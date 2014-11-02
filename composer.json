@@ -1,0 +1,31 @@
+{
+    "name": "ttek/tk-framework",
+    "type": "library",
+    "description": "This is the main tropotek framework",
+    "keywords": ["Tk", "framework", "tropotek"],
+    "homepage": "http://www.tropotek.com/",
+    "time":  "2010-12-09",
+    "license": "MIT",
+    "version": "trunk",
+    "authors": [
+        {
+            "name": "Michael Mifsud",
+            "email": "info@tropotek.com",
+            "homepage": "http://www.tropotek.com/"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0"
+    },
+    "autoload": {
+        "psr-0": {
+            "Tk\\": ""
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-trunk": "1.2.x-dev"
+        }
+    }
+
+}

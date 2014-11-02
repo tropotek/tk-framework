@@ -1,0 +1,65 @@
+<?php
+/*
+ * @author Michael Mifsud <info@tropotek.com>
+ * @link http://www.tropotek.com/
+ * @license Copyright 2007 Michael Mifsud
+ */
+namespace Tk\Test;
+
+use \Tk\Config as Config;
+/**
+ *
+ * @package Tk\Test
+ */
+class ConfigTest extends \PHPUnit_Framework_TestCase
+{
+
+
+    public function __construct()
+    {
+        parent::__construct('Config Test');
+    }
+
+    public function setUp()
+    {
+
+    }
+
+    public function tearDown()
+    {
+
+    }
+
+
+
+    public function testCreate()
+    {
+        $config = Config::getInstance();
+        $this->assertTrue($config instanceof Config);
+    }
+
+    public function testGetSet()
+    {
+
+        $config = Config::getInstance();
+        $this->assertStringStartsWith($config->getSitePath(), dirname(__FILE__));
+    }
+
+    public function testNset()
+    {
+        $config = Config::getInstance();
+        $config->nset('test.var1', 'success');
+        $this->assertEquals($config->get('test.var1'), 'success');
+        $config->nset('test.var1', 'overwrite');
+        $this->assertNotEquals($config->get('test.var1'), 'overwrite');
+        $config->set('test.var1', 'overwrite');
+        $this->assertEquals($config->get('test.var1'), 'overwrite');
+
+        $this->assertEquals($config->exists('test.var2'), false);
+        $config->set('test.var2', 'test');
+        $this->assertEquals($config->exists('test.var2'), true);
+
+    }
+
+}
+
