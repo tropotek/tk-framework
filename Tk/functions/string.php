@@ -115,6 +115,25 @@ function ucSplit($str)
     return ucfirst(preg_replace('/[A-Z]/', ' $0', $str));
 }
 
+/**
+ * @param $haystack
+ * @param $needle
+ * @return bool
+ */
+function startsWith($haystack, $needle)
+{
+    return $needle === "" || strpos($haystack, $needle) === 0;
+}
+
+/**
+ * @param $haystack
+ * @param $needle
+ * @return bool
+ */
+function endsWith($haystack, $needle)
+{
+    return $needle === "" || substr($haystack, -strlen($needle)) === $needle;
+}
 
 /**
  * Substring without losing word meaning and

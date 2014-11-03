@@ -134,6 +134,25 @@ abstract class Object implements Observable
         return $rc->getFileName();
     }
 
+    /**
+     * Get the url path of a class
+     *
+     * @param string|Object $class
+     * @return string
+     */
+    static function classurl($class)
+    {
+        if (is_object($class)) {
+            $class = get_class($class);
+        }
+        $rc = new \ReflectionClass($class);
+        $path = $rc->getFileName();
+        if (startsWith($path, \Tk\Config::getInstance()->getSitePath())) {
+            return str_replace(\Tk\Config::getInstance()->getSitePath(), '' , $path);
+        }
+        return basename($path);
+    }
+
 
     /**
      * Get the Observable control object
@@ -339,7 +358,19 @@ abstract class Object implements Observable
      */
     public function getClassPath()
     {
-         return self::classpath($this->getClassName());
+        return self::classpath($this->getClassName());
+    }
+
+    /**
+     * Get the class url from the file path
+     * NOTE: if the path is outside the project's sitePath then
+     * only the basename portion of the path is returned.
+     *
+     * @return string
+     */
+    public function getClassUrl()
+    {
+        return self::classurl($this->getClassName());
     }
 
 

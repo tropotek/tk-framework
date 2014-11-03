@@ -44,7 +44,7 @@ class FilesystemTest extends \PHPUnit_Framework_TestCase
         $val = $fs->isDir($dest);
         $this->assertTrue($val, 'Check of is_dir');
 
-        $fs->putTree('/vendor/ttek/framework/Tk', $dest);
+        $fs->putTree('/vendor/ttek/tk-framework/Tk', $dest);
         $val = $fs->isFile($dest . '/Url.php');
         $this->assertTrue($val, 'Check if Url.php file got copied');
 
