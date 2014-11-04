@@ -116,26 +116,6 @@ function ucSplit($str)
 }
 
 /**
- * @param $haystack
- * @param $needle
- * @return bool
- */
-function startsWith($haystack, $needle)
-{
-    return $needle === "" || strpos($haystack, $needle) === 0;
-}
-
-/**
- * @param $haystack
- * @param $needle
- * @return bool
- */
-function endsWith($haystack, $needle)
-{
-    return $needle === "" || substr($haystack, -strlen($needle)) === $needle;
-}
-
-/**
  * Substring without losing word meaning and
  * tiny words (length 3 by default) are included on the result.
  * "..." is added if result do not reach original string length

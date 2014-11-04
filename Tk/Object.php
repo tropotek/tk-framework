@@ -147,7 +147,7 @@ abstract class Object implements Observable
         }
         $rc = new \ReflectionClass($class);
         $path = $rc->getFileName();
-        if (startsWith($path, \Tk\Config::getInstance()->getSitePath())) {
+        if (strpos($path, \Tk\Config::getInstance()->getSitePath()) === 0) {
             return str_replace(\Tk\Config::getInstance()->getSitePath(), '' , $path);
         }
         return basename($path);
