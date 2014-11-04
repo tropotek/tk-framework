@@ -269,6 +269,15 @@ class Gateway extends \Tk\Object
     }
 
     /**
+     * Clear the callback queue
+     *
+     */
+    public function clearAllCallbacks()
+    {
+        $this->callbackList[] = array();
+    }
+
+    /**
      * Gte the last sent message status
      *
      * @return bool

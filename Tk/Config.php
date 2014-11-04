@@ -513,12 +513,15 @@ class Config extends Registry
     /**
      *
      *
-     * @param string $template
+     * @param string $content
      * @return \Tk\Mail\Message
      */
-    public function createMailMessage($template = '')
+    public function createMailMessage($content = '')
     {
         $message = new \Tk\Mail\Message();
+        if ($content) {
+            $message->setBody($content);
+        }
         return $message;
     }
 
