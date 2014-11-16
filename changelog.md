@@ -1,5 +1,16 @@
 #CHANGELOG#
 
+Ver 1.2.0 [2014-11-17]:
+----------------
+ - Finished updates
+ - Main sectiosn of the GOALS question manager is completed.
+ - Implemented sorting to question list
+ - Started adding new GOALS question manager
+ - Started updated to GOALS questions ordering
+ - Changes after github migration
+ - Fixed javascript files after removal of jquery in assets dir
+
+
 Ver 1.1.9 [2013-12-13]:
 ----------------
  - Updated company description fields
