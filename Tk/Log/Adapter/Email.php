@@ -25,12 +25,12 @@ class Email extends Iface
             return;
         }
 
-        $from = $to = \Tk\Config::getInstance()->get('site.email');
+        $from = $to = \Tk\Config::getInstance()->getSiteEmail();
 
         $message = new \Tk\Mail\DomMessage();
         $message->addTo($to);
         $message->setFrom($from);
-        $message->setSubject($_SERVER['HTTP_HOST'] . ' | ' . $obj->getHeader());
+        $message->setSubject('Mail Log: ' . $_SERVER['HTTP_HOST'] . ' - ' . $obj->getHeader());
         $ps = highlight_string("<?php\n".$this->getDefaultDump()."\n?>", true);
         $ps = str_replace('<span style="color: #0000BB">&lt;?php<br />', '<span style="color: #0000BB;">', $ps);
         $ps = str_replace('<span style="color: #0000BB">?&gt;</span>', '', $ps);

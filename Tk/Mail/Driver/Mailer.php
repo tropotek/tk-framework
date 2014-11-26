@@ -485,8 +485,8 @@ class Mailer
      * @param string $kind One of 'to', 'cc', 'bcc', 'ReplyTo'
      * @param string $address The email address to send to
      * @param string $name
+     * @throws Exception
      * @return bool true on success, false if address already used or invalid in some way
-     * 
      */
     protected function AddAnAddress($kind, $address, $name = '')
     {
@@ -520,6 +520,8 @@ class Mailer
      * Set the From and FromName properties
      * @param string $address
      * @param string $name
+     * @param int    $auto
+     * @throws Exception
      * @return bool
      */
     public function SetFrom($address, $name = '', $auto = 1)

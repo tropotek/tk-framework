@@ -159,7 +159,7 @@ HTML;
      *
      * @param \Dom\Template $template
      */
-    public function setTemplate(\Dom\Template $template)
+    public function setTemplate($template)
     {
         $this->template = $template;
         $this->templateOrg = clone $template;
