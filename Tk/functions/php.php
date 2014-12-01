@@ -369,18 +369,19 @@ if (!function_exists('get_called_class')) {
 
 /************************** Setup PHP Environment **************************/
 
-if (empty($_SERVER['HTTP_HOST'])) {
+/*if (empty($_SERVER['HTTP_HOST'])) {
     $_SERVER['HTTP_HOST']  = 'example.com';
-}
-if (empty($_SERVER['REQUEST_URI'])) {
-    $_SERVER['REQUEST_URI'] = '/';
-}
+}*/
+
 /**
  *  This is a little hack for IIS with no $_SERVER['REQUEST_URI'] value
  */
-if (!isset($_SERVER['REQUEST_URI'])) {
+if (empty($_SERVER['REQUEST_URI'])) {
     $_SERVER['REQUEST_URI'] = substr($_SERVER['PHP_SELF'], 1);
     if (isset($_SERVER['QUERY_STRING']) && $_SERVER['QUERY_STRING']) { $_SERVER['REQUEST_URI'] .= '?' . $_SERVER['QUERY_STRING']; }
+}
+if (empty($_SERVER['REQUEST_URI'])) {
+    $_SERVER['REQUEST_URI'] = '/';
 }
 
 /**

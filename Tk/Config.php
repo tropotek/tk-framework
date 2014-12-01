@@ -58,6 +58,7 @@ class Config extends Registry
         $this->attach(new TimezoneConfigObserver(), 'system.timezone');
         $this->attach(new TempConfigObserver(), 'system.tmpPath');
 
+
     }
 
     /**
@@ -80,7 +81,6 @@ class Config extends Registry
         $this->parseConfigFile(dirname(dirname(__FILE__)).'/config/mail.php');
         $this->parseConfigFile(dirname(dirname(__FILE__)).'/config/maintenance.php');
         $this->parseConfigFile(dirname(dirname(__FILE__)).'/config/session.php');
-
     }
 
     /**

@@ -208,6 +208,8 @@ class Url extends Object implements \Serializable
             $host = $_SERVER['HTTP_X_FORWARDED_HOST'];
         } else if (isset($_SERVER['HTTP_HOST'])) {
             $host = $_SERVER['HTTP_HOST'];
+        } else if (Config::getInstance()->isCli() && Config::getInstance()->exists('cli.host')) {
+            $host = Config::getInstance()->get('cli.host');
         }
 
         // build spec into URL format
