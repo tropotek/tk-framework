@@ -74,7 +74,8 @@ $config['system.language'] = 'en_AU';
 $config['system.timezone'] = 'Australia/Victoria';
 
 // Set to true if you want to use SSL pages
-$config['system.enableSsl'] = false;
+// If this setting is not set then no check is made
+//$config['system.enableSsl'] = false;
 
 
 // ----------------------

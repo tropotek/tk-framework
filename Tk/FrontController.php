@@ -88,7 +88,7 @@ class FrontController extends Object implements Command\Iface
      */
     public function showNotFoundError()
     {
-        $this->getConfig()->getResponse()->sendError("Sorry, an error has occured. Requested page not found!.", Response::SC_NOT_FOUND);
+        $this->getConfig()->getResponse()->sendError("Sorry, an error has occurred. Requested page not found!.", Response::SC_NOT_FOUND);
     }
 
 }
