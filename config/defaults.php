@@ -6,18 +6,28 @@
 
 // Attempt to auto discover the site docRoot path
 $_su = '';
-if (isset($_SERVER['PHP_SELF'])) {
-    $_su = dirname($_SERVER['PHP_SELF']);
-    if (strlen($_su) == 1) {
-        $_su = '';
-    }
-}
+
 
 if (empty($config['system.sitePath'])) {
     $config['system.sitePath'] = dirname(dirname(dirname(dirname(dirname(__FILE__)))));
 }
+// Attempt to get the site url from wither the .htaccess or current page.
 if (empty($config['system.siteUrl'])) {
-    $config['system.siteUrl'] =  $_su;
+    if (is_file($config['system.sitePath'].'/.htaccess')) {
+        $ht = file_get_contents($config['system.sitePath'].'/.htaccess');
+        if (preg_match('/\n\s+RewriteBase\s+(.*)\s+/i', $ht, $regs)) {
+            $config['system.siteUrl'] = rtrim($regs[1], '/');
+        }
+    }
+    if (!$config['system.siteUrl']) {
+        if (isset($_SERVER['PHP_SELF'])) {
+            $_su = dirname($_SERVER['PHP_SELF']);
+            if (strlen($_su) == 1) {
+                $config['system.siteUrl'] =  $_su;
+            }
+        }
+    }
+    error_log(print_r($config['system.siteUrl'], true));
 }
 
 $config['system.srcPath'] = '/src';

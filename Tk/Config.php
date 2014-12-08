@@ -65,9 +65,9 @@ class Config extends Registry
      * Init the config
      *
      * @param string $sitePath
-     * @param string $siteUrl
+     * @param string $siteUrl (optional) Uses .htaccess RewriteBase parameter if it exists.
      */
-    protected function init($sitePath = '', $siteUrl = '')
+    protected function init($sitePath, $siteUrl = '')
     {
         $this->set('system.sitePath', $sitePath);
         $this->set('system.siteUrl', $siteUrl);
