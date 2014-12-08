@@ -6,8 +6,6 @@
 
 // Attempt to auto discover the site docRoot path
 $_su = '';
-
-
 if (empty($config['system.sitePath'])) {
     $config['system.sitePath'] = dirname(dirname(dirname(dirname(dirname(__FILE__)))));
 }
