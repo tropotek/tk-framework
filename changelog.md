@@ -1,5 +1,11 @@
 #CHANGELOG#
 
+Ver 1.2.4 [2014-12-09]:
+-------------------------------
+ - Added GOALS view action to student view
+ - Moved Dashboard Status boxes to Term Dashboard
+
+
 Ver 1.2.0 [2014-11-17]:
 ----------------
  - Finished updates
