@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 1.2.5 [2015-01-14]:
+-------------------------------
+ - Finalising igal for first release.
+
+
 Ver 1.2.4 [2014-12-09]:
 -------------------------------
  - Added GOALS view action to student view
