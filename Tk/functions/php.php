@@ -86,7 +86,7 @@ set_error_handler('ErrorHandler');
  *   vd($arg1, $arg2, $arg3, ...);
  * </code>
  *
- * @internal param mixed $args Multiple vars retrieved using func_get_args()
+ * @optional param mixed $args Multiple vars retrieved using func_get_args()
  * @return mixed
  * @package Debug
  */

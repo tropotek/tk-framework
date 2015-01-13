@@ -204,6 +204,7 @@ class Url extends Object implements \Serializable
         if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
             $this->scheme = 'https';
         }
+
         if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
             $host = $_SERVER['HTTP_X_FORWARDED_HOST'];
         } else if (isset($_SERVER['HTTP_HOST'])) {
