@@ -24,7 +24,7 @@ namespace Tk;
  *          <tr>
  *          {dataBlock}
  *            <td>{dataValue}</td>
- *          {dataBlock}
+ *          {/dataBlock}
  *          </tr>
  *        {/rowBlock}
  *      </table>
@@ -35,7 +35,7 @@ namespace Tk;
  *
  * This template is designed to work with standard string type templates.
  *
- * @todo Nested blocks are not currently working untill we get some other method of implementation.
+ * @todo Nested blocks are not currently working until we get some other method of implementation.
  */
 class Template extends Object
 {
@@ -85,7 +85,11 @@ class Template extends Object
     {
         $ld = preg_quote($this->lDelim);
         $rd = preg_quote($this->rDelim);
+
+        // original regex, not working?
         //$reg = '#' . $ld . '([^' . $ld . ']*?)' .  $rd . '((?:[^{]|{(?!/?(.+)})|(?R))+)' . $ld . '[^' . $ld . ']\1' . $rd . '#si';
+
+        // My interpretation that seems to work
         $reg = '#' . $ld . '([^' . $ld . ']*?)' .  $rd . '(.*?)' . $ld . '[^' . $ld . ']\1' . $rd . '#si';
 
         if (is_array($input)) {
@@ -123,6 +127,7 @@ class Template extends Object
     {
         foreach($data as $k => $v) {
             if (is_array($v)) continue;
+            if ($v === true || $v === false) continue;
             $string = str_replace($this->lDelim . $k . $this->rDelim, $v, $string);
         }
         return $string;
