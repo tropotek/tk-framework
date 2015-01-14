@@ -66,7 +66,7 @@ class Template extends Object
      *
      * @param string $template
      * @param $data
-     * @return mixed
+     * @return string
      */
     function parse($template, $data)
     {
@@ -78,7 +78,7 @@ class Template extends Object
     /**
      * @param $input
      * @param array $data
-     * @return mixed|string
+     * @return string
      * @todo Get nested blocks working if possible
      */
     private function parseTagsRecursive($input, $data = array())

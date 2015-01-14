@@ -38,17 +38,11 @@ class TemplateTest extends \PHPUnit_Framework_TestCase {
  </head>
  <body>
    <h1>{pageTitle}</h1>
-   <table>
-     {rowBlock}
-       <tr>
-       {dataBlock}
-         <td>{dataValue}</td>
-       {/dataBlock}
-       {dataBlockHidden}
-         <td>{dataValueHidden}</td>
-       {/dataBlockHidden}
-       </tr>
-     {/rowBlock}
+   <table>{rowBlock}
+       <tr>{dataBlock}
+         <td>{dataValue}</td>{/dataBlock}{dataBlockHidden}
+         <td>{dataValueHidden}</td>{/dataBlockHidden}
+       </tr>{/rowBlock}
    </table>
    <p>{dataBlock1}</p>
    <p>Content For Data Block 1</p>
@@ -75,13 +69,10 @@ HTML;
  <body>
    <h1>Page Title Test</h1>
    <table>
-
        <tr>
-
-         <td>{dataValue}</td>
-
-
-
+         <td>Data Value Test</td>
+         <td>----</td>
+       </tr>
    </table>
    <p></p>
    <p>Content For Data Block 1</p>
@@ -93,6 +84,8 @@ HTML;
         $tpl = \Tk\Template::parseTemplate($in, $params);
 
         tklog($tpl);
+
+        $this->assertEquals(trim($tpl), trim($result1));
 
     }
 
