@@ -1,5 +1,11 @@
 #CHANGELOG#
 
+Ver 1.2.6 [2015-01-15]:
+-------------------------------
+ - Bug: Fixed Mail template block isse where some blocks where being replaced with 1 instead of being
+   shown
+
+
 Ver 1.2.5 [2015-01-14]:
 -------------------------------
  - Finalising igal for first release.
