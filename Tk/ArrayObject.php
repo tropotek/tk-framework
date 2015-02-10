@@ -337,7 +337,7 @@ class ArrayObject extends Object implements \IteratorAggregate, \ArrayAccess, \S
         ksort($arr);
         foreach ($arr as $k => $v) {
             if (is_object($v)) {
-                $str .= "[$k] => {" . get_class($v) . "}\n";
+                $str .= "[$k] => { " . get_class($v) . "}\n";
             } elseif (is_array($v)) {
                 $str .= "[$k] =>  array[" . count($v) . "]\n";
             } else {
