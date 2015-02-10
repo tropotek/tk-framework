@@ -1,5 +1,11 @@
 #CHANGELOG#
 
+Ver 1.2.8 [2015-02-10]:
+-------------------------------
+ - Added goals Manager for asier location of GOALS submissions, Remove menu auto open on hover, it was
+   not an elegant solution
+
+
 Ver 1.2.7 [2015-01-20]:
 -------------------------------
  - Added \Tk\Template PHPUnit test
