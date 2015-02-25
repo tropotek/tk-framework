@@ -25,7 +25,8 @@ if (empty($config['system.siteUrl'])) {
             }
         }
     }
-    error_log(print_r($config['system.siteUrl'], true));
+    if (!$config->isCli())
+        error_log(print_r($config['system.siteUrl'], true));
 }
 
 $config['system.srcPath'] = '/src';
