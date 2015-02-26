@@ -32,6 +32,7 @@ class Registry extends ArrayObject
         return $this;
     }
 
+
     /**
      *
      *

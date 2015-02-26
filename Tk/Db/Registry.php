@@ -181,6 +181,22 @@ class Registry extends \Tk\Registry
     }
 
     /**
+     * Get all group values from the table
+     *
+     * @return array
+     */
+    public function dbGetByGroup()
+    {
+        $sql = sprintf('SELECT * FROM %s WHERE `group` = %s ', $this->getDbTable(), $this->db->quote($this->dbGroup));
+        $res = $this->db->query($sql);
+        $result = array();
+        foreach($res->fetchAll() as $row) {
+            $result[$row->key] = $row->value;
+        }
+        return $result;
+    }
+
+    /**
      * Check if a key exists
      *
      * @param string $key
