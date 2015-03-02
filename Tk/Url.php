@@ -87,8 +87,6 @@ class Url extends Object implements \Serializable
     protected $user = '';
 
 
-
-
     /**
      * __construct
      *
@@ -97,6 +95,7 @@ class Url extends Object implements \Serializable
      *
      * @param string $spec The String to parse as a URL
      * @param string $prepend (optional) Must be a path string beginning with a '/' char
+     * @throws Exception
      */
     public function __construct($spec, $prepend = null)
     {

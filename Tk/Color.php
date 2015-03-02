@@ -115,7 +115,7 @@ class Color extends Object
      * Create Tk\Color from a hex string
      *
      * @param int $hex
-     * @return Tk\Color
+     * @return \Tk\Color
      */
     static function create($hex)
     {
@@ -128,7 +128,7 @@ class Color extends Object
      * @param int $red
      * @param int $green
      * @param int $blue
-     * @return Tk\Color
+     * @return \Tk\Color
      */
     static function createDecimal($red = 0, $green = 0, $blue = 0)
     {
@@ -143,7 +143,7 @@ class Color extends Object
      * Set the color object's hex value
      *
      * @param string $str
-     * @return Tk\Color
+     * @return \Tk\Color
      */
     public function setColor($str)
     {
