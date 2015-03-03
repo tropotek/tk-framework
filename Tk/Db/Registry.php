@@ -70,7 +70,7 @@ class Registry extends \Tk\Registry
      * @param string $dbGroup
      * @return \Tk\Db\Registry
      */
-    static function createDbRegistry($dbTable, $dbGroup)
+    static function createDbRegistry($dbTable = 'config', $dbGroup = 'system')
     {
         $obj = new self();
         $obj->dbTable = $dbTable;
