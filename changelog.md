@@ -1,5 +1,13 @@
 #CHANGELOG#
 
+Ver 1.2.9 [2015-03-18]:
+-------------------------------
+ - Try this then
+ - Fixed SSL redirect issue. Pat this one is for you
+ - Started working on youtube upload script and API implementation
+ - Started adding the youtube processing script. Updated media view codes
+
+
 Ver 1.2.8 [2015-02-10]:
 -------------------------------
  - Added goals Manager for asier location of GOALS submissions, Remove menu auto open on hover, it was
