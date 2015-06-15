@@ -158,7 +158,7 @@ function tkMail($to, $message, $subject = '{No Subject}', $from = '', $headers =
 
 /**
  * Create an array to work with the form list fields
- * Turn a single dimensinal array into a two dimensinal array.
+ * Turn a single dimensional array into a two dimensional array.
  *
  * @param array $arr
  * @return array
