@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 1.2.10 [2015-06-18]:
+-------------------------------
+ - Fixed no results in Student Assessmenet table.
+
+
 Ver 1.2.9 [2015-03-18]:
 -------------------------------
  - Try this then
