@@ -1,5 +1,11 @@
 #CHANGELOG#
 
+
+Ver 1.2.11 [2015-07-18]:
+-------------------------------
+ - Created branch for old version 1.0.0 lib code.
+
+
 Ver 1.2.10 [2015-06-18]:
 -------------------------------
  - Fixed no results in Student Assessmenet table.
