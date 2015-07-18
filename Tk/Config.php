@@ -139,7 +139,7 @@ class Config extends Registry
         $appUrl = rtrim($appUrl, '/');
         $this->setAppUrl($appUrl);
 
-        $appPath = rtrim(dirname(dirname(__DIR__)), '/');
+        $appPath = rtrim(dirname(dirname(dirname(dirname(__DIR__)))), '/');
         $this->setAppPath($appPath);
 
         $this->setDebug(false);
