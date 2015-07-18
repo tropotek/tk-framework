@@ -1,7 +1,7 @@
 {
     "name": "ttek/tk-framework",
     "type": "library",
-    "description": "This is the main tropotek framework",
+    "description": "Tropotek Framework V2",
     "keywords": ["Tk", "framework", "tropotek"],
     "homepage": "http://www.tropotek.com/",
     "time":  "2010-12-09",
@@ -15,7 +15,14 @@
         }
     ],
     "require": {
-        "php": ">=5.3.0"
+        "php": ">=5.3.0",
+        
+        "symfony/http-kernel": "2.6.*",
+        "symfony/http-foundation": "2.6.*",
+        "symfony/routing": "2.6.*",
+        "symfony/event-dispatcher": "2.6.*",
+
+        "monolog/monolog": "^1.13@dev"
     },
     "autoload": {
         "psr-0": {
@@ -24,7 +31,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "1.2.x-dev"
+            "dev-master": "2.0.x-dev"
         }
     }
 }

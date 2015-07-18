@@ -14,101 +14,95 @@ namespace Tk;
  *
  * @package Tk
  */
-class ArrayObject extends Object implements \IteratorAggregate, \ArrayAccess, \Serializable, \Countable
+class ArrayObject implements \IteratorAggregate, \ArrayAccess, \Serializable, \Countable
 {
 
     /**
      * @var array
      */
-    private $data = array();
+    private $array = array();
+
+
 
     /**
      *
-     * @param array $data
+     * @param array $array
      */
-    public function __construct($data = array())
+    public function __construct($array = array())
     {
-        $this->data = (array)$data;
+        $this->array = (array)$array;
+    }
+
+
+
+    /**
+     * Allow for the items to be treated as object params
+     * EG: $arrObj->item = $arrObj['item']
+     *
+     * @param string $key
+     * @param mixed $val
+     */
+    public function __set($key, $val)
+    {
+        $this->offsetSet($key, $val);
     }
 
     /**
-     * create
+     * Allow for the items to be treated as object params
+     * EG: $arrObj->item = $arrObj['item']
      *
-     * @param array $data
-     * @return \Tk\ArrayObject
+     * @param string $key
+     * @return mixed
      */
-    static function createArray($data = array())
+    public function __get($key)
     {
-        $obj = new self($data);
-        return $obj;
+        return $this->offsetGet($key);
     }
+
+
+
+
+
 
     /**
      * Return the native data array
      *
      * @return array
      */
-    public function getArray()
+    public function getDataArray()
     {
-        return $this->data;
+        return $this->array;
     }
 
-    /**
-     * Load an array of keys with values from this array.
-     * Handy to get a subset of values and set them in a new array
-     *
-     * @param array $array
-     */
-    public function loadArray($array = array())
-    {
-        foreach ($array as $k => $v) {
-            if ($this->exists($k))
-                $array[$k] = $v;
-        }
-    }
 
-    /**
-     * merge an external array into this array
-     *
-     * @param array $src
-     * @return array
-     */
-    public function mergeArray($src)
+    public function setDataArray($array)
     {
-        if ($this === $src) return $this;
-        if ($src instanceof \Tk\ArrayObject) {
-            $src = $src->getArray();
+        if ($array instanceof ArrayObject) {
+            $array = $array->getDataArray();
         }
-        $this->data = array_merge($this->data, $src);
+        if (!is_array($array)) {
+            throw new \UnexpectedValueException('Parameter not of type array or ' . get_class($this));
+        }
+        $this->array = $array;
         return $this;
     }
 
     /**
      * merge an external array into this array
-     * Alias for meargeArray()
-     *
-     * @param array $src
-     * @return array
-     */
-    public function import($src)
-    {
-        return $this->mergeArray($src);
-    }
-
-    /**
-     * Exchange the array for another one.
-     * If no array supplied the current data array returned.
      *
      * @param array $array
-     * @return array
+     * @return ArrayObject
      */
-    public function exchangeArray(array $array = null)
+    public function merge($array)
     {
-        $ret = $this->data;
-        if ($array) {
-            $this->data = $array;
+        if ($array instanceof ArrayObject) {
+            $array = $array->getDataArray();
         }
-        return $ret;
+        if (!is_array($array)) {
+            throw new \UnexpectedValueException('Parameter not of type array or ' . get_class($this));
+        }
+        $this->array = array_merge($this->array, $array);
+        return $this;
     }
 
 
@@ -125,7 +119,7 @@ class ArrayObject extends Object implements \IteratorAggregate, \ArrayAccess, \S
      */
     public function getIterator()
     {
-        return new \ArrayIterator($this->data);
+        return new \ArrayIterator($this->array);
     }
 
     /**
@@ -137,12 +131,10 @@ class ArrayObject extends Object implements \IteratorAggregate, \ArrayAccess, \S
     public function offsetSet($offset, $value)
     {
         if (is_null($offset)) {
-            $this->data[] = $value;
+            $this->array[] = $value;
         } else {
-            $this->data[$offset] = $value;
+            $this->array[$offset] = $value;
         }
-        $this->notify('set_' . $offset);
-        $this->notify($offset);
     }
 
     /**
@@ -153,8 +145,7 @@ class ArrayObject extends Object implements \IteratorAggregate, \ArrayAccess, \S
      */
     public function offsetExists($offset)
     {
-        $this->notify('exists_' . $offset);
-        return isset($this->data[$offset]);
+        return isset($this->array[$offset]);
     }
 
     /**
@@ -164,8 +155,7 @@ class ArrayObject extends Object implements \IteratorAggregate, \ArrayAccess, \S
      */
     public function offsetUnset($offset)
     {
-        $this->notify('unset_' . $offset);
-        unset($this->data[$offset]);
+        unset($this->array[$offset]);
     }
 
     /**
@@ -176,8 +166,7 @@ class ArrayObject extends Object implements \IteratorAggregate, \ArrayAccess, \S
      */
     public function offsetGet($offset)
     {
-        $this->notify('get_' . $offset);
-        return isset($this->data[$offset]) ? $this->data[$offset] : null;
+        return isset($this->array[$offset]) ? $this->array[$offset] : null;
     }
 
     /**
@@ -187,7 +176,7 @@ class ArrayObject extends Object implements \IteratorAggregate, \ArrayAccess, \S
      */
     public function serialize()
     {
-        return serialize($this->data);
+        return serialize($this->array);
     }
 
     /**
@@ -197,7 +186,7 @@ class ArrayObject extends Object implements \IteratorAggregate, \ArrayAccess, \S
      */
     public function unserialize($data)
     {
-        $this->data = unserialize($data);
+        $this->array = unserialize($data);
     }
 
     /**$name
@@ -207,7 +196,7 @@ class ArrayObject extends Object implements \IteratorAggregate, \ArrayAccess, \S
      */
     public function count()
     {
-        return count($this->data);
+        return count($this->array);
     }
 
     /**
@@ -275,57 +264,6 @@ class ArrayObject extends Object implements \IteratorAggregate, \ArrayAccess, \S
     }
 
     /**
-     * Allow for the items to be treated as object params
-     * EG: $arrObj->item = $arrObj['item']
-     *
-     * @param string $key
-     * @param mixed $val
-     */
-    public function __set($key, $val)
-    {
-        $this->offsetSet($key, $val);
-    }
-
-    /**
-     * Allow for the items to be treated as object params
-     * EG: $arrObj->item = $arrObj['item']
-     *
-     * @param string $key
-     * @return mixed
-     */
-    public function __get($key)
-    {
-        return $this->offsetGet($key);
-    }
-
-    /**
-     * Allow calls to array_* functions:
-     * <?php
-     *      $yourObject->array_keys();
-     *      OR
-     *      $yourObject->arrayKeys();
-     * ?>
-     * Don't forget to ommit the first parameter - it's automatic!
-     *
-     * @param string $func
-     * @param array $argv
-     * @return \Tk\ArrayObject
-     * @throws \Tk\Exception
-     */
-    public function __call($func, $argv)
-    {
-        if (!strpos($func, '_')) {
-            $func = preg_replace('/[A-Z]/', '_$0', $func);
-            $func = strtolower($func);
-        }
-        if (!is_callable($func) || substr($func, 0, 5) !== 'array') {
-            throw new Exception('Method not found: ' . __CLASS__ . '->' . $func);
-        }
-        return call_user_func_array($func, array_merge(array($this->data), $argv));
-        //return call_user_func_array($func, array_merge(array($this->getArrayCopy()), $argv));
-    }
-
-    /**
      * toString
      *
      * @return string
@@ -333,7 +271,7 @@ class ArrayObject extends Object implements \IteratorAggregate, \ArrayAccess, \S
     public function toString()
     {
         $str = "";
-        $arr = $this->data;
+        $arr = $this->array;
         ksort($arr);
         foreach ($arr as $k => $v) {
             if (is_object($v)) {
