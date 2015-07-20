@@ -6,7 +6,7 @@
  * @license Copyright 2007 Michael Mifsud
  */
 
-namespace Tk;
+namespace Tk\Utils;
 
 /**
  * A wrapper for the php array object

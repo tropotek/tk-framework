@@ -6,7 +6,7 @@
  * Time: 8:32 AM
  */
 
-namespace Tk;
+namespace Tk\Utils;
 
 /**
  * Class Registry

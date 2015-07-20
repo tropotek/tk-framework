@@ -10,7 +10,8 @@ namespace Tk;
 
 
 use Symfony\Component\HttpFoundation\Request;
-use \Psr\Log\LogLevel;
+use Psr\Log\LogLevel;
+use Tk\Utils\Registry;
 
 /**
  * Class Config

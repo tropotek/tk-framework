@@ -6,7 +6,7 @@
  * Time: 8:03 AM
  */
 
-namespace Tk;
+namespace Tk\Utils;
 
 use Symfony\Component\HttpFoundation\Request;
 
@@ -84,7 +84,6 @@ class StackTrace {
      * @param int $skip
      * @return string
      *
-     * @todo style up the html (maybe from a template..)
      */
     static function traceToHtml($stackTraceArray, $skip = 0)
     {

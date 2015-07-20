@@ -67,6 +67,16 @@ final class Log {
     }
 
     /**
+     * Get the logger object
+     *
+     * @return LoggerInterface|\Psr\Log\NullLogger
+     */
+    function getLogger()
+    {
+        return $this->logger;
+    }
+
+    /**
      *
      *
      * @param LoggerInterface $logger
