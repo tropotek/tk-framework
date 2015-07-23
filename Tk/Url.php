@@ -670,7 +670,7 @@ class Url implements \Serializable
         $arr = debug_backtrace();
         $arr = $arr[0];
         // \Tk\Log('\Tk\Url::redirect('.$this->toString().'): called from ' . str_replace($this->getConfig()->getSitePath(), '', $arr['file']) . ' (' . $arr['line'] . ') ');
-        \Tk\Log('\Tk\Url::redirect('.$this->toString().'): called from ' . basename($arr['file']) . ' (' . $arr['line'] . ') ');
+        \Tk\Log.d('\Tk\Url::redirect('.$this->toString().'): called from ' . basename($arr['file']) . ' (' . $arr['line'] . ') ');
 
         header("Location: {$this->toString()}");
         exit();
