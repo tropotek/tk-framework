@@ -125,6 +125,7 @@ class Config extends Registry
     protected function init()
     {
         $this->setAppScripTime(microtime(true));
+
         // Setup isCli function in config.
         $this->setCli(false);
         if (substr(php_sapi_name(), 0, 3) == 'cli') {
@@ -132,6 +133,7 @@ class Config extends Registry
         }
 
         // Add request to config
+        $_POST['config'] = $this;
         $request = Request::createFromGlobals();
         $this->setRequest($request);
 
@@ -157,13 +159,72 @@ class Config extends Registry
         $this->setSrcPath($this->getAppPath() . '/src');
         $this->setSrcUrl($this->getAppUrl() . '/src');
 
-        $this->setCachePath($this->getAppPath() . '/cache');
-        $this->setCacheUrl($this->getAppUrl() . '/cache');
+        $this->setCachePath($this->getDataPath() . '/cache');
+        $this->setCacheUrl($this->getDataUrl() . '/cache');
 
-        $this->setTempPath($this->getAppPath() . '/temp');
-        $this->setTempUrl($this->getAppUrl() . '/temp');
+        $this->setTempPath($this->getDataPath() . '/temp');
+        $this->setTempUrl($this->getDataUrl() . '/temp');
     }
 
 
+    public function getAppUrl()
+    {
+        return $this->get('app.url');
+    }
+
+    public function getAppPath()
+    {
+        return $this->get('app.path');
+    }
+
+    public function getDataUrl()
+    {
+        return $this->get('data.url');
+    }
+
+    public function getDataPath()
+    {
+        return $this->get('data.path');
+    }
+
+    public function getVendorUrl()
+    {
+        return $this->get('vendor.url');
+    }
+
+    public function getVendorPath()
+    {
+        return $this->get('vendor.path');
+    }
+
+    public function getSrcUrl()
+    {
+        return $this->get('src.url');
+    }
+
+    public function getSrcPath()
+    {
+        return $this->get('src.path');
+    }
+
+    public function getCacheUrl()
+    {
+        return $this->get('cache.url');
+    }
+
+    public function getCachePath()
+    {
+        return $this->get('cache.path');
+    }
+
+    public function getTempUrl()
+    {
+        return $this->get('temp.url');
+    }
+
+    public function getTempPath()
+    {
+        return $this->get('temp.path');
+    }
 
 }

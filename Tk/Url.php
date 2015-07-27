@@ -16,17 +16,6 @@ namespace Tk;
  *  o host defaults to the current host.
  *  o port defaults to 80
  *
- * When using create() or new \Tk\Url() there are three ways to supply the spec path:
- *  o http://www.example.com/path/to/index.html  =>  http://www.example.com/path/to/index.html
- *  o /server/path/to/index.html  =>  http://www.sitehost.com/server/path/to/index.html
- *  o path/to/index.html  =>  http://www.sitehost.com/siteUrl/path/to/index.html
- *
- * For the last example the path will be determined from the Tk_Config::get('system.siteUrl');
- *
- * NOTE: For external URL's the prepend value is not usable,
- *  it will be cleared.
- *
- * @todo: Optimise this object as a stand alone URL object also maybe incorporate the Symfony Request and Router objects to create urls. ??????
  */
 class Url implements \Serializable
 {
@@ -87,27 +76,17 @@ class Url implements \Serializable
     protected $user = '';
 
 
+
+
     /**
      * __construct
      *
-     * NOTE: For external URL's the prepend value is not usable,
-     *  it will be cleared.
-     *
      * @param string $spec The String to parse as a URL
-     * @param string $prepend (optional) Must be a path string beginning with a '/' char
      * @throws Exception
      */
-    public function __construct($spec, $prepend = null)
+    public function __construct($spec)
     {
         $this->spec = trim($spec);
-        $prepend = rtrim($prepend, '\\/');
-        if ($prepend) {
-            if ($prepend[0] != '/') {
-                throw new Exception('Invalid prepend path. Path must begin with `/`: ' . $prepend);
-            }
-            $this->prepend = $prepend;
-        }
-        // Only init resource path URL's these are not inited only stored
         if (!preg_match('/^(#|javascript|mailto)/i', $this->spec)) {
             $this->init();
         }
@@ -115,7 +94,7 @@ class Url implements \Serializable
 
     public function serialize()
     {
-        return serialize(array('spec' => $this->spec, 'prepend' => $this->prepend));
+        return serialize(array('spec' => $this->spec));
     }
 
 
@@ -123,46 +102,8 @@ class Url implements \Serializable
     {
         $arr = unserialize($data);
         $this->spec = $arr['spec'];
-        $this->prepend = $arr['prepend'];
         $this->init();
     }
-
-
-
-
-
-    /**
-     * Create a url, However if a relative path to a file is given
-     * the project site root is prepended to the given URL.
-     * To avoid relative URL's use 'new \Tk\Url()' not the create() methods.
-     *
-     * When using create() or new \Tk\Url() there are three ways to supply the spec path:
-     *  o http://www.example.com/path/to/index.html  =>  http://www.example.com/path/to/index.html
-     *  o /path/to/index.html  =>  http://www.sitehost.com/siteUrl/path/to/index.html     <-- Convert to relative
-     *  o path/to/index.html   =>  http://www.sitehost.com/siteUrl/path/to/index.html     <-- Convert to relative
-     *
-     * If supplying a relative path, the optional prepend paramater can be added to prepend the path
-     * of the url, if none supplied the Tk_config::getSitePath() method is used.
-     *
-     * @param string $spec
-     * @param string $prepend If null then \Tk\Config::getSiteUrl()
-     * @return Url
-     */
-    static function create($spec = '', $prepend = null)
-    {
-        if ($spec instanceof Url) {
-            return $spec;
-        }
-        // Only apply default prepend to local urls
-        if ($prepend === null && class_exists('\Tk\Config')) {
-            $prepend = Config::getInstance()->getSiteUrl();
-        }
-        $url = new self($spec, $prepend);
-        return $url;
-    }
-
-
-
 
 
 
@@ -201,11 +142,6 @@ class Url implements \Serializable
 
         $components = parse_url($spec);
         if ($components) {
-            // uninitiate prepend path for non local urls.
-            if (str_replace('www.', '', $components['host']) != str_replace('www.', '', $host)) {
-                $this->prepend = '';
-            }
-
             if (array_key_exists('scheme', $components)) {
                 $this->setScheme($components['scheme']);
             }
@@ -256,8 +192,6 @@ class Url implements \Serializable
         }
         return false;
     }
-
-
 
 
     /**
@@ -322,7 +256,6 @@ class Url implements \Serializable
      */
     public function setHost($str)
     {
-        // Todo: validate with regx
         $this->host = $str;
         return $this;
     }
@@ -345,7 +278,6 @@ class Url implements \Serializable
      */
     public function setPassword($str)
     {
-        // Todo: validate with regx
         $this->password = $str;
         return $this;
     }
@@ -356,13 +288,9 @@ class Url implements \Serializable
      *
      * @return string
      */
-    public function getPath($relative = false)
+    public function getPath()
     {
-        if ($relative || !$this->prepend) {
-            return $this->path;
-        }
-        $path = $this->prepend . $this->path;
-        return $path;
+        return $this->path;
     }
 
     /**
@@ -374,11 +302,6 @@ class Url implements \Serializable
     public function setPath($path)
     {
         $path = urldecode($path);
-        if ($this->prepend) {
-            if (preg_match('|^('.  preg_quote($this->prepend) . ')|', $path)) {
-                $path = str_replace($this->prepend, '', $path);
-            }
-        }
         $this->path = $path;
         return $this;
     }
@@ -453,13 +376,9 @@ class Url implements \Serializable
      *
      * @return string
      */
-    public function getBasename($withExt = true)
+    public function getBasename()
     {
-        $name = basename($this->getPath());
-        if (!$withExt && $this->getExtension()) {
-            $name = str_replace('.' . $this->getExtension(), '', $name);
-        }
-        return $name;
+        return basename($this->getPath());
     }
 
     /**
@@ -484,7 +403,7 @@ class Url implements \Serializable
     }
 
     /**
-     * Get the array of queryfields in a map
+     * Get the array of query fields in a map
      *
      * @return array
      */
@@ -494,7 +413,7 @@ class Url implements \Serializable
     }
 
     /**
-     * Get the array of queryfields in a map
+     * Get the array of query fields in a map
      *
      * @param array $map
      * @return Url
@@ -508,7 +427,7 @@ class Url implements \Serializable
     }
 
     /**
-     * clear and reset the querystring
+     * clear and reset the query string
      *
      * @return Url
      */
@@ -535,7 +454,7 @@ class Url implements \Serializable
     }
 
     /**
-     * Remove a field in the querystring
+     * Remove a field in the query string
      *
      * @param string $field
      * @return Url
@@ -666,11 +585,9 @@ class Url implements \Serializable
                 break;
         }
 
-
         $arr = debug_backtrace();
         $arr = $arr[0];
-        // \Tk\Log('\Tk\Url::redirect('.$this->toString().'): called from ' . str_replace($this->getConfig()->getSitePath(), '', $arr['file']) . ' (' . $arr['line'] . ') ');
-        \Tk\Log.d('\Tk\Url::redirect('.$this->toString().'): called from ' . basename($arr['file']) . ' (' . $arr['line'] . ') ');
+        error_log('\Tk\Url::redirect('.$this->toString().'): called from ' . basename($arr['file']) . ' (' . $arr['line'] . ') ');
 
         header("Location: {$this->toString()}");
         exit();

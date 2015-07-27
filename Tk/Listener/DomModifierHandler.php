@@ -10,7 +10,7 @@ namespace Tk\Listener;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
-//use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Response;
 use Tk\Dom\Modifier\Modifier;
 use Dom\Template;
 

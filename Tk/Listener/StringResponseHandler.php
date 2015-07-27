@@ -17,9 +17,9 @@ class StringResponseHandler implements EventSubscriberInterface
 
     public function onView(GetResponseForControllerResultEvent $event)
     {
-        $response = $event->getControllerResult();
-        if (is_string($response)) {
-            $event->setResponse(new Response($response));
+        $result = $event->getControllerResult();
+        if (is_string($result)) {
+            $event->setResponse(new Response($result));
         }
     }
 

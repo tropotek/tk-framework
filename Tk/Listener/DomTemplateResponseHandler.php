@@ -27,9 +27,9 @@ class DomTemplateResponseHandler implements EventSubscriberInterface
      */
     public function onView(GetResponseForControllerResultEvent $event)
     {
-        $template = $event->getControllerResult();
-        if ($template) {
-            $event->setResponse(new Response($template->toString()));
+        $result = $event->getControllerResult();
+        if ($result instanceof \Dom\Template) {
+            $event->setResponse(new Response($result->toString()));
         }
     }
 
