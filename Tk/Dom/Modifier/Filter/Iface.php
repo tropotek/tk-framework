@@ -68,14 +68,6 @@ abstract class Iface
 
 
     /**
-     * pre init the front controller
-     *
-     * @param \DOMDocument $doc
-     * @deprecated Use postTraverse()
-     */
-    public function postInit($doc) { }
-
-    /**
      * called after DOM tree is traversed
      *
      * @param \DOMDocument $doc
