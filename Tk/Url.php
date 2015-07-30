@@ -6,15 +6,14 @@
  */
 namespace Tk;
 
-/**
- * A URL class.
+/** A URL class.
  *
  * <b>[[&lt;scheme&gt;://][[&lt;user&gt;[:&lt;password&gt;]@]&lt;host&gt;[:&lt;port&gt;]]][/[&lt;path&gt;][?&lt;query&gt;][#&lt;fragment&gt;]]</b>
  *
- * where:<br/>
- *  o scheme defaults to http
- *  o host defaults to the current host.
- *  o port defaults to 80
+ * where:
+ *   - scheme defaults to http
+ *   - host defaults to the current host.
+ *   - port defaults to 80
  *
  */
 class Url implements \Serializable
