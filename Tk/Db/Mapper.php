@@ -41,10 +41,10 @@ abstract class Mapper
 
 
     /**
-     * Get/Create an instance of a data mapper
+     * Get/Create an instance of a data mapper.
      *
-     * @param string|Model $mapperClass
-     * @param string|Pdo $db
+     * @param string $mapperClass The Model mapper class string EG: 'App\Db\UserMap'
+     * @param Pdo $db
      * @return Mapper
      */
     static function create($mapperClass, $db = null)

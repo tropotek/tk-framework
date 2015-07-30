@@ -60,7 +60,7 @@ class Pdo extends \PDO
     /**
      * @var \Closure
      */
-    private $observer;
+    private $onLogListener;
 
 
 
@@ -164,8 +164,8 @@ class Pdo extends \PDO
     public function addLog(array $entry)
     {
         $this->log[] = $entry;
-        if ($this->observer) {
-            call_user_func($this->observer, $entry);
+        if ($this->onLogListener) {
+            call_user_func($this->onLogListener, $entry);
         }
     }
 
@@ -202,9 +202,9 @@ class Pdo extends \PDO
      *
      * @param callable $observer The observer.
      */
-    public function onLog($observer)
+    public function setOnLogListener($observer)
     {
-        $this->observer = $observer;
+        $this->onLogListener = $observer;
     }
 
     /**
@@ -506,18 +506,12 @@ class Pdo extends \PDO
         if ($row && isset($row['Auto_increment'])) {
             return (int)$row['Auto_increment'];
         }
-
         $sql = sprintf("SELECT MAX(`%s`) AS `lastId` FROM `%s` ", $pKey, $table);
         $result = $this->query($sql);
         $result->setFetchMode(\PDO::FETCH_ASSOC);
         $row = $result->fetch();
         return ((int) $row['lastId']) + 1;
     }
-
-
-
-
-
 
 }
 

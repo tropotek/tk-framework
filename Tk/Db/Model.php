@@ -30,18 +30,26 @@ abstract class Model
     /**
      * Get this object's DB mapper
      *
+     * The Mapper class will be taken from this class's name if not supplied
+     *
+     * By default the Database is attempted to be seet from the Tk\Config object if it exists
+     *
+     * Also the Default table name is generated from this object: EG: /App/Db/WebUser = 'webUser'
+     *
+     * The 2 parameters must be set if you do not wish to use these defaults
+     *
+     * @param string $mapperClass
      * @return Mapper
      */
-    static function getMapper($db = null)
+    static function getMapper($mapperClass = '')
     {
-        $class = get_called_class();
-        $mapperClass = $class.'Map';
+        if (!$mapperClass) {
+            $class = get_called_class();
+            $mapperClass = $class . 'Map';
+        }
         $mapper = Mapper::create($mapperClass);
-        if (!$mapper->getDb()) {
-            if (!$db && class_exists('\Tk\Config')) {
-                $db = \Tk\Config::getInstance()->getDb();
-            }
-            $mapper->setDb($db);
+        if (!$mapper->getDb() && class_exists('\Tk\Config') && \Tk\Config::getInstance()->getDb()) {
+            $mapper->setDb(\Tk\Config::getInstance()->getDb());
         }
         if (!$mapper->getTable()) {
             $a = explode('\\', $class);
