@@ -1,27 +1,16 @@
 <?php
-/*
- * @author Michael Mifsud <info@tropotek.com>
- * @link http://www.tropotek.com/
- * @license Copyright 2007 Michael Mifsud
- */
-
 namespace Tk;
-
 
 use Symfony\Component\HttpFoundation\Request;
 use Psr\Log\LogLevel;
 use Tk\Utils\Registry;
 
 /**
- * Class Config
- *
- * This config class is a specific array type object to contain the
- * applications config and dependency values and functions.
+ * A Config class for handling the applications dependency values.
  *
  * It can be used as a standard array it extends the \Tk\Registry
  * Example usage:
  * <code>
- * <?php
  * $request = Request::createFromGlobals();
  * $cfg = \Tk\Config::getInstance();
  *
@@ -63,26 +52,28 @@ use Tk\Utils\Registry;
  * // Output
  * // object(Closure)[14]
  *
- *
  * </code>
  *
  * Internally the Config values are stored in an array. So to set a value there is a couple of ways to do this:
  *
- *   $cfg->setSitePath($path);
- *   same as
- *   $sfg['site.path'] = $path
+ * $cfg->setSitePath($path);
+ *
+ * same as
+ *
+ * $cfg['site.path'] = $path;
  *
  * To get a values stored in the registry you can do the following using the array access methods:
  *
- *   $val = $cfg->getSitePath();
- *   same as
- *   $val = $cfg['site.path']
+ * $val = $cfg->getSitePath();
  *
- * NOTICE: When using the array access methods to get a closure (anonymous function) the
- * closure object will be returned. You must call getClosureObject($params) to execute the closure function
- * and return the executed result. (see above example)
+ * same as
+ *
+ * $val = $cfg['site.path'];
  *
  *
+ * @author Michael Mifsud <info@tropotek.com>
+ * @link http://www.tropotek.com/
+ * @license Copyright 2007 Michael Mifsud
  */
 class Config extends Registry
 {

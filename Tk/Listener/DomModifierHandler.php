@@ -1,10 +1,4 @@
 <?php
-/*
- * @author Michael Mifsud <info@tropotek.com>
- * @link http://www.tropotek.com/
- * @license Copyright 2007 Michael Mifsud
- */
-
 namespace Tk\Listener;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -13,7 +7,13 @@ use Symfony\Component\HttpFoundation\Response;
 use Tk\Dom\Modifier\Modifier;
 use Dom\Template;
 
-
+/**
+ * Class DomModifierHandler
+ *
+ * @author Michael Mifsud <info@tropotek.com>
+ * @link http://www.tropotek.com/
+ * @license Copyright 2007 Michael Mifsud
+ */
 class DomModifierHandler implements EventSubscriberInterface
 {
     /**

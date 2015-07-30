@@ -1,10 +1,4 @@
 <?php
-/*
- * @author Michael Mifsud <info@tropotek.com>
- * @link http://www.tropotek.com/
- * @license Copyright 2007 Michael Mifsud
- */
-
 namespace Tk\Listener;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -12,11 +6,14 @@ use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * If a Dom/Template is returned from a controller action.
- * Then this Event processes the template ready for output.
+ * If a \Dom\Template object is returned from a controller
  *
- * Class DomTemplateResponseHandler
- * @package Tk\Listener
+ * This event creates a valid response from the \Dom\Template object
+ *
+ *
+ * @author Michael Mifsud <info@tropotek.com>
+ * @link http://www.tropotek.com/
+ * @license Copyright 2007 Michael Mifsud
  */
 class DomTemplateResponseHandler implements EventSubscriberInterface
 {

@@ -1,36 +1,33 @@
 <?php
-/*
- * @author Michael Mifsud <info@tropotek.com>
- * @link http://www.tropotek.com/
- * @license Copyright 2007 Michael Mifsud
- */
 namespace Tk\Dom\Modifier;
 
 /**
  * This class is designed to take a \DOMDocument, traverse it and pass each Element to
- * the child Dom iterator.
+ * the children filters.
  *
- * The main aim of this object is to make final last minute alterations to the dom template
- * before rendering ensuring that we only traverse the DOM tree once on the final render stage.
+ * The main aim of this object is to make final last minute alterations to the dom template.
  *
- * This can be extended by adding Mod\DomModifier\Filter\Iface objects.
+ * This ensures that we only traverse the DOM tree once on the final render stage.
  *
- * Mod\DomModifier\Filter\Iface objects are used to optimise final template changes
- * for extended modifier functionality, just add new Mod\DomModifier objects to the Tk\Controller\DomModifier object.
+ * New filters can be created by extending the \Tk\Dom\Modifier\Filter\Iface object.
  *
  * See the Tk\Config::getDomModifier() to get a basic implementation of the DomModifier.
  *
  * Example:<br/>
  * <code>
- * $dm = new \Tk\Dom\Modifier\Modifier();<br/>
- * $dm->add(new \Tk\Dom\Modifier\Filter\Path($apUrl, $templateUrl));<br/>
- * $dm->execute($template->getDocument());<br/>
+ * $dm = new \Tk\Dom\Modifier\Modifier();
+ * $dm->add(new \Tk\Dom\Modifier\Filter\Path($apUrl, $templateUrl));
+ * $dm->execute($template->getDocument());
  * </code>
  *
+ * @author Michael Mifsud <info@tropotek.com>
+ * @link http://www.tropotek.com/
+ * @license Copyright 2007 Michael Mifsud
  */
 class Modifier
 {
     /**
+     * A list of filter objects
      * @var array
      */
     protected $list = array();
@@ -41,12 +38,12 @@ class Modifier
     protected $nodeTrash = array();
 
     /**
-     * @var \DOMNode
+     * @var \DOMElement
      */
     protected $head = null;
 
     /**
-     * @var \DOMNode
+     * @var \DOMElement
      */
     protected $body = null;
 

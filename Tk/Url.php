@@ -1,9 +1,4 @@
 <?php
-/*
- * @author Michael Mifsud <info@tropotek.com>
- * @link http://www.tropotek.com/
- * @license Copyright 2007 Michael Mifsud
- */
 namespace Tk;
 
 /**
@@ -11,11 +6,22 @@ namespace Tk;
  *
  * <b>[[&lt;scheme&gt;://][[&lt;user&gt;[:&lt;password&gt;]@]&lt;host&gt;[:&lt;port&gt;]]][/[&lt;path&gt;][?&lt;query&gt;][#&lt;fragment&gt;]]</b>
  *
- * where:<br/>
- *  o scheme defaults to http
- *  o host defaults to the current host.
- *  o port defaults to 80
+ * Where:
  *
+ * - __scheme__ defaults to http
+ * - __host__ defaults to the current host
+ * - __port__ defaults to 80
+ *
+ * <code>
+ * echo \Tk\Url::create('/full/url/path/index.html')->__toString();
+ * // Result:
+ * //  http://localhost/full/url/path/index.html
+ * </code>
+ *
+ *
+ * @author Michael Mifsud <info@tropotek.com>
+ * @link http://www.tropotek.com/
+ * @license Copyright 2007 Michael Mifsud
  */
 class Url implements \Serializable
 {
@@ -90,6 +96,21 @@ class Url implements \Serializable
         if (!preg_match('/^(#|javascript|mailto)/i', $this->spec)) {
             $this->init();
         }
+    }
+
+    /**
+     * A static factory method to facilitate inline calls
+     *
+     * <code>
+     * \Tk\Url::create('http://example.com/test');
+     * </code>
+     *
+     * @param $spec
+     * @return Url
+     */
+    public static function create($spec)
+    {
+        return new self($spec);
     }
 
     public function serialize()
@@ -492,9 +513,9 @@ class Url implements \Serializable
     }
 
     /**
-     * redirect
-     * Codes:
+     * Redirect Codes:
      *
+     * <code>
      *  301: Moved Permanently
      *
      *    - The requested resource has been assigned a new permanent URI and any
@@ -545,9 +566,8 @@ class Url implements \Serializable
      *      redirection MAY be altered on occasion, the client SHOULD continue to use the
      *      Request-URI for future requests. This response is only cacheable if indicated
      *      by a Cache-Control or Expires header field.
+     * </code>
      *
-     *
-     * func: redirect($to,$code=307)
      * @link http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
      * @link http://edoceo.com/creo/php-redirect.php
      */

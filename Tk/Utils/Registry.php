@@ -1,10 +1,4 @@
 <?php
-/*
- * @author Michael Mifsud <info@tropotek.com>
- * @link http://www.tropotek.com/
- * @license Copyright 2007 Michael Mifsud
- */
-
 namespace Tk\Utils;
 
 /**
@@ -16,7 +10,6 @@ namespace Tk\Utils;
  * It can be used as a standard array it extends the \Tk\ArrayObject
  * Example usage:
  * <code>
- * <?php
  * $request = Request::createFromGlobals();
  * $cfg = new \Tk\Registry();
  *
@@ -62,24 +55,24 @@ namespace Tk\Utils;
  *
  * Internally the Registry values are stored in an array. So to set a value there is a couple of ways to do this:
  *
- *   $cfg->setSitePath($path);
- *   same as
- *   $sfg['site.path'] = $path
+ * $cfg->setSitePath($path);
+ *
+ * same as
+ *
+ * $sfg['site.path'] = $path
  *
  * To get a values stored in the registry you can do the following using the array access methods:
  *
- *   $val = $cfg->getSitePath();
- *   same as
- *   $val = $cfg['site.path']
+ * $val = $cfg->getSitePath();
  *
- * NOTICE: When using the array access methods to get a closure (anonymous function) the
- * closure object will be returned. You must call getClosureObject($params) to execute the closure function
- * and return the executed result. (see above example)
+ * same as
+ *
+ * $val = $cfg['site.path']
  *
  *
- *
- *
- * @package Tk
+ * @author Michael Mifsud <info@tropotek.com>
+ * @link http://www.tropotek.com/
+ * @license Copyright 2007 Michael Mifsud
  */
 class Registry extends ArrayObject
 {

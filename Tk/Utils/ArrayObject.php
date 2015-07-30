@@ -1,17 +1,15 @@
 <?php
-/*
- * @author Michael Mifsud <info@tropotek.com>
- * @link http://www.tropotek.com/
- * @license Copyright 2007 Michael Mifsud
- */
-
 namespace Tk\Utils;
 
 /**
  * A wrapper for the php array object
+ *
  * This object also contains all the array functions as methods.
  *
- * @package Tk
+ *
+ * @author Michael Mifsud <info@tropotek.com>
+ * @link http://www.tropotek.com/
+ * @license Copyright 2007 Michael Mifsud
  */
 class ArrayObject implements \IteratorAggregate, \ArrayAccess, \Serializable, \Countable
 {
@@ -114,7 +112,7 @@ class ArrayObject implements \IteratorAggregate, \ArrayAccess, \Serializable, \C
     /**
      *  \IteratorAggregate
      *
-     * @return \Tk\ArrayIterator
+     * @return \ArrayIterator
      */
     public function getIterator()
     {
@@ -124,8 +122,8 @@ class ArrayObject implements \IteratorAggregate, \ArrayAccess, \Serializable, \C
     /**
      * \ArrayAccess
      *
-     * @param type $offset
-     * @param type $value
+     * @param string $offset
+     * @param mixed $value
      */
     public function offsetSet($offset, $value)
     {
@@ -204,7 +202,7 @@ class ArrayObject implements \IteratorAggregate, \ArrayAccess, \Serializable, \C
      *
      * @param $key
      * @param mixed $val
-     * @return \Tk\ArrayObject
+     * @return ArrayObject
      */
     public function set($key, $val)
     {
@@ -217,7 +215,7 @@ class ArrayObject implements \IteratorAggregate, \ArrayAccess, \Serializable, \C
      *
      * @param string $key
      * @param mixed $val
-     * @return \Tk\ArrayObject
+     * @return ArrayObject
      */
     public function nset($key, $val)
     {
@@ -254,7 +252,7 @@ class ArrayObject implements \IteratorAggregate, \ArrayAccess, \Serializable, \C
      * Remove an entry from the registry cache
      *
      * @param string $key
-     * @return \Tk\Registry
+     * @return \ArrayObject
      */
     public function delete($key)
     {

@@ -1,9 +1,4 @@
 <?php
-/*
- * @author Michael Mifsud <info@tropotek.com>
- * @link http://www.tropotek.com/
- * @license Copyright 2007 Michael Mifsud
- */
 namespace Tk\Dom\Modifier\Filter;
 
 use \Tk\Dom\Modifier\Modifier;
@@ -12,6 +7,10 @@ use \Tk\Dom\Modifier\Modifier;
 /**
  * The interface for all DomModifier filter objects
  *
+ *
+ * @author Michael Mifsud <info@tropotek.com>
+ * @link http://www.tropotek.com/
+ * @license Copyright 2007 Michael Mifsud
  */
 abstract class Iface
 {

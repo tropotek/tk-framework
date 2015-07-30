@@ -1,14 +1,15 @@
 <?php
-/*
- * @author Michael Mifsud <info@tropotek.com>
- * @link http://www.tropotek.com/
- * @license Copyright 2007 Michael Mifsud
- */
-
 namespace Tk\Utils;
 
 use Symfony\Component\HttpFoundation\Request;
 
+/**
+ * Class StackTrace
+ *
+ * @author Michael Mifsud <info@tropotek.com>
+ * @link http://www.tropotek.com/
+ * @license Copyright 2007 Michael Mifsud
+ */
 class StackTrace {
 
 
