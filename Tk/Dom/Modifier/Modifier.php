@@ -20,13 +20,11 @@ namespace Tk\Dom\Modifier;
  *
  * See the Tk\Config::getDomModifier() to get a basic implementation of the DomModifier.
  *
- * Example:
+ * Example:<br/>
  * <code>
- * <?php
- *     $dm = new \Tk\Dom\Modifier\Modifier();
- *     $dm->add(new \Tk\Dom\Modifier\Filter\Path($apUrl, $templateUrl));
- *     $dm->execute($template->getDocument());
- * ?>
+ * $dm = new \Tk\Dom\Modifier\Modifier();<br/>
+ * $dm->add(new \Tk\Dom\Modifier\Filter\Path($apUrl, $templateUrl));<br/>
+ * $dm->execute($template->getDocument());<br/>
  * </code>
  *
  */
@@ -159,7 +157,6 @@ class Modifier
         $this->traverse($doc->documentElement);
 
         foreach ($this->list as $mod) {
-            $mod->postInit($doc);   // << deprecated
             $mod->postTraverse($doc);
         }
         // Clear trash

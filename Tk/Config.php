@@ -1,9 +1,8 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: mifsudm
- * Date: 6/17/15
- * Time: 8:32 AM
+/*
+ * @author Michael Mifsud <info@tropotek.com>
+ * @link http://www.tropotek.com/
+ * @license Copyright 2007 Michael Mifsud
  */
 
 namespace Tk;
