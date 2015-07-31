@@ -43,8 +43,8 @@ abstract class Model
      */
     static function getMapper($mapperClass = '')
     {
+        $class = get_called_class();
         if (!$mapperClass) {
-            $class = get_called_class();
             $mapperClass = $class . 'Map';
         }
         $mapper = Mapper::create($mapperClass);
@@ -71,7 +71,7 @@ abstract class Model
     {
         $id = self::getMapper()->insert($this);
         $this->id = $id;
-        return $this->getId();
+        return $id;
     }
 
     /**

@@ -44,10 +44,9 @@ abstract class Mapper
      * Get/Create an instance of a data mapper.
      *
      * @param string $mapperClass The Model mapper class string EG: 'App\Db\UserMap'
-     * @param Pdo $db
      * @return Mapper
      */
-    static function create($mapperClass, $db = null)
+    static function create($mapperClass)
     {
         if (!isset(self::$instance[$mapperClass])) {
             self::$instance[$mapperClass] = new $mapperClass();
@@ -252,9 +251,8 @@ abstract class Mapper
     public function select(array $bind = array(), $params = array())
     {
         $params = array_merge(array('boolOperator' => 'AND'), $params);
-
+        $where = array();
         if ($bind) {
-            $where = array();
             foreach ($bind as $col => $value) {
                 unset($bind[$col]);
                 $bind[":" . $col] = $value;
