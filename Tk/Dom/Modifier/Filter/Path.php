@@ -218,6 +218,7 @@ class Path extends Iface
      */
     private function prependPath($path)
     {
+        if (!$path) return $path;
         if ($path[0] == '/' || $path[0] == '\\') {   // match site relative paths
             $retPath = $this->addSiteUrl($path);
         } else  {

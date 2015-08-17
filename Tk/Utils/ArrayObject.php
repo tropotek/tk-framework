@@ -252,7 +252,7 @@ class ArrayObject implements \IteratorAggregate, \ArrayAccess, \Serializable, \C
      * Remove an entry from the registry cache
      *
      * @param string $key
-     * @return \ArrayObject
+     * @return ArrayObject
      */
     public function delete($key)
     {
