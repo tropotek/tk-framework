@@ -37,9 +37,12 @@ class DomModifierHandler implements EventSubscriberInterface
     public function onView(GetResponseForControllerResultEvent $event)
     {
         /* @var $template Template */
-        $template = $event->getControllerResult();
-        if ($template instanceof Template) {
-            $this->domModifier->execute($template->getDocument());
+        $result = $event->getControllerResult();
+        if ($result instanceof Template) {
+            $this->domModifier->execute($result->getDocument());
+        }
+        if ($result instanceof \Dom\Renderer\Iface) {
+            $this->domModifier->execute($result->getTemplate()->getDocument());
         }
     }
 

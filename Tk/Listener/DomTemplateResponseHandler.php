@@ -27,6 +27,9 @@ class DomTemplateResponseHandler implements EventSubscriberInterface
         if ($result instanceof \Dom\Template) {
             $event->setResponse(new Response($result->toString()));
         }
+        if ($result instanceof \Dom\Renderer\Iface) {
+            $event->setResponse(new Response($result->getTemplate()->toString()));
+        }
     }
 
     /**
