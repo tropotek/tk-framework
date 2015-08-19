@@ -169,7 +169,14 @@ class Path extends Iface
      */
     public function init($doc)
     {
-
+        // Try to automatically determin the template path
+        if (!$this->templateUrl && $doc->documentURI) {
+            $config = \Tk\Config::getInstance();
+            $urlStr = str_replace($config->getAppPath(), '', $doc->documentURI);
+            $urlStr = dirname($urlStr);
+            $urlStr = $config->getAppUrl() . $urlStr;
+            $this->templateUrl = $urlStr;
+        }
     }
 
     /**

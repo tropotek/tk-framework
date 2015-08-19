@@ -571,7 +571,7 @@ class Url implements \Serializable
      * @link http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
      * @link http://edoceo.com/creo/php-redirect.php
      */
-    public function redirect($code = 301)
+    public function redirect($code = 302)
     {
 
         if (headers_sent()) {
