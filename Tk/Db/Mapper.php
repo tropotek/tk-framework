@@ -200,13 +200,8 @@ abstract class Mapper
         $bind = array(
             $this->primaryKey => $id
         );
-        $stmt = $this->select($bind, array('limit' => 1));
-
-        $row = $stmt->fetch();
-        if ($row && count($row)) {
-            return $this->dbUnserialize($row);
-        }
-        return null;
+        $list = $this->select($bind, array('limit' => 1));
+        return current($list);
     }
 
     /**
@@ -217,16 +212,8 @@ abstract class Mapper
      */
     public function findAll($params = array())
     {
-        $stmt = $this->select(array(), $params);
-        $list = array();
-        foreach($stmt as $row) {
-            $list[] = $this->dbUnserialize($row);
-        }
-        return $list;
+        return $this->select(array(), $params);
     }
-
-
-
 
 
     /**
@@ -245,7 +232,7 @@ abstract class Mapper
      *
      * @param array  $bind
      * @param array $params
-     * @return PdoStatement
+     * @return array
      * @see http://www.sitepoint.com/integrating-the-data-mappers/
      */
     public function select(array $bind = array(), $params = array())
@@ -282,11 +269,13 @@ abstract class Mapper
 
         $stmt = $this->getDb()->prepare($sql);
         $stmt->execute($bind);
-        return $stmt;
+
+        $list = array();
+        foreach($stmt as $row) {
+            $list[] = $this->dbUnserialize($row);
+        }
+        return $list;
     }
-
-
-
 
 
     /**

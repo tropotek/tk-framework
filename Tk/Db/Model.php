@@ -17,6 +17,12 @@ namespace Tk\Db;
  */
 abstract class Model
 {
+
+    /**
+     * @var string
+     */
+    static $APPEND = 'Map';
+
     /**
      * The Table Primary Key (Usually)
      * @var int
@@ -25,41 +31,44 @@ abstract class Model
 
 
 
-
-
     /**
      * Get this object's DB mapper
      *
      * The Mapper class will be taken from this class's name if not supplied
      *
-     * By default the Database is attempted to be seet from the Tk\Config object if it exists
+     * By default the Database is attempted to be set from the Tk\Config object if it exists
      *
      * Also the Default table name is generated from this object: EG: /App/Db/WebUser = 'webUser'
      *
-     * The 2 parameters must be set if you do not wish to use these defaults
+     * This would in-turn look for the mapper class /App/Db/WebUserMap
+     *
+     * Change the self::$APPEND parameter to change the class append name
+     *
+     * The method setDb() must be called after calling getMapper() if you do not wish to use the DB from the config
+     *
      *
      * @param string $mapperClass
      * @return Mapper
      */
     static function getMapper($mapperClass = '')
     {
-        $class = get_called_class();
+        $append = self::$APPEND;
         if (!$mapperClass) {
-            $mapperClass = $class . 'Map';
+            $class = get_called_class();
+            $mapperClass = $class . $append;
         }
         $mapper = Mapper::create($mapperClass);
         if (!$mapper->getDb() && class_exists('\Tk\Config') && \Tk\Config::getInstance()->getDb()) {
             $mapper->setDb(\Tk\Config::getInstance()->getDb());
         }
         if (!$mapper->getTable()) {
-            $a = explode('\\', $class);
+            $a = explode('\\', $mapperClass);
             $table = lcfirst(array_pop($a));
+            $table = substr($table, 0, strrpos($table, $append));
             $mapper->setTable($table);
         }
         return $mapper;
     }
-
-
 
     /**
      * Insert the object into storage.
@@ -110,7 +119,6 @@ abstract class Model
         return $r;
     }
 
-
     /**
      * Returns the object id if it is greater than 0 or the nextInsertId if is 0
      *
@@ -123,11 +131,5 @@ abstract class Model
         }
         return $this->id;
     }
-
-
-
-
-
-
 
 }
