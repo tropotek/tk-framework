@@ -101,7 +101,7 @@ class Url implements \Serializable
      * A static factory method to facilitate inline calls
      *
      * <code>
-     * \Tk\Url::create('http://example.com/test');
+     *   \Tk\Url::create('http://example.com/test');
      * </code>
      *
      * @param $spec
