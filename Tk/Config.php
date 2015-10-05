@@ -124,6 +124,7 @@ class Config extends Registry
 
         // Add request to config
         $_POST['config'] = $this;
+        $this->setConfig($this);
         $request = Request::createFromGlobals();
         $this->setRequest($request);
 
