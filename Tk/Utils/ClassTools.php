@@ -1,6 +1,4 @@
 <?php
-
-
 namespace Tk\Utils;
 
 
@@ -11,7 +9,6 @@ class ClassTools
     /**
      * Take a class in the form of Tk_Some_Class
      * And convert it to a class like \Tk\Some\Class
-     *
      *
      * @param string $class
      * @return string
@@ -27,7 +24,6 @@ class ClassTools
     /**
      * Take a class in the form of \Tk\Some\Class
      * And convert it to a namespace class like Tk_Some_Class
-     *
      *
      * @param string $class
      * @return string
@@ -63,7 +59,7 @@ class ClassTools
      * @param string|Object $class
      * @return string
      */
-    static function classurl($class)
+    static function classUrl($class)
     {
         if (is_object($class)) {
             $class = get_class($class);
