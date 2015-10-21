@@ -607,7 +607,7 @@ class Url implements \Serializable
 
         $arr = debug_backtrace();
         $arr = $arr[0];
-        error_log('\Tk\Url::redirect('.$this->toString().'): called from ' . basename($arr['file']) . ' (' . $arr['line'] . ') ');
+        vd('  - ' . $code . ' REDIRECT ['.$this->toString().'] Called from ' . basename($arr['file']) . '[' . $arr['line'] . '] '."\n\n");
 
         header("Location: {$this->toString()}");
         exit();
