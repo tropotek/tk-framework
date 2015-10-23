@@ -90,9 +90,17 @@ abstract class Mapper
         return $row;
     }
 
-
-
-
+    /**
+     * @param $array
+     * @return mixed
+     */
+    private function backtickArray($array)
+    {
+        foreach($array as $k => $v) {
+            $array[$k] = '`'.trim($array[$k], '`').'`';
+        }
+        return $array;
+    }
 
     /**
      * Insert
@@ -103,7 +111,8 @@ abstract class Mapper
     public function insert($obj)
     {
         $bind = $this->dbSerialize($obj);
-        $cols = implode(", ", array_keys($bind));
+
+        $cols = implode(", ", $this->backtickArray(array_keys($bind)));
         $values = implode(", :", array_keys($bind));
         foreach ($bind as $col => $value) {
             if ($col == $this->primaryKey) continue;
@@ -143,10 +152,11 @@ abstract class Mapper
             }
             unset($bind[$col]);
             $bind[":" . $col] = $value;
-            $set[] = $col . " = :" . $col;
+            $set[] = '`'.$col . '` = :' . $col;
         }
-        $where = $this->primaryKey . ' = ' . $bind[':'.$this->primaryKey];
-        $sql = "UPDATE " . $this->table . " SET " . implode(", ", $set) . (($where) ? " WHERE " . $where : " ");
+        $where = '`'.$this->primaryKey . '` = ' . $bind[':'.$this->primaryKey];
+        $sql = "UPDATE `" . $this->table . "` SET " . implode(", ", $set) . (($where) ? " WHERE " . $where : " ");
+        vd($sql, $bind);
         $stmt = $this->getDb()->prepare($sql);
         $stmt->execute($bind);
         return $stmt->rowCount();
@@ -182,7 +192,7 @@ abstract class Mapper
     public function delete($obj)
     {
         $where = $this->primaryKey . ' = ' . $obj->{$this->primaryKey};
-        $sql = "DELETE FROM " . $this->table . (($where) ? " WHERE " . $where : " ");
+        $sql = 'DELETE FROM `' . $this->table .'` ' . (($where) ? ' WHERE ' . $where : ' ');
         $stmt = $this->getDb()->prepare($sql);
         $stmt->execute();
         return $stmt->rowCount();
@@ -243,7 +253,7 @@ abstract class Mapper
             foreach ($bind as $col => $value) {
                 unset($bind[$col]);
                 $bind[":" . $col] = $value;
-                $where[] = $col . " = :" . $col;
+                $where[] = '`'.$col . "` = :" . $col;
             }
         }
         $sql = "SELECT * FROM " . $this->table . (($bind) ? " WHERE " . implode(" " . $params['boolOperator'] . " ", $where) : " ");
