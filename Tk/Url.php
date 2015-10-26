@@ -109,6 +109,8 @@ class Url implements \Serializable
      */
     public static function create($spec)
     {
+        if ($spec instanceof Url)
+            return $spec;
         return new self($spec);
     }
 
