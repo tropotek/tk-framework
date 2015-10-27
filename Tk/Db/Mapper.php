@@ -156,7 +156,7 @@ abstract class Mapper
         }
         $where = '`'.$this->primaryKey . '` = ' . $bind[':'.$this->primaryKey];
         $sql = "UPDATE `" . $this->table . "` SET " . implode(", ", $set) . (($where) ? " WHERE " . $where : " ");
-        vd($sql, $bind);
+
         $stmt = $this->getDb()->prepare($sql);
         $stmt->execute($bind);
         return $stmt->rowCount();
@@ -258,23 +258,23 @@ abstract class Mapper
         }
         $sql = "SELECT * FROM " . $this->table . (($bind) ? " WHERE " . implode(" " . $params['boolOperator'] . " ", $where) : " ");
 
-        if (!empty($options['groupBy'])) {
-            $sql .= ' GROUP BY ' . $options['groupBy'];
+        if (!empty($params['groupBy'])) {
+            $sql .= ' GROUP BY ' . $params['groupBy'];
         }
 
-        if (!empty($options['having'])) {
-            $sql .= ' HAVING ' . $options['having'];
+        if (!empty($params['having'])) {
+            $sql .= ' HAVING ' . $params['having'];
         }
 
-        if (!empty($options['orderBy'])) {
-            $sql .= ' ORDER BY ' . $options['orderBy'];
+        if (!empty($params['orderBy'])) {
+            $sql .= ' ORDER BY ' . $params['orderBy'];
         }
 
-        if (!empty($options['limit'])) {
-            $sql .= ' LIMIT ' . (int)$options['limit'];
+        if (!empty($params['limit'])) {
+            $sql .= ' LIMIT ' . (int)$params['limit'];
         }
-        if (!empty($options['offset'])) {
-            $sql .= ' OFFSET ' . (int)$options['offset'];
+        if (!empty($params['offset'])) {
+            $sql .= ' OFFSET ' . (int)$params['offset'];
         }
 
         $stmt = $this->getDb()->prepare($sql);

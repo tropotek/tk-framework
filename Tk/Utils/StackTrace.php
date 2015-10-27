@@ -24,6 +24,7 @@ class StackTrace {
     static function traceToString($stackTraceArray, $skip = 0)
     {
         $request = Request::createFromGlobals();
+        $config = \Tk\Config::getInstance();
         $str = '';
         for ($i = 0; $i < $skip; $i++) {
             array_shift($stackTraceArray);
@@ -41,8 +42,7 @@ class StackTrace {
             if (isset($t['file'])) {
                 $file = $t['file'];
                 // try to get relative path to the site
-                if ($request->getBasePath())
-                    $file = str_replace($request->getBasePath(), '', $file);
+                $file = str_replace($config->getAppPath(), '', $file);
             }
             $line = '';
             if (isset($t['line'])) {
@@ -90,5 +90,16 @@ class StackTrace {
         return '<pre>' . self::traceToString($stackTraceArray, $skip) . '</pre>';
     }
 
+    /**
+     * @param int $skip
+     */
+    static function logTrace($skip = 0)
+    {
+        $trace = "\n".\Tk\Utils\StackTrace::traceToString(debug_backtrace(), $skip);
+        $log = \Tk\Config::getInstance()->getLog();
+        if ($log) {
+            $log->debug($trace);
+        }
+    }
 
 }

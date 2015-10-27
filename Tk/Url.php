@@ -89,8 +89,11 @@ class Url implements \Serializable
      * @param string $spec The String to parse as a URL
      * @throws Exception
      */
-    public function __construct($spec)
+    public function __construct($spec = '')
     {
+        if (!$spec) {
+            $spec = $_SERVER["REQUEST_URI"];
+        }
         $this->spec = trim($spec);
         if (!preg_match('/^(#|javascript|mailto)/i', $this->spec)) {
             $this->init();
@@ -107,12 +110,14 @@ class Url implements \Serializable
      * @param $spec
      * @return Url
      */
-    public static function create($spec)
+    public static function create($spec = '')
     {
         if ($spec instanceof Url)
             return $spec;
         return new self($spec);
     }
+
+
 
     public function serialize()
     {
