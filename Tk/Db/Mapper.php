@@ -1,11 +1,4 @@
 <?php
-/*
- * Created by PhpStorm.
- * User: godar
- * Date: 7/30/15
- * Time: 7:14 PM
- */
-
 namespace Tk\Db;
 
 /**
@@ -18,6 +11,15 @@ namespace Tk\Db;
 abstract class Mapper
 {
 
+    const PARAM_GROUP_BY = 'groupBy';
+    const PARAM_HAVING = 'having';
+    const PARAM_ORDER_BY = 'orderBy';
+    const PARAM_LIMIT = 'limit';
+    const PARAM_OFFSET = 'offset';
+    const PARAM_TOTAL = 'total';
+
+
+
     /**
      * @var Mapper[]
      */
@@ -27,6 +29,11 @@ abstract class Mapper
      * @var string
      */
     protected $table = '';
+
+    /**
+     * @var string
+     */
+    protected $modelClass = '';
 
     /**
      * @var string
@@ -46,13 +53,15 @@ abstract class Mapper
      * @param string $mapperClass The Model mapper class string EG: 'App\Db\UserMap'
      * @return Mapper
      */
-    static function create($mapperClass)
+    static function create($mapperClass, $modelClass = '')
     {
         if (!isset(self::$instance[$mapperClass])) {
             self::$instance[$mapperClass] = new $mapperClass();
+            self::$instance[$mapperClass]->modelClass = $modelClass;
         }
         return self::$instance[$mapperClass];
     }
+
 
 
     /**
@@ -88,6 +97,14 @@ abstract class Mapper
     public function dbUnserialize($row)
     {
         return $row;
+    }
+
+    /**
+     * @return string
+     */
+    public function getModelClass()
+    {
+        return $this->modelClass;
     }
 
     /**
@@ -133,7 +150,6 @@ abstract class Mapper
     }
 
     /**
-     *
      *
      * @param $obj
      * @return int
@@ -201,7 +217,6 @@ abstract class Mapper
 
     /**
      *
-     *
      * @param $id
      * @return Model|null
      */
@@ -210,7 +225,7 @@ abstract class Mapper
         $bind = array(
             $this->primaryKey => $id
         );
-        $list = $this->select($bind, array('limit' => 1));
+        $list = $this->select($bind, array(self::PARAM_LIMIT => 1));
         return current($list);
     }
 
@@ -256,35 +271,54 @@ abstract class Mapper
                 $where[] = '`'.$col . "` = :" . $col;
             }
         }
-        $sql = "SELECT * FROM " . $this->table . (($bind) ? " WHERE " . implode(" " . $params['boolOperator'] . " ", $where) : " ");
+        $sql = "SELECT SQL_CALC_FOUND_ROWS * FROM " . $this->table . (($bind) ? " WHERE " . implode(" " . $params['boolOperator'] . " ", $where) : " ");
 
-        if (!empty($params['groupBy'])) {
-            $sql .= ' GROUP BY ' . $params['groupBy'];
+        if (!empty($params[self::PARAM_GROUP_BY])) {
+            $sql .= ' GROUP BY ' . $params[self::PARAM_GROUP_BY];
         }
 
-        if (!empty($params['having'])) {
-            $sql .= ' HAVING ' . $params['having'];
+        if (!empty($params[self::PARAM_HAVING])) {
+            $sql .= ' HAVING ' . $params[self::PARAM_HAVING];
         }
 
-        if (!empty($params['orderBy'])) {
-            $sql .= ' ORDER BY ' . $params['orderBy'];
+        if (!empty($params[self::PARAM_ORDER_BY])) {
+            $sql .= ' ORDER BY ' . $params[self::PARAM_ORDER_BY];
         }
 
-        if (!empty($params['limit'])) {
-            $sql .= ' LIMIT ' . (int)$params['limit'];
+        if (!empty($params[self::PARAM_LIMIT])) {
+            $sql .= ' LIMIT ' . (int)$params[self::PARAM_LIMIT];
         }
-        if (!empty($params['offset'])) {
-            $sql .= ' OFFSET ' . (int)$params['offset'];
+        if (!empty($params[self::PARAM_OFFSET])) {
+            $sql .= ' OFFSET ' . (int)$params[self::PARAM_OFFSET];
         }
 
         $stmt = $this->getDb()->prepare($sql);
+        //$stmt->setFetchMode(\PDO::FETCH_CLASS, $this->getModelClass());     // to populate before the constructor is called.
+        //$stmt->setFetchMode(\PDO::FETCH_CLASS|PDO::FETCH_PROPS_LATE, $this->getModelClass());     // To populate after the constructor is called
         $stmt->execute($bind);
+        
+        $stmt->setParam('mapper', $this);
+        $stmt->setParam('dbTool', 'todo');
+
+        //return $stmt;
 
         $list = array();
         foreach($stmt as $row) {
-            $list[] = $this->dbUnserialize($row);
+            $list[] = $this->dbUnserialize((array)$row);
         }
         return $list;
+    }
+
+    /**
+     * Call this directly after yor select query to get the total available rows
+     *
+     * @return int
+     */
+    public function getFoundRows()
+    {
+        $sql = 'SELECT FOUND_ROWS()';
+        $r = $this->getDb()->query($sql);
+        return (int)$r->fetch(PDO::FETCH_COLUMN);
     }
 
 

@@ -57,7 +57,7 @@ abstract class Model
             $class = get_called_class();
             $mapperClass = $class . $append;
         }
-        $mapper = Mapper::create($mapperClass);
+        $mapper = Mapper::create($mapperClass, $class);
         if (!$mapper->getDb() && class_exists('\Tk\Config') && \Tk\Config::getInstance()->getDb()) {
             $mapper->setDb(\Tk\Config::getInstance()->getDb());
         }
