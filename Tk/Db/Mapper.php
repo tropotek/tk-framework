@@ -296,7 +296,7 @@ abstract class Mapper
         //$stmt->setFetchMode(\PDO::FETCH_CLASS, $this->getModelClass());     // to populate before the constructor is called.
         //$stmt->setFetchMode(\PDO::FETCH_CLASS|PDO::FETCH_PROPS_LATE, $this->getModelClass());     // To populate after the constructor is called
         $stmt->execute($bind);
-        
+
         $stmt->setParam('mapper', $this);
         $stmt->setParam('dbTool', 'todo');
 
@@ -320,7 +320,6 @@ abstract class Mapper
         $r = $this->getDb()->query($sql);
         return (int)$r->fetch(PDO::FETCH_COLUMN);
     }
-
 
     /**
      * @return string
