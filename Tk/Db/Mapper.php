@@ -10,16 +10,6 @@ namespace Tk\Db;
  */
 abstract class Mapper
 {
-
-    const PARAM_GROUP_BY = 'groupBy';
-    const PARAM_HAVING = 'having';
-    const PARAM_ORDER_BY = 'orderBy';
-    const PARAM_LIMIT = 'limit';
-    const PARAM_OFFSET = 'offset';
-    const PARAM_TOTAL = 'total';
-
-
-
     /**
      * @var Mapper[]
      */
@@ -225,7 +215,7 @@ abstract class Mapper
         $bind = array(
             $this->primaryKey => $id
         );
-        $list = $this->select($bind, array(self::PARAM_LIMIT => 1));
+        $list = $this->select($bind, array(\Tk\Db\Pdo::PARAM_LIMIT => 1));
         return current($list);
     }
 
@@ -273,40 +263,42 @@ abstract class Mapper
         }
         $sql = "SELECT SQL_CALC_FOUND_ROWS * FROM " . $this->table . (($bind) ? " WHERE " . implode(" " . $params['boolOperator'] . " ", $where) : " ");
 
-        if (!empty($params[self::PARAM_GROUP_BY])) {
-            $sql .= ' GROUP BY ' . $params[self::PARAM_GROUP_BY];
+        if (!empty($params[\Tk\Db\Pdo::PARAM_GROUP_BY])) {
+            $sql .= ' GROUP BY ' . $params[\Tk\Db\Pdo::PARAM_GROUP_BY];
         }
 
-        if (!empty($params[self::PARAM_HAVING])) {
-            $sql .= ' HAVING ' . $params[self::PARAM_HAVING];
+        if (!empty($params[\Tk\Db\Pdo::PARAM_HAVING])) {
+            $sql .= ' HAVING ' . $params[\Tk\Db\Pdo::PARAM_HAVING];
         }
 
-        if (!empty($params[self::PARAM_ORDER_BY])) {
-            $sql .= ' ORDER BY ' . $params[self::PARAM_ORDER_BY];
+        if (!empty($params[\Tk\Db\Pdo::PARAM_ORDER_BY])) {
+            $sql .= ' ORDER BY ' . $params[\Tk\Db\Pdo::PARAM_ORDER_BY];
         }
 
-        if (!empty($params[self::PARAM_LIMIT])) {
-            $sql .= ' LIMIT ' . (int)$params[self::PARAM_LIMIT];
+        if (!empty($params[\Tk\Db\Pdo::PARAM_LIMIT])) {
+            $sql .= ' LIMIT ' . (int)$params[\Tk\Db\Pdo::PARAM_LIMIT];
         }
-        if (!empty($params[self::PARAM_OFFSET])) {
-            $sql .= ' OFFSET ' . (int)$params[self::PARAM_OFFSET];
+        if (!empty($params[\Tk\Db\Pdo::PARAM_OFFSET])) {
+            $sql .= ' OFFSET ' . (int)$params[\Tk\Db\Pdo::PARAM_OFFSET];
         }
+
 
         $stmt = $this->getDb()->prepare($sql);
-        //$stmt->setFetchMode(\PDO::FETCH_CLASS, $this->getModelClass());     // to populate before the constructor is called.
+        $stmt->setFetchMode(\PDO::FETCH_CLASS, $this->getModelClass());     // to populate before the constructor is called.
         //$stmt->setFetchMode(\PDO::FETCH_CLASS|PDO::FETCH_PROPS_LATE, $this->getModelClass());     // To populate after the constructor is called
         $stmt->execute($bind);
 
-        $stmt->setParam('mapper', $this);
-        $stmt->setParam('dbTool', 'todo');
+        $stmt->setParams($params);
+        $stmt->addParam(\Tk\Db\Pdo::PARAM_FOUND_ROWS, $this->getFoundRows());
+        $stmt->addParam('mapper', $this);
 
-        //return $stmt;
+        return $stmt;
 
-        $list = array();
-        foreach($stmt as $row) {
-            $list[] = $this->dbUnserialize((array)$row);
-        }
-        return $list;
+//        $list = array();
+//        foreach($stmt as $row) {
+//            $list[] = $this->dbUnserialize((array)$row);
+//        }
+//        return $list;
     }
 
     /**
@@ -320,6 +312,52 @@ abstract class Mapper
         $r = $this->getDb()->query($sql);
         return (int)$r->fetch(PDO::FETCH_COLUMN);
     }
+
+    /**
+     * Return a string for the SQL query
+     *
+     * ORDER BY `cell`
+     * LIMIT 10 OFFSET 30
+     *
+     * @param string $prepend  If set will be prepended to any fields without a prefix string.
+     * @param Params $dbParams
+     * @return string
+     */
+    public function getSqlFromParams(Params $dbParams, $prepend = '')
+    {
+        $orderBy = '';
+        if ($dbParams->getOrderBy()) {
+            $orFields = str_replace(array(';', '-- ', '/*'), ' ', $dbParams->getOrderBy());
+            if ($prepend) {
+                if ($prepend && substr($prepend, -1) != '.') {
+                    $prepend = $prepend . ".";
+                }
+                $arr = explode(',', $orFields);
+                foreach ($arr as $i => $str) {
+                    $str = trim($str);
+                    if (preg_match('/^(ASC|DESC|FIELD\(|RAND\(|IF\(|NULL)/i', $str)) continue;
+                    if (!preg_match('/^([a-z]+\.)?`/i', $str)) continue;
+                    //if (!preg_match('/^([a-z]+\.)?`/i', $str)) continue;
+                    if (!preg_match('/^([a-zA-Z0-9_-]+\.)/', $str) && is_string($str)) {
+                        $str = $prepend . $str;
+                    }
+                    $arr[$i] = $str;
+                }
+                $orFields = implode(', ', $arr);
+            }
+
+            $orderBy = 'ORDER BY ' . $orFields;
+        }
+        $limitStr = '';
+        if ($dbParams->getLimit() > 0) {
+            $limitStr = 'LIMIT ' . (int)$dbParams->getLimit();
+            if ($dbParams->getOffset()) {
+                $limitStr .= ' OFFSET ' . (int)$dbParams->getOffset();
+            }
+        }
+        return $orderBy . ' ' . $limitStr;
+    }
+
 
     /**
      * @return string
