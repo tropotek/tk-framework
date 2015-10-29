@@ -1,11 +1,4 @@
 <?php
-/*
- * Created by PhpStorm.
- * User: godar
- * Date: 7/30/15
- * Time: 7:14 PM
- */
-
 namespace Tk\Db;
 
 /**
@@ -21,14 +14,24 @@ abstract class Model
     /**
      * @var string
      */
-    static $APPEND = 'Map';
+    static public $MAPPER_APPEND = 'Map';
+
 
     /**
-     * The Table Primary Key (Usually)
-     * @var int
+     * Take the raw data from a DB and populate this
+     * Model object's instance
+     *
+     * @param array $row
+     * @return Model
      */
-    public $id = 0;
+    public function __dbmap(array $row) { }
 
+    /**
+     * Return an array formatted data ready for an sql query
+     *
+     * @return array|null
+     */
+    public function __dbunmap() { return; }
 
 
     /**
@@ -49,12 +52,14 @@ abstract class Model
      *
      * @param string $mapperClass
      * @return Mapper
+     *
+     * @todo: not happy with this method as it stands.... fix it!
      */
     static function getMapper($mapperClass = '')
     {
-        $append = self::$APPEND;
+        $append = self::$MAPPER_APPEND;
+        $class = get_called_class();
         if (!$mapperClass) {
-            $class = get_called_class();
             $mapperClass = $class . $append;
         }
         $mapper = Mapper::create($mapperClass, $class);
@@ -71,6 +76,33 @@ abstract class Model
     }
 
     /**
+     * Get the model primary DB key, usually ID
+     *
+     * @return mixed
+     */
+    public function getId()
+    {
+        $pk = self::getMapper()->getPrimaryKey();
+        if (property_exists($this, $pk)) {
+            return $this->$pk;
+        }
+        return null;
+    }
+
+    /**
+     * @param mixed $id
+     * @return $this
+     */
+    public function setId($id)
+    {
+        $pk = self::getMapper()->getPrimaryKey();
+        if (property_exists($this, $pk)) {
+            $this->$pk = $id;
+        }
+        return $this;
+    }
+
+    /**
      * Insert the object into storage.
      * By default this is a database
      *
@@ -79,7 +111,7 @@ abstract class Model
     public function insert()
     {
         $id = self::getMapper()->insert($this);
-        $this->id = $id;
+        $this->setId($id);
         return $id;
     }
 
@@ -101,7 +133,7 @@ abstract class Model
      */
     public function save()
     {
-        if ($this->id) {
+        if ($this->getId()) {
             $this->update();
         } else {
             $this->insert();
@@ -126,10 +158,10 @@ abstract class Model
      */
     public function getVolatileId()
     {
-        if (!$this->id) {
+        if (!$this->getId()) {
             return self::getMapper()->getDb()->getNextInsertId(self::getMapper()->getTable());
         }
-        return $this->id;
+        return $this->getId();
     }
 
 }

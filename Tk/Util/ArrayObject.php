@@ -1,5 +1,5 @@
 <?php
-namespace Tk\Utils;
+namespace Tk\Util;
 
 /**
  * A wrapper for the php array object

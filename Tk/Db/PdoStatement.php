@@ -23,11 +23,6 @@ class PdoStatement extends \PDOStatement
      */
     protected $pdo;
 
-    /**
-     * @var array
-     */
-    protected $params = array();
-
 
     /**
      * Represents a prepared statement and, after the statement is executed, an associated result set
@@ -39,50 +34,6 @@ class PdoStatement extends \PDOStatement
     {
         $this->pdo = $pdo;
     }
-
-    /**
-     * @param $name
-     * @param $value
-     * @return $this
-     */
-    public function addParam($name, $value)
-    {
-        $this->params[$name] = $value;
-        return $this;
-    }
-
-    /**
-     * @param $name
-     * @return mixed
-     */
-    public function getParam($name)
-    {
-        if (isset($this->params[$name])) {
-            return $this->params[$name];
-        }
-        return null;
-    }
-
-    /**
-     * @return array
-     */
-    public function getParams()
-    {
-        return $this->params;
-    }
-
-    /**
-     * @param array $params
-     * @return $this
-     */
-    public function setParams($params)
-    {
-        $this->params = $params;
-        return $this;
-    }
-
-
-
 
     /**
      * Executes a prepared statement

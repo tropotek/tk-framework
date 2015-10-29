@@ -1,5 +1,5 @@
 <?php
-namespace Tk\Utils;
+namespace Tk\Util;
 
 use Symfony\Component\HttpFoundation\Request;
 
@@ -95,7 +95,7 @@ class StackTrace {
      */
     static function logTrace($skip = 0)
     {
-        $trace = "\n".\Tk\Utils\StackTrace::traceToString(debug_backtrace(), $skip);
+        $trace = "\n".self::traceToString(debug_backtrace(), $skip);
         $log = \Tk\Config::getInstance()->getLog();
         if ($log) {
             $log->debug($trace);

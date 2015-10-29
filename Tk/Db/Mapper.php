@@ -10,6 +10,15 @@ namespace Tk\Db;
  */
 abstract class Mapper
 {
+
+    const PARAM_GROUP_BY = 'groupBy';
+    const PARAM_HAVING = 'having';
+    const PARAM_ORDER_BY = 'orderBy';
+    const PARAM_LIMIT = 'limit';
+    const PARAM_OFFSET = 'offset';
+    const PARAM_FOUND_ROWS = 'foundRows';
+
+    
     /**
      * @var Mapper[]
      */
@@ -47,9 +56,21 @@ abstract class Mapper
     {
         if (!isset(self::$instance[$mapperClass])) {
             self::$instance[$mapperClass] = new $mapperClass();
-            self::$instance[$mapperClass]->modelClass = $modelClass;
+            //self::$instance[$mapperClass]->modelClass = $modelClass;
         }
-        return self::$instance[$mapperClass];
+        return static::$instance[$mapperClass];
+    }
+
+    /**
+     *
+     *
+     * @return Model
+     */
+    public function loadObject($array)
+    {
+
+        return $this->dbUnserialize($array);
+
     }
 
 
@@ -71,7 +92,6 @@ abstract class Mapper
         return (array)$obj;
     }
 
-
     /**
      * Override this method in your own mapper
      *
@@ -89,25 +109,10 @@ abstract class Mapper
         return $row;
     }
 
-    /**
-     * @return string
-     */
-    public function getModelClass()
-    {
-        return $this->modelClass;
-    }
 
-    /**
-     * @param $array
-     * @return mixed
-     */
-    private function backtickArray($array)
-    {
-        foreach($array as $k => $v) {
-            $array[$k] = '`'.trim($array[$k], '`').'`';
-        }
-        return $array;
-    }
+
+
+
 
     /**
      * Insert
@@ -117,18 +122,15 @@ abstract class Mapper
      */
     public function insert($obj)
     {
+        $pk = $this->getPrimaryKey();
         $bind = $this->dbSerialize($obj);
 
         $cols = implode(", ", $this->backtickArray(array_keys($bind)));
         $values = implode(", :", array_keys($bind));
         foreach ($bind as $col => $value) {
-            if ($col == $this->primaryKey) continue;
+            if ($col == $pk) continue;
             if ($col == 'modified' || $col == 'created') {
                 $value = date('Y-m-d H:i:s');
-            }
-            // TODO add object toString helpers/hooks here
-            if ($value instanceof \DateTime) {
-                $value = $value->format('Y-m-d H:i:s');
             }
             unset($bind[$col]);
             $bind[":" . $col] = $value;
@@ -146,21 +148,18 @@ abstract class Mapper
      */
     public function update($obj)
     {
+        $pk = $this->getPrimaryKey();
         $bind = $this->dbSerialize($obj);
         $set = array();
         foreach ($bind as $col => $value) {
             if ($col == 'modified') {
                 $value = date('Y-m-d H:i:s');
             }
-            // TODO add object toString helpers/hooks here
-            if ($value instanceof \DateTime) {
-                $value = $value->format('Y-m-d H:i:s');
-            }
             unset($bind[$col]);
             $bind[":" . $col] = $value;
             $set[] = '`'.$col . '` = :' . $col;
         }
-        $where = '`'.$this->primaryKey . '` = ' . $bind[':'.$this->primaryKey];
+        $where = '`'.$pk . '` = ' . $bind[':'.$pk];
         $sql = "UPDATE `" . $this->table . "` SET " . implode(", ", $set) . (($where) ? " WHERE " . $where : " ");
 
         $stmt = $this->getDb()->prepare($sql);
@@ -172,17 +171,17 @@ abstract class Mapper
     /**
      * Save the object, let the code decide weather to insert ot update the db.
      *
-     * This assumes the object primary key is `id` and exists in the object to be saved.
      *
-     * @param $obj
+     * @param Model $obj
      * @throws \Exception
      */
     public function save($obj)
     {
-        if (!property_exists($obj, $this->primaryKey)) {
+        $pk = $this->getPrimaryKey();
+        if (!property_exists($obj, $pk)) {
             throw new \Exception('No valid primary key found');
         }
-        if ($obj->id == 0) {
+        if ($obj->$pk == 0) {
             $this->insert($obj);
         } else {
             $this->update($obj);
@@ -192,44 +191,19 @@ abstract class Mapper
     /**
      * Delete object
      *
-     * @param $obj
+     * @param Model $obj
      * @return int
      */
     public function delete($obj)
     {
-        $where = $this->primaryKey . ' = ' . $obj->{$this->primaryKey};
+        $pk = $this->getPrimaryKey();
+        $where = $pk . ' = ' . $obj->$pk;
+        //$where = $pk . ' = ' . $obj->getId();
         $sql = 'DELETE FROM `' . $this->table .'` ' . (($where) ? ' WHERE ' . $where : ' ');
         $stmt = $this->getDb()->prepare($sql);
         $stmt->execute();
         return $stmt->rowCount();
     }
-
-
-    /**
-     *
-     * @param $id
-     * @return Model|null
-     */
-    public function find($id)
-    {
-        $bind = array(
-            $this->primaryKey => $id
-        );
-        $list = $this->select($bind, array(\Tk\Db\Pdo::PARAM_LIMIT => 1));
-        return current($list);
-    }
-
-    /**
-     * Find all objects in DB
-     *
-     * @param array $params
-     * @return array
-     */
-    public function findAll($params = array())
-    {
-        return $this->select(array(), $params);
-    }
-
 
     /**
      *
@@ -246,60 +220,40 @@ abstract class Mapper
      *
      *
      * @param array  $bind
-     * @param array $params
-     * @return array
+     * @param Tool $tool
+     * @return ArrayObject
      * @see http://www.sitepoint.com/integrating-the-data-mappers/
      */
-    public function select(array $bind = array(), $params = array())
+    public function select(array $bind = array(), $tool = null, $boolOperator = 'AND')
     {
-        $params = array_merge(array('boolOperator' => 'AND'), $params);
+        if (!$tool instanceof \Tk\Db\Tool) {
+            $tool = new Tool();
+        }
+
         $where = array();
         if ($bind) {
             foreach ($bind as $col => $value) {
                 unset($bind[$col]);
-                $bind[":" . $col] = $value;
-                $where[] = '`'.$col . "` = :" . $col;
+                $bind[':' . $col] = $value;
+                $where[] = $tool->getPrepend().'`'.$col . '` = :' . $col;
             }
         }
-        $sql = "SELECT SQL_CALC_FOUND_ROWS * FROM " . $this->table . (($bind) ? " WHERE " . implode(" " . $params['boolOperator'] . " ", $where) : " ");
 
-        if (!empty($params[\Tk\Db\Pdo::PARAM_GROUP_BY])) {
-            $sql .= ' GROUP BY ' . $params[\Tk\Db\Pdo::PARAM_GROUP_BY];
-        }
-
-        if (!empty($params[\Tk\Db\Pdo::PARAM_HAVING])) {
-            $sql .= ' HAVING ' . $params[\Tk\Db\Pdo::PARAM_HAVING];
-        }
-
-        if (!empty($params[\Tk\Db\Pdo::PARAM_ORDER_BY])) {
-            $sql .= ' ORDER BY ' . $params[\Tk\Db\Pdo::PARAM_ORDER_BY];
-        }
-
-        if (!empty($params[\Tk\Db\Pdo::PARAM_LIMIT])) {
-            $sql .= ' LIMIT ' . (int)$params[\Tk\Db\Pdo::PARAM_LIMIT];
-        }
-        if (!empty($params[\Tk\Db\Pdo::PARAM_OFFSET])) {
-            $sql .= ' OFFSET ' . (int)$params[\Tk\Db\Pdo::PARAM_OFFSET];
-        }
-
+        // Build Query
+        $sql = sprintf('SELECT SQL_CALC_FOUND_ROWS %s * FROM %s %s ',
+            $tool->isDistinct() ? 'DISTINCT' : '',
+            $this->getTable(),
+            ($bind) ? ' WHERE ' . implode(' ' . $boolOperator . ' ', $where) : ' '
+        );
+        $sql .= $tool->getSql();
 
         $stmt = $this->getDb()->prepare($sql);
-        $stmt->setFetchMode(\PDO::FETCH_CLASS, $this->getModelClass());     // to populate before the constructor is called.
-        //$stmt->setFetchMode(\PDO::FETCH_CLASS|PDO::FETCH_PROPS_LATE, $this->getModelClass());     // To populate after the constructor is called
         $stmt->execute($bind);
 
-        $stmt->setParams($params);
-        $stmt->addParam(\Tk\Db\Pdo::PARAM_FOUND_ROWS, $this->getFoundRows());
-        $stmt->addParam('mapper', $this);
-
-        return $stmt;
-
-//        $list = array();
-//        foreach($stmt as $row) {
-//            $list[] = $this->dbUnserialize((array)$row);
-//        }
-//        return $list;
+        $arr = ArrayObject::createFromMapper($stmt->fetchAll(\PDO::FETCH_ASSOC), $this, $tool);
+        return $arr;
     }
+
 
     /**
      * Call this directly after yor select query to get the total available rows
@@ -313,49 +267,32 @@ abstract class Mapper
         return (int)$r->fetch(PDO::FETCH_COLUMN);
     }
 
-    /**
-     * Return a string for the SQL query
-     *
-     * ORDER BY `cell`
-     * LIMIT 10 OFFSET 30
-     *
-     * @param string $prepend  If set will be prepended to any fields without a prefix string.
-     * @param Params $dbParams
-     * @return string
-     */
-    public function getSqlFromParams(Params $dbParams, $prepend = '')
-    {
-        $orderBy = '';
-        if ($dbParams->getOrderBy()) {
-            $orFields = str_replace(array(';', '-- ', '/*'), ' ', $dbParams->getOrderBy());
-            if ($prepend) {
-                if ($prepend && substr($prepend, -1) != '.') {
-                    $prepend = $prepend . ".";
-                }
-                $arr = explode(',', $orFields);
-                foreach ($arr as $i => $str) {
-                    $str = trim($str);
-                    if (preg_match('/^(ASC|DESC|FIELD\(|RAND\(|IF\(|NULL)/i', $str)) continue;
-                    if (!preg_match('/^([a-z]+\.)?`/i', $str)) continue;
-                    //if (!preg_match('/^([a-z]+\.)?`/i', $str)) continue;
-                    if (!preg_match('/^([a-zA-Z0-9_-]+\.)/', $str) && is_string($str)) {
-                        $str = $prepend . $str;
-                    }
-                    $arr[$i] = $str;
-                }
-                $orFields = implode(', ', $arr);
-            }
 
-            $orderBy = 'ORDER BY ' . $orFields;
-        }
-        $limitStr = '';
-        if ($dbParams->getLimit() > 0) {
-            $limitStr = 'LIMIT ' . (int)$dbParams->getLimit();
-            if ($dbParams->getOffset()) {
-                $limitStr .= ' OFFSET ' . (int)$dbParams->getOffset();
-            }
-        }
-        return $orderBy . ' ' . $limitStr;
+
+
+    /**
+     *
+     * @param $id
+     * @return Model|null
+     */
+    public function find($id)
+    {
+        $bind = array(
+            $this->getPrimaryKey() => $id
+        );
+        $list = $this->select($bind, \Tk\Db\Tool::create('', 1));
+        return $list->current();
+    }
+
+    /**
+     * Find all objects in DB
+     *
+     * @param Tool $tool
+     * @return array
+     */
+    public function findAll($tool = null)
+    {
+        return $this->select(array(), $tool);
     }
 
 
@@ -405,5 +342,19 @@ abstract class Mapper
     public function setDb($db)
     {
         $this->db = $db;
+    }
+
+
+
+    /**
+     * @param $array
+     * @return mixed
+     */
+    private function backtickArray($array)
+    {
+        foreach($array as $k => $v) {
+            $array[$k] = '`'.trim($array[$k], '`').'`';
+        }
+        return $array;
     }
 }

@@ -3,7 +3,7 @@ namespace Tk;
 
 use Symfony\Component\HttpFoundation\Request;
 use Psr\Log\LogLevel;
-use Tk\Utils\Registry;
+use Tk\Util\Registry;
 
 /**
  * A Config class for handling the applications dependency values.

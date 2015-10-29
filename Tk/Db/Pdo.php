@@ -13,7 +13,6 @@ namespace Tk\Db;
 class Pdo extends \PDO
 {
 
-
     /**
      * @var bool
      */
