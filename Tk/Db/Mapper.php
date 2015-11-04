@@ -16,6 +16,7 @@ abstract class Mapper
     const PARAM_ORDER_BY = 'orderBy';
     const PARAM_LIMIT = 'limit';
     const PARAM_OFFSET = 'offset';
+    const PARAM_DISTINCT = 'distinct';
     const PARAM_FOUND_ROWS = 'foundRows';
 
     
@@ -62,20 +63,6 @@ abstract class Mapper
     }
 
     /**
-     *
-     *
-     * @return Model
-     */
-    public function loadObject($array)
-    {
-
-        return $this->dbUnserialize($array);
-
-    }
-
-
-
-    /**
      * Override this method in your own mapper
      *
      * serialize object for saving into DB via an array
@@ -110,9 +97,15 @@ abstract class Mapper
     }
 
 
-
-
-
+    /**
+     *
+     *
+     * @return Model
+     */
+    public function loadObject($array)
+    {
+        return $this->dbUnserialize($array);
+    }
 
     /**
      * Insert
@@ -245,7 +238,7 @@ abstract class Mapper
             $this->getTable(),
             ($bind) ? ' WHERE ' . implode(' ' . $boolOperator . ' ', $where) : ' '
         );
-        $sql .= $tool->getSql();
+        $sql .= $tool->toSql();
 
         $stmt = $this->getDb()->prepare($sql);
         $stmt->execute($bind);

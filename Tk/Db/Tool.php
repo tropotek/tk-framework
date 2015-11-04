@@ -102,20 +102,23 @@ class Tool
         $obj = new self($defaultOrderBy, $defaultLimit);
         $obj->setInstanceId($instanceId);
 
-        if (!empty($array[$obj->makeInstanceKey(Mapper::PARAM_ORDER_BY)])) {
+        if (isset($array[$obj->makeInstanceKey(Mapper::PARAM_ORDER_BY)])) {
             $obj->setOrderBy($array[$obj->makeInstanceKey(Mapper::PARAM_ORDER_BY)]);
         }
-        if (!empty($array[$obj->makeInstanceKey(Mapper::PARAM_LIMIT)])) {
+        if (isset($array[$obj->makeInstanceKey(Mapper::PARAM_LIMIT)])) {
             $obj->setLimit($array[$obj->makeInstanceKey(Mapper::PARAM_LIMIT)]);
         }
-        if (!empty($array[$obj->makeInstanceKey(Mapper::PARAM_OFFSET)])) {
+        if (isset($array[$obj->makeInstanceKey(Mapper::PARAM_OFFSET)])) {
             $obj->setOffset($array[$obj->makeInstanceKey(Mapper::PARAM_OFFSET)]);
         }
-        if (!empty($array[$obj->makeInstanceKey(Mapper::PARAM_GROUP_BY)])) {
+        if (isset($array[$obj->makeInstanceKey(Mapper::PARAM_GROUP_BY)])) {
             $obj->setGroupBy($array[$obj->makeInstanceKey(Mapper::PARAM_GROUP_BY)]);
         }
-        if (!empty($array[$obj->makeInstanceKey(Mapper::PARAM_HAVING)])) {
+        if (isset($array[$obj->makeInstanceKey(Mapper::PARAM_HAVING)])) {
             $obj->setHaving($array[$obj->makeInstanceKey(Mapper::PARAM_HAVING)]);
+        }
+        if (isset($array[$obj->makeInstanceKey(Mapper::PARAM_DISTINCT)])) {
+            $obj->setDistinct($array[$obj->makeInstanceKey(Mapper::PARAM_DISTINCT)]);
         }
 
         return $obj;
@@ -127,37 +130,41 @@ class Tool
      * Use when creating from a session then load from the request to
      * create an updated tool.
      *
+     * @param array $array
      * @return $this
      */
-    public function updateFromArray()
+    public function updateFromArray($array)
     {
-        if (!empty($array[$this->makeInstanceKey(Mapper::PARAM_ORDER_BY)])) {
+        if (isset($array[$this->makeInstanceKey(Mapper::PARAM_ORDER_BY)])) {
             if ($array[$this->makeInstanceKey(Mapper::PARAM_ORDER_BY)] != $this->getOrderBy()) {
                 $this->setOrderBy($array[$this->makeInstanceKey(Mapper::PARAM_ORDER_BY)]);
                 $this->setOffset(0);
             }
         }
-        if (!empty($array[$this->makeInstanceKey(Mapper::PARAM_LIMIT)])) {
+        if (isset($array[$this->makeInstanceKey(Mapper::PARAM_LIMIT)])) {
             if ($array[$this->makeInstanceKey(Mapper::PARAM_LIMIT)] != $this->getLimit()) {
                 $this->setLimit($array[$this->makeInstanceKey(Mapper::PARAM_LIMIT)]);
                 $this->setOffset(0);
             }
         }
-        if (!empty($array[$this->makeInstanceKey(Mapper::PARAM_OFFSET)])) {
+        if (isset($array[$this->makeInstanceKey(Mapper::PARAM_OFFSET)])) {
             $this->setOffset($array[$this->makeInstanceKey(Mapper::PARAM_OFFSET)]);
         }
 
-        if (!empty($array[$this->makeInstanceKey(Mapper::PARAM_GROUP_BY)])) {
+        if (isset($array[$this->makeInstanceKey(Mapper::PARAM_GROUP_BY)])) {
             if ($array[$this->makeInstanceKey(Mapper::PARAM_GROUP_BY)] != $this->getGroupBy()) {
                 $this->setGroupBy($array[$this->makeInstanceKey(Mapper::PARAM_GROUP_BY)]);
                 $this->setOffset(0);
             }
         }
-        if (!empty($array[$this->makeInstanceKey(Mapper::PARAM_HAVING)])) {
+        if (isset($array[$this->makeInstanceKey(Mapper::PARAM_HAVING)])) {
             if ($array[$this->makeInstanceKey(Mapper::PARAM_HAVING)] != $this->getHaving()) {
                 $this->setHaving($array[$this->makeInstanceKey(Mapper::PARAM_HAVING)]);
                 $this->setOffset(0);
             }
+        }
+        if (isset($array[$this->makeInstanceKey(Mapper::PARAM_DISTINCT)])) {
+            $this->setDistinct($array[$this->makeInstanceKey(Mapper::PARAM_DISTINCT)]);
         }
         return $this;
     }
@@ -321,6 +328,18 @@ class Tool
         return $this;
     }
 
+    public function toArray()
+    {
+        $arr = array();
+        $arr[$this->makeInstanceKey(Mapper::PARAM_ORDER_BY)] = $this->getOrderBy();
+        $arr[$this->makeInstanceKey(Mapper::PARAM_LIMIT)] = $this->getLimit();
+        $arr[$this->makeInstanceKey(Mapper::PARAM_OFFSET)] = $this->getOffset();
+        $arr[$this->makeInstanceKey(Mapper::PARAM_GROUP_BY)] = $this->getGroupBy();
+        $arr[$this->makeInstanceKey(Mapper::PARAM_HAVING)] = $this->getHaving();
+        $arr[$this->makeInstanceKey(Mapper::PARAM_DISTINCT)] = $this->isDistinct();
+        return $arr;
+    }
+
 
     /**
      * Return a string for the SQL query
@@ -330,7 +349,7 @@ class Tool
      *
      * @return string
      */
-    public function getSql()
+    public function toSql()
     {
         // GROUP BY
         $groupBy = '';

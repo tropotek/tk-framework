@@ -88,12 +88,14 @@ class Config extends Registry
     /**
      * Get an instance of this object
      *
+     * @param string $appUrl
+     * @param string $appPath
      * @return Config
      */
-    static function getInstance()
+    static function getInstance($appUrl = '', $appPath = '')
     {
         if (static::$instance == null) {
-            static::$instance = new static();
+            static::$instance = new static($appUrl, $appPath);
         }
         return static::$instance;
     }
@@ -102,19 +104,24 @@ class Config extends Registry
     /**
      * Construct the config object and initiate default settings
      *
+     * @param string $appUrl
+     * @param string $appPath
      */
-    public function __construct()
+    public function __construct($appUrl = '', $appPath = '')
     {
-        $this->init();
+        $this->init($appUrl, $appPath);
     }
 
     /**
      * init the default params.
      *
+     * @param string $appUrl
+     * @param string $appPath
      */
-    protected function init()
+    protected function init($appUrl = '', $appPath = '')
     {
         $this->setAppScripTime(microtime(true));
+        $this->setConfig($this);
 
         // Setup isCli function in config.
         $this->setCli(false);
@@ -122,19 +129,15 @@ class Config extends Registry
             $this->setCli(true);
         }
 
-        // Add request to config
-        $_POST['config'] = $this;
-        $this->setConfig($this);
-        $request = Request::createFromGlobals();
-        $this->setRequest($request);
 
         // Setup the app path
-        $appUrl = $request->getBasePath();
         $appUrl = rtrim($appUrl, '/');
         $this->setAppUrl($appUrl);
-
-        $appPath = rtrim(dirname(dirname(dirname(dirname(__DIR__)))), '/');
+        if (!$appPath) {
+            $appPath = rtrim(dirname(dirname(dirname(dirname(__DIR__)))), '/');
+        }
         $this->setAppPath($appPath);
+
 
         $this->setDebug(false);
 
