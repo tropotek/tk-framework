@@ -63,16 +63,19 @@ class ArrayObject implements \Iterator, \Countable
     }
 
     /**
-     * @param array $rows
      * @param Mapper $mapper
+     * @param PdoStatement $statement
      * @param Tool $tool
      * @return ArrayObject
      */
-    static function createFromMapper($rows, $mapper, $tool = null)
+    static function createFromMapper(Mapper $mapper, PdoStatement $statement, $tool = null)
     {
+
+        $rows = $statement->fetchAll(\PDO::FETCH_ASSOC);
         $obj = new self($rows);
         $obj->foundRows = $mapper->getFoundRows();
         $obj->mapper = $mapper;
+        $obj->statement = $statement;
         if (!$tool) {
             $tool = new Tool();
         }
@@ -111,6 +114,16 @@ class ArrayObject implements \Iterator, \Countable
     {
         return $this->mapper;
     }
+
+    /**
+     * s
+     * @return PdoStatement
+     */
+    public function getStatement()
+    {
+        return $this->statement;
+    }
+
 
     /**
      * Get the result rows as a standard array.

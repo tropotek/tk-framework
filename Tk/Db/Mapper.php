@@ -243,7 +243,7 @@ abstract class Mapper
         $stmt = $this->getDb()->prepare($sql);
         $stmt->execute($bind);
 
-        $arr = ArrayObject::createFromMapper($stmt->fetchAll(\PDO::FETCH_ASSOC), $this, $tool);
+        $arr = ArrayObject::createFromMapper($this, $stmt, $tool);
         return $arr;
     }
 

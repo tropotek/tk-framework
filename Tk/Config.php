@@ -160,7 +160,6 @@ class Config extends Registry
         $this->setTempUrl($this->getDataUrl() . '/temp');
     }
 
-
     public function getAppUrl()
     {
         return $this->get('app.url');

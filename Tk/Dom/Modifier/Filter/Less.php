@@ -14,7 +14,7 @@ use \Tk\Dom\Modifier\Exception;
  *   }
  * }
  *
- *
+ * @todo: need to implement this for the TK3 libs
  */
 class Less extends Iface
 {
@@ -67,6 +67,10 @@ class Less extends Iface
         if (!class_exists('Less_Parser')) {
             throw new Exception('Please install lessphp. (http://lessphp.gpeasy.com/)');
         }
+
+
+
+
 
         $this->source[] = <<<LESS
 @_themeUrl : {$this->enquote($this->getConfig()->getSelectedThemeUrl())};
@@ -146,7 +150,6 @@ LESS;
         } else if ($node->nodeName == 'style' && $node->getAttribute('type') == 'text/less' ) {
             $this->source[] = $node->nodeValue;
             $this->domModifier->removeNode($node);
-
             $this->insNode = $node;
         }
     }

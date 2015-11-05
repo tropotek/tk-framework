@@ -24,6 +24,9 @@ class PdoStatement extends \PDOStatement
     protected $pdo;
 
 
+    protected $bindParams = null;
+
+
     /**
      * Represents a prepared statement and, after the statement is executed, an associated result set
      *
@@ -49,6 +52,7 @@ class PdoStatement extends \PDOStatement
         if (!is_array($args)) {
             $args = func_get_args();
         }
+        $this->bindParams = $args;
         $result = parent::execute($args);
         $this->pdo->addLog(
             array(
@@ -59,5 +63,16 @@ class PdoStatement extends \PDOStatement
         );
         return $result;
     }
+
+    /**
+     * Get the params bound upon the last call to execute()
+     *
+     * @return null|array
+     */
+    public function getBindParams()
+    {
+        return $this->bindParams;
+    }
+
 
 }
