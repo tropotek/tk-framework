@@ -514,6 +514,21 @@ class Pdo extends \PDO
         return ((int) $row['lastId']) + 1;
     }
 
+
+    /**
+     * Encode string to avoid sql injections.
+     *
+     * @param string $str
+     * @return string
+     */
+    public function escapeString($str)
+    {
+        if ($str) {
+            return substr($this->quote($str), 1, -1);
+        }
+        return $str;
+    }
+
 }
 
 

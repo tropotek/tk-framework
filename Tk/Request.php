@@ -28,12 +28,10 @@ class Request extends HttpFoundation\Request implements \ArrayAccess
      * @param array           $server     The SERVER parameters
      * @param string|resource $content    The raw body data
      */
-    public function __construct(array $query = array(), array $request = array(), array $attributes = array(), array $cookies = array(), array $files = array(), array $server = array(), $content = null)
-    {
-        $this->requestArray = array_merge($query, $request);
-        //$this->requestArray = $_REQUEST;
-        parent::__construct($query, $request, $attributes, $cookies, $files, $server, $content);
-    }
+//    public function __construct(array $query = array(), array $request = array(), array $attributes = array(), array $cookies = array(), array $files = array(), array $server = array(), $content = null)
+//    {
+//        parent::__construct($query, $request, $attributes, $cookies, $files, $server, $content);
+//    }
 
 
     /**
@@ -59,10 +57,16 @@ class Request extends HttpFoundation\Request implements \ArrayAccess
     }
 
 
+    /**
+     * Get the $_GET and $_POST variables in one array.
+     *
+     * @return array
+     */
     public function getRequestArray()
     {
-        return $this->requestArray;
+        return array_merge($this->query->all(), $this->request->all());
     }
+
 
 
     /**

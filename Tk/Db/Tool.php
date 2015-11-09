@@ -46,12 +46,7 @@ class Tool
     /**
      * @var bool
      */
-    protected $distinct = false;
-
-    /**
-     * @var string
-     */
-    protected $prepend = '';
+    protected $distinct = true;
 
 
     /**
@@ -88,7 +83,7 @@ class Tool
     }
 
     /**
-     * Good to use for createing from a request or session array
+     * Good to use for creating from a request or session array
      *
      *
      * @param $array
@@ -134,40 +129,52 @@ class Tool
      * create an updated tool.
      *
      * @param array $array
-     * @return $this
+     * @return boolean Returns true if the object has been changed
      */
     public function updateFromArray($array)
     {
-        if (isset($array[$this->makeInstanceKey(Mapper::PARAM_OFFSET)])) {
-            $this->setOffset($array[$this->makeInstanceKey(Mapper::PARAM_OFFSET)]);
-        }
+        $updated = false;
+
         if (isset($array[$this->makeInstanceKey(Mapper::PARAM_ORDER_BY)])) {
             if ($array[$this->makeInstanceKey(Mapper::PARAM_ORDER_BY)] != $this->getOrderBy()) {
                 $this->setOrderBy($array[$this->makeInstanceKey(Mapper::PARAM_ORDER_BY)]);
+                $updated = true;
             }
         }
         if (isset($array[$this->makeInstanceKey(Mapper::PARAM_LIMIT)])) {
             if ($array[$this->makeInstanceKey(Mapper::PARAM_LIMIT)] != $this->getLimit()) {
                 $this->setLimit($array[$this->makeInstanceKey(Mapper::PARAM_LIMIT)]);
                 $this->setOffset(0);
+                $updated = true;
             }
         }
+        if (isset($array[$this->makeInstanceKey(Mapper::PARAM_OFFSET)])) {
+            if ($array[$this->makeInstanceKey(Mapper::PARAM_OFFSET)] != $this->getOffset()) {
+                $this->setOffset($array[$this->makeInstanceKey(Mapper::PARAM_OFFSET)]);
+                $updated = true;
+            }
+        }
+
         if (isset($array[$this->makeInstanceKey(Mapper::PARAM_GROUP_BY)])) {
             if ($array[$this->makeInstanceKey(Mapper::PARAM_GROUP_BY)] != $this->getGroupBy()) {
                 $this->setGroupBy($array[$this->makeInstanceKey(Mapper::PARAM_GROUP_BY)]);
-                $this->setOffset(0);
+                $updated = true;
             }
         }
         if (isset($array[$this->makeInstanceKey(Mapper::PARAM_HAVING)])) {
             if ($array[$this->makeInstanceKey(Mapper::PARAM_HAVING)] != $this->getHaving()) {
                 $this->setHaving($array[$this->makeInstanceKey(Mapper::PARAM_HAVING)]);
-                $this->setOffset(0);
+                $updated = true;
             }
         }
         if (isset($array[$this->makeInstanceKey(Mapper::PARAM_DISTINCT)])) {
-            $this->setDistinct($array[$this->makeInstanceKey(Mapper::PARAM_DISTINCT)]);
+            if ($array[$this->makeInstanceKey(Mapper::PARAM_DISTINCT)] != $this->isDistinct()) {
+                $this->setDistinct($array[$this->makeInstanceKey(Mapper::PARAM_DISTINCT)]);
+                $updated = true;
+            }
         }
-        return $this;
+
+        return $updated;
     }
 
 
@@ -308,36 +315,26 @@ class Tool
     }
 
     /**
-     * @return string
+     * Return an array with the parameters
+     * Usefull to save the params to the session or request
+     *
+     * @return array
      */
-    public function getPrepend()
-    {
-        return $this->prepend;
-    }
-
-    /**
-     * @param string $prepend
-     * @return $this
-     * @throws Exception
-     */
-    public function setPrepend($prepend)
-    {
-        $prepend = trim($prepend, '.');
-        if (!preg_match('/[a-z0-9_]+/i', $prepend))
-            throw new Exception('Invalid DB Tool prepend value');
-        $this->prepend = $prepend.'.';
-        return $this;
-    }
-
     public function toArray()
     {
         $arr = array();
-        $arr[$this->makeInstanceKey(Mapper::PARAM_ORDER_BY)] = $this->getOrderBy();
-        $arr[$this->makeInstanceKey(Mapper::PARAM_LIMIT)] = $this->getLimit();
-        $arr[$this->makeInstanceKey(Mapper::PARAM_OFFSET)] = $this->getOffset();
-        $arr[$this->makeInstanceKey(Mapper::PARAM_GROUP_BY)] = $this->getGroupBy();
-        $arr[$this->makeInstanceKey(Mapper::PARAM_HAVING)] = $this->getHaving();
-        $arr[$this->makeInstanceKey(Mapper::PARAM_DISTINCT)] = $this->isDistinct();
+        if ($this->getOrderBy())
+            $arr[$this->makeInstanceKey(Mapper::PARAM_ORDER_BY)] = $this->getOrderBy();
+        if ($this->getLimit())
+            $arr[$this->makeInstanceKey(Mapper::PARAM_LIMIT)] = $this->getLimit();
+        if ($this->getOffset())
+            $arr[$this->makeInstanceKey(Mapper::PARAM_OFFSET)] = $this->getOffset();
+        if ($this->getGroupBy())
+            $arr[$this->makeInstanceKey(Mapper::PARAM_GROUP_BY)] = $this->getGroupBy();
+        if ($this->getHaving())
+            $arr[$this->makeInstanceKey(Mapper::PARAM_HAVING)] = $this->getHaving();
+
+        //$arr[$this->makeInstanceKey(Mapper::PARAM_DISTINCT)] = $this->isDistinct();
         return $arr;
     }
 
@@ -348,9 +345,10 @@ class Tool
      * ORDER BY `cell`
      * LIMIT 10 OFFSET 30
      *
+     * @param string $tblAlias
      * @return string
      */
-    public function toSql()
+    public function toSql($tblAlias = '')
     {
         // GROUP BY
         $groupBy = '';
@@ -368,14 +366,14 @@ class Tool
         $orderBy = '';
         if ($this->getOrderBy()) {
             $orFields = str_replace(array(';', '-- ', '/*'), ' ', $this->getOrderBy());
-            if ($this->getPrepend()) {
+            if ($tblAlias) {
                 $arr = explode(',', $orFields);
                 foreach ($arr as $i => $str) {
                     $str = trim($str);
                     if (preg_match('/^(ASC|DESC|FIELD\(|RAND\(|IF\(|NULL)/i', $str)) continue;
                     if (!preg_match('/^([a-z]+\.)?`/i', $str)) continue;
                     if (!preg_match('/^([a-zA-Z0-9_-]+\.)/', $str) && is_string($str)) {
-                        $str = $this->getPrepend() . $str;
+                        $str = $tblAlias . $str;
                     }
                     $arr[$i] = $str;
                 }

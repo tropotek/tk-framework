@@ -18,7 +18,6 @@ abstract class Mapper
     const PARAM_OFFSET = 'offset';
     const PARAM_DISTINCT = 'distinct';
     const PARAM_FOUND_ROWS = 'foundRows';
-
     
     /**
      * @var Mapper[]
@@ -44,6 +43,11 @@ abstract class Mapper
      * @var Pdo
      */
     protected $db = null;
+
+    /**
+     * @var string
+     */
+    protected $alias = 'a';
 
 
 
@@ -94,6 +98,35 @@ abstract class Mapper
     public function dbUnserialize($row)
     {
         return $row;
+    }
+
+    /**
+     * Get the table alias used for multiple table queries.
+     * The default alias is 'a'
+     *
+     *   EG: a.`id`
+     *
+     * @return string
+     */
+    public function getAlias()
+    {
+        return $this->alias;
+    }
+
+    /**
+     * Set the table alias
+     *
+     * @param string $alias
+     * @return $this
+     * @throws Exception
+     */
+    public function setAlias($alias)
+    {
+        $alias = trim($alias, '.');
+        if (!preg_match('/[a-z0-9_]+/i', $alias))
+            throw new Exception('Invalid Table alias value');
+        $this->alias = $alias;
+        return $this;
     }
 
 
@@ -212,31 +245,39 @@ abstract class Mapper
      *   );
      *
      *
-     * @param array  $bind
+     * @param array $bind
      * @param Tool $tool
+     * @param string $boolOperator
      * @return ArrayObject
      * @see http://www.sitepoint.com/integrating-the-data-mappers/
      */
-    public function select(array $bind = array(), $tool = null, $boolOperator = 'AND')
+    public function select($bind = array(), $tool = null, $boolOperator = 'AND')
     {
-        if (!$tool instanceof \Tk\Db\Tool) {
+        if (!$tool instanceof Tool) {
             $tool = new Tool();
         }
 
+        $alias = $this->getAlias();
+        if ($alias) {
+            $alias = $alias . '.';
+        }
+
+        $from = $this->getTable();
         $where = array();
         if ($bind) {
             foreach ($bind as $col => $value) {
                 unset($bind[$col]);
                 $bind[':' . $col] = $value;
-                $where[] = $tool->getPrepend().'`'.$col . '` = :' . $col;
+                $where[] = $alias.'`'.$col . '` = :' . $col;
             }
         }
+        $where = implode(' ' . $boolOperator . ' ', $where);
 
         // Build Query
         $sql = sprintf('SELECT SQL_CALC_FOUND_ROWS %s * FROM %s %s ',
             $tool->isDistinct() ? 'DISTINCT' : '',
-            $this->getTable(),
-            ($bind) ? ' WHERE ' . implode(' ' . $boolOperator . ' ', $where) : ' '
+            $from,
+            ($bind) ? ' WHERE ' . $where : ' '
         );
         $sql .= $tool->toSql();
 
@@ -247,6 +288,75 @@ abstract class Mapper
         return $arr;
     }
 
+    /**
+     * Select a number of elements from a database
+     *
+     * @param string $where EG: "`column1`=4 AND `column2`='string'"
+     * @param Tool $tool
+     * @return ArrayObject
+     */
+    public function selectMany($where = '', $tool = null)
+    {
+        return $this->selectFrom('', $where, $tool);
+    }
+
+    /**
+     * Select a number of elements from a database
+     *
+     * @param string $from
+     * @param string $where EG: "`column1`=4 AND `column2`='string'"
+     * @param Tool $tool
+     * @return ArrayObject
+     */
+    public function selectFrom($from = '', $where = '', $tool = null)
+    {
+        if (!$tool instanceof Tool) {
+            $tool = new Tool();
+        }
+
+        $alias = $this->getAlias();
+        if ($alias) {
+            $alias = $alias . '.';
+        }
+
+        if (!$from) {
+            $from = sprintf('`%s` %s', $this->getTable(), $this->getAlias());
+        }
+
+//        if ($where) {
+//            if ($this->getMarkDeleted() && strstr($where, '`'.$this->markDeleted.'`') === false) {
+//                $where = sprintf(' %s`%s` = 0 AND ', $alias, $this->getMarkDeleted()) . $where;
+//            }
+//            $where = 'WHERE ' . $where;
+//        } else {
+//            if ($this->getMarkDeleted() && strstr($where, '`'.$this->markDeleted.'`') === false) {
+//                $where = sprintf('WHERE %s`%s` = 0 ', $alias, $this->getMarkDeleted());
+//            }
+//        }
+
+        if ($where) {
+            $where = 'WHERE ' . $where;
+        }
+
+        $distinct = '';
+        if ($tool->isDistinct()) {
+            $distinct = 'DISTINCT';
+        }
+
+        // OrderBy, GroupBy, Limit, etc
+        $toolStr = '';
+        if ($tool) {
+            $toolStr = $tool->toSql($alias);
+        }
+
+        $sql = sprintf('SELECT SQL_CALC_FOUND_ROWS %s %s* FROM %s %s %s ', $distinct, $alias, $from, $where, $toolStr);
+
+        $stmt = $this->getDb()->prepare($sql);
+        $stmt->execute();
+
+        $arr = ArrayObject::createFromMapper($this, $stmt, $tool);
+        return $arr;
+    }
 
     /**
      * Call this directly after yor select query to get the total available rows
@@ -259,9 +369,6 @@ abstract class Mapper
         $r = $this->getDb()->query($sql);
         return (int)$r->fetch(PDO::FETCH_COLUMN);
     }
-
-
-
 
     /**
      *
@@ -285,9 +392,8 @@ abstract class Mapper
      */
     public function findAll($tool = null)
     {
-        return $this->select(array(), $tool);
+        return $this->selectMany('', $tool);
     }
-
 
     /**
      * @return string
@@ -337,8 +443,6 @@ abstract class Mapper
         $this->db = $db;
     }
 
-
-
     /**
      * @param $array
      * @return mixed
@@ -350,4 +454,6 @@ abstract class Mapper
         }
         return $array;
     }
+
+
 }
