@@ -53,7 +53,9 @@ class Request extends HttpFoundation\Request implements \ArrayAccess
      */
     public static function createRequest(array $query = array(), array $request = array(), array $attributes = array(), array $cookies = array(), array $files = array(), array $server = array(), $content = null)
     {
-        return new self($query, $request, $attributes, $cookies, $files, $server, $content);
+        $obj = new self($query, $request, $attributes, $cookies, $files, $server, $content);
+        $obj->requestArray = array_merge($obj->query->all(), $obj->request->all());
+        return $obj;
     }
 
 
@@ -64,7 +66,7 @@ class Request extends HttpFoundation\Request implements \ArrayAccess
      */
     public function getRequestArray()
     {
-        return array_merge($this->query->all(), $this->request->all());
+        return $this->requestArray;
     }
 
 

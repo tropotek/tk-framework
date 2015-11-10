@@ -154,7 +154,6 @@ class Tool
                 $updated = true;
             }
         }
-
         if (isset($array[$this->makeInstanceKey(Mapper::PARAM_GROUP_BY)])) {
             if ($array[$this->makeInstanceKey(Mapper::PARAM_GROUP_BY)] != $this->getGroupBy()) {
                 $this->setGroupBy($array[$this->makeInstanceKey(Mapper::PARAM_GROUP_BY)]);
@@ -288,7 +287,7 @@ class Tool
 
     /**
      * @param string $having
-     * @return $this;
+     * @return $this
      */
     public function setHaving($having)
     {
@@ -306,7 +305,7 @@ class Tool
 
     /**
      * @param boolean $b
-     * @return $this;
+     * @return $this
      */
     public function setDistinct($b)
     {
@@ -316,7 +315,7 @@ class Tool
 
     /**
      * Return an array with the parameters
-     * Usefull to save the params to the session or request
+     * Useful to save the params to the session or request
      *
      * @return array
      */

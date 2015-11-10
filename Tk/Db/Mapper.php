@@ -262,7 +262,7 @@ abstract class Mapper
             $alias = $alias . '.';
         }
 
-        $from = $this->getTable();
+        $from = $this->getTable() . ' ' . $this->getAlias();
         $where = array();
         if ($bind) {
             foreach ($bind as $col => $value) {
