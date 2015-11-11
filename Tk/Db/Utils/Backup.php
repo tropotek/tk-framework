@@ -19,7 +19,6 @@ class Backup
     private $db = null;
 
 
-
     /**
      * construct
      *
@@ -29,7 +28,6 @@ class Backup
     {
         $this->db = $db;
     }
-
 
     /**
      * Create a backup file of the database
@@ -148,8 +146,6 @@ TEXT;
         return $outFile;
     }
 
-
-
     /**
      * Restore a database backup file from a file
      *
@@ -179,7 +175,5 @@ TEXT;
         }
         fclose($handle);
     }
-
-
 
 }

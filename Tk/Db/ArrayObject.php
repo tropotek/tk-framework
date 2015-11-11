@@ -142,7 +142,8 @@ class ArrayObject implements \Iterator, \Countable
     {
         if (isset($this->rows[$i])) {
             if ($this->mapper) {
-                return $this->mapper->loadObject($this->rows[$i]);
+                //return $this->mapper->loadObject($this->rows[$i]);
+                return $this->mapper->map($this->rows[$i]);
             }
             return (object)$this->rows[$i];
         }

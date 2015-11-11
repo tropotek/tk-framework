@@ -123,8 +123,6 @@ class Registry extends ArrayObject
             $this->set($key, $argv[0]);
         } else if ($type == 'get' || $type = 'create' | $type = 'is' | $type = 'has') {
             $val = $this->get($key);
-
-            //if (is_object($val) && is_callable($val) && $val instanceof \Closure) {
             if ($val instanceof \Closure) {
                 return call_user_func_array($val, $argv);
             }

@@ -65,7 +65,7 @@ class Less extends Iface
     public function init($doc)
     {
         if (!class_exists('Less_Parser')) {
-            throw new Exception('Please install lessphp. (http://lessphp.gpeasy.com/)');
+            throw new Exception('Please install lessphp. (http://lessphp.gpeasy.com/) [Composer: "oyejorge/less.php": "~1.5"]');
         }
 
 
@@ -131,7 +131,7 @@ LESS;
     /**
      * Call this method to traverse a document
      *
-     * @param \DOMElement | \Mod\Dom\Filter\DOMElement $node
+     * @param \DOMElement $node
      * @throws Exception
      */
     public function executeNode(\DOMElement $node)

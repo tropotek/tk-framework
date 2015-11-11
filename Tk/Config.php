@@ -1,8 +1,6 @@
 <?php
 namespace Tk;
 
-use Symfony\Component\HttpFoundation\Request;
-use Psr\Log\LogLevel;
 use Tk\Util\Registry;
 
 /**
@@ -88,13 +86,13 @@ class Config extends Registry
     /**
      * Get an instance of this object
      *
-     * @param string $appUrl
+     * @param string $appUrl Only required on first call to init the config paths
      * @param string $appPath
      * @return Config
      */
     static function getInstance($appUrl = '', $appPath = '')
     {
-        if (static::$instance == null) {
+        if (static::$instance == null && $appUrl) {
             static::$instance = new static($appUrl, $appPath);
         }
         return static::$instance;
@@ -109,6 +107,7 @@ class Config extends Registry
      */
     public function __construct($appUrl = '', $appPath = '')
     {
+        parent::__construct();
         $this->init($appUrl, $appPath);
     }
 
@@ -129,8 +128,12 @@ class Config extends Registry
             $this->setCli(true);
         }
 
+        $this->setDebug(false);
 
-        // Setup the app path
+        // Setup the app path if none exists
+        if (!$appUrl) {
+            $appUrl = dirname($_SERVER['PHP_SELF']);
+        }
         $appUrl = rtrim($appUrl, '/');
         $this->setAppUrl($appUrl);
         if (!$appPath) {
@@ -138,11 +141,8 @@ class Config extends Registry
         }
         $this->setAppPath($appPath);
 
-
-        $this->setDebug(false);
-
         $this->setSystemLogPath(ini_get('error_log'));
-        $this->setSystemLogLevel(LogLevel::ERROR);
+        $this->setSystemLogLevel('error');
 
         $this->setDataPath($this->getAppPath() . '/data');
         $this->setDataUrl($this->getAppUrl() . '/data');
@@ -160,62 +160,107 @@ class Config extends Registry
         $this->setTempUrl($this->getDataUrl() . '/temp');
     }
 
+    /**
+     * @return string
+     */
     public function getAppUrl()
     {
         return $this->get('app.url');
     }
 
+    /**
+     * @return string
+     */
     public function getAppPath()
     {
         return $this->get('app.path');
     }
 
+    /**
+     * @return string
+     */
     public function getDataUrl()
     {
         return $this->get('data.url');
     }
 
+    /**
+     * @return string
+     */
     public function getDataPath()
     {
         return $this->get('data.path');
     }
 
+    /**
+     * @return string
+     */
     public function getVendorUrl()
     {
         return $this->get('vendor.url');
     }
 
+    /**
+     * @return string
+     */
     public function getVendorPath()
     {
         return $this->get('vendor.path');
     }
 
+    /**
+     * @return string
+     */
     public function getSrcUrl()
     {
         return $this->get('src.url');
     }
 
+    /**
+     * @return string
+     */
     public function getSrcPath()
     {
         return $this->get('src.path');
     }
 
+    /**
+     * @return string
+     */
     public function getCacheUrl()
     {
         return $this->get('cache.url');
     }
 
+    /**
+     * @return string
+     */
     public function getCachePath()
     {
         return $this->get('cache.path');
     }
 
+    /**
+     * @return string
+     */
     public function getTempUrl()
     {
         return $this->get('temp.url');
     }
 
+    /**
+     * @return string
+     */
     public function getTempPath()
+    {
+        return $this->get('temp.path');
+    }
+
+    /**
+     * Is this application a command run in a terminal
+     * @return boolean
+     */
+    public function getCli()
     {
         return $this->get('temp.path');
     }

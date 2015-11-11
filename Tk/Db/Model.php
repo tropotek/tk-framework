@@ -18,23 +18,6 @@ abstract class Model
 
 
     /**
-     * Take the raw data from a DB and populate this
-     * Model object's instance
-     *
-     * @param array $row
-     * @return Model
-     */
-    public function __dbmap(array $row) { }
-
-    /**
-     * Return an array formatted data ready for an sql query
-     *
-     * @return array|null
-     */
-    public function __dbunmap() { return; }
-
-
-    /**
      * Get this object's DB mapper
      *
      * The Mapper class will be taken from this class's name if not supplied
@@ -51,20 +34,24 @@ abstract class Model
      *
      *
      * @param string $mapperClass
+     * @param array | \Tk\Config $config
      * @return Mapper
      *
      * @todo: not happy with this method as it stands.... fix it!
      */
-    static function getMapper($mapperClass = '')
+    static function getMapper($mapperClass = '', $config = null)
     {
+        if (!$config)
+            $config = \Tk\Config::getInstance();
+
         $append = self::$MAPPER_APPEND;
         $class = get_called_class();
         if (!$mapperClass) {
             $mapperClass = $class . $append;
         }
         $mapper = Mapper::create($mapperClass, $class);
-        if (!$mapper->getDb() && class_exists('\Tk\Config') && \Tk\Config::getInstance()->getDb()) {
-            $mapper->setDb(\Tk\Config::getInstance()->getDb());
+        if (!$mapper->getDb() && $config[Pdo::CONFIG_DB]) {
+            $mapper->setDb($config[Pdo::CONFIG_DB]);
         }
         if (!$mapper->getTable()) {
             $a = explode('\\', $mapperClass);

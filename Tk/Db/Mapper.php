@@ -8,7 +8,7 @@ namespace Tk\Db;
  * @link http://www.tropotek.com/
  * @license Copyright 2015 Michael Mifsud
  */
-abstract class Mapper
+abstract class Mapper implements Mappable
 {
 
     const PARAM_GROUP_BY = 'groupBy';
@@ -67,66 +67,40 @@ abstract class Mapper
     }
 
     /**
-     * Override this method in your own mapper
+     * Map the data from a DB row to the required object
      *
-     * serialize object for saving into DB via an array
+     * Input: array (
+     *   'tblColumn' => 'columnValue'
+     * )
      *
-     * output array (
+     * Output: Should return an \stdClass or \Tk\Model object
+     *
+     * @param Model|\stdClass|array $row
+     * @return Model|\stdClass
+     * @since 2.0.0
+     */
+    public function map($row)
+    {
+        return (object)$row;
+    }
+
+    /**
+     * Un-map an object to an array ready for DB insertion.
+     * All filds and types must match the required DB types.
+     *
+     * Input: This requires a \Tk\Model or \stdClass object as input
+     *
+     * Output: array (
      *   'tblColumn' => 'columnValue'
      * )
      *
      * @param Model|\stdClass $obj
      * @return array
+     * @since 2.0.0
      */
-    public function dbSerialize($obj)
+    public function unmap($obj)
     {
         return (array)$obj;
-    }
-
-    /**
-     * Override this method in your own mapper
-     *
-     * Unserialize Db row data into the required object
-     *
-     * input array (
-     *   'tblColumn' => 'columnValue'
-     * )
-     *
-     * @param Model|\stdClass|array $row
-     * @return Model|\stdClass
-     */
-    public function dbUnserialize($row)
-    {
-        return $row;
-    }
-
-    /**
-     * Get the table alias used for multiple table queries.
-     * The default alias is 'a'
-     *
-     *   EG: a.`id`
-     *
-     * @return string
-     */
-    public function getAlias()
-    {
-        return $this->alias;
-    }
-
-    /**
-     * Set the table alias
-     *
-     * @param string $alias
-     * @return $this
-     * @throws Exception
-     */
-    public function setAlias($alias)
-    {
-        $alias = trim($alias, '.');
-        if (!preg_match('/[a-z0-9_]+/i', $alias))
-            throw new Exception('Invalid Table alias value');
-        $this->alias = $alias;
-        return $this;
     }
 
 
@@ -135,10 +109,10 @@ abstract class Mapper
      *
      * @return Model
      */
-    public function loadObject($array)
-    {
-        return $this->dbUnserialize($array);
-    }
+//    public function loadObject($array)
+//    {
+//        return $this->map($array);
+//    }
 
     /**
      * Insert
@@ -149,7 +123,7 @@ abstract class Mapper
     public function insert($obj)
     {
         $pk = $this->getPrimaryKey();
-        $bind = $this->dbSerialize($obj);
+        $bind = $this->unmap($obj);
 
         $cols = implode(", ", $this->backtickArray(array_keys($bind)));
         $values = implode(", :", array_keys($bind));
@@ -175,7 +149,7 @@ abstract class Mapper
     public function update($obj)
     {
         $pk = $this->getPrimaryKey();
-        $bind = $this->dbSerialize($obj);
+        $bind = $this->unmap($obj);
         $set = array();
         foreach ($bind as $col => $value) {
             if ($col == 'modified') {
@@ -393,6 +367,37 @@ abstract class Mapper
     public function findAll($tool = null)
     {
         return $this->selectMany('', $tool);
+    }
+
+
+    
+    /**
+     * Get the table alias used for multiple table queries.
+     * The default alias is 'a'
+     *
+     *   EG: a.`id`
+     *
+     * @return string
+     */
+    public function getAlias()
+    {
+        return $this->alias;
+    }
+
+    /**
+     * Set the table alias
+     *
+     * @param string $alias
+     * @return $this
+     * @throws Exception
+     */
+    public function setAlias($alias)
+    {
+        $alias = trim($alias, '.');
+        if (!preg_match('/[a-z0-9_]+/i', $alias))
+            throw new Exception('Invalid Table alias value');
+        $this->alias = $alias;
+        return $this;
     }
 
     /**
