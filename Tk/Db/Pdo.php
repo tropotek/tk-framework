@@ -12,7 +12,7 @@ namespace Tk\Db;
  */
 class Pdo extends \PDO
 {
-    const CONFIG_DB = 'system.db';
+    const CONFIG_DB = 'db';
 
     /**
      * @var bool

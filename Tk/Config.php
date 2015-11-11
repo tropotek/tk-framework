@@ -82,7 +82,6 @@ class Config extends Registry
     static $instance = null;
 
 
-
     /**
      * Get an instance of this object
      *
@@ -92,12 +91,11 @@ class Config extends Registry
      */
     static function getInstance($appUrl = '', $appPath = '')
     {
-        if (static::$instance == null && $appUrl) {
+        if (static::$instance == null) {
             static::$instance = new static($appUrl, $appPath);
         }
         return static::$instance;
     }
-
 
     /**
      * Construct the config object and initiate default settings

@@ -614,7 +614,7 @@ class Url implements \Serializable
 
         $arr = debug_backtrace();
         $arr = $arr[0];
-        vd('  - ' . $code . ' REDIRECT ['.$this->toString().'] Called from ' . basename($arr['file']) . '[' . $arr['line'] . '] '."\n\n");
+        error_log('  - ' . $code . ' REDIRECT ['.$this->toString().'] Called from ' . basename($arr['file']) . '[' . $arr['line'] . '] '."\n\n");
 
         header("Location: {$this->toString()}");
         exit();
