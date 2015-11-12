@@ -224,8 +224,9 @@ abstract class Mapper implements Mappable
      * @param string $boolOperator
      * @return ArrayObject
      * @see http://www.sitepoint.com/integrating-the-data-mappers/
+     * @deprecated See if we need this ?
      */
-    public function select($bind = array(), $tool = null, $boolOperator = 'AND')
+    public function select_dead($bind = array(), $tool = null, $boolOperator = 'AND')
     {
         if (!$tool instanceof Tool) {
             $tool = new Tool();
@@ -269,7 +270,7 @@ abstract class Mapper implements Mappable
      * @param Tool $tool
      * @return ArrayObject
      */
-    public function selectMany($where = '', $tool = null)
+    public function select($where = '', $tool = null)
     {
         return $this->selectFrom('', $where, $tool);
     }
@@ -351,10 +352,12 @@ abstract class Mapper implements Mappable
      */
     public function find($id)
     {
-        $bind = array(
-            $this->getPrimaryKey() => $id
-        );
-        $list = $this->select($bind, \Tk\Db\Tool::create('', 1));
+//        $bind = array(
+//            $this->getPrimaryKey() => $id
+//        );
+//        $list = $this->select($bind, \Tk\Db\Tool::create('', 1));
+        $where = sprintf('`%s` = %s', $this->getPrimaryKey(), (int)$id);
+        $list = $this->select($where);
         return $list->current();
     }
 
@@ -366,7 +369,7 @@ abstract class Mapper implements Mappable
      */
     public function findAll($tool = null)
     {
-        return $this->selectMany('', $tool);
+        return $this->select('', $tool);
     }
 
 
