@@ -70,8 +70,6 @@ class Pdo extends \PDO
     private $onLogListener;
 
 
-
-
     /**
      * Construct a \PDO SQL driver object
      *
@@ -122,7 +120,6 @@ class Pdo extends \PDO
         return $obj;
     }
 
-
     /**
      * Method to return an array of connection attributes.
      *
@@ -143,8 +140,6 @@ class Pdo extends \PDO
     }
 
 
-
-
     /**
      * Get the driver name
      *
@@ -161,7 +156,7 @@ class Pdo extends \PDO
      *
      * @return string
      */
-    public function getDbName()
+    public function getDatabaseName()
     {
         return $this->dbName;
     }
@@ -360,22 +355,19 @@ class Pdo extends \PDO
         return false;
     }
 
-
-
-
     /**
      * Execute a query and return a result object
      *
      * @param $sql
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function multiQuery($sql)
     {
         $sql = preg_replace("(--.*)", '', $sql);
         $queryList = preg_split('/\.*;\s*\n\s*/', $sql);
         if (!is_array($queryList) || count($queryList) == 0) {
-            $e = new \Tk\Exception('Error in SQL query data');
+            $e = new Exception('Error in SQL query data');
             throw $e;
         }
         foreach ($queryList as $query) {
@@ -400,7 +392,7 @@ class Pdo extends \PDO
 
         self::$logLastQuery = false;
         $total = 0;
-        if (preg_match('/^SELECT SQL_CALC_FOUND_ROWS/i', $sql)) {   // Mysql only
+        if ($this->getDriver() == 'mysql' && preg_match('/^SELECT SQL_CALC_FOUND_ROWS/i', $sql)) {   // Mysql only
             $countSql = 'SELECT FOUND_ROWS()';
             $result = $this->query($countSql);
             $result->setFetchMode(\PDO::FETCH_ASSOC);
@@ -430,37 +422,20 @@ class Pdo extends \PDO
      */
     public function databaseExists($dbName)
     {
-        $sql = sprintf("SHOW DATABASES LIKE %s", $this->quote($dbName));
-        $result = $this->query($sql);
-        $result->setFetchMode(\PDO::FETCH_ASSOC);
-        foreach ($result as $v) {
-            $k = sprintf('Database (%s)', $dbName);
-            if ($v[$k] == $dbName) {
-                return true;
-            }
-        }
-        return false;
+        $list = $this->getDatabaseList();
+        return in_array($dbName, $list);
     }
 
     /**
-     * Check if a database with the supplied name exists
+     * Check if a table exists in the current database
      *
      * @param string $table
      * @return bool
      */
     public function tableExists($table)
     {
-        $table = $this->quote($table);
-        $sql = sprintf("SHOW TABLES LIKE '%s'", $table);
-        $result = $this->query($sql);
-        $result->setFetchMode(\PDO::FETCH_ASSOC);
-        foreach ($result as $v) {
-            $k = sprintf('Tables_in_%s (%s)', $this->getDbName(), $table);
-            if ($v[$k] == $table) {
-                return true;
-            }
-        }
-        return false;
+        $list = $this->getTableList();
+        return in_array($table, $list);
     }
     
     /**
@@ -470,12 +445,21 @@ class Pdo extends \PDO
      */
     public function getDatabaseList()
     {
-        $sql = "SHOW DATABASES";
-        $result = $this->query($sql);
-        $result->setFetchMode(\PDO::FETCH_ASSOC);
         $list = array();
-        foreach ($result as $row) {
-            $list[] = $row['Database'];
+        if ($this->getDriver() == 'mysql') {
+            $sql = 'SHOW DATABASES';
+            $result = $this->query($sql);
+            $result->setFetchMode(\PDO::FETCH_ASSOC);
+            foreach ($result as $row) {
+                $list[] = $row['Database'];
+            }
+        } else if ($this->getDriver() == 'pgsql'){
+            $sql = sprintf('SELECT datname FROM pg_database WHERE datistemplate = false');
+            $result = $this->query($sql);
+            $result->setFetchMode(\PDO::FETCH_ASSOC);
+            foreach ($result as $row) {
+                $list[] = $row['datname'];
+            }
         }
         return $list;
     }
@@ -487,12 +471,21 @@ class Pdo extends \PDO
      */
     public function getTableList()
     {
-        $sql = "SHOW TABLES";
-        $result = $this->query($sql);
-        $result->setFetchMode(\PDO::FETCH_NUM);
         $list = array();
-        foreach ($result as $row) {
-            $list[] = $row[0];
+        if ($this->getDriver() == 'mysql') {
+            $sql = 'SHOW TABLES';
+            $result = $this->query($sql);
+            $result->setFetchMode(\PDO::FETCH_NUM);
+            foreach ($result as $row) {
+                $list[] = $row[0];
+            }
+        } else if ($this->getDriver() == 'pgsql') {
+            $sql = sprintf('SELECT table_name FROM information_schema.tables WHERE table_schema = \'public\'');
+            $result = $this->query($sql);
+            $result->setFetchMode(\PDO::FETCH_NUM);
+            foreach ($result as $row) {
+                $list[] = $row[0];
+            }
         }
         return $list;
     }
@@ -507,21 +500,29 @@ class Pdo extends \PDO
      */
     public function getNextInsertId($table, $pKey = 'id')
     {
-        $table = $this->quote($table);
-        $sql = sprintf("SHOW TABLE STATUS LIKE '%s' ", $table);
-        $result = $this->query($sql);
-        $result->setFetchMode(\PDO::FETCH_ASSOC);
-        $row = $result->fetch();
-        if ($row && isset($row['Auto_increment'])) {
-            return (int)$row['Auto_increment'];
+        if ($this->getDriver() == 'mysql') {
+            $table = $this->quote($table);
+            $sql = sprintf("SHOW TABLE STATUS LIKE '%s' ", $table);
+            $result = $this->query($sql);
+            $result->setFetchMode(\PDO::FETCH_ASSOC);
+            $row = $result->fetch();
+            if ($row && isset($row['Auto_increment'])) {
+                return (int)$row['Auto_increment'];
+            }
+            $sql = sprintf("SELECT MAX(`%s`) AS `lastId` FROM `%s` ", $pKey, $table);
+            $result = $this->query($sql);
+            $result->setFetchMode(\PDO::FETCH_ASSOC);
+            $row = $result->fetch();
+            return ((int)$row['lastId']) + 1;
         }
-        $sql = sprintf("SELECT MAX(`%s`) AS `lastId` FROM `%s` ", $pKey, $table);
+
+        // Not as accurate as I would like and should not be relied upon.
+        $sql = sprintf('SELECT %s FROM %s ORDER BY %s DESC LIMIT 1;', self::quoteParameter($pKey), self::quoteParameter($table), self::quoteParameter($pKey));
         $result = $this->query($sql);
         $result->setFetchMode(\PDO::FETCH_ASSOC);
         $row = $result->fetch();
-        return ((int) $row['lastId']) + 1;
+        return $row[$pKey]+1;
     }
-
 
     /**
      * Encode string to avoid sql injections.

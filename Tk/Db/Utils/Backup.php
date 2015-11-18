@@ -40,7 +40,7 @@ class Backup
      */
     public function export($outFile, $dropTable = true)
     {
-        $dbName = $this->db->getDbName();
+        $dbName = $this->db->getDatabaseName();
         $fp = fopen($outFile, 'w');
         if (!is_resource($fp)) {
             throw new Exception('Unable to open file for writing: ' . $outFile);
