@@ -31,7 +31,7 @@ class Tool
     /**
      * @var string
      */
-    protected $orderBy = '`id` DESC';
+    protected $orderBy = 'id DESC';
 
     /**
      * @var string
@@ -370,9 +370,11 @@ class Tool
                 foreach ($arr as $i => $str) {
                     $str = trim($str);
                     if (preg_match('/^(ASC|DESC|FIELD\(|RAND\(|IF\(|NULL)/i', $str)) continue;
-                    if (!preg_match('/^([a-z]+\.)?`/i', $str)) continue;
-                    if (!preg_match('/^([a-zA-Z0-9_-]+\.)/', $str) && is_string($str)) {
-                        $str = $tblAlias . $str;
+                    //if (!preg_match('/^([a-z]+\.)?`/i', $str)) continue;
+                    //if (!preg_match('/^([a-zA-Z]+\.)/', $str) && is_string($str)) {
+                    if (strpos($str, '.') === false) {
+                        list($param, $order) = explode(' ', $str);
+                        $str = $tblAlias . Pdo::quoteParameter($param) . ' ' . $order;
                     }
                     $arr[$i] = $str;
                 }

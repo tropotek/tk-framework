@@ -114,7 +114,7 @@ abstract class Mapper implements Mappable
         $pk = $this->getDb()->quoteParameter($this->getPrimaryKey());
         $bind = $this->unmap($obj);
 
-        $cols = implode(', ', $this->getDb()->quoteParameterArray(array_keys($bind)));
+        $cols = implode(', ', Pdo::quoteParameterArray(array_keys($bind)));
         $values = implode(', :', array_keys($bind));
         foreach ($bind as $col => $value) {
             if ($col == $pk) continue;

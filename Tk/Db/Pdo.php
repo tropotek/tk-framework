@@ -541,10 +541,10 @@ class Pdo extends \PDO
      * @param $array
      * @return mixed
      */
-    public function quoteParameterArray($array)
+    public static function quoteParameterArray($array)
     {
         foreach($array as $k => $v) {
-            $array[$k] = $this->quoteParameter($v);
+            $array[$k] = self::quoteParameter($v);
         }
         return $array;
     }
@@ -556,10 +556,10 @@ class Pdo extends \PDO
      * @param $param
      * @return string
      */
-    public function quoteParameter($param)
+    public static function quoteParameter($param)
     {
         //if (in_array($param, self::$SQL_RESERVED_WORDS))
-            return self::$PARAM_QUOTE . trim($param) . self::$PARAM_QUOTE;
+            return self::$PARAM_QUOTE . trim($param, self::$PARAM_QUOTE) . self::$PARAM_QUOTE;
         //return $param;
     }
 
