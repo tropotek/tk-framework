@@ -73,7 +73,7 @@ class ArrayObject implements \Iterator, \Countable
 
         $rows = $statement->fetchAll(\PDO::FETCH_ASSOC);
         $obj = new self($rows);
-        $obj->foundRows = $mapper->getFoundRows();
+        $obj->foundRows = $mapper->getDb()->countFoundRows($mapper->getDb()->getLastQuery());
         $obj->mapper = $mapper;
         $obj->statement = $statement;
         if (!$tool) {

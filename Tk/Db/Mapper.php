@@ -103,17 +103,6 @@ abstract class Mapper implements Mappable
         return (array)$obj;
     }
 
-
-    /**
-     *
-     *
-     * @return Model
-     */
-//    public function loadObject($array)
-//    {
-//        return $this->map($array);
-//    }
-
     /**
      * Insert
      *
@@ -122,20 +111,20 @@ abstract class Mapper implements Mappable
      */
     public function insert($obj)
     {
-        $pk = $this->getPrimaryKey();
+        $pk = $this->getDb()->quoteParameter($this->getPrimaryKey());
         $bind = $this->unmap($obj);
 
-        $cols = implode(", ", $this->backtickArray(array_keys($bind)));
-        $values = implode(", :", array_keys($bind));
+        $cols = implode(', ', $this->getDb()->quoteParameterArray(array_keys($bind)));
+        $values = implode(', :', array_keys($bind));
         foreach ($bind as $col => $value) {
             if ($col == $pk) continue;
             if ($col == 'modified' || $col == 'created') {
                 $value = date('Y-m-d H:i:s');
             }
             unset($bind[$col]);
-            $bind[":" . $col] = $value;
+            $bind[':' . $col] = $value;
         }
-        $sql = "INSERT INTO " . $this->table . " (" . $cols . ")  VALUES (:" . $values . ")";
+        $sql = 'INSERT INTO ' . $this->getDb()->quoteParameter($this->table) . ' (' . $cols . ')  VALUES (:' . $values . ')';
         $this->getDb()->prepare($sql)->execute($bind);
         $id = (int)$this->getDb()->lastInsertId();
         return $id;
@@ -156,11 +145,11 @@ abstract class Mapper implements Mappable
                 $value = date('Y-m-d H:i:s');
             }
             unset($bind[$col]);
-            $bind[":" . $col] = $value;
-            $set[] = '`'.$col . '` = :' . $col;
+            $bind[':' . $col] = $value;
+            $set[] = $this->getDb()->quoteParameter($col) . ' = :' . $col;
         }
-        $where = '`'.$pk . '` = ' . $bind[':'.$pk];
-        $sql = "UPDATE `" . $this->table . "` SET " . implode(", ", $set) . (($where) ? " WHERE " . $where : " ");
+        $where = $this->getDb()->quoteParameter($pk) . ' = ' . $bind[':'.$pk];
+        $sql = 'UPDATE ' . $this->getDb()->quoteParameter($this->table) . ' SET ' . implode(', ', $set) . (($where) ? ' WHERE ' . $where : ' ');
 
         $stmt = $this->getDb()->prepare($sql);
         $stmt->execute($bind);
@@ -197,26 +186,15 @@ abstract class Mapper implements Mappable
     public function delete($obj)
     {
         $pk = $this->getPrimaryKey();
-        $where = $pk . ' = ' . $obj->$pk;
-        //$where = $pk . ' = ' . $obj->getId();
-        $sql = 'DELETE FROM `' . $this->table .'` ' . (($where) ? ' WHERE ' . $where : ' ');
+        $where = $this->getDb()->quoteParameter($pk) . ' = ' . $obj->$pk;
+        $sql = 'DELETE FROM ' . $this->getDb()->quoteParameter($this->table) .' ' . (($where) ? ' WHERE ' . $where : ' ');
         $stmt = $this->getDb()->prepare($sql);
         $stmt->execute();
         return $stmt->rowCount();
     }
 
     /**
-     *
-     * $options:
-     *   array (
-     *     'orderBy' => '',
-     *     'limit' => '',
-     *     'offset' => '',
-     *
-     *     'boolOperator' => 'AND',
-     *     'groupBy' => '',
-     *     'having' => ''
-     *   );
+     * A select query using a prepared statement. Less control
      *
      *
      * @param array $bind
@@ -226,7 +204,7 @@ abstract class Mapper implements Mappable
      * @see http://www.sitepoint.com/integrating-the-data-mappers/
      * @deprecated See if we need this ?
      */
-    public function select_dead($bind = array(), $tool = null, $boolOperator = 'AND')
+    public function selectPrepared($bind = array(), $tool = null, $boolOperator = 'AND')
     {
         if (!$tool instanceof Tool) {
             $tool = new Tool();
@@ -243,13 +221,18 @@ abstract class Mapper implements Mappable
             foreach ($bind as $col => $value) {
                 unset($bind[$col]);
                 $bind[':' . $col] = $value;
-                $where[] = $alias.'`'.$col . '` = :' . $col;
+                $where[] = $alias. $this->getDb()->quoteParameter($col) . ' = :' . $col;
             }
         }
         $where = implode(' ' . $boolOperator . ' ', $where);
 
         // Build Query
-        $sql = sprintf('SELECT SQL_CALC_FOUND_ROWS %s * FROM %s %s ',
+        $foundRowsKey = '';
+        if ($this->getDb()->getDriver() == 'mysql') {
+            $foundRowsKey = 'SQL_CALC_FOUND_ROWS';
+        }
+        $sql = sprintf('SELECT %s %s * FROM %s %s ',
+            $foundRowsKey,
             $tool->isDistinct() ? 'DISTINCT' : '',
             $from,
             ($bind) ? ' WHERE ' . $where : ' '
@@ -295,7 +278,7 @@ abstract class Mapper implements Mappable
         }
 
         if (!$from) {
-            $from = sprintf('`%s` %s', $this->getTable(), $this->getAlias());
+            $from = sprintf('%s %s', $this->getDb()->quoteParameter($this->getTable()), $this->getAlias());
         }
 
 //        if ($where) {
@@ -323,8 +306,12 @@ abstract class Mapper implements Mappable
         if ($tool) {
             $toolStr = $tool->toSql($alias);
         }
+        $foundRowsKey = '';
+        if ($this->getDb()->getDriver() == 'mysql') {
+            $foundRowsKey = 'SQL_CALC_FOUND_ROWS';
+        }
 
-        $sql = sprintf('SELECT SQL_CALC_FOUND_ROWS %s %s* FROM %s %s %s ', $distinct, $alias, $from, $where, $toolStr);
+        $sql = sprintf('SELECT %s %s %s* FROM %s %s %s ', $foundRowsKey, $distinct, $alias, $from, $where, $toolStr);
 
         $stmt = $this->getDb()->prepare($sql);
         $stmt->execute();
@@ -334,29 +321,13 @@ abstract class Mapper implements Mappable
     }
 
     /**
-     * Call this directly after yor select query to get the total available rows
-     *
-     * @return int
-     */
-    public function getFoundRows()
-    {
-        $sql = 'SELECT FOUND_ROWS()';
-        $r = $this->getDb()->query($sql);
-        return (int)$r->fetch(PDO::FETCH_COLUMN);
-    }
-
-    /**
      *
      * @param $id
      * @return Model|null
      */
     public function find($id)
     {
-//        $bind = array(
-//            $this->getPrimaryKey() => $id
-//        );
-//        $list = $this->select($bind, \Tk\Db\Tool::create('', 1));
-        $where = sprintf('`%s` = %s', $this->getPrimaryKey(), (int)$id);
+        $where = sprintf('%s = %s', $this->getDb()->quoteParameter($this->getPrimaryKey()), (int)$id);
         $list = $this->select($where);
         return $list->current();
     }
@@ -450,18 +421,5 @@ abstract class Mapper implements Mappable
     {
         $this->db = $db;
     }
-
-    /**
-     * @param $array
-     * @return mixed
-     */
-    private function backtickArray($array)
-    {
-        foreach($array as $k => $v) {
-            $array[$k] = '`'.trim($array[$k], '`').'`';
-        }
-        return $array;
-    }
-
 
 }

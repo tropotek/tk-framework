@@ -15,6 +15,11 @@ class Pdo extends \PDO
     const CONFIG_DB = 'db';
 
     /**
+     * @var string
+     */
+    static $PARAM_QUOTE = '"';
+
+    /**
      * @var bool
      */
     static $logLastQuery = true;
@@ -92,8 +97,11 @@ class Pdo extends \PDO
         preg_match('/^([a-z]+):(([a-z]+)=([a-z0-9_-]+))+/i', $dsn, $regs);
         $this->dbName = $regs[4];
 
-        // Set utf8 encoding....(security)
-        $this->exec("SET CHARACTER SET utf8");
+        // Get mysql to emulate standard DB's
+        if ($this->getDriver() == 'mysql') {
+            $this->exec("SET CHARACTER SET utf8");
+            $this->exec("SET SESSION sql_mode = 'ANSI_QUOTES'");
+        }
     }
 
     /**
@@ -385,11 +393,10 @@ class Pdo extends \PDO
      * @param string $sql
      * @return int
      */
-    public function countQuery($sql = '')
+    public function countFoundRows($sql = '')
     {
         if (!$sql) $sql = $this->getLastQuery();
         if (!$sql) return 0;
-
 
         self::$logLastQuery = false;
         $total = 0;
@@ -528,6 +535,32 @@ class Pdo extends \PDO
             return substr($this->quote($str), 1, -1);
         }
         return $str;
+    }
+
+    /**
+     * @param $array
+     * @return mixed
+     */
+    public function quoteParameterArray($array)
+    {
+        foreach($array as $k => $v) {
+            $array[$k] = $this->quoteParameter($v);
+        }
+        return $array;
+    }
+
+    /**
+     * Quote a parameter based on the quote system
+     * if the param exists in the reserved words list
+     *
+     * @param $param
+     * @return string
+     */
+    public function quoteParameter($param)
+    {
+        //if (in_array($param, self::$SQL_RESERVED_WORDS))
+            return self::$PARAM_QUOTE . trim($param) . self::$PARAM_QUOTE;
+        //return $param;
     }
 
 }
