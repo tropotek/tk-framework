@@ -400,7 +400,7 @@ class Pdo extends \PDO
 
         self::$logLastQuery = false;
         $total = 0;
-        if (preg_match('/^SELECT SQL_CALC_FOUND_ROWS/i', $sql)) {
+        if (preg_match('/^SELECT SQL_CALC_FOUND_ROWS/i', $sql)) {   // Mysql only
             $countSql = 'SELECT FOUND_ROWS()';
             $result = $this->query($countSql);
             $result->setFetchMode(\PDO::FETCH_ASSOC);
