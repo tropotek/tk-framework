@@ -236,9 +236,6 @@ class Pdo extends \PDO
         return $this->lastQuery;
     }
 
-
-
-
     /**
      * Prepares a statement for execution and returns a statement object
      *
@@ -453,7 +450,7 @@ class Pdo extends \PDO
             foreach ($result as $row) {
                 $list[] = $row['Database'];
             }
-        } else if ($this->getDriver() == 'pgsql'){
+        } else if ($this->getDriver() == 'pgsql') {
             $sql = sprintf('SELECT datname FROM pg_database WHERE datistemplate = false');
             $result = $this->query($sql);
             $result->setFetchMode(\PDO::FETCH_ASSOC);
