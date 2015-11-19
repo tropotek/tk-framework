@@ -511,6 +511,13 @@ class Pdo extends \PDO
             $result->setFetchMode(\PDO::FETCH_ASSOC);
             $row = $result->fetch();
             return ((int)$row['lastId']) + 1;
+        } if ($this->getDriver() == 'pgsql') {
+            $sql = sprintf('SELECT * FROM %s_%s_seq', $table, $pKey);
+            $result = $this->prepare($sql);
+            $result->execute();
+            $row = $result->fetch(\PDO::FETCH_ASSOC);
+            return ((int)$row['last_value']) + 1;
+
         }
 
         // Not as accurate as I would like and should not be relied upon.
