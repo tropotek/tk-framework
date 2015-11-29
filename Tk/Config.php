@@ -263,4 +263,25 @@ class Config extends Registry
         return $this->get('temp.path');
     }
 
+    /**
+     * Get the system DB object
+     *
+     * @return Db\Pdo|mixed
+     */
+    public function getDb()
+    {
+        return $this->get('db');
+    }
+
+    /**
+     * Set the system DB object
+     *
+     * @param Db\Pdo|mixed $db
+     * @return $this
+     */
+    public function setDb($db)
+    {
+        $this->set('db', $db);
+        return $this;
+    }
 }

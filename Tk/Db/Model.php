@@ -50,8 +50,8 @@ abstract class Model
             $mapperClass = $class . $append;
         }
         $mapper = Mapper::create($mapperClass, $class);
-        if (!$mapper->getDb() && $config[Pdo::CONFIG_DB]) {
-            $mapper->setDb($config[Pdo::CONFIG_DB]);
+        if (!$mapper->getDb()) {
+            $mapper->setDb($config->getDb());
         }
         if (!$mapper->getTable()) {
             $a = explode('\\', $mapperClass);
