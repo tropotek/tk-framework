@@ -451,7 +451,7 @@ class Pdo extends \PDO
                 $list[] = $row['Database'];
             }
         } else if ($this->getDriver() == 'pgsql') {
-            $sql = sprintf('SELECT datname FROM pg_database WHERE datistemplate = false');
+            $sql = sprintf('SELECT datname F ROM pg_database WHERE datistemplate = false');
             $result = $this->query($sql);
             $result->setFetchMode(\PDO::FETCH_ASSOC);
             foreach ($result as $row) {
