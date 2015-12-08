@@ -12,7 +12,10 @@ namespace Tk\Db;
  */
 class Pdo extends \PDO
 {
-    const CONFIG_DB = 'db';
+    /**
+     * The key for the option to enable ANSI mode for MySQL
+     */
+    const ANSI_QUOTES = 'mysql.ansi.quotes';
 
     /**
      * @var string
@@ -73,20 +76,22 @@ class Pdo extends \PDO
     /**
      * Construct a \PDO SQL driver object
      *
+     * Added options:
+     *
+     *  o $options[self::ANSI_QUOTES] = false; // Change to true to force MySQL to use ANSI quoting style.
+     *
+     *
      * @param string $dsn
      * @param string $username
      * @param string $password
-     * @param array|string $options
+     * @param array $options
      * @throws \Exception
      */
     public function __construct($dsn, $username, $password, $options = array())
     {
         if (!count($options)) {
-            $options = array(
-//                \PDO::ATTR_PERSISTENT    => true,
-                \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
-                \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_OBJ
-            );
+            // Required options
+            $options[\PDO::ATTR_ERRMODE] =  \PDO::ERRMODE_EXCEPTION;
         }
         parent::__construct($dsn, $username, $password, $options);
         $this->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('\Tk\Db\PdoStatement', array($this)));
@@ -98,7 +103,8 @@ class Pdo extends \PDO
         // Get mysql to emulate standard DB's
         if ($this->getDriver() == 'mysql') {
             $this->exec("SET CHARACTER SET utf8");
-            $this->exec("SET SESSION sql_mode = 'ANSI_QUOTES'");
+            if (isset($options[self::ANSI_QUOTES]) && $options[self::ANSI_QUOTES] == true)
+                $this->exec("SET SESSION sql_mode = 'ANSI_QUOTES'");
         }
     }
 
@@ -110,12 +116,13 @@ class Pdo extends \PDO
      * @param string $dbPass
      * @param string $dbHost
      * @param string $dbType
+     * @param array $options
      * @return Pdo
      */
-    static function createInstance($dbName, $dbUser, $dbPass, $dbHost = 'localhost', $dbType = 'mysql')
+    static function createInstance($dbName, $dbUser, $dbPass, $dbHost = 'localhost', $dbType = 'mysql', $options = array())
     {
         $dns = $dbType . ':dbname=' . $dbName . ';host=' . $dbHost;
-        $obj = new self($dns, $dbUser, $dbPass);
+        $obj = new self($dns, $dbUser, $dbPass, $options);
 
         return $obj;
     }
