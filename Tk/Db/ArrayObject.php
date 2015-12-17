@@ -231,5 +231,17 @@ class ArrayObject implements \Iterator, \Countable
         return count($this->rows);
     }
 
-
+    /**
+     * 
+     * 
+     * @return array
+     */
+    public function toArray()
+    {
+        $arr = array();
+        foreach($this as $obj) {
+            $arr[] = $obj;
+        }
+        return $arr;
+    }
 }

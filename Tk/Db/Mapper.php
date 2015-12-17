@@ -336,7 +336,7 @@ abstract class Mapper implements Mappable
      * Find all objects in DB
      *
      * @param Tool $tool
-     * @return array
+     * @return ArrayObject
      */
     public function findAll($tool = null)
     {
