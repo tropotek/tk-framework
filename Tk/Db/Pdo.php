@@ -1,6 +1,8 @@
 <?php
 namespace Tk\Db;
 
+use Tk\Db\Exception;
+
 /**
  * PDO Database driver
  *
@@ -388,6 +390,7 @@ class Pdo extends \PDO
      *
      * @param string $sql
      * @return int
+     * @throws \Tk\Db\Exception
      */
     public function countFoundRows($sql = '')
     {
@@ -399,6 +402,10 @@ class Pdo extends \PDO
         if ($this->getDriver() == 'mysql' && preg_match('/^SELECT SQL_CALC_FOUND_ROWS/i', $sql)) {   // Mysql only
             $countSql = 'SELECT FOUND_ROWS()';
             $result = $this->query($countSql);
+            if ($result === false) {
+                $info = $this->errorInfo();
+                throw new Exception(end($info));
+            }
             $result->setFetchMode(\PDO::FETCH_ASSOC);
             $row = $result->fetch();
             if ($row) {
@@ -408,6 +415,10 @@ class Pdo extends \PDO
             $cSql = preg_replace('/(LIMIT [0-9]+(( )?,?( )?(OFFSET )?[0-9]+)?)?/i', '', $sql);
             $countSql = "SELECT COUNT(*) as i FROM ($cSql) as t";
             $result = $this->query($countSql);
+            if ($result === false) {
+                $info = $this->errorInfo();
+                throw new Exception(end($info));
+            }
             $result->setFetchMode(\PDO::FETCH_ASSOC);
             $row = $result->fetch();
             if ($row) {
