@@ -111,6 +111,7 @@ abstract class Mapper implements Mappable
      */
     public function insert($obj)
     {
+        vd('=============================');
         $pk = $this->getDb()->quoteParameter($this->getPrimaryKey());
         $bind = $this->unmap($obj);
 
