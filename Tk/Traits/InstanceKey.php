@@ -1,5 +1,5 @@
 <?php
-namespace Tk;
+namespace Tk\Traits;
 
 /**
  * Class InstanceTrait
@@ -8,7 +8,7 @@ namespace Tk;
  * @link http://www.tropotek.com/
  * @license Copyright 2015 Michael Mifsud
  */
-trait InstanceTrait
+trait InstanceKey
 {
 
     /**

@@ -40,14 +40,19 @@ class Date
     const MED_DATE = 'j M Y';
 
     /**
-     * A Day in seconds
-     */
-    const DAY = 60*60*24;
-
-    /**
      * An hour in seconds
      */
     const HOUR = 60*60;
+
+    /**
+     * A Day in seconds
+     */
+    const DAY = self::HOUR*24;
+
+    /**
+     * A Day in seconds
+     */
+    const WEEK = self::DAY*7;
     
 
     /**

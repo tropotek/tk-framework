@@ -11,7 +11,7 @@ namespace Tk\Db;
  */
 class Tool
 {
-    use \Tk\InstanceTrait;
+    use \Tk\Traits\InstanceKey;
 
     /**
      * Limit the number of records retrieved.

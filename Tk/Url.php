@@ -24,20 +24,15 @@ namespace Tk;
  */
 class Url implements \Serializable
 {
+    
+    static public $BASE_URL = '';
+    
 
     /**
      * This is the supplied full/partial url
      * @var string
      */
     protected $spec = '';
-
-    /**
-     * The path to prepend to the url. Generally the site Url path
-     * @var string
-     */
-    protected $prepend = '';
-
-
 
 
     /**
@@ -91,10 +86,23 @@ class Url implements \Serializable
      */
     public function __construct($spec = '')
     {
-        if (!$spec) {
+        if (!$spec) {   // Create an auto request url.
             $spec = $_SERVER["REQUEST_URI"];
         }
-        $this->spec = trim($spec);
+        
+        $spec = trim($spec);
+        if ($spec && self::$BASE_URL) {
+            //if (!preg_match('/^(#|javascript|mailto)/i', $spec) && !preg_match('/^([a-zA-Z_-]+\:\/\/)/', $spec)) {
+            // make sure path is ralative: IE: not `http://domain`, `mailto:email@`..., `//domain`, etc
+            // TODO: not checked `domain.com/path/path`, need to create a regex for this one day
+            if (!preg_match('/^(#|javascript|mailto)/i', $spec) && !preg_match('/^([a-zA-Z_-]?\:?\/\/)/', $spec)) {
+                $spec = str_replace(self::$BASE_URL, '', $spec);
+                $spec = trim($spec, '/');
+                $spec = self::$BASE_URL . '/' . $spec;
+            }
+        }
+        
+        $this->spec = $spec;
         if (!preg_match('/^(#|javascript|mailto)/i', $this->spec)) {
             $this->init();
         }
@@ -119,6 +127,8 @@ class Url implements \Serializable
 
 
 
+    
+    
     public function serialize()
     {
         return serialize(array('spec' => $this->spec));

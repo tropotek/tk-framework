@@ -111,23 +111,26 @@ abstract class Mapper implements Mappable
      */
     public function insert($obj)
     {
-        vd('=============================');
-        $pk = $this->getDb()->quoteParameter($this->getPrimaryKey());
         $bind = $this->unmap($obj);
-
-        $cols = implode(', ', Pdo::quoteParameterArray(array_keys($bind)));
+        if (isset($bind[$this->getPrimaryKey()]))
+            unset($bind[$this->getPrimaryKey()]);
+        $keys = array_keys($bind);
+        $cols = implode(', ', Pdo::quoteParameterArray($keys));
         $values = implode(', :', array_keys($bind));
         foreach ($bind as $col => $value) {
-            if ($col == $pk) continue;
             if ($col == 'modified' || $col == 'created') {
-                $value = date('Y-m-d H:i:s');
+                $value = date('Y-m-d H:i:s.u');
             }
             unset($bind[$col]);
             $bind[':' . $col] = $value;
         }
         $sql = 'INSERT INTO ' . $this->getDb()->quoteParameter($this->table) . ' (' . $cols . ')  VALUES (:' . $values . ')';
         $this->getDb()->prepare($sql)->execute($bind);
-        $id = (int)$this->getDb()->lastInsertId();
+        $seq = '';
+        if ($this->getDb()->getDriver() == 'pgsql') {   // Generate the seq key for Postgres only
+            $seq = $this->getTable().'_'.$this->getPrimaryKey().'_seq';
+        }
+        $id = (int)$this->getDb()->lastInsertId($seq);
         return $id;
     }
 
