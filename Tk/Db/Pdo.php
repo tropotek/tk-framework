@@ -576,7 +576,7 @@ class Pdo extends \PDO
      * Quote a parameter based on the quote system
      * if the param exists in the reserved words list
      *
-     * @param $param
+     * @param string $param
      * @return string
      */
     public static function quoteParameter($param)
