@@ -61,6 +61,8 @@ class PdoStatement extends \PDOStatement
                 'values' => $args,
             )
         );
+//        $err = $this->errorInfo();
+//        vd($err[2]);
         return $result;
     }
 
