@@ -81,6 +81,10 @@ class Url implements \Serializable
     /**
      * __construct
      *
+     * 
+     * paths that do not start with a scheme section to the url are prepended with the  self::$BASE_URL . '/' string
+     * 
+     * 
      * @param string $spec The String to parse as a URL
      * @throws Exception
      */
@@ -94,11 +98,16 @@ class Url implements \Serializable
         if ($spec && self::$BASE_URL) {
             //if (!preg_match('/^(#|javascript|mailto)/i', $spec) && !preg_match('/^([a-zA-Z_-]+\:\/\/)/', $spec)) {
             // make sure path is ralative: IE: not `http://domain`, `mailto:email@`..., `//domain`, etc
+            
             // TODO: not checked `domain.com/path/path`, need to create a regex for this one day
-            if (!preg_match('/^(#|javascript|mailto)/i', $spec) && !preg_match('/^([a-zA-Z_-]?\:?\/\/)/', $spec)) {
-                $spec = str_replace(self::$BASE_URL, '', $spec);
-                $spec = trim($spec, '/');
-                $spec = self::$BASE_URL . '/' . $spec;
+            //vd(parse_url($spec), parse_url('#'), parse_url('javascript:;'), parse_url('mailto:test@domain.com'));
+            $p = parse_url($spec);
+            if (!preg_match('/^(#|javascript|mailto)/i', $spec) && !isset($p['scheme'])) {
+                if (self::$BASE_URL) {
+                    $spec = str_replace(self::$BASE_URL, '', $spec);
+                    $spec = trim($spec, '/');
+                    $spec = self::$BASE_URL . '/' . $spec;
+                }
             }
         }
         

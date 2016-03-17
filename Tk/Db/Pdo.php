@@ -104,9 +104,16 @@ class Pdo extends \PDO
 
         // Get mysql to emulate standard DB's
         if ($this->getDriver() == 'mysql') {
-            $this->exec("SET CHARACTER SET utf8");
+            $this->exec('SET CHARACTER SET utf8');
+            if (isset($options['timezone'])) {
+                $this->exec('SET time_zone = \'' . $options['timezone'] . '\'');
+            }
             if (isset($options[self::ANSI_QUOTES]) && $options[self::ANSI_QUOTES] == true)
                 $this->exec("SET SESSION sql_mode = 'ANSI_QUOTES'");
+        } else {
+            if (isset($options['timezone'])) {
+                $this->exec('SET TIME ZONE \'' . $options['timezone'] . '\'');
+            }
         }
     }
 

@@ -70,7 +70,56 @@ class Date
      */
     private function __construct() { }
 
-    
+
+    /**
+     * Create a DateTime object with system timezone
+     *
+     * @param string $time
+     * @param \DateTimeZone $timezone
+     * @return \DateTime
+     */
+    static function parse($time = 'now', $timezone = null)
+    {
+        if ($timezone && is_string($timezone)) {
+            $timezone = new \DateTimeZone($timezone);
+        }
+        if (!$timezone) {
+            $timezone = new \DateTimeZone(date_default_timezone_get());
+        }
+
+//        $regs = null;
+//        if (preg_match('/^([0-9]{1,2})(\/|-)([0-9]{1,2})(\/|-)([0-9]{2,4})( ([0-9]{1,2}):([0-9]{1,2})(:([0-9]{1,2}))?)?$/', $time, $regs)) {
+//            $day = date('j');
+//            $month = date('n');
+//            $year = date('Y');
+//            $hour = date('G');
+//            $minute = date('i');
+//            $second = date('s');
+//
+//            $day = intval($regs[1]);
+//            $month = intval($regs[3]);
+//            $year = intval($regs[5]);
+//
+//            if (isset($regs[6])) {
+//                //$time = \DateTime::createFromFormat('Y-m-d H:i:s', $time, $timezone)->getTimestamp();
+//                $hour = intval($regs[6]);
+//                $minute = intval($regs[7]);
+//                if (isset($regs[9])) {
+//                    $second = intval($regs[9]);
+//                }
+//            }
+//            $time = '@'.mktime($hour, $minute, $second, $month, $day, $year);
+//        }
+        if (preg_match('/^[0-9]{1,11}$/', $time)) {
+            $time = '@'.$time;
+        }
+        
+        $date = new \DateTime($time);
+        $date->setTimezone($timezone);
+        return $date;
+    }
+
+
     /**
      * Get the months ending date 1 = 31-Jan, 12 = 31-Dec
      *
