@@ -86,30 +86,7 @@ class Date
         if (!$timezone) {
             $timezone = new \DateTimeZone(date_default_timezone_get());
         }
-
-//        $regs = null;
-//        if (preg_match('/^([0-9]{1,2})(\/|-)([0-9]{1,2})(\/|-)([0-9]{2,4})( ([0-9]{1,2}):([0-9]{1,2})(:([0-9]{1,2}))?)?$/', $time, $regs)) {
-//            $day = date('j');
-//            $month = date('n');
-//            $year = date('Y');
-//            $hour = date('G');
-//            $minute = date('i');
-//            $second = date('s');
-//
-//            $day = intval($regs[1]);
-//            $month = intval($regs[3]);
-//            $year = intval($regs[5]);
-//
-//            if (isset($regs[6])) {
-//                //$time = \DateTime::createFromFormat('Y-m-d H:i:s', $time, $timezone)->getTimestamp();
-//                $hour = intval($regs[6]);
-//                $minute = intval($regs[7]);
-//                if (isset($regs[9])) {
-//                    $second = intval($regs[9]);
-//                }
-//            }
-//            $time = '@'.mktime($hour, $minute, $second, $month, $day, $year);
-//        }
+        
         if (preg_match('/^[0-9]{1,11}$/', $time)) {
             $time = '@'.$time;
         }

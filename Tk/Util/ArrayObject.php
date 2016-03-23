@@ -242,8 +242,20 @@ class ArrayObject implements \IteratorAggregate, \ArrayAccess, \Serializable, \C
      *
      * @param string $key
      * @return bool
+     * @deprecated Use has()
      */
     public function exists($key)
+    {
+        return $this->has($key);
+    }
+
+    /**
+     * Test if an array key exists in this object
+     *
+     * @param string $key
+     * @return bool
+     */
+    public function has($key)
     {
         return $this->offsetExists($key);
     }
@@ -253,8 +265,20 @@ class ArrayObject implements \IteratorAggregate, \ArrayAccess, \Serializable, \C
      *
      * @param string $key
      * @return ArrayObject
+     * @deprecated Use remove()
      */
     public function delete($key)
+    {
+        return $this->remove($key);
+    }
+
+    /**
+     * Remove an entry from the registry cache
+     *
+     * @param string $key
+     * @return ArrayObject
+     */
+    public function remove($key)
     {
         $this->offsetUnset($key);
         return $this;

@@ -500,20 +500,6 @@ class Url implements \Serializable
     }
 
     /**
-     * Remove a field in the query string
-     *
-     * @param string $field
-     * @return Url
-     */
-    public function delete($field)
-    {
-        if (isset($this->query[$field])) {
-            unset($this->query[$field]);
-        }
-        return $this;
-    }
-
-    /**
      * Get a value from the query string.
      *
      * @param string $field
@@ -526,6 +512,20 @@ class Url implements \Serializable
         }
         return '';
     }
+    
+    /**
+     * Remove a field in the query string
+     *
+     * @param string $field
+     * @return Url
+     */
+    public function remove($field)
+    {
+        if (isset($this->query[$field])) {
+            unset($this->query[$field]);
+        }
+        return $this;
+    }
 
     /**
      * Check if a query field exists in the array
@@ -533,10 +533,38 @@ class Url implements \Serializable
      * @param string $field
      * @return bool
      */
-    public function exists($field)
+    public function has($field)
     {
         return isset($this->query[$field]);
     }
+    
+    
+
+    /**
+     * Remove a field in the query string
+     *
+     * @param string $field
+     * @return Url
+     * @deprecated Use remove() to bring inline with symfony parameter bag obj
+     */
+    public function delete($field)
+    {
+        return $this->remove($field);
+    }
+
+    /**
+     * Check if a query field exists in the array
+     *
+     * @param string $field
+     * @return bool
+     * @deprecated Use has() to bring inline with symfony parameter bag obj
+     */
+    public function exists($field)
+    {
+        return $this->has($field);
+    }
+    
+    
 
     /**
      * Redirect Codes:
