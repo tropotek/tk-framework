@@ -156,6 +156,25 @@ class Config extends Registry
 
         $this->setTempPath($this->getDataPath() . '/temp');
         $this->setTempUrl($this->getDataUrl() . '/temp');
+
+        // Site information
+        $this->setSystemName('Untitled Site');
+        $this->setSystemDescription('');
+        $this->setSystemVersion('0.0');
+        $this->setSystemLicence('');
+        $this->setSystemReleased('');
+        
+        if (is_file($this->getAppPath() . '/composer.json')) {
+            $composer = json_decode(file_get_contents($this->getAppPath() . '/composer.json'));
+            $this->setSystemName($composer->name);
+            $this->setSystemDescription($composer->description);
+            $this->setSystemVersion($composer->version);
+            $this->setSystemLicence($composer->license);
+            $this->setSystemReleased($composer->time);
+        }
+        
+        
+        
     }
 
     /**

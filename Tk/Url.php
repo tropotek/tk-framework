@@ -353,6 +353,21 @@ class Url implements \Serializable
     }
 
     /**
+     * If the $BASE_URL is set the path is returned with the $BASE_URL removed.
+     * 
+     * @return mixed|string
+     */
+    public function getRelativePath()
+    {
+        $path = $this->getPath();
+        $burl = parse_url(self::$BASE_URL);
+        $path = str_replace($burl['path'], '', $path);
+        return $path;
+    }
+    
+    
+
+    /**
      * Get the port of the url
      *
      * @return string
@@ -627,7 +642,6 @@ class Url implements \Serializable
      */
     public function redirect($code = 302)
     {
-
         if (headers_sent()) {
             throw new \Exception('Invalid URL Redirect, Headers Allready Sent.');
         }
@@ -661,7 +675,7 @@ class Url implements \Serializable
 
         $arr = debug_backtrace();
         $arr = $arr[0];
-        error_log('  - ' . $code . ' REDIRECT ['.$this->toString().'] Called from ' . basename($arr['file']) . '[' . $arr['line'] . '] '."\n\n");
+        error_log('- ' . $code . ' REDIRECT ['.$this->toString().'] Called from ' . basename($arr['file']) . '[' . $arr['line'] . '] '."\n");
 
         header("Location: {$this->toString()}");
         exit();
