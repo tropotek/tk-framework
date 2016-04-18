@@ -1,34 +1,34 @@
 {
-    "name": "ttek/tk-framework",
-    "type": "library",
-    "description": "Tropotek Framework V2",
-    "keywords":  [
-        "Tk",
-        "framework",
-        "tropotek"
-    ],
-    "homepage": "http://www.tropotek.com/",
-    "time": "2016-04-19",
-    "license": "MIT",
-    "version": "2.0.0",
-    "authors":  [
-         {
-            "name": "Michael Mifsud",
-            "email": "info@tropotek.com",
-            "homepage": "http://www.tropotek.com/"
-        }
-    ],
-    "autoload":  {
-        "psr-0":  {
-            "Tk\\": ""
-        }
-    },
-    "require":  {
-        "php": ">=5.4.0"
-    },
-    "extra":  {
-        "branch-alias":  {
-            "dev-master": "2.0.x-dev"
-        }
+  "name": "ttek/tk-framework",
+  "type": "library",
+  "description": "Tropotek Framework V2",
+  "keywords": [
+    "Tk",
+    "framework",
+    "tropotek"
+  ],
+  "homepage": "http://www.tropotek.com/",
+  "time": "2010-12-09",
+  "license": "MIT",
+  "version": "trunk",
+  "authors": [
+    {
+      "name": "Michael Mifsud",
+      "email": "info@tropotek.com",
+      "homepage": "http://www.tropotek.com/"
     }
+  ],
+  "autoload": {
+    "psr-0": {
+      "Tk\\": ""
+    }
+  },
+  "require": {
+    "php": ">=5.4.0"
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "2.0.x-dev"
+    }
+  }
 }
