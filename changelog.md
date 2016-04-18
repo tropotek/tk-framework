@@ -1,5 +1,62 @@
 #CHANGELOG#
 
+Ver 2.0.0 [2016-04-19]:
+-------------------------------
+ - Finalised base code for uni apps
+ - Finally added tabs and fieldsets to Form renderer
+ - Fixed LTI classes and logic
+ - Fixed date timezone issues with timestamp use \Tk\Date::parse({timestamp})
+ - Adde Lti Authentication, still need finishing....
+ - Fixed Auth system, started LTI connector setup
+ - LDAP and authentication tidy up
+ - Updated form calls to new form
+ - Finished basic user system.
+ - Updated form, relized it needs to be refactored, see readme
+ - Merge branch 'master' of git://github.com/tropotek/tk-framework
+ - Modded DB things, Made MyuSQL ANSI mode false by default
+ - Added postgress compatable queries to the \Tk\PDo object
+ - Fixed some DB queries
+ - Minor DB updates
+ - Updated DB libs for postgress compatability
+ - Tiding up
+ - Seperating symfony from tk-framework adding to App
+ - Fixing DomTemplate documentation
+ - Finished table and form, need to create updated extrnal libs now
+ - Added Filter form to table.
+ - Minor updates
+ - More work on the table and filter
+ - Added minor table updates, nearly there
+ - Bringing back the DB ArrayObject and Tool... Bigger, Better and Cleaner than ever!!!!!
+ - Back to stuffing with the lower DB objects...grrrr
+ - Back to screwing with the DB objects again, I think we need the TkTool back
+ - Base of new Table lib complete
+ - Started working on the new Table lib
+ - I think I finally am happy with the Form base objects, still have to do a straight HTML renderer
+   tho....
+ - Finished form re-design
+ - Still working on the form lib
+ - Added file type to form lib
+ - Finalised inline renderer
+ - Added get/set renderer to form
+ - More form stuff
+ - Added edit form page for testing
+ - Added sb-admin2 template for admin and fixed URL redirect code to 302
+ - Added Authentication and Form objects
+ - Added new Auth system for development
+ - Db updates
+ - Finiished base DB object
+ - Fixed conflict
+ - Update comments
+ - Documentation stuff
+ - Update douc comments
+ - More updates
+ - Minor updates
+ - Minor update
+ - Updated the framework a little, tis all...
+ - Updating framework v2
+ - Remove v1 files and added v2 Files
+
+
 Ver 1.2.10 [2015-06-18]:
 -------------------------------
  - Fixed no results in Student Assessmenet table.
