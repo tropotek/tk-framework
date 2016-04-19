@@ -22,7 +22,7 @@ class Pdo extends \PDO
     /**
      * @var string
      */
-    static $PARAM_QUOTE = '"';
+    static $PARAM_QUOTE = '';
 
     /**
      * @var bool
@@ -108,12 +108,15 @@ class Pdo extends \PDO
             if (isset($options['timezone'])) {
                 $this->exec('SET time_zone = \'' . $options['timezone'] . '\'');
             }
-            if (isset($options[self::ANSI_QUOTES]) && $options[self::ANSI_QUOTES] == true)
+            self::$PARAM_QUOTE = '`';
+            if (isset($options[self::ANSI_QUOTES]) && $options[self::ANSI_QUOTES] == true) {
                 $this->exec("SET SESSION sql_mode = 'ANSI_QUOTES'");
+            }
         } else {
             if (isset($options['timezone'])) {
                 $this->exec('SET TIME ZONE \'' . $options['timezone'] . '\'');
             }
+            self::$PARAM_QUOTE = '"';
         }
     }
 
