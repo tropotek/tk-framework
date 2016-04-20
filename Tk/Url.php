@@ -726,4 +726,11 @@ class Url implements \Serializable
         return $url;
     }
 
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->toString();
+    }
 }
