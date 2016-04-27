@@ -369,7 +369,7 @@ class Tool
                 $arr = explode(',', $orFields);
                 foreach ($arr as $i => $str) {
                     $str = trim($str);
-                    if (preg_match('/^(ASC|DESC|FIELD\(|RAND\(|IF\(|NULL)/i', $str)) continue;
+                    if (!preg_match('/^(ASC|DESC|FIELD\(|RAND\(|IF\(|NULL)/i', $str)) continue;
                     //if (!preg_match('/^([a-z]+\.)?`/i', $str)) continue;
                     //if (!preg_match('/^([a-zA-Z]+\.)/', $str) && is_string($str)) {
                     if (strpos($str, '.') === false) {
