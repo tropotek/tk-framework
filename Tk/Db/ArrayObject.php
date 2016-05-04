@@ -67,6 +67,7 @@ class ArrayObject implements \Iterator, \Countable
      * @param PdoStatement $statement
      * @param Tool $tool
      * @return ArrayObject
+     * @todo: remove the need for the statement and just use the array?????
      */
     static function createFromMapper(Mapper $mapper, PdoStatement $statement, $tool = null)
     {
