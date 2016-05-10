@@ -1,7 +1,6 @@
 <?php
 namespace Tk;
 
-use Tk\Util\Registry;
 
 /**
  * A Config class for handling the applications dependency values.
@@ -73,7 +72,7 @@ use Tk\Util\Registry;
  * @link http://www.tropotek.com/
  * @license Copyright 2007 Michael Mifsud
  */
-class Config extends Registry
+class Config extends ArrayObject
 {
 
     /**
@@ -302,5 +301,93 @@ class Config extends Registry
     {
         $this->set('db', $db);
         return $this;
+    }
+
+
+
+
+
+
+
+    /**
+     * Import params from another registry object or array
+     *
+     * @param Registry|array $params
+     * @return $this
+     */
+    public function import($params)
+    {
+        foreach($params as $k => $v) {
+            $this[$k] = $v;
+        }
+        return $this;
+    }
+
+    /**
+     * Allow call to parameters via a get and set
+     *
+     * For example if the following entries exist in the registry:
+     *
+     *   array(
+     *    'site.path' => '/path/to/site',
+     *    'site.url' => '/url/to/site'
+     * )
+     *
+     * Then they can be accessed by the following virtual methods:
+     *
+     *   $registry->getSitePath();
+     *   $registry->setSitePath('/');
+     *
+     * @param string $func
+     * @param array  $argv
+     * @return mixed | null
+     */
+    public function __call($func, $argv)
+    {
+        $key = preg_replace('/[A-Z]/', '.$0', $func);
+        $key = strtolower($key);
+
+        $pos = strpos($key, '.');
+        $type = substr($key, 0, $pos);
+        $key = substr($key, $pos+1);
+
+        if ($type == 'set') {
+            $this->set($key, $argv[0]);
+        } else if ($type == 'get' || $type = 'create' | $type = 'is' | $type = 'has') {
+            $val = $this->get($key);
+            if ($val instanceof \Closure) {
+                return call_user_func_array($val, $argv);
+            }
+            return $val;
+        }
+        return null;
+    }
+
+
+
+    /**
+     * Return a group of entries from the registry
+     *
+     * for example if the prefixName = 'app.site'
+     *
+     * it would return all registry values with the key starting with `app.site.____`
+     *
+     * @param string $prefixName
+     * @param boolean $truncateKey If true then the supplied $prefixName will be removed from the returned keys
+     * @return array
+     */
+    public function getGroup($prefixName, $truncateKey = false)
+    {
+        $arr = array();
+        foreach ($this as $k => $v) {
+            if (preg_match('/^' . $prefixName . '\./', $k)) {
+                if (!$truncateKey) {
+                    $arr[$k] = $v;
+                } else {
+                    $arr[str_replace($prefixName.'.', '', $k)] = $v;
+                }
+            }
+        }
+        return $arr;
     }
 }

@@ -1,5 +1,5 @@
 <?php
-namespace Tk\Util;
+namespace Tk;
 
 /**
  * A wrapper for the php array object
@@ -30,8 +30,6 @@ class ArrayObject implements \IteratorAggregate, \ArrayAccess, \Serializable, \C
         $this->array = (array)$array;
     }
 
-
-
     /**
      * Allow for the items to be treated as object params
      * EG: $arrObj->item = $arrObj['item']
@@ -55,8 +53,6 @@ class ArrayObject implements \IteratorAggregate, \ArrayAccess, \Serializable, \C
     {
         return $this->offsetGet($key);
     }
-
-
 
 
 
@@ -101,9 +97,6 @@ class ArrayObject implements \IteratorAggregate, \ArrayAccess, \Serializable, \C
         $this->array = array_merge($this->array, $array);
         return $this;
     }
-
-
-
 
 
 
@@ -242,34 +235,10 @@ class ArrayObject implements \IteratorAggregate, \ArrayAccess, \Serializable, \C
      *
      * @param string $key
      * @return bool
-     * @deprecated Use has()
      */
     public function exists($key)
     {
-        return $this->has($key);
-    }
-
-    /**
-     * Test if an array key exists in this object
-     *
-     * @param string $key
-     * @return bool
-     */
-    public function has($key)
-    {
         return $this->offsetExists($key);
-    }
-
-    /**
-     * Remove an entry from the registry cache
-     *
-     * @param string $key
-     * @return ArrayObject
-     * @deprecated Use remove()
-     */
-    public function delete($key)
-    {
-        return $this->remove($key);
     }
 
     /**

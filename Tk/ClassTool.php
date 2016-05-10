@@ -1,8 +1,16 @@
 <?php
 namespace Tk\Util;
 
-
-class ClassTools
+/**
+ * Class ClassTool
+ * This object is a utility object to perform actions 
+ * with class names and name-spacing issues.
+ *
+ * @author Michael Mifsud <info@tropotek.com>
+ * @link http://www.tropotek.com/
+ * @license Copyright 2015 Michael Mifsud
+ */
+class ClassTool
 {
 
 
