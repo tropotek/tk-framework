@@ -78,7 +78,7 @@ class Date
      * @param \DateTimeZone $timezone
      * @return \DateTime
      */
-    static function parse($time = 'now', $timezone = null)
+    static function create($time = 'now', $timezone = null)
     {
         if ($timezone && is_string($timezone)) {
             $timezone = new \DateTimeZone($timezone);
