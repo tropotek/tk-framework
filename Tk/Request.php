@@ -23,7 +23,7 @@ class Request
     protected $session = null;
 
     /**
-     * @varCookie|array
+     * @var Cookie|array
      */
     protected $cookie = null;
     
@@ -147,29 +147,34 @@ class Request
      *
      * @param string $key A key to retrieve the data.
      * @param mixed $value
+     * @return $this
      */
     public function set($key, $value)
     {
-        if ($value === null) {
-            unset($_REQUEST[$key]);
-        } else {
-            $_REQUEST[$key] = $value;
-        }
+        $_REQUEST[$key] = $value;
+        return $this;
+    }
+
+    /**
+     * Remove a value from the request global array
+     * 
+     * @param $key
+     * @return $this
+     */
+    public function delete($key)
+    {
+        unset($_REQUEST[$key]);
+        return $this;
     }
 
     /**
      * Returns the value of a request parameter as a String,
      * or null if the parameter does not exist.
      *
-     * You should only use this method when you are sure the parameter has
-     * only one value. If the parameter might have more than one value, use
-     * getParameterValues().
-     *
-     * If you use this method with a multivalued parameter, the value returned
-     * is equal to the first value in the array returned by getParameterValues.
-     *
+     * If the key is not found the $_SERVER global is then checked.
+     * 
      * @param string $key The parameter name.
-     * @return mixed
+     * @return string
      */
     public function get($key)
     {
@@ -180,6 +185,8 @@ class Request
         if (isset($_SERVER[$key])) {
             return $_SERVER[$key];
         }
+        
+        return '';
     }
 
     /**
@@ -191,8 +198,7 @@ class Request
     public function exists($key)
     {
         return isset($_REQUEST[$key]);
-    }
-    
+    }    
 
     /**
      * Get the $_REQUEST array map
@@ -243,7 +249,6 @@ class Request
     {
         return $this->cookie;
     }
-
 
     /**
      * @return Url
@@ -302,12 +307,12 @@ class Request
     public function getRemoteAddr($checkProxy = true)
     {
         $ip = '';
-        if ($checkProxy && $this->getServer('HTTP_CLIENT_IP') != null) {
-            $ip = $this->getServer('HTTP_CLIENT_IP');
-        } else if ($checkProxy && $this->getServer('HTTP_X_FORWARDED_FOR') != null) {
-            $ip = $this->getServer('HTTP_X_FORWARDED_FOR');
+        if ($checkProxy && $_SERVER['HTTP_CLIENT_IP'] != null) {
+            $ip = $_SERVER['HTTP_CLIENT_IP'];
+        } else if ($checkProxy && $_SERVER['HTTP_X_FORWARDED_FOR'] != null) {
+            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
         } else {
-            $ip = $this->getServer('REMOTE_ADDR');
+            $ip = $_SERVER['REMOTE_ADDR'];
         }
         return $ip;
     }
@@ -319,7 +324,7 @@ class Request
      */
     public function getScheme()
     {
-        return ($this->getServer('HTTPS') == 'on') ? self::SCHEME_HTTPS : self::SCHEME_HTTP;
+        return ($_SERVER['HTTPS'] == 'on') ? self::SCHEME_HTTPS : self::SCHEME_HTTP;
     }
 
     /**
