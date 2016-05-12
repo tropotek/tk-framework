@@ -81,6 +81,10 @@ class Pdo extends \PDO
      * Added options:
      *
      *  o $options[self::ANSI_QUOTES] = false; // Change to true to force MySQL to use ANSI quoting style.
+     *  o $options['timezone'] = '';
+     *  o $options['mysql.ansi.quotes'] = '';
+     *  o $options['timezone'] = '';
+     *  o $options['timezone'] = '';
      *
      *
      * @param string $dsn
@@ -91,10 +95,6 @@ class Pdo extends \PDO
      */
     public function __construct($dsn, $username, $password, $options = array())
     {
-        if (!count($options)) {
-            // Required options
-            $options[\PDO::ATTR_ERRMODE] =  \PDO::ERRMODE_EXCEPTION;
-        }
         parent::__construct($dsn, $username, $password, $options);
         $this->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('\Tk\Db\PdoStatement', array($this)));
 
@@ -108,10 +108,10 @@ class Pdo extends \PDO
             if (isset($options['timezone'])) {
                 $this->exec('SET time_zone = \'' . $options['timezone'] . '\'');
             }
-            self::$PARAM_QUOTE = '`';
             if (isset($options[self::ANSI_QUOTES]) && $options[self::ANSI_QUOTES] == true) {
                 $this->exec("SET SESSION sql_mode = 'ANSI_QUOTES'");
             }
+            self::$PARAM_QUOTE = '`';
         } else {
             if (isset($options['timezone'])) {
                 $this->exec('SET TIME ZONE \'' . $options['timezone'] . '\'');
