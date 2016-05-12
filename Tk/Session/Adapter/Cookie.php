@@ -1,15 +1,16 @@
 <?php
-/*
- * @author Michael Mifsud <info@tropotek.com>
- * @link http://www.tropotek.com/
- * @license Copyright 2007 Michael Mifsud
- */
 namespace Tk\Session\Adapter;
 
+
 /**
- * A session object
- *
- * @package Tk\Session\Adapter
+ * Class Cookie
+ * 
+ * 
+ * @author Michael Mifsud <info@tropotek.com>
+ * @link http://www.tropotek.com/
+ * @license Copyright 2015 Michael Mifsud
+ * 
+ * @todo This object needs to be unit tested it is still not working correctly
  */
 class Cookie implements Iface
 {
@@ -60,12 +61,14 @@ class Cookie implements Iface
         return session_id();
     }
     
+    
+    
     /**
      * @param string $path
-     * @param string $name
+     * @param string $sessionId
      * @return bool
      */
-    public function open($path, $name)
+    public function open($path, $sessionId)
     {
         return true;
     }
@@ -79,39 +82,44 @@ class Cookie implements Iface
     }
 
     /**
-     * @param string $id
+     * read
+     * 
+     * @param string $sessionId
      * @return string
      */
-    public function read($id)
+    public function read($sessionId)
     {
         $data = (string)$this->cookie->get($this->cookieName);
-        if ($data == '') {
-            return $data;
+        if ($data) {
+            $data = $this->encrypt ? base64_decode($data) : \Tk\Encrypt::decode($data);
         }
-        return empty($this->encrypt) ? base64_decode($data) : \Tk\Encrypt::decode($data);
+        return $data;
     }
 
     /**
-     * @param string $id
+     * @param string $sessionId
      * @param string $data
      * @return bool
      */
-    public function write($id, $data)
+    public function write($sessionId, $data)
     {
         $data = empty($this->encrypt) ? base64_encode($data) : \Tk\Encrypt::encode($data);
         if (strlen($data) > 4048) {
             return false;
         }
-        return $this->cookie->set($this->cookieName, $data, $this->expiration);
+        $this->cookie->set($this->cookieName, $data, $this->expiration);
+        //$this->cookie->set($this->cookieName, $data);
+        return true;
     }
 
     /**
-     * @param string $id
+     * @param string $sessionId
      * @return bool
      */
-    public function destroy($id)
+    public function destroy($sessionId)
     {
-        return $this->cookie->delete($this->cookieName);
+        $this->cookie->delete($this->cookieName);
+        return true;
     }
 
     /**

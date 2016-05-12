@@ -15,7 +15,12 @@ class Session implements \ArrayAccess
      * This should be a unique key that would be hard to clash with
      */
     const KEY_DATA = '_-___SESSION_DATA___-_';
-        
+
+    /**
+     * @var bool
+     */
+    private $started = false;
+    
     /**
      * @var \Tk\Session\Adapter\Iface
      */
@@ -27,10 +32,14 @@ class Session implements \ArrayAccess
     protected $params = array();
 
     /**
-     * @var \Tk\Request
+     * @var Request
      */
     protected $request = null;
 
+    /**
+     * @var Cookie
+     */
+    protected $cookie = null;
 
 
     /**
@@ -45,16 +54,23 @@ class Session implements \ArrayAccess
      *   'session.adapter' => '',               // The classname of the session Adapter
      *   'session.validate' => 'user_agent',    // Session parameters to validate: user_agent, ip_address, expiration.
      * )
-     * 
      *
-     * @param \Tk\Request $request
-     * @param \Tk\Session\Adapter\Iface|null $adapter
      * @param array|\ArrayAccess $params
+     * @param Request $request
+     * @param Cookie $cookie
+     * @throws Exception
      */
-    private function __construct($request, $adapter = null, $params = array())
+    public function __construct($params = array(), $request = null, $cookie = null)
     {
-        $this->request = $request;
         $this->params = $params;
+        
+        if (!$request)
+            $request = new Request();
+        if (!$cookie)
+            $cookie = new Cookie('/');
+        
+        $this->request = $request;
+        $this->cookie = $cookie;
         
         if (!$this->getParam('session.name'))
             $this->params['session.name'] = md5($_SERVER['SERVER_NAME']);
@@ -67,39 +83,27 @@ class Session implements \ArrayAccess
         if ($this->getParam('session.expiration'))
             ini_set('session.gc_maxlifetime', (int)$this->getParam('session.expiration'));
 
-        // Create a new session
-        $this->create($adapter);
-
-        if ($this->getParam('session.regenerate') > 0 && ($_SESSION['_total_hits'] % (int)$this->getParam('session.regenerate')) === 0) {
-            // Regenerate session id and update session cookie
-            $this->regenerate();
-        } else {
-            // Always update session cookie to keep the session alive
-            $this->request->setCookie($this->getParam('session.name'), $_SESSION['_session_id'], time() + (int)$this->getParam('session.expiration'));
-        }
-
-        // Make sure that sessions are closed before exiting
-        register_shutdown_function(array($this, 'writeClose'));
-
     }
-
+    
     /**
-     * Create a new session.
+     * Start this session
      *
      * @param \Tk\Session\Adapter\Iface $adapter
      * @throws Exception
      * @return \Tk\Session\Adapter\Iface
      */
-    public function create($adapter = null)
+    public function start($adapter = null)
     {
-        // Destroy any current sessions
+        $this->started = true;
+        
+        // Destroy any existing sessions
         $this->destroy();
         if ($adapter instanceof Session\Adapter\Iface) {
             $this->adapter = $adapter;
-            // Register non-native adapter as the session handler
-            session_set_save_handler(array($this->adapter, 'open'), array($this->adapter, 'close'),
-                array($this->adapter, 'read'), array($this->adapter, 'write'), array($this->adapter, 'destroy'),
-                array($this->adapter, 'gc'));
+            session_set_save_handler(
+                array($adapter, 'open'), array($adapter, 'close'), array($adapter, 'read'), 
+                array($adapter, 'write'), array($adapter, 'destroy'), array($adapter, 'gc')
+            );
         }
 
         // Validate the session name
@@ -110,8 +114,8 @@ class Session implements \ArrayAccess
         // Name the session, this will also be the name of the cookie
         $sesName = $this->getParam('session.name');
 
-        if (isset($this->request[$sesName]) && isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == 'on') {
-            session_id($this->request[$sesName]);
+        if ($this->getRequest()->exists($sesName) && isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == 'on') {
+            session_id($this->getRequest()->get($sesName));
         }
         session_name($sesName);
 
@@ -119,16 +123,16 @@ class Session implements \ArrayAccess
         session_start();
 
         // reset the session cookie expiration
-        if ($this->request->cookieExists($sesName)) {
-            $this->request->setCookie($sesName, $this->request->get($sesName), time() + (int)$this->getParam('session.expiration'));
+        if ($this->getCookie()->exists($sesName)) {
+            $this->getCookie()->set($sesName, $this->getRequest()->get($sesName), time() + (int)$this->getParam('session.expiration'));
         }
 
         if(!isset($_SESSION[self::KEY_DATA])) {
             $_SESSION[self::KEY_DATA] = array(
                 'session_id' => session_id(),
-                'user_agent' => $this->request->getUserAgent(),
-                'ip_address' => $this->request->getRemoteAddr(),
-                'site_referer' => $this->request->getReferer(),
+                'user_agent' => $this->getRequest()->getUserAgent(),
+                'ip_address' => $this->getRequest()->getRemoteAddr(),
+                'site_referer' => $this->getRequest()->getReferer(),
                 'total_hits' => 0,
                 'last_activity' => 0
             );
@@ -139,21 +143,17 @@ class Session implements \ArrayAccess
 
         // Validate data only on hits after one
         if ($_SESSION[self::KEY_DATA]['total_hits'] > 1) {
-            // Validate the session
-            // TODO: Should we just check for all of em?
+            // Validate the session, regenerate if not valid.
             foreach ($this->getParam('session.validate') as $valid) {
                 switch ($valid) {
-                    // Check user agent for consistency
                     case 'user_agent' :
-                        if ($_SESSION[self::KEY_DATA][$valid] !== $this->request->getUserAgent())
-                            return $this->create();
+                        if ($_SESSION[self::KEY_DATA][$valid] !== $this->getRequest()->getUserAgent())
+                            return $this->start($adapter);
                         break;
-                    // Check ip address for consistency
                     case 'ip_address' :
-                        if ($_SESSION[self::KEY_DATA][$valid] !== $this->request->getRemoteAddr())
+                        if ($_SESSION[self::KEY_DATA][$valid] !== $this->getRequest()->getRemoteAddr())
                             return $this->create();
                         break;
-                    // Check expiration time to prevent users from manually modifying it
                     case 'expiration' :
                         if (time() - $_SESSION[self::KEY_DATA]['last_activity'] > ini_get('session.gc_maxlifetime'))
                             return $this->create();
@@ -164,6 +164,21 @@ class Session implements \ArrayAccess
         // Update last activity
         $_SESSION[self::KEY_DATA]['last_activity'] = time();
         
+        // Only run on first start
+        if (!$this->started) {
+            
+            if ($this->getParam('session.regenerate') > 0 && ($_SESSION['_total_hits'] % (int)$this->getParam('session.regenerate')) === 0) {
+                // Regenerate session id and update session cookie
+                $this->regenerate();
+            } else {
+                // Always update session cookie to keep the session alive
+                $this->getCookie()->set($this->getParam('session.name'), $_SESSION['_session_id'], time() + (int)$this->getParam('session.expiration'));
+            }
+
+            // Make sure that sessions are closed before exiting
+            register_shutdown_function(array($this, 'writeClose'));
+        }
+        
         return $this;
     }
 
@@ -173,6 +188,7 @@ class Session implements \ArrayAccess
      */
     public function regenerate()
     {
+        // TODO: we are using the adapter regenerate() function here could we add a callback 'create_id()' to the adapters to do this automatically?
         if ($this->adapter) {
             // Pass the regenerating off to the driver in case it wants to do anything special
             $_SESSION[self::KEY_DATA]['session_id'] = $this->adapter->regenerate();
@@ -185,9 +201,9 @@ class Session implements \ArrayAccess
         }
         // Get the session name
         $name = session_name();
-        if ($this->request->cookieExists($name)) {
-            // Change the cookie value to match the new session id to prevent "lag"
-            $_COOKIE[$name] = $_SESSION[self::KEY_DATA]['session_id'];
+        if ($this->getCookie()->exists($name)) {    // Change the cookie value to match the new session id to prevent "lag"
+            $this->getCookie()->set($name, $_SESSION[self::KEY_DATA]['session_id']);
+            //$_COOKIE[$name] = $_SESSION[self::KEY_DATA]['session_id'];
         }
         return $this;
     }
@@ -207,7 +223,7 @@ class Session implements \ArrayAccess
             // Re-initialize the array
             $_SESSION = array();
             // Delete the session cookie
-            $this->request->deleteCookie($name);
+            $this->getCookie()->delete($name);
         }
     }
 
@@ -263,8 +279,22 @@ class Session implements \ArrayAccess
         }
         return $this;
     }
-    
-    
+
+    /**
+     * @return Cookie
+     */
+    public function getCookie()
+    {
+        return $this->cookie;
+    }
+
+    /**
+     * @return Request
+     */
+    public function getRequest()
+    {
+        return $this->request;
+    }
     
     
     
@@ -282,6 +312,7 @@ class Session implements \ArrayAccess
         if (isset($_SESSION[$key])) {
             return $_SESSION[$key];
         }
+        return null;
     }
 
     /**
@@ -333,8 +364,7 @@ class Session implements \ArrayAccess
     {
         return isset($_SESSION[$key]);
     }
-
-
+    
     /**
      * looks for the $key in the params object,
      * if not found then prepends 'session.' to the key

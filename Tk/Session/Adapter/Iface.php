@@ -29,15 +29,6 @@ interface Iface extends \SessionHandlerInterface
     
     // SessionHandlerInterface
     
-    
-    /**
-     * Opens a session.
-     *
-     * @param   string $path  save path
-     * @param   string $name  session name
-     * @return  boolean
-     */
-    public function open($path, $name);
 
     /**
      * Closes a session.
@@ -47,29 +38,12 @@ interface Iface extends \SessionHandlerInterface
     public function close();
 
     /**
-     * Reads a session.
-     *
-     * @param   string $id session id
-     * @return  string
-     */
-    public function read($id);
-
-    /**
-     * Writes a session.
-     *
-     * @param   string $id  session id
-     * @param   string $data  session data
-     * @return  boolean
-     */
-    public function write($id, $data);
-
-    /**
      * Destroys a session.
      *
-     * @param   string $id  session id
+     * @param   string $sessionId
      * @return  boolean
      */
-    public function destroy($id);
+    public function destroy($sessionId);
 
     /**
      * Garbage collection.
@@ -78,6 +52,32 @@ interface Iface extends \SessionHandlerInterface
      * @return  boolean
      */
     public function gc($maxlifetime);
+    
+    /**
+     * Opens a session.
+     *
+     * @param string $path The path where to store/retrieve the session.
+     * @param string $sessionId The session id.
+     * @return  boolean
+     */
+    public function open($path, $sessionId);
+
+    /**
+     * Reads a session.
+     *
+     * @param   string $sessionId
+     * @return  string
+     */
+    public function read($sessionId);
+
+    /**
+     * Writes a session.
+     *
+     * @param   string $sessionId
+     * @param   string $data
+     * @return  boolean
+     */
+    public function write($sessionId, $data);
 
 }
 

@@ -11,12 +11,12 @@ namespace Tk;
  * $request = Request::createFromGlobals();
  * $cfg = \Tk\Config::getInstance();
  *
- * $cfg->setAppPath($appPath);
+ * $cfg->setAppPath($sitePath);
  * $cfg->setRequest($request);
- * $cfg->setAppUrl($request->getBasePath());
- * $cfg->setAppDataPath($cfg->getAppPath().'/data');
- * $cfg->setAppCachePath($cfg->getAppDataPath().'/cache');
- * $cfg->setAppTempPath($cfg->getAppDataPath().'/temp');
+ * $cfg->setUrl($request->getBasePath());
+ * $cfg->setDataPath($cfg->getSitePath().'/data');
+ * $cfg->setCachePath($cfg->getDataPath().'/cache');
+ * $cfg->setTempPath($cfg->getDataPath().'/temp');
  * // Useful for dependency management to create application objects
  * $cfg->setStdObject(function($test1, $test2, $test3) {
  *     $cfg = \Tk\Registry::getInstance();
@@ -84,14 +84,14 @@ class Config extends ArrayObject
     /**
      * Get an instance of this object
      *
-     * @param string $appUrl Only required on first call to init the config paths
-     * @param string $appPath
+     * @param string $siteUrl Only required on first call to init the config paths
+     * @param string $sitePath Only required on first call to init the config paths
      * @return Config
      */
-    static function getInstance($appUrl = '', $appPath = '')
+    static function getInstance($sitePath = '', $siteUrl = '')
     {
         if (static::$instance == null) {
-            static::$instance = new static($appUrl, $appPath);
+            static::$instance = new static($sitePath, $siteUrl);
         }
         return static::$instance;
     }
@@ -99,24 +99,24 @@ class Config extends ArrayObject
     /**
      * Construct the config object and initiate default settings
      *
-     * @param string $appUrl
-     * @param string $appPath
+     * @param string $siteUrl
+     * @param string $sitePath
      */
-    public function __construct($appUrl = '', $appPath = '')
+    public function __construct($sitePath = '', $siteUrl = '')
     {
         parent::__construct();
-        $this->init($appUrl, $appPath);
+        $this->init($sitePath, $siteUrl);
     }
 
     /**
      * init the default params.
      *
-     * @param string $appUrl
-     * @param string $appPath
+     * @param string $sitePath
+     * @param string $siteUrl
      */
-    protected function init($appUrl = '', $appPath = '')
+    protected function init($sitePath = '', $siteUrl = '')
     {
-        $this->setAppScripTime(microtime(true));
+        $this->setScripTime(microtime(true));
         $this->setConfig($this);
 
         // Setup isCli function in config.
@@ -128,27 +128,27 @@ class Config extends ArrayObject
         $this->setDebug(false);
 
         // Setup the app path if none exists
-        if (!$appUrl) {
-            $appUrl = dirname($_SERVER['PHP_SELF']);
+        if (!$siteUrl) {
+            $siteUrl = dirname($_SERVER['PHP_SELF']);
         }
-        $appUrl = rtrim($appUrl, '/');
-        $this->setAppUrl($appUrl);
-        if (!$appPath) {
-            $appPath = rtrim(dirname(dirname(dirname(dirname(__DIR__)))), '/');
+        $siteUrl = rtrim($siteUrl, '/');
+        $this->setSiteUrl($siteUrl);
+        if (!$sitePath) {
+            $sitePath = rtrim(dirname(dirname(dirname(dirname(__DIR__)))), '/');
         }
-        $this->setAppPath($appPath);
+        $this->setSitePath($sitePath);
 
         $this->setSystemLogPath(ini_get('error_log'));
         $this->setSystemLogLevel('error');
 
-        $this->setDataPath($this->getAppPath() . '/data');
-        $this->setDataUrl($this->getAppUrl() . '/data');
+        $this->setDataPath($this->getSitePath() . '/data');
+        $this->setDataUrl($this->getSiteUrl() . '/data');
 
-        $this->setVendorPath($this->getAppPath() . '/vendor');
-        $this->setVendorUrl($this->getAppUrl() . '/vendor');
+        $this->setVendorPath($this->getSitePath() . '/vendor');
+        $this->setVendorUrl($this->getSiteUrl() . '/vendor');
 
-        $this->setSrcPath($this->getAppPath() . '/src');
-        $this->setSrcUrl($this->getAppUrl() . '/src');
+        $this->setSrcPath($this->getSitePath() . '/src');
+        $this->setSrcUrl($this->getSiteUrl() . '/src');
 
         $this->setCachePath($this->getDataPath() . '/cache');
         $this->setCacheUrl($this->getDataUrl() . '/cache');
@@ -163,8 +163,8 @@ class Config extends ArrayObject
         $this->setSystemLicence('');
         $this->setSystemReleased('');
         
-        if (is_file($this->getAppPath() . '/composer.json')) {
-            $composer = json_decode(file_get_contents($this->getAppPath() . '/composer.json'));
+        if (is_file($this->getSitePath() . '/composer.json')) {
+            $composer = json_decode(file_get_contents($this->getSitePath() . '/composer.json'));
             $this->setSystemName($composer->name);
             $this->setSystemDescription($composer->description);
             $this->setSystemVersion($composer->version);
@@ -172,24 +172,22 @@ class Config extends ArrayObject
             $this->setSystemReleased($composer->time);
         }
         
-        
-        
     }
 
     /**
      * @return string
      */
-    public function getAppUrl()
+    public function getSiteUrl()
     {
-        return $this->get('app.url');
+        return $this->get('site.url');
     }
 
     /**
      * @return string
      */
-    public function getAppPath()
+    public function getSitePath()
     {
-        return $this->get('app.path');
+        return $this->get('site.path');
     }
 
     /**

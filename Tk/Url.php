@@ -96,11 +96,7 @@ class Url implements \Serializable
         
         $spec = trim($spec);
         if ($spec && self::$BASE_URL) {
-            //if (!preg_match('/^(#|javascript|mailto)/i', $spec) && !preg_match('/^([a-zA-Z_-]+\:\/\/)/', $spec)) {
-            // make sure path is ralative: IE: not `http://domain`, `mailto:email@`..., `//domain`, etc
-            
-            // TODO: not checked `domain.com/path/path`, need to create a regex for this one day
-            //vd(parse_url($spec), parse_url('#'), parse_url('javascript:;'), parse_url('mailto:test@domain.com'));
+            // TODO: not checked `domain.com/path/path`, need to create a regex for this one day;
             $p = parse_url($spec);
             if (!preg_match('/^(#|javascript|mailto)/i', $spec) && !isset($p['scheme'])) {
                 if (self::$BASE_URL) {

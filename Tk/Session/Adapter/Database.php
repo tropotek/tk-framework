@@ -8,9 +8,9 @@ namespace Tk\Session\Adapter;
  *    CREATE TABLE session (
  *       session_id VARCHAR(127) NOT NULL,
  *       data TEXT NOT NULL,
- *       modified DATETIME NOT NULL,
- *       created DATETIME NOT NULL,
- *       PRIMARY KEY (sessionId)
+ *       modified TIMESTAMP NOT NULL,
+ *       created TIMESTAMP NOT NULL,
+ *       PRIMARY KEY (session_id)
  *   );
  *  </code>
  *
@@ -104,7 +104,7 @@ class Database implements Iface
         // Load the session
         $query = sprintf('SELECT * FROM %s WHERE session_id = %s LIMIT 1', $this->db->quoteParameter($this->table), $this->db->quote($id));
         $result = $this->db->query($query);
-        $row = $result->fetch();
+        $row = $result->fetchObject();
         if (!$row) {  // No current session
             $this->sessionId = null;
             return '';

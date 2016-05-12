@@ -11,39 +11,23 @@ namespace Tk;
  * @link http://www.tropotek.com/
  * @license Copyright 2015 Michael Mifsud
  */
-class Request
-{
+class Request implements \ArrayAccess
+{    
+    
     /* Common request schemas */
     const SCHEME_HTTP = 'http';
     const SCHEME_HTTPS = 'https';
-
-    /**
-     * @var Session|array
-     */
-    protected $session = null;
-
-    /**
-     * @var Cookie|array
-     */
-    protected $cookie = null;
+    
+    
     
     
 
     /**
      * Request constructor.
-     *
-     * @param Session|array $session
-     * @param Cookie|array $cookie
      */
-    function __construct($session = array(), $cookie = array())
+    function __construct()
     {
-        $this->session = $session;
-        $this->cookie = $cookie;
-        try {   // Need a catch statement here as it could be run outside a try catch.
-            $this->sanitize();
-        } catch (\Exception $e) {
-            error_log(print_r($e->__toString(), true));
-        }
+        $this->sanitize();
     }
 
 
@@ -63,33 +47,36 @@ class Request
      */
     private function sanitize()
     {
-
-        // Clean $_REQUEST data
-        if (is_array($_REQUEST) && count($_REQUEST) > 0) {
-            foreach ($_REQUEST as $key => $val) {
-                $_REQUEST[$this->cleanKey($key)] = $this->cleanData($val);
+        try {   // Need a catch statement here as it could be run outside a try catch.
+            // Clean $_REQUEST data
+            if (is_array($_REQUEST) && count($_REQUEST) > 0) {
+                foreach ($_REQUEST as $key => $val) {
+                    $_REQUEST[$this->cleanKey($key)] = $this->cleanData($val);
+                }
             }
-        }
-
-        // Clean $_GET data
-        if (is_array($_GET) && count($_GET) > 0) {
-            foreach ($_GET as $key => $val) {
-                $_GET[$this->cleanKey($key)] = $this->cleanData($val);
+    
+            // Clean $_GET data
+            if (is_array($_GET) && count($_GET) > 0) {
+                foreach ($_GET as $key => $val) {
+                    $_GET[$this->cleanKey($key)] = $this->cleanData($val);
+                }
             }
-        }
-
-        // Clean $_POST Data
-        if (is_array($_POST) && count($_POST) > 0) {
-            foreach ($_POST as $key => $val) {
-                $_POST[$this->cleanKey($key)] = $this->cleanData($val);
+    
+            // Clean $_POST Data
+            if (is_array($_POST) && count($_POST) > 0) {
+                foreach ($_POST as $key => $val) {
+                    $_POST[$this->cleanKey($key)] = $this->cleanData($val);
+                }
             }
-        }
-
-        // Clean $_COOKIE Data
-        if (is_array($_COOKIE) && count($_COOKIE) > 0) {
-            foreach ($_COOKIE as $key => $val) {
-                $_COOKIE[$this->cleanKey($key)] = $this->cleanData($val);
+    
+            // Clean $_COOKIE Data
+            if (is_array($_COOKIE) && count($_COOKIE) > 0) {
+                foreach ($_COOKIE as $key => $val) {
+                    $_COOKIE[$this->cleanKey($key)] = $this->cleanData($val);
+                }
             }
+        } catch (\Exception $e) {
+            error_log(print_r($e->__toString(), true));
         }
     }
 
@@ -103,7 +90,6 @@ class Request
      *
      * @param	string|array $str
      * @return	string
-     * @todo: implement some other fast checks here
      */
     private function cleanData($str)
     {
@@ -114,7 +100,6 @@ class Request
             }
             return $new_array;
         }
-
         // Standardize newlines
         return preg_replace("/\015\012|\015|\012/", "\n", $str);
     }
@@ -221,35 +206,6 @@ class Request
         return array_keys($_REQUEST);
     }
 
-    
-    
-    
-    
-    
-    
-    
-
-
-    /**
-     * Get the session object.
-     * 
-     * @return array|Session
-     */
-    public function getSession()
-    {
-        return $this->session;
-    }
-
-    /**
-     * Get the cookie object
-     * 
-     * @return array|Cookie
-     */
-    public function getCookie()
-    {
-        return $this->cookie;
-    }
-
     /**
      * @return Url
      */
@@ -261,7 +217,7 @@ class Request
     /**
      * Returns the referring \Tk\Url if available.
      *
-     * @return \Tk\Url Returns null if there was no referer.
+     * @return null|Url Returns null if there was no referer.
      */
     public function getReferer()
     {
@@ -269,6 +225,7 @@ class Request
         if ($referer) {
             return Url::create($referer);
         }
+        return null;
     }
 
     /**
@@ -306,15 +263,12 @@ class Request
      */
     public function getRemoteAddr($checkProxy = true)
     {
-        $ip = '';
-        if ($checkProxy && $_SERVER['HTTP_CLIENT_IP'] != null) {
-            $ip = $_SERVER['HTTP_CLIENT_IP'];
-        } else if ($checkProxy && $_SERVER['HTTP_X_FORWARDED_FOR'] != null) {
-            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-        } else {
-            $ip = $_SERVER['REMOTE_ADDR'];
+        if ($checkProxy && isset($_SERVER['HTTP_CLIENT_IP'])) {
+            return $_SERVER['HTTP_CLIENT_IP'];
+        } else if ($checkProxy && isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            return $_SERVER['HTTP_X_FORWARDED_FOR'];
         }
-        return $ip;
+        return $_SERVER['REMOTE_ADDR'];
     }
 
     /**
@@ -404,10 +358,78 @@ class Request
      */
     public function getRawPostData()
     {
-        $postdata = file_get_contents("php://input");
-        return $postdata;
+        return file_get_contents("php://input");
     }
 
+    
+    
+    
+    // ArrayAccess Interface
 
+    /**
+     * Whether a offset exists
+     *
+     * @link http://php.net/manual/en/arrayaccess.offsetexists.php
+     * @param mixed $offset <p>
+     * An offset to check for.
+     * </p>
+     * @return boolean true on success or false on failure.
+     * </p>
+     * <p>
+     * The return value will be casted to boolean if non-boolean was returned.
+     * @since 5.0.0
+     */
+    public function offsetExists($offset)
+    {
+        return $this->exists($offset);
+    }
+
+    /**
+     * Offset to retrieve
+     *
+     * @link http://php.net/manual/en/arrayaccess.offsetget.php
+     * @param mixed $offset <p>
+     * The offset to retrieve.
+     * </p>
+     * @return mixed Can return all value types.
+     * @since 5.0.0
+     */
+    public function offsetGet($offset)
+    {
+        return $this->get($offset);
+    }
+
+    /**
+     * Offset to set
+     *
+     * @link http://php.net/manual/en/arrayaccess.offsetset.php
+     * @param mixed $offset <p>
+     * The offset to assign the value to.
+     * </p>
+     * @param mixed $value <p>
+     * The value to set.
+     * </p>
+     * @return void
+     * @since 5.0.0
+     */
+    public function offsetSet($offset, $value)
+    {
+        $this->set($offset, $value);
+    }
+
+    /**
+     * Offset to unset
+     *
+     * @link http://php.net/manual/en/arrayaccess.offsetunset.php
+     * @param mixed $offset <p>
+     * The offset to unset.
+     * </p>
+     * @return void
+     * @since 5.0.0
+     */
+    public function offsetUnset($offset)
+    {
+        $this->delete($offset);
+    }
 
 }

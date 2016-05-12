@@ -52,7 +52,7 @@ class ClassTool
      * @param string|Object $class
      * @return string
      */
-    static function classpath($class)
+    static function classPath($class)
     {
         if (is_object($class)) {
             $class = get_class($class);
@@ -62,20 +62,26 @@ class ClassTool
     }
 
     /**
-     * Get the url path of a class
+     * Get the site relative url path of a class
+     * Use \Tk\Url to get the full URL
+     * 
+     * Url::create(ClassTool::classUrl('\Tk\SomeClass', $config->getAppPath));
      *
      * @param string|Object $class
+     * @param string $sitePath full path to the base of the site
      * @return string
      */
-    static function classUrl($class)
+    static function classUrl($class, $sitePath)
     {
+        $sitePath = rtrim($sitePath, '/');
         if (is_object($class)) {
             $class = get_class($class);
         }
         $rc = new \ReflectionClass($class);
         $path = $rc->getFileName();
-        if (strpos($path, \Tk\Config::getInstance()->getAppPath()) === 0) {
-            return str_replace(\Tk\Config::getInstance()->getAppPath(), '' , $path);
+        
+        if (strpos($path, $sitePath) === 0) {
+            return str_replace($sitePath, '' , $path);
         }
         return basename($path);
     }
