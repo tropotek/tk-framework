@@ -133,8 +133,9 @@ class Config extends ArrayObject
         }
         $siteUrl = rtrim($siteUrl, '/');
         $this->setSiteUrl($siteUrl);
+        
         if (!$sitePath) {
-            $sitePath = rtrim(dirname(dirname(dirname(dirname(__DIR__)))), '/');
+            $sitePath = rtrim( dirname(dirname(dirname(dirname(dirname(__FILE__))))) , '/');
         }
         $this->setSitePath($sitePath);
 
