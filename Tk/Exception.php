@@ -44,3 +44,19 @@ class Exception extends \Exception
     }
 
 }
+
+class WarningException              extends Exception {}
+class ParseException                extends Exception {}
+class NoticeException               extends Exception {}
+class CoreErrorException            extends Exception {}
+class CoreWarningException          extends Exception {}
+class CompileErrorException         extends Exception {}
+class CompileWarningException       extends Exception {}
+class UserErrorException            extends Exception {}
+class UserWarningException          extends Exception {}
+class UserNoticeException           extends Exception {}
+class StrictException               extends Exception {}
+class RecoverableErrorException     extends Exception {}
+class DeprecatedException           extends Exception {}
+class UserDeprecatedException       extends Exception {}
+
