@@ -22,12 +22,14 @@ namespace Tk;
  * @link http://www.tropotek.com/
  * @license Copyright 2007 Michael Mifsud
  */
-class Url implements \Serializable
+class Url implements \Serializable, \IteratorAggregate
 {
-    
+    /**
+     * @var string
+     */
     static public $BASE_URL = '';
     
-
+    
     /**
      * This is the supplied full/partial url
      * @var string
@@ -523,20 +525,6 @@ class Url implements \Serializable
         }
         return '';
     }
-    
-    /**
-     * Remove a field in the query string
-     *
-     * @param string $field
-     * @return Url
-     */
-    public function remove($field)
-    {
-        if (isset($this->query[$field])) {
-            unset($this->query[$field]);
-        }
-        return $this;
-    }
 
     /**
      * Check if a query field exists in the array
@@ -548,34 +536,32 @@ class Url implements \Serializable
     {
         return isset($this->query[$field]);
     }
-    
-    
 
     /**
      * Remove a field in the query string
      *
      * @param string $field
      * @return Url
-     * @deprecated Use remove() to bring inline with symfony parameter bag obj
      */
     public function delete($field)
     {
-        return $this->remove($field);
+        if ($this->has($field)) {
+            unset($this->query[$field]);
+        }
+        return $this;
     }
 
+
     /**
-     * Check if a query field exists in the array
+     * IteratorAggregate for iterating over the object like an array.
      *
-     * @param string $field
-     * @return bool
-     * @deprecated Use has() to bring inline with symfony parameter bag obj
+     * @return \ArrayIterator
      */
-    public function exists($field)
+    public function getIterator()
     {
-        return $this->has($field);
+        return new \ArrayIterator($_REQUEST);
     }
-    
-    
+
 
     /**
      * Redirect Codes:
@@ -635,6 +621,8 @@ class Url implements \Serializable
      *
      * @link http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
      * @link http://edoceo.com/creo/php-redirect.php
+     * @param int $code
+     * @throws \Exception
      */
     public function redirect($code = 302)
     {

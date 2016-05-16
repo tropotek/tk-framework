@@ -11,14 +11,21 @@ namespace Tk;
  * @link http://www.tropotek.com/
  * @license Copyright 2015 Michael Mifsud
  */
-class Request implements \ArrayAccess
+class Request implements \IteratorAggregate
 {    
     
     /* Common request schemas */
     const SCHEME_HTTP = 'http';
     const SCHEME_HTTPS = 'https';
-    
-    
+
+    /**
+     * Set this if you want to extend the Request's sanitizer method
+     * This will be called after the existing sanitizer method is run.
+     * The callback will supply the request as a single argument passed to the callback.
+     * 
+     * @var callable
+     */
+    static $sanitizerCallback = null;
     
     
 
@@ -75,6 +82,9 @@ class Request implements \ArrayAccess
                     $_COOKIE[$this->cleanKey($key)] = $this->cleanData($val);
                 }
             }
+            if (is_callable(static::$sanitizerCallback)) {
+                call_user_func_array(static::$sanitizerCallback, array($this));
+            } 
         } catch (\Exception $e) {
             error_log(print_r($e->__toString(), true));
         }
@@ -432,4 +442,16 @@ class Request implements \ArrayAccess
         $this->delete($offset);
     }
 
+
+    /**
+     * IteratorAggregate for iterating over the object like an array.
+     *
+     * @return \ArrayIterator
+     */
+    public function getIterator()
+    {
+        return new \ArrayIterator($_REQUEST);
+    }
+    
+    
 }
