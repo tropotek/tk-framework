@@ -63,9 +63,9 @@ class ClassTool
 
     /**
      * Get the site relative url path of a class
-     * Use \Tk\Url to get the full URL
+     * Use \Tk\Uri to get the full URL
      * 
-     * Url::create(ClassTool::classUrl('\Tk\SomeClass', $config->getAppPath));
+     * \Tk\Uri::create(ClassTool::classUrl('\Tk\SomeClass', $config->getAppPath));
      *
      * @param string|Object $class
      * @param string $sitePath full path to the base of the site
