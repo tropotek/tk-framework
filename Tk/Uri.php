@@ -14,7 +14,7 @@ use Psr\Http\Message\UriInterface;
  * - __port__ defaults to 80
  *
  * <code>
- * echo \Tk\Url::create('/full/uri/path/index.html')->__toString();
+ * echo Uri::create('/full/uri/path/index.html')->__toString();
  * // Result:
  * //  http://localhost/full/uri/path/index.html
  * </code>
@@ -127,7 +127,7 @@ class Uri implements UriInterface, \Serializable, \IteratorAggregate
      * A static factory method to facilitate inline calls
      *
      * <code>
-     *   \Tk\Url::create('http://example.com/test');
+     *   \Tk\Uri::create('http://example.com/test');
      * </code>
      *
      * @param $spec

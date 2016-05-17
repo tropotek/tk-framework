@@ -225,7 +225,7 @@ class Request implements \IteratorAggregate
     }
 
     /**
-     * Returns the referring \Tk\Url if available.
+     * Returns the referring \Tk\Uri if available.
      *
      * @return null|Uri Returns null if there was no referer.
      */
