@@ -130,6 +130,8 @@ class Pdo extends \PDO
      * @param string $dbType
      * @param array $options
      * @return Pdo
+     * @deprecated 
+     * @todo Need to create a simpler create method??????? Maybe the user should create a Factory for instance creation...
      */
     static function createInstance($dbName, $dbUser, $dbPass, $dbHost = 'localhost', $dbType = 'mysql', $options = array())
     {

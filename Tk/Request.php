@@ -217,23 +217,23 @@ class Request implements \IteratorAggregate
     }
 
     /**
-     * @return Url
+     * @return Uri
      */
     public function getUri()
     {
-        return Url::create($_SERVER["REQUEST_URI"]);
+        return Uri::create($_SERVER["REQUEST_URI"]);
     }
 
     /**
      * Returns the referring \Tk\Url if available.
      *
-     * @return null|Url Returns null if there was no referer.
+     * @return null|Uri Returns null if there was no referer.
      */
     public function getReferer()
     {
         $referer = $_SERVER['HTTP_REFERER'];
         if ($referer) {
-            return Url::create($referer);
+            return Uri::create($referer);
         }
         return null;
     }

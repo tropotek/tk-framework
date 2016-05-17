@@ -152,11 +152,11 @@ class Session implements \ArrayAccess
                         break;
                     case 'ip_address' :
                         if ($_SESSION[self::KEY_DATA][$valid] !== $this->getRequest()->getRemoteAddr())
-                            return $this->create();
+                            return $this->start();
                         break;
                     case 'expiration' :
                         if (time() - $_SESSION[self::KEY_DATA]['last_activity'] > ini_get('session.gc_maxlifetime'))
-                            return $this->create();
+                            return $this->start();
                         break;
                 }
             }
@@ -349,8 +349,7 @@ class Session implements \ArrayAccess
     public function delete($key)
     {
         if ($key != self::KEY_DATA)
-            return $this;
-        unset($_SESSION[$key]);
+            unset($_SESSION[$key]);
         return $this;
     }
 
