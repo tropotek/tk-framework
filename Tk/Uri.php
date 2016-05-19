@@ -82,7 +82,7 @@ class Uri implements UriInterface, \Serializable, \IteratorAggregate
     /**
      * @var string
      */
-    protected $user = '';
+    protected $username = '';
 
 
 
@@ -208,7 +208,7 @@ class Uri implements UriInterface, \Serializable, \IteratorAggregate
                 //$this->setPort($_SERVER['SERVER_PORT']);
             }
             if (array_key_exists('user', $components)) {
-                $this->user = $components['user'];
+                $this->username = $components['user'];
                 //$this->setUser($components['user']);
             }
             if (array_key_exists('pass', $components)) {
@@ -249,99 +249,6 @@ class Uri implements UriInterface, \Serializable, \IteratorAggregate
         }
         return false;
     }
-
-
-    /**
-     * Set the fragment portion of the uri
-     *
-     * @param string $str
-     * @return Uri
-     * @deprecated 
-     */
-    public function setFragment($str)
-    {
-        $this->fragment = urldecode($str);
-        return $this;
-    }
-
-    /**
-     * Set the port of the uri
-     *
-     * @param string $str
-     * @return Uri
-     * @deprecated
-     */
-    public function setPort($str)
-    {
-        $this->port = (int)$str;
-        return $this;
-    }
-
-    /**
-     * Set the scheme
-     *
-     * @param string $scheme
-     * @return Uri
-     * @deprecated
-     */
-    public function setScheme($scheme)
-    {
-        $this->scheme = $scheme;
-        return $this;
-    }
-
-    /**
-     * Set the host portion of the uri
-     *
-     * @param string $str
-     * @return Uri
-     * @deprecated
-     */
-    public function setHost($str)
-    {
-        $this->host = $str;
-        return $this;
-    }
-
-    /**
-     * Set the password portion of the uri
-     *
-     * @param string $str
-     * @return Uri
-     * @deprecated
-     */
-    public function setPassword($str)
-    {
-        $this->password = $str;
-        return $this;
-    }
-
-    /**
-     * Set the user portion of the uri
-     *
-     * @param string $str
-     * @return Uri
-     * @deprecated
-     */
-    public function setUser($str)
-    {
-        $this->user = $str;
-        return $this;
-    }
-
-    /**
-     * Set the path portion of the uri
-     *
-     * @param string $path
-     * @return Uri
-     * @deprecated
-     */
-    public function setPath($path)
-    {
-        $path = urldecode($path);
-        $this->path = $path;
-        return $this;
-    }
     
     
 
@@ -351,9 +258,9 @@ class Uri implements UriInterface, \Serializable, \IteratorAggregate
      *
      * @return string
      */
-    public function getUser()
+    public function getUsername()
     {
-        return $this->user;
+        return $this->username;
     }
 
     /**
@@ -410,11 +317,11 @@ class Uri implements UriInterface, \Serializable, \IteratorAggregate
      * clear and reset the query string
      *
      * @return Uri
+     * @deprecated use withQuery()
      */
     public function reset()
     {
-        $this->query = array();
-        return $this;
+        return $this->withQuery('');
     }
 
     /**
@@ -422,15 +329,16 @@ class Uri implements UriInterface, \Serializable, \IteratorAggregate
      *
      * @param string $field
      * @param string $value
-     * @return Uri
+     * @return Uri 
      */
     public function set($field, $value = null)
     {
+        $uri = clone $this;
         if ($value === null) {
             $value = $field;
         }
-        $this->query[$field] = $value;
-        return $this;
+        $uri->query[$field] = $value;
+        return $uri;
     }
 
     /**
@@ -466,10 +374,11 @@ class Uri implements UriInterface, \Serializable, \IteratorAggregate
      */
     public function delete($field)
     {
-        if ($this->has($field)) {
-            unset($this->query[$field]);
+        $uri = clone $this;
+        if ($uri->has($field)) {
+            unset($uri->query[$field]);
         }
-        return $this;
+        return $uri;
     }
 
 
@@ -480,7 +389,7 @@ class Uri implements UriInterface, \Serializable, \IteratorAggregate
      */
     public function getIterator()
     {
-        return new \ArrayIterator($_REQUEST);
+        return new \ArrayIterator($this->query);
     }
 
 
@@ -544,6 +453,8 @@ class Uri implements UriInterface, \Serializable, \IteratorAggregate
      * @link http://edoceo.com/creo/php-redirect.php
      * @param int $code
      * @throws \Exception
+     * 
+     * @todo: maybe this needs to go somewhere else if we are considering the PSR7 standards.
      */
     public function redirect($code = 302)
     {
@@ -816,8 +727,8 @@ class Uri implements UriInterface, \Serializable, \IteratorAggregate
     public function getUserInfo()
     {
         $str = '';
-        if ($this->getUser()) {
-            $str .= $this->getUser();
+        if ($this->getUsername()) {
+            $str .= $this->getUsername();
         }
         if ($this->getPassword()) {
             $str .= ':' . $this->getPassword();
@@ -863,8 +774,9 @@ class Uri implements UriInterface, \Serializable, \IteratorAggregate
 
     
     
-    
-    
+
+
+
     /**
      * Return an instance with the specified scheme.
      *
@@ -883,10 +795,7 @@ class Uri implements UriInterface, \Serializable, \IteratorAggregate
     public function withScheme($scheme)
     {
         $uri = clone $this;
-        if ($scheme) {
-            $uri->scheme = $scheme;
-        }
-        return $uri;
+        return $uri->setScheme($scheme);
     }
 
     /**
@@ -899,19 +808,15 @@ class Uri implements UriInterface, \Serializable, \IteratorAggregate
      * user; an empty string for the user is equivalent to removing user
      * information.
      *
-     * @param string $user The user name to use for authority.
+     * @param string $username The user name to use for authority.
      * @param null|string $password The password associated with $user.
      * @return Uri A new instance with the specified user information.
      */
-    public function withUserInfo($user, $password = null)
+    public function withUserInfo($username, $password = null)
     {
         $uri = clone $this;
-        if ($user) {
-            $uri->user = $user;
-        }
-        if ($password) {
-            $uri->password = $password;
-        }
+        $uri->setUsername($username);
+        $uri->setPassword($password);
         return $uri;
     }
 
@@ -930,10 +835,7 @@ class Uri implements UriInterface, \Serializable, \IteratorAggregate
     public function withHost($host)
     {
         $uri = clone $this;
-        if ($host) {
-            $uri->host = $host;
-        }
-        return $uri;
+        return $uri->setHost($host);
     }
 
     /**
@@ -956,10 +858,7 @@ class Uri implements UriInterface, \Serializable, \IteratorAggregate
     public function withPort($port)
     {
         $uri = clone $this;
-        if ($port && $port != 80) {
-            $uri->port = $port;
-        }
-        return $uri;
+        return $uri->setPort($port);
     }
 
     /**
@@ -987,12 +886,7 @@ class Uri implements UriInterface, \Serializable, \IteratorAggregate
     public function withPath($path)
     {
         $uri = clone $this;
-        if ($path) {
-            $uri->path = urldecode($path);
-            // TODO: see if we need to incorporate the $BASE_URL_PATH here,
-            // We may not have to as it would change the PSR standard return value.
-        }
-        return $uri;
+        return $uri->setPath($path);
     }
 
     /**
@@ -1038,10 +932,103 @@ class Uri implements UriInterface, \Serializable, \IteratorAggregate
     public function withFragment($fragment)
     {
         $uri = clone $this;
-        $uri->fragment = $fragment;
-        return $uri;
+        return $uri->setFragment($fragment);
     }
+
     
     
+    
+    
+    
+
+    /**
+     * Set the fragment portion of the uri
+     *
+     * @param string $fragment
+     * @return Uri 
+     */
+    public function setFragment($fragment)
+    {
+        $this->fragment = urldecode($fragment);
+        return $this;
+    }
+
+    /**
+     * Set the port of the uri
+     *
+     * @param int $port
+     * @return Uri 
+     */
+    public function setPort($port)
+    {
+        $port = (int)$port;
+        if ($port && ($port <= 0 || $port >= 65535))
+            throw new \InvalidArgumentException('Invalid port, valid values are 1-65535.');
+        if ($port == 80) {
+            $port = null;
+        }
+        $this->port = $port;
+        return $this;
+    }
+
+    /**
+     * Set the scheme
+     *
+     * @param string $scheme
+     * @return Uri
+     */
+    public function setScheme($scheme)
+    {
+        $this->scheme = $scheme;
+        return $this;
+    }
+
+    /**
+     * Set the host portion of the uri
+     *
+     * @param string $host
+     * @return Uri
+     */
+    public function setHost($host)
+    {
+        $this->host = $host;
+        return $this;
+    }
+
+    /**
+     * Set the path portion of the uri
+     *
+     * @param string $path
+     * @return Uri
+     */
+    public function setPath($path)
+    {
+        $this->path = $path;
+        return $this;
+    }
+
+    /**
+     * Set the password portion of the uri
+     *
+     * @param string $password
+     * @return Uri
+     */
+    public function setPassword($password)
+    {
+        $this->password = $password;
+        return $this;
+    }
+
+    /**
+     * Set the user portion of the uri
+     *
+     * @param string $username
+     * @return Uri
+     */
+    public function setUsername($username)
+    {
+        $this->username = $username;
+        return $this;
+    }
     
 }
