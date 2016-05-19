@@ -16,7 +16,7 @@ class UriTest extends \PHPUnit_Framework_TestCase
 
     public function __construct()
     {
-        parent::__construct('\Tk\Uri Test');
+        parent::__construct('Uri Test');
     }
 
     public function setUp()
