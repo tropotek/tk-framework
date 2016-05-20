@@ -142,6 +142,30 @@ class Pdo extends \PDO
     }
 
     /**
+     * 
+     * $options = array(
+     *   'db.type' => 'mysql',
+     *   'db.host' => 'localhost',
+     *   'db.name' => 'database',
+     *   'db.user' => 'user',
+     *   'db.pass' => 'pass',
+     *   'timezone' => '',              // optional
+     *   'mysql.ansi.quotes' => false   // optional
+     * );
+     * 
+     * @param array $options
+     * @return Pdo
+     */
+    static function create($options)
+    {
+        $dns = $options['db.type'] . ':dbname=' . $options['db.name'] . ';host=' . $options['db.host'];
+        $obj = new self($dns, $options['db.user'], $options['db.pass'], $options);
+
+        return $obj;
+    }
+    
+    
+    /**
      * Method to return an array of connection attributes.
      *
      * @see http://www.php.net/manual/en/pdo.getattribute.php Pdo getAttribute
