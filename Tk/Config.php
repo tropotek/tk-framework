@@ -71,6 +71,8 @@ namespace Tk;
  * @author Michael Mifsud <info@tropotek.com>
  * @link http://www.tropotek.com/
  * @license Copyright 2007 Michael Mifsud
+ * @deprecated Will consider using a flat array and some sort of initilasation static method somewhere (A helper maybe???)
+ *  -- See what other frameworks are doing for their config system, TIP: keep it simple....
  */
 class Config extends ArrayObject
 {
