@@ -29,7 +29,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
-     * Add item to collection
+     * Set an item in the collection
      *
      * @param $key
      * @param $value
