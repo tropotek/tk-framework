@@ -62,8 +62,19 @@ class ArrayObject implements \IteratorAggregate, \ArrayAccess, \Serializable, \C
      * Return the native data array
      *
      * @return array
+     * @deprecated Use all()
      */
     public function getDataArray()
+    {
+        return $this->all();
+    }
+
+    /**
+     * Return the native data array
+     *
+     * @return array
+     */
+    public function all()
     {
         return $this->array;
     }
@@ -72,7 +83,7 @@ class ArrayObject implements \IteratorAggregate, \ArrayAccess, \Serializable, \C
     public function setDataArray($array)
     {
         if ($array instanceof ArrayObject) {
-            $array = $array->getDataArray();
+            $array = $array->all();
         }
         if (!is_array($array)) {
             throw new \UnexpectedValueException('Parameter not of type array or ' . get_class($this));
@@ -90,7 +101,7 @@ class ArrayObject implements \IteratorAggregate, \ArrayAccess, \Serializable, \C
     public function merge($array)
     {
         if ($array instanceof ArrayObject) {
-            $array = $array->getDataArray();
+            $array = $array->all();
         }
         if (!is_array($array)) {
             throw new \UnexpectedValueException('Parameter not of type array or ' . get_class($this));
@@ -237,7 +248,7 @@ class ArrayObject implements \IteratorAggregate, \ArrayAccess, \Serializable, \C
      * @param string $key
      * @return bool
      */
-    public function exists($key)
+    public function has($key)
     {
         return $this->offsetExists($key);
     }
