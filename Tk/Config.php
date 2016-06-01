@@ -317,7 +317,7 @@ class Config extends ArrayObject
     /**
      * Import params from another registry object or array
      *
-     * @param Registry|array $params
+     * @param array $params
      * @return $this
      */
     public function import($params)
@@ -367,8 +367,6 @@ class Config extends ArrayObject
         }
         return null;
     }
-
-
 
     /**
      * Return a group of entries from the registry
