@@ -23,8 +23,7 @@
       "Tk\\": ""
     },
     "files": [
-      "Tk/Exception.php",
-      "bootstrap.php"
+      "Tk/Exception.php"
     ]
   },
   "require": {
