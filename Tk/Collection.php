@@ -29,6 +29,18 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
+     * Add a list of items to the collection
+     * 
+     * @param array $items Key-value array of data to append to this collection
+     */
+    public function replace(array $items)
+    {
+        foreach ($items as $key => $value) {
+            $this->set($key, $value);
+        }
+    }
+
+    /**
      * Set an item in the collection
      *
      * @param $key
@@ -42,23 +54,11 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
-     * Add a list of items to the collection
-     * 
-     * @param array $items Key-value array of data to append to this collection
-     */
-    public function replace(array $items)
-    {
-        foreach ($items as $key => $value) {
-            $this->set($key, $value);
-        }
-    }
-
-    /**
      * Get collection item for key
      * 
      * @param $key
-     * @param null $default
-     * @return null
+     * @param null|mixed $default
+     * @return mixed
      */
     public function get($key, $default = null)
     {
@@ -186,7 +186,13 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
     {
         return new \ArrayIterator($this->data);
     }
-    
-    
+
+    /**
+     * @return array
+     */
+    public function toArray()
+    {
+        return $this->data;
+    }
 
 }
