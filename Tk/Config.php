@@ -88,6 +88,18 @@ class Config extends ArrayObject
 
 
     /**
+     * Construct the config object and initiate default settings
+     *
+     * @param string $siteUrl
+     * @param string $sitePath
+     */
+    public function __construct($sitePath = '', $siteUrl = '')
+    {
+        parent::__construct();
+        $this->init($sitePath, $siteUrl);
+    }
+
+    /**
      * Get an instance of this object
      *
      * @param string $siteUrl Only required on first call to init the config paths
@@ -100,18 +112,6 @@ class Config extends ArrayObject
             static::$instance = new static($sitePath, $siteUrl);
         }
         return static::$instance;
-    }
-
-    /**
-     * Construct the config object and initiate default settings
-     *
-     * @param string $siteUrl
-     * @param string $sitePath
-     */
-    public function __construct($sitePath = '', $siteUrl = '')
-    {
-        parent::__construct();
-        $this->init($sitePath, $siteUrl);
     }
 
     /**
@@ -308,16 +308,10 @@ class Config extends ArrayObject
         return $this;
     }
 
-
-
-
-
-
-
     /**
      * Import params from another registry object or array
      *
-     * @param array $params
+     * @param array|\ArrayAccess $params
      * @return $this
      */
     public function import($params)
