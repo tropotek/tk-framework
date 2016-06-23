@@ -1,14 +1,14 @@
 <?php
-namespace Tk\Util;
+namespace Tk;
 
 /**
- * Tools for dealing with filesytems data
+ * Tools for dealing with filesystem data
  *
  * @author Michael Mifsud <info@tropotek.com>
  * @link http://www.tropotek.com/
  * @license Copyright 2015 Michael Mifsud
  */
-class Filesystem
+class File
 {
 
 
@@ -18,7 +18,7 @@ class Filesystem
      * @param $pathname
      * @return bool true if path is absolute.
      */
-    static function isAbsolute($pathname)
+    static public function isAbsolute($pathname)
     {
         return !empty($pathname) && ($pathname[0] === '/' || preg_match('/^[A-Z]:\\\\/i', $pathname) || substr($pathname, 0, 2) == '\\\\');
     }
@@ -29,7 +29,7 @@ class Filesystem
      * @param string $str
      * @return int
      */
-    static function string2Bytes($str)
+    static public function string2Bytes($str)
     {
         $sUnit = substr($str, -1);
         $iSize = (int)substr($str, 0, -1);
@@ -61,7 +61,7 @@ class Filesystem
      * @return string
      * @author http://php-pdb.sourceforge.net/samples/viewSource.php?file=twister.php
      */
-    static function bytes2String($bytes, $round = 2)
+    static public function bytes2String($bytes, $round = 2)
     {
         $tags = array('b', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
         $index = 0;
@@ -104,9 +104,8 @@ class Filesystem
      * @param string $path
      * @return int
      */
-    static function diskSpace($path)
+    static public function diskSpace($path)
     {
-        $path = self::ObjToStr($path);
         if (is_dir($path)) {
             $s = stat($path);
         }
@@ -136,7 +135,7 @@ class Filesystem
      * @param $path
      * @return string
      */
-    static function getExtension($path)
+    static public function getExtension($path)
     {
         return pathinfo($path, PATHINFO_EXTENSION);
     }
@@ -151,7 +150,7 @@ class Filesystem
      *
      * @return int
      */
-    static function getMaxUploadSize()
+    static public function getMaxUploadSize()
     {
         $maxPost = self::string2Bytes(ini_get('post_max_size'));
         $maxUpload = self::string2Bytes(ini_get('upload_max_filesize'));
@@ -167,7 +166,7 @@ class Filesystem
      * @param string $path
      * @return bool
      */
-    static function rmdir($path)
+    static public function rmdir($path)
     {
         if (is_file($path)) {
             if (is_writable($path)) {
@@ -199,5 +198,46 @@ class Filesystem
         }
     }
     
+    /**
+     * Get the mime type of a file based on its extension
+     *
+     * @param string $filename
+     * @return string
+     * @package Tk
+     */
+    static public function getFileMimeType($filename)
+    {
+        $mime_types = array('txt' => 'text/plain', 'htm' => 'text/html', 'html' => 'text/html', 'php' => 'text/html', 'css' => 'text/css', 'js' => 'application/javascript', 'json' => 'application/json', 'xml' => 'application/xml', 'swf' => 'application/x-shockwave-flash', 'flv' => 'video/x-flv',
+
+            // images
+            'png' => 'image/png', 'jpe' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'jpg' => 'image/jpeg', 'gif' => 'image/gif', 'bmp' => 'image/bmp', 'ico' => 'image/vnd.microsoft.icon', 'tiff' => 'image/tiff', 'tif' => 'image/tiff', 'svg' => 'image/svg+xml', 'svgz' => 'image/svg+xml',
+
+            // archives
+            'zip' => 'application/zip', 'rar' => 'application/x-rar-compressed', 'exe' => 'application/x-msdownload', 'msi' => 'application/x-msdownload', 'cab' => 'application/vnd.ms-cab-compressed',
+
+            // audio/video
+            'mp3' => 'audio/mpeg', 'qt' => 'video/quicktime', 'mov' => 'video/quicktime',
+
+            // adobe
+            'pdf' => 'application/pdf', 'psd' => 'image/vnd.adobe.photoshop', 'ai' => 'application/postscript', 'eps' => 'application/postscript', 'ps' => 'application/postscript',
+
+            // ms office
+            'doc' => 'application/msword', 'rtf' => 'application/rtf', 'xls' => 'application/vnd.ms-excel', 'ppt' => 'application/vnd.ms-powerpoint',
+
+            // open office
+            'odt' => 'application/vnd.oasis.opendocument.text', 'ods' => 'application/vnd.oasis.opendocument.spreadsheet');
+        $extArr = explode('.', $filename);
+        $ext = strtolower(array_pop($extArr));
+        if (array_key_exists($ext, $mime_types)) {
+            return $mime_types[$ext];
+        } elseif (function_exists('finfo_open')) {
+            $finfo = finfo_open(FILEINFO_MIME);
+            $mimetype = finfo_file($finfo, $filename);
+            finfo_close($finfo);
+            return $mimetype;
+        } else {
+            return 'application/octet-stream';
+        }
+    }
 
 }

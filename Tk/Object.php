@@ -1,5 +1,5 @@
 <?php
-namespace Tk\Util;
+namespace Tk;
 
 /**
  * Class ClassTool
@@ -10,10 +10,9 @@ namespace Tk\Util;
  * @link http://www.tropotek.com/
  * @license Copyright 2015 Michael Mifsud
  */
-class ClassTool
+class Object
 {
-
-
+    
     /**
      * Take a class in the form of Tk_Some_Class
      * And convert it to a class like \Tk\Some\Class
@@ -86,6 +85,28 @@ class ClassTool
         return basename($path);
     }
 
-
+    /**
+     * Convert a map array to a stdClass object
+     *
+     * @param array $array
+     * @return \stdClass|null Returns null on error
+     */
+    function arrayToObject($array)
+    {
+        if (!is_array($array)) {
+            return null;
+        }
+        $object = new \stdClass();
+        if (is_array($array) && count($array) > 0) {
+            foreach ($array as $name => $value) {
+                $name = strtolower(trim($name));
+                if (!empty($name)) {
+                    $object->$name = self::arrayToObject($value);
+                }
+            }
+            return $object;
+        }
+        return null;
+    }
 
 }
