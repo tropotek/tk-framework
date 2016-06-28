@@ -17,7 +17,7 @@ class Str
      * By default the $attrs contains tag events
      *
      * @param string $str
-     * @param array $atrs Eg: array('onclick', 'onmouseup', 'onmousedown', ...);
+     * @param array $attrs Eg: array('onclick', 'onmouseup', 'onmousedown', ...);
      * @return string
      */
     static public function stripAttrs($str, $attrs = null)
@@ -225,8 +225,41 @@ class Str
         )*$%xs', $string);
 
     }
-    
-    
+
+
+
+    /**
+     * varToString
+     *
+     * @param $var
+     * @return string
+     */
+    static public function varToString($var)
+    {
+        if (is_object($var)) {
+            return sprintf('Object(%s)', get_class($var));
+        }
+        if (is_array($var)) {
+            $a = array();
+            foreach ($var as $k => $v) {
+                $a[] = sprintf('%s => %s', $k, self::varToString($v));
+            }
+            return sprintf('Array(%s)', implode(', ', $a));
+        }
+        if (is_resource($var)) {
+            return sprintf('Resource(%s)', get_resource_type($var));
+        }
+        if (null === $var) {
+            return 'null';
+        }
+        if (false === $var) {
+            return 'false';
+        }
+        if (true === $var) {
+            return 'true';
+        }
+        return (string) $var;
+    }
     
     
     
