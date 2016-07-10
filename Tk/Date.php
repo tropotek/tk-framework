@@ -91,8 +91,8 @@ class Date
             $time = '@'.$time;
         }
         
-        $date = new \DateTime($time);
-        $date->setTimezone($timezone);
+        $date = new \DateTime($time, $timezone);
+        //$date->setTimezone($timezone);
         return $date;
     }
 
