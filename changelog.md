@@ -1,5 +1,26 @@
 #CHANGELOG#
 
+Ver 2.0.1 [2016-07-10]:
+-------------------------------
+ - Added tinymce to edit page...
+ - Added basic view and edit controllers for wiki pages
+ - Finished user login, register
+ - Started Wiki pages and routing
+ - More wiki updates, updated the Auth adapters too
+ - Finalised base template site
+ - Finished routing, added new template to site
+ - Finished basic HTTP objects
+ - Finalised Basic Routing, Started KErnal
+ - Added new files to the new http lib
+ - Fixed Url to Uri class names and methods
+ - Started to implement PSR7 interfaces, this will break most things using the URL
+ - Updated code, added an update.md with info for the updated codes...
+ - Finished draft of student rotation select grid
+ - Finalised staff rotation manager/editor table.
+ - Started rotation creation javascript plugin
+ - Merge branch 'master' of git://github.com/tropotek/tk-framework
+
+
 Ver 2.0.0 [2016-04-19]:
 -------------------------------
  - Finalised base code for uni apps
