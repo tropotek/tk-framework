@@ -150,8 +150,8 @@ class Date
             $startYear = $startYear - 1;
             $endYear = $startYear;
         }
-        $start = new \DateTime($startYear.'-07-01 00:00:00');
-        $end = new \DateTime($endYear.'-06-30 23:59:59');
+        $start = new \DateTime($startYear.'-07-01 00:00:00', $date->getTimezone());
+        $end = new \DateTime($endYear.'-06-30 23:59:59', $date->getTimezone());
         
         return array($start, $end);
     }
@@ -165,7 +165,7 @@ class Date
      */
     static function ceil(\DateTime $date)
     {
-        return new \DateTime($date->format('Y-m-d 23:59:59'));
+        return new \DateTime($date->format('Y-m-d 23:59:59'), $date->getTimezone());
     }
 
     /**
@@ -176,7 +176,7 @@ class Date
      */
     static function floor(\DateTime $date)
     {
-        return new \DateTime($date->format('Y-m-d 00:00:00'));
+        return new \DateTime($date->format('Y-m-d 00:00:00'), $date->getTimezone());
     }
 
     /**
@@ -187,7 +187,7 @@ class Date
      */
     static function getMonthStart(\DateTime $date)
     {
-        return new \DateTime($date->format('Y-1-d 00:00:00'));
+        return new \DateTime($date->format('Y-1-d 00:00:00'), $date->getTimezone());
     }
 
     /**
@@ -199,7 +199,7 @@ class Date
     static function getMonthEnd(\DateTime $date)
     {
         $lastDay = self::getMonthDays($date->format('n'), $date->format('Y'));
-        return new \DateTime($date->format('Y-'.$lastDay.'-d 23:59:59'));
+        return new \DateTime($date->format('Y-'.$lastDay.'-d 23:59:59'), $date->getTimezone());
     }
 
     
