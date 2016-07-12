@@ -14,27 +14,33 @@ namespace Tk;
 class Encrypt
 {
     /**
-     * The default key if none entered
      * @var string
      */
-    static $key = '@@_Default_TK_@@';
+    private $key = '';
+
+    /**
+     * Encrypt constructor.
+     *
+     * @param string $key
+     */
+    public function __construct($key = '@@_Default_TK_@@')
+    {
+        $this->key = $key;
+    }
+
 
     /**
      *  encrypt
      *
      * @param string $string
-     * @param string $key
      * @return string
      */
-    static function encode($string, $key = '')
+    public function encode($string)
     {
-        if ($key == '') {
-            $key = self::$key;
-        }
         $result = '';
         for($i = 0; $i < strlen($string); $i++) {
             $char = substr($string, $i, 1);
-            $keychar = substr($key, ($i % strlen($key)) - 1, 1);
+            $keychar = substr($this->key, ($i % strlen($this->key)) - 1, 1);
             $char = chr(ord($char) + ord($keychar));
             $result .= $char;
         }
@@ -45,19 +51,15 @@ class Encrypt
      * decrypt
      *
      * @param string $string
-     * @param string $key
      * @return string
      */
-    static function decode($string, $key = '')
+    public function decode($string)
     {
-        if ($key == '') {
-            $key = self::$key;
-        }
         $result = '';
         $string = base64_decode($string);
         for($i = 0; $i < strlen($string); $i++) {
             $char = substr($string, $i, 1);
-            $keychar = substr($key, ($i % strlen($key)) - 1, 1);
+            $keychar = substr($this->key, ($i % strlen($this->key)) - 1, 1);
             $char = chr(ord($char) - ord($keychar));
             $result .= $char;
         }
