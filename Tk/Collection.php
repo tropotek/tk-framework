@@ -13,7 +13,7 @@ namespace Tk;
 class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
 {
     
-    protected $data = [];
+    protected $data = array();
 
 
     /**
@@ -21,7 +21,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @param array $items
      */
-    public function __construct(array $items = [])
+    public function __construct(array $items = array())
     {
         foreach ($items as $key => $value) {
             $this->set($key, $value);
@@ -115,7 +115,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public function clear()
     {
-        $this->data = [];
+        $this->data = array();
         return $this;
     }
     
