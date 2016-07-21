@@ -30,14 +30,16 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
 
     /**
      * Add a list of items to the collection
-     * 
+     *
      * @param array $items Key-value array of data to append to this collection
+     * @return $this
      */
     public function replace(array $items)
     {
         foreach ($items as $key => $value) {
             $this->set($key, $value);
         }
+        return $this;
     }
 
     /**

@@ -15,6 +15,13 @@ class Date
 {
 
     /**
+     * Use this to format form dates, change it in the script bootstrap if required
+     *
+     * @var string
+     */
+    static public $formFormat = 'd/m/Y';
+
+    /**
      * EG: 2009-12-31 24:59:59
      */
     const ISO_DATE = 'Y-m-d H:i:s';
@@ -95,6 +102,30 @@ class Date
         //$date->setTimezone($timezone);
         return $date;
     }
+
+    /**
+     * Create a date from a string returned from the self::$formFormat string
+     *
+     * @param $dateStr
+     * @param null $timezone
+     * @return \DateTime
+     */
+    static function createFormDate($dateStr, $timezone = null)
+    {
+        if ($timezone && is_string($timezone)) {
+            $timezone = new \DateTimeZone($timezone);
+        }
+        if (!$timezone) {
+            $timezone = new \DateTimeZone(date_default_timezone_get());
+        }
+
+        $date = \DateTime::createFromFormat(self::$formFormat, $dateStr);
+        //$date = new \DateTime($time, $timezone);
+        $date->setTimezone($timezone);
+        return $date;
+
+    }
+
 
 
     /**
