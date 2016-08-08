@@ -178,7 +178,6 @@ class Config extends ArrayObject
             $this->setSystemLicence($composer->license);
             $this->setSystemReleased($composer->time);
         }
-        
     }
 
     /**
