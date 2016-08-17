@@ -71,12 +71,18 @@ namespace Tk;
  * @author Michael Mifsud <info@tropotek.com>
  * @link http://www.tropotek.com/
  * @license Copyright 2007 Michael Mifsud
- * @deprecated Will consider using a flat array and some sort of initilasation static method somewhere (A helper maybe???)
+ *
+ * @deprecated Will consider using a flat array and some sort of initialisation static method somewhere (A helper maybe???)
  *  -- See what other frameworks are doing for their config system, TIP: keep it simple....
  * This object has been used both as a place for global site settings and also a DI container
- * it may be time to seperate these responsibilities and use some pattern that is more appropriate...???
+ * it may be time to separate these responsibilities and use some pattern that is more appropriate...???
  * I will leave it here for now but know that only the application level should be using this object nothing in the libs 
  * should be implementing this in the future...
+ *
+ * Wed, 17 Aug 2016: Still pondering this object and its implementation.
+ *   It is a handy way to handle the config. Maybe we just clean it up
+ *   and refer to it as a Registry Pattern and remove make instances at the App level ?????
+ *
  */
 class Config extends ArrayObject
 {
