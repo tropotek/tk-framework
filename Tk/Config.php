@@ -153,11 +153,11 @@ class Config extends Collection
         $config['system.log.level'] = 'error';
 
         $config['system.data.path'] =   '/data';
+        $config['system.cache.path'] =  '/data/cache';
+        $config['system.temp.path'] =   '/data/temp';
         $config['system.src.path'] =    '/src';
-        $config['system.template.path'] =   '/html';
         $config['system.vendor.path'] = '/vendor';
-        $config['system.cache.path'] =  '/cache';
-        $config['system.temp.path'] =   '/temp';
+        $config['system.template.path'] =   '/html';
 
         // Site information
         $config['system.project'] = 'Untitled Site';
