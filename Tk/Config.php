@@ -152,14 +152,14 @@ class Config extends Collection
         $config['system.log.path'] = ini_get('error_log');
         $config['system.log.level'] = 'error';
 
-        $config['system.data.path'] =   '/data';
-        $config['system.cache.path'] =  '/data/cache';
-        $config['system.temp.path'] =   '/data/temp';
-        $config['system.src.path'] =    '/src';
-        $config['system.vendor.path'] = '/vendor';
-        $config['system.plugin.path'] = '/plugin';
-        $config['system.assets.path'] = '/assets';
-        $config['system.template.path'] =   '/html';
+        $config['system.data.path'] =     '/data';
+        $config['system.cache.path'] =    '/data/cache';
+        $config['system.temp.path'] =     '/data/temp';
+        $config['system.src.path'] =      '/src';
+        $config['system.vendor.path'] =   '/vendor';
+        $config['system.plugin.path'] =   '/plugin';
+        $config['system.assets.path'] =   '/assets';
+        $config['system.template.path'] = '/html';
 
         // Site information
         $config['system.project'] = 'Untitled Site';
@@ -179,7 +179,7 @@ class Config extends Collection
             if (isset($composer->version))
                 $config['system.version'] = $composer->version;
             if (isset($composer->license))
-                $config['system.licence'] = '$composer->license';
+                $config['system.licence'] = $composer->license;
             if (isset($composer->time))
                 $config['system.released'] = $composer->time;
             if (isset($composer->authors)) {
