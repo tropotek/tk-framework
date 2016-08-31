@@ -153,8 +153,9 @@ class Config extends Collection
         $config['system.log.level'] = 'error';
 
         $config['system.data.path'] =   '/data';
-        $config['system.vendor.path'] = '/vendor';
         $config['system.src.path'] =    '/src';
+        $config['system.template.path'] =   '/html';
+        $config['system.vendor.path'] = '/vendor';
         $config['system.cache.path'] =  '/cache';
         $config['system.temp.path'] =   '/temp';
 
@@ -193,8 +194,6 @@ class Config extends Collection
         }
     }
 
-
-
     /**
      * Get the current script running time in seconds
      *
@@ -204,8 +203,6 @@ class Config extends Collection
     {
         return (string)(microtime(true) - self::getInstance()->get('script.time'));
     }
-
-
 
     /**
      * @return string
@@ -222,8 +219,6 @@ class Config extends Collection
     {
         return $this->get('site.path');
     }
-
-
 
     /**
      * @return string
@@ -244,17 +239,17 @@ class Config extends Collection
     /**
      * @return string
      */
-    public function getVendorUrl()
+    public function getTemplateUrl()
     {
-        return $this->getSiteUrl() . $this->get('system.vendor.path');
+        return $this->getSiteUrl() . $this->get('system.template.path');
     }
 
     /**
      * @return string
      */
-    public function getVendorPath()
+    public function getTemplatePath()
     {
-        return $this->getSitePath() . $this->get('system.vendor.path');
+        return $this->getSitePath() . $this->get('system.template.path');
     }
 
     /**
@@ -287,6 +282,22 @@ class Config extends Collection
     public function getCachePath()
     {
         return $this->getSitePath() . $this->get('system.cache.path');
+    }
+
+    /**
+     * @return string
+     */
+    public function getVendorUrl()
+    {
+        return $this->getSiteUrl() . $this->get('system.vendor.path');
+    }
+
+    /**
+     * @return string
+     */
+    public function getVendorPath()
+    {
+        return $this->getSitePath() . $this->get('system.vendor.path');
     }
 
     /**
