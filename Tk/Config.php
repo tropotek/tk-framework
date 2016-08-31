@@ -157,6 +157,8 @@ class Config extends Collection
         $config['system.temp.path'] =   '/data/temp';
         $config['system.src.path'] =    '/src';
         $config['system.vendor.path'] = '/vendor';
+        $config['system.plugin.path'] = '/plugin';
+        $config['system.assets.path'] = '/assets';
         $config['system.template.path'] =   '/html';
 
         // Site information
@@ -298,6 +300,38 @@ class Config extends Collection
     public function getVendorPath()
     {
         return $this->getSitePath() . $this->get('system.vendor.path');
+    }
+
+    /**
+     * @return string
+     */
+    public function getPluginUrl()
+    {
+        return $this->getSiteUrl() . $this->get('system.plugin.path');
+    }
+
+    /**
+     * @return string
+     */
+    public function getPluginPath()
+    {
+        return $this->getSitePath() . $this->get('system.plugin.path');
+    }
+
+    /**
+     * @return string
+     */
+    public function getAssetsUrl()
+    {
+        return $this->getSiteUrl() . $this->get('system.assets.path');
+    }
+
+    /**
+     * @return string
+     */
+    public function getAssetsPath()
+    {
+        return $this->getSitePath() . $this->get('system.assets.path');
     }
 
     /**
