@@ -21,7 +21,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @param array $items
      */
-    public function __construct(array $items = array())
+    public function __construct($items = array())
     {
         foreach ($items as $key => $value) {
             $this->set($key, $value);
@@ -34,7 +34,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
      * @param array $items Key-value array of data to append to this collection
      * @return $this
      */
-    public function replace(array $items)
+    public function replace($items)
     {
         foreach ($items as $key => $value) {
             $this->set($key, $value);
@@ -195,6 +195,28 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
     public function toArray()
     {
         return $this->data;
+    }
+
+    /**
+     * toString
+     *
+     * @return string
+     */
+    public function toString()
+    {
+        $str = "";
+        $arr = $this->data;
+        ksort($arr);
+        foreach ($arr as $k => $v) {
+            if (is_object($v)) {
+                $str .= "[$k] => {" . get_class($v) . "}\n";
+            } elseif (is_array($v)) {
+                $str .= "[$k] =>  array[" . count($v) . "]\n";
+            } else {
+                $str .= "[$k] => $v\n";
+            }
+        }
+        return $str;
     }
 
 }

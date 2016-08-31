@@ -12,7 +12,7 @@ use Monolog\Formatter\LineFormatter;
  */
 class MonologLineFormatter extends LineFormatter
 {
-    const APP_FORMAT = "[%datetime%]%pre% %channel%.%level_name%: %message% %context% %extra%\n";
+    const APP_FORMAT = "[%datetime%]%post% %channel%.%level_name%: %message% %context% %extra%\n";
 
     protected $scriptTime = 0;
 
@@ -36,18 +36,21 @@ class MonologLineFormatter extends LineFormatter
     {
         $output = parent::format($record);
 
-        $pre = sprintf('[%5.2f][%8s]', round($this->scriptDuration(), 2), \Tk\File::bytes2String(memory_get_usage(false)));
-        $output = str_replace('%pre%', $pre, $output);
+        $pre = sprintf('[%5.2f][%9s]', round($this->scriptDuration(), 2), \Tk\File::bytes2String(memory_get_usage(false)));
+        $output = str_replace('%post%', $pre, $output);
 
         return $output;
     }
 
     /**
      * @param $t
+     * @return $this
      */
     public function setScripTime($t)
     {
-        $this->scriptTime = $t;
+        if ($t)
+            $this->scriptTime = $t;
+        return $this;
     }
 
     /**

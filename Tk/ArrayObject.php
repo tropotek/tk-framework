@@ -10,7 +10,7 @@ namespace Tk;
  * @author Michael Mifsud <info@tropotek.com>
  * @link http://www.tropotek.com/
  * @license Copyright 2007 Michael Mifsud
- * @deprecated
+ * @deprecated Use the Collection object instead
  */
 class ArrayObject implements \IteratorAggregate, \ArrayAccess, \Serializable, \Countable
 {

@@ -72,7 +72,9 @@ namespace Tk;
  * @link http://www.tropotek.com/
  * @license Copyright 2007 Michael Mifsud
  *
- * @deprecated Will consider using a flat array and some sort of initialisation static method somewhere (A helper maybe???)
+ * @todo Should we remove this object??, it causes us to rely on it at times, that also influences the code for bad object design
+ *
+ * @notes Will consider using a flat array and some sort of initialisation static method somewhere (A helper maybe???)
  *  -- See what other frameworks are doing for their config system, TIP: keep it simple....
  * This object has been used both as a place for global site settings and also a DI container
  * it may be time to separate these responsibilities and use some pattern that is more appropriate...???
@@ -84,13 +86,19 @@ namespace Tk;
  *   and refer to it as a Registry Pattern and remove make instances at the App level ?????
  *
  */
-class Config extends ArrayObject
+class Config extends Collection
 {
 
     /**
      * @var Config
      */
     static $instance = null;
+
+    /**
+     * Reserved config keys
+     * @var array
+     */
+    protected $reserved = array('data.url', 'data.path', 'vendor.url', 'vendor.path', 'src.url', 'src.path', 'cache.url', 'cache.path', 'temp.url', 'temp.path');
 
 
     /**
@@ -128,61 +136,60 @@ class Config extends ArrayObject
      */
     protected function init($sitePath = '', $siteUrl = '')
     {
-        $this->setScripTime(microtime(true));
-        $this->setConfig($this);
+        $config['script.time'] = microtime(true);
+        $config = $this;
 
         // Setup isCli function in config.
-        $this->setCli(false);
+        $config['cli'] = false;
         if (substr(php_sapi_name(), 0, 3) == 'cli') {
-            $this->setCli(true);
+            $config['cli'] = true;
         }
 
-        $this->setDebug(false);
+        // setup site path and URL
+        list($config['site.path'], $config['site.url']) = $this->getDefaultPaths($sitePath, $siteUrl);
 
-        // Setup the app path if none exists
-        if (!$siteUrl) {
-            $siteUrl = dirname($_SERVER['PHP_SELF']);
-        }
-        $siteUrl = rtrim($siteUrl, '/');
-        $this->setSiteUrl($siteUrl);
-        
-        if (!$sitePath) {
-            $sitePath = rtrim( dirname(dirname(dirname(dirname(dirname(__FILE__))))) , '/');
-        }
-        $this->setSitePath($sitePath);
+        $config['debug'] = false;
+        $config['system.log.path'] = ini_get('error_log');
+        $config['system.log.level'] = 'error';
 
-        $this->setSystemLogPath(ini_get('error_log'));
-        $this->setSystemLogLevel('error');
-
-        $this->setDataPath($this->getSitePath() . '/data');
-        $this->setDataUrl($this->getSiteUrl() . '/data');
-
-        $this->setVendorPath($this->getSitePath() . '/vendor');
-        $this->setVendorUrl($this->getSiteUrl() . '/vendor');
-
-        $this->setSrcPath($this->getSitePath() . '/src');
-        $this->setSrcUrl($this->getSiteUrl() . '/src');
-
-        $this->setCachePath($this->getDataPath() . '/cache');
-        $this->setCacheUrl($this->getDataUrl() . '/cache');
-
-        $this->setTempPath($this->getDataPath() . '/temp');
-        $this->setTempUrl($this->getDataUrl() . '/temp');
+        $config['system.data.path'] =   '/data';
+        $config['system.vendor.path'] = '/vendor';
+        $config['system.src.path'] =    '/src';
+        $config['system.cache.path'] =  '/cache';
+        $config['system.temp.path'] =   '/temp';
 
         // Site information
-        $this->setSystemName('Untitled Site');
-        $this->setSystemDescription('');
-        $this->setSystemVersion('0.0');
-        $this->setSystemLicence('');
-        $this->setSystemReleased('');
-        
+        $config['system.project'] = 'Untitled Site';
+        $config['system.description'] = '';
+        $config['system.version'] = '0.0';
+        $config['system.licence'] = '';
+        $config['system.released'] = '';
+        $config['system.authors'] = '';
+        $config['system.stability'] = '';
+
         if (is_file($this->getSitePath() . '/composer.json')) {
             $composer = json_decode(file_get_contents($this->getSitePath() . '/composer.json'));
-            $this->setSystemName($composer->name);
-            $this->setSystemDescription($composer->description);
-            $this->setSystemVersion($composer->version);
-            $this->setSystemLicence($composer->license);
-            $this->setSystemReleased($composer->time);
+            if (isset($composer->name))
+                $config['system.project'] = $composer->name;
+            if (isset($composer->description))
+                $config['system.description'] = $composer->description;
+            if (isset($composer->version))
+                $config['system.version'] = $composer->version;
+            if (isset($composer->license))
+                $config['system.licence'] = '$composer->license';
+            if (isset($composer->time))
+                $config['system.released'] = $composer->time;
+            if (isset($composer->authors)) {
+                $authStr = '';
+                foreach ($composer->authors as $auth) {
+                    if ($auth->homepage)
+                        $authStr .= $auth->homepage . ', ';
+                }
+                $config['system.authors'] = trim($authStr, ', ');
+            }
+            if (isset($composer->{'minimum-stability'}))
+                $config['system.stability'] = $composer->{'minimum-stability'};
+
         }
     }
 
@@ -195,8 +202,10 @@ class Config extends ArrayObject
      */
     public static function scriptDuration()
     {
-        return (string)(microtime(true) - self::getInstance()->getScripTime());
+        return (string)(microtime(true) - self::getInstance()->get('script.time'));
     }
+
+
 
     /**
      * @return string
@@ -214,12 +223,14 @@ class Config extends ArrayObject
         return $this->get('site.path');
     }
 
+
+
     /**
      * @return string
      */
     public function getDataUrl()
     {
-        return $this->get('data.url');
+        return $this->getSiteUrl() . $this->get('system.data.path');
     }
 
     /**
@@ -227,7 +238,7 @@ class Config extends ArrayObject
      */
     public function getDataPath()
     {
-        return $this->get('data.path');
+        return $this->getSitePath() . $this->get('system.data.path');
     }
 
     /**
@@ -235,7 +246,7 @@ class Config extends ArrayObject
      */
     public function getVendorUrl()
     {
-        return $this->get('vendor.url');
+        return $this->getSiteUrl() . $this->get('system.vendor.path');
     }
 
     /**
@@ -243,7 +254,7 @@ class Config extends ArrayObject
      */
     public function getVendorPath()
     {
-        return $this->get('vendor.path');
+        return $this->getSitePath() . $this->get('system.vendor.path');
     }
 
     /**
@@ -251,7 +262,7 @@ class Config extends ArrayObject
      */
     public function getSrcUrl()
     {
-        return $this->get('src.url');
+        return $this->getSiteUrl() . $this->get('system.src.path');
     }
 
     /**
@@ -259,7 +270,7 @@ class Config extends ArrayObject
      */
     public function getSrcPath()
     {
-        return $this->get('src.path');
+        return $this->getSitePath() . $this->get('system.src.path');
     }
 
     /**
@@ -267,7 +278,7 @@ class Config extends ArrayObject
      */
     public function getCacheUrl()
     {
-        return $this->get('cache.url');
+        return $this->getSiteUrl() . $this->get('system.cache.path');
     }
 
     /**
@@ -275,7 +286,7 @@ class Config extends ArrayObject
      */
     public function getCachePath()
     {
-        return $this->get('cache.path');
+        return $this->getSitePath() . $this->get('system.cache.path');
     }
 
     /**
@@ -283,7 +294,7 @@ class Config extends ArrayObject
      */
     public function getTempUrl()
     {
-        return $this->get('temp.url');
+        return $this->getSiteUrl() . $this->get('system.temp.path');
     }
 
     /**
@@ -291,38 +302,7 @@ class Config extends ArrayObject
      */
     public function getTempPath()
     {
-        return $this->get('temp.path');
-    }
-
-    /**
-     * Is this application a command run in a terminal
-     * @return boolean
-     */
-    public function getCli()
-    {
-        return $this->get('temp.path');
-    }
-
-    /**
-     * Get the system DB object
-     *
-     * @return Db\Pdo|mixed
-     */
-    public function getDb()
-    {
-        return $this->get('db');
-    }
-
-    /**
-     * Set the system DB object
-     *
-     * @param Db\Pdo|mixed $db
-     * @return $this
-     */
-    public function setDb($db)
-    {
-        $this->set('db', $db);
-        return $this;
+        return $this->getSitePath() . $this->get('system.temp.path');
     }
 
     /**
@@ -330,12 +310,14 @@ class Config extends ArrayObject
      *
      * @param array|\ArrayAccess $params
      * @return $this
+     * @deprecated
      */
     public function import($params)
     {
-        foreach($params as $k => $v) {
-            $this[$k] = $v;
-        }
+        parent::replace($params);
+//        foreach($params as $k => $v) {
+//            $this[$k] = $v;
+//        }
         return $this;
     }
 
@@ -355,8 +337,9 @@ class Config extends ArrayObject
      *   $registry->setSitePath('/');
      *
      * @param string $func
-     * @param array  $argv
-     * @return mixed | null
+     * @param array $argv
+     * @return mixed|null
+     * @throws Exception
      */
     public function __call($func, $argv)
     {
@@ -366,6 +349,9 @@ class Config extends ArrayObject
         $pos = strpos($key, '.');
         $type = substr($key, 0, $pos);
         $key = substr($key, $pos+1);
+
+        if (in_array($key, $this->reserved))
+            throw new \Tk\Exception('Reserved keywords cannot be used: ' . $key);
 
         if ($type == 'set') {
             $this->set($key, $argv[0]);
@@ -403,5 +389,25 @@ class Config extends ArrayObject
             }
         }
         return $arr;
+    }
+
+    /**
+     * This function tries to automatically determin the app path and url
+     * @param string $sitePath
+     * @param string $siteUrl
+     * @return array
+     */
+    protected function getDefaultPaths($sitePath = '', $siteUrl = '')
+    {
+        // Determine the default path
+        if (!$sitePath) {
+            $sitePath = rtrim( dirname(dirname(dirname(dirname(dirname(__FILE__))))) , '/');
+        }
+        // Determine the default base url
+        if (!$siteUrl) {
+            $siteUrl = dirname($_SERVER['PHP_SELF']);
+        }
+        $siteUrl = rtrim($siteUrl, '/');
+        return array($sitePath, $siteUrl);
     }
 }
