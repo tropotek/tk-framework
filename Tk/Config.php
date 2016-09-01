@@ -136,8 +136,8 @@ class Config extends Collection
      */
     protected function init($sitePath = '', $siteUrl = '')
     {
-        $config['script.time'] = microtime(true);
         $config = $this;
+        $config['script.time'] = microtime(true);
 
         // Setup isCli function in config.
         $config['cli'] = false;
