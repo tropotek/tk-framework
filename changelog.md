@@ -1,5 +1,23 @@
 #CHANGELOG#
 
+Ver 2.0.3 [2016-09-05]:
+-------------------------------
+ - Updated Plugin system
+ - Fixed Less Compiler
+ - Cleaned config
+ - Fixed Select with no value in array
+ - Modified user management in administration
+ - Added new tk mail lib
+ - Implemented lib into project
+ - Checkbox broken still fixing it!
+ - Updated Form File field and javascript plugin
+ - Updated Edit Institution page
+ - Changed all = [] to = array()
+ - Change php version check to gt php5.0.0
+ - Fixed DB session interface
+ - Updated Encode object
+
+
 Ver 2.0.2 [2016-07-11]:
 -------------------------------
 
