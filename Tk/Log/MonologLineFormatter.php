@@ -35,7 +35,6 @@ class MonologLineFormatter extends LineFormatter
     public function format(array $record)
     {
         $output = parent::format($record);
-
         $pre = sprintf('[%5.2f][%9s]', round($this->scriptDuration(), 2), \Tk\File::bytes2String(memory_get_usage(false)));
         $output = str_replace('%post%', $pre, $output);
 
@@ -46,7 +45,7 @@ class MonologLineFormatter extends LineFormatter
      * @param $t
      * @return $this
      */
-    public function setScripTime($t)
+    public function setScriptTime($t)
     {
         if ($t)
             $this->scriptTime = $t;
