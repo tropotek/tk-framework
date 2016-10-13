@@ -24,27 +24,59 @@ class Date
     /**
      * EG: 2009-12-31 24:59:59
      */
+    const FORMAT_ISO_DATE = 'Y-m-d H:i:s';
+
+    /**
+     * EG: Tuesday, 23 Apr 2009
+     */
+    const FORMAT_LONG_DATE = 'l, j M Y';
+
+    /**
+     * EG: Tuesday, 01 Jan 2009 12:59 PM
+     */
+    const FORMAT_LONG_DATETIME = 'l, j M Y h:i A';
+
+    /**
+     * EG: 23/09/2009 24:59:59
+     */
+    const FORMAT_SHORT_DATETIME = 'd/m/Y H:i:s';
+
+    /**
+     * EG: 23 Apr 2009
+     */
+    const FORMAT_MED_DATE = 'j M Y';
+
+
+    /**
+     * EG: 2009-12-31 24:59:59
+     * @deprecated prefix with FORMAT_
+     */
     const ISO_DATE = 'Y-m-d H:i:s';
 
     /**
      * EG: Tuesday, 23 Apr 2009
+     * @deprecated prefix with FORMAT_
      */
     const LONG_DATE = 'l, j M Y';
 
     /**
      * EG: Tuesday, 01 Jan 2009 12:59 PM
+     * @deprecated prefix with FORMAT_
      */
     const LONG_DATETIME = 'l, j M Y h:i A';
 
     /**
      * EG: 23/09/2009 24:59:59
+     * @deprecated prefix with FORMAT_
      */
     const SHORT_DATETIME = 'd/m/Y H:i:s';
 
     /**
      * EG: 23 Apr 2009
+     * @deprecated prefix with FORMAT_
      */
     const MED_DATE = 'j M Y';
+
 
     /**
      * An hour in seconds
