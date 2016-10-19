@@ -205,7 +205,7 @@ class File
      * @return string
      * @package Tk
      */
-    static public function getFileMimeType($filename)
+    static public function getMimeType($filename)
     {
         $mime_types = array('txt' => 'text/plain', 'htm' => 'text/html', 'html' => 'text/html', 'php' => 'text/html', 'css' => 'text/css', 'js' => 'application/javascript', 'json' => 'application/json', 'xml' => 'application/xml', 'swf' => 'application/x-shockwave-flash', 'flv' => 'video/x-flv',
 
