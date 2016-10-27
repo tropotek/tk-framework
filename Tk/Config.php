@@ -1,6 +1,9 @@
 <?php
 namespace Tk;
 
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
+
 
 /**
  * A Config class for handling the applications dependency values.
@@ -148,7 +151,9 @@ class Config extends Collection
         // setup site path and URL
         list($config['site.path'], $config['site.url']) = $this->getDefaultPaths($sitePath, $siteUrl);
 
+
         $config['debug'] = false;
+        $config['log'] = new NullLogger();
         $config['system.log.path'] = ini_get('error_log');
         $config['system.log.level'] = 'error';
 
@@ -161,38 +166,40 @@ class Config extends Collection
         $config['system.assets.path'] =   '/assets';
         $config['system.template.path'] = '/html';
 
+
         // Site information
-        $config['system.project'] = 'Untitled Site';
-        $config['system.description'] = '';
-        $config['system.version'] = '0.0';
-        $config['system.licence'] = '';
-        $config['system.released'] = '';
-        $config['system.authors'] = '';
-        $config['system.stability'] = '';
+        $config['system.info.project'] = 'Untitled Site';
+        $config['system.info.description'] = '';
+        $config['system.info.version'] = '0.0';
+        $config['system.info.licence'] = '';
+        $config['system.info.released'] = '';
+        $config['system.info.authors'] = '';
+        $config['system.info.stability'] = '';
 
         if (is_file($this->getSitePath() . '/composer.json')) {
             $composer = json_decode(file_get_contents($this->getSitePath() . '/composer.json'));
             if (isset($composer->name))
-                $config['system.project'] = $composer->name;
+                $config['system.info.project'] = $composer->name;
             if (isset($composer->description))
-                $config['system.description'] = $composer->description;
+                $config['system.info.description'] = $composer->description;
             if (isset($composer->version))
-                $config['system.version'] = $composer->version;
+                $config['system.info.version'] = $composer->version;
             if (isset($composer->license))
-                $config['system.licence'] = $composer->license;
+                $config['system.info.licence'] = $composer->license;
             if (isset($composer->time))
-                $config['system.released'] = $composer->time;
+                $config['system.info.released'] = $composer->time;
             if (isset($composer->authors)) {
                 $authStr = '';
                 foreach ($composer->authors as $auth) {
                     if ($auth->homepage)
                         $authStr .= $auth->homepage . ', ';
                 }
-                $config['system.authors'] = trim($authStr, ', ');
+                $config['system.info.authors'] = trim($authStr, ', ');
             }
-            if (isset($composer->{'minimum-stability'}))
-                $config['system.stability'] = $composer->{'minimum-stability'};
-
+            if (isset($composer->{'minimum-stability'})) {
+                $config['system.info.stability'] = $composer->{'minimum-stability'};
+                $config['system.info.minimumStability'] = $composer->{'minimum-stability'};
+            }
         }
     }
 
@@ -204,6 +211,31 @@ class Config extends Collection
     public static function scriptDuration()
     {
         return (string)(microtime(true) - self::getInstance()->get('script.time'));
+    }
+
+    /**
+     * @param boolean $truncateKeys If true then the supplied $prefixName will be removed from the returned keys
+     * @return int
+     */
+    public function getSystemInfo($truncateKeys = false)
+    {
+        return $this->getGroup('system.info', $truncateKeys);
+    }
+
+    /**
+     * @return int
+     */
+    public function getScriptTime()
+    {
+        return $this->get('script.time');
+    }
+
+    /**
+     * @return LoggerInterface
+     */
+    public function getLog()
+    {
+        return $this->get('log');
     }
 
     /**
@@ -351,20 +383,25 @@ class Config extends Collection
     }
 
     /**
-     * Import params from another registry object or array
+     * Is the application in debug mode
      *
-     * @param array|\ArrayAccess $params
-     * @return $this
-     * @deprecated
+     * @return boolean
      */
-    public function import($params)
+    public function isDebug()
     {
-        parent::replace($params);
-//        foreach($params as $k => $v) {
-//            $this[$k] = $v;
-//        }
-        return $this;
+        return $this->get('debug');
     }
+
+    /**
+     * Is the environment a Command line interface (CLI)
+     *
+     * @return boolean
+     */
+    public function isCli()
+    {
+        return $this->get('cli');
+    }
+
 
     /**
      * Allow call to parameters via a get and set
@@ -418,15 +455,15 @@ class Config extends Collection
      * it would return all registry values with the key starting with `app.site.____`
      *
      * @param string $prefixName
-     * @param boolean $truncateKey If true then the supplied $prefixName will be removed from the returned keys
+     * @param boolean $truncateKeys If true then the supplied $prefixName will be removed from the returned keys
      * @return array
      */
-    public function getGroup($prefixName, $truncateKey = false)
+    public function getGroup($prefixName, $truncateKeys = false)
     {
         $arr = array();
         foreach ($this as $k => $v) {
             if (preg_match('/^' . $prefixName . '\./', $k)) {
-                if (!$truncateKey) {
+                if (!$truncateKeys) {
                     $arr[$k] = $v;
                 } else {
                     $arr[str_replace($prefixName.'.', '', $k)] = $v;
@@ -437,7 +474,7 @@ class Config extends Collection
     }
 
     /**
-     * This function tries to automatically determin the app path and url
+     * This function tries to automatically determine the app path and url
      * @param string $sitePath
      * @param string $siteUrl
      * @return array
