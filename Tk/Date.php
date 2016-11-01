@@ -119,6 +119,7 @@ class Date
      */
     static function create($time = 'now', $timezone = null)
     {
+        if ($time instanceof \DateTime) return $time;
         if ($timezone && is_string($timezone)) {
             $timezone = new \DateTimeZone($timezone);
         }
