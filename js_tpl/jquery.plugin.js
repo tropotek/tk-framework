@@ -35,7 +35,11 @@
 // remember to change every instance of "pluginName" to the name of your plugin!
 (function($) {
 
-  // here we go!
+  /**
+   *
+   * @param Element element
+   * @param options
+   */
   var pluginName = function(element, options) {
 
     // plugin's default options
@@ -63,8 +67,7 @@
     // where "element" is the element the plugin is attached to;
     plugin.settings = {};
 
-    var $element = $(element), // reference to the jQuery version of DOM element
-        element = element;    // reference to the actual DOM element
+    var $element = $(element); // reference to the jQuery version of DOM element
 
     // the "constructor" method that gets called when the object is created
     plugin.init = function() {
