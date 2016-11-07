@@ -131,6 +131,7 @@ class File
      *
      * A the last period ('.') in the pathname is used to delimit the file
      * extension. If the pathname does not have a file extension an empty string is returned.
+     * EG: 'mp3', 'php', ...
      *
      * @param $path
      * @return string
