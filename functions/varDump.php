@@ -1,10 +1,5 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: mifsudm
- * Date: 9/11/16
- * Time: 8:02 AM
- */
+
 /**
  * logger Helper function
  * Replacement for var_dump();
@@ -45,11 +40,7 @@ function vdd() {
 
     $path = str_replace($config->getSitePath(), '', $line['file']);
     $str = sprintf('vdd(%s [%s])', $path, $line['line']) . "\n";
-    if (class_exists('\Tk\Vd')) {
-        $str .= \Tk\Vd::getInstance($config->getSitePath())->makeDump(func_get_args(), true);
-    } else {
-        $str .= print_r(func_get_args(), true);
-    }
+    $str .= \Tk\Debug\VarDump::getInstance($config->getSitePath())->makeDump(func_get_args(), true);
 
     if (!$config->isCli()) {
         $log->info($str);
