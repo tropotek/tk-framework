@@ -11,6 +11,22 @@ namespace Tk;
 class File
 {
 
+    /**
+     * Default location of the mime.types remote file
+     * @var string
+     */
+    static $MIME_TYPES_URL      = 'http://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types';
+
+    /**
+     * @var string
+     */
+    static $CACHE_MIME_FILE     = 'mime.types';
+
+    /**
+     * @var int
+     */
+    static $CACHE_MIME_SEC      = 60 * 60 * 24 * 28;     // 28 day cache
+
 
     /**
      * Returns true if given $path is an absolute path.
@@ -208,37 +224,62 @@ class File
      */
     static public function getMimeType($filename)
     {
-        $mime_types = array('txt' => 'text/plain', 'htm' => 'text/html', 'html' => 'text/html', 'php' => 'text/html', 'css' => 'text/css', 'js' => 'application/javascript', 'json' => 'application/json', 'xml' => 'application/xml', 'swf' => 'application/x-shockwave-flash', 'flv' => 'video/x-flv',
 
-            // images
-            'png' => 'image/png', 'jpe' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'jpg' => 'image/jpeg', 'gif' => 'image/gif', 'bmp' => 'image/bmp', 'ico' => 'image/vnd.microsoft.icon', 'tiff' => 'image/tiff', 'tif' => 'image/tiff', 'svg' => 'image/svg+xml', 'svgz' => 'image/svg+xml',
-
-            // archives
-            'zip' => 'application/zip', 'rar' => 'application/x-rar-compressed', 'exe' => 'application/x-msdownload', 'msi' => 'application/x-msdownload', 'cab' => 'application/vnd.ms-cab-compressed',
-
-            // audio/video
-            'mp3' => 'audio/mpeg', 'qt' => 'video/quicktime', 'mov' => 'video/quicktime',
-
-            // adobe
-            'pdf' => 'application/pdf', 'psd' => 'image/vnd.adobe.photoshop', 'ai' => 'application/postscript', 'eps' => 'application/postscript', 'ps' => 'application/postscript',
-
-            // ms office
-            'doc' => 'application/msword', 'rtf' => 'application/rtf', 'xls' => 'application/vnd.ms-excel', 'ppt' => 'application/vnd.ms-powerpoint',
-
-            // open office
-            'odt' => 'application/vnd.oasis.opendocument.text', 'ods' => 'application/vnd.oasis.opendocument.spreadsheet');
-        $extArr = explode('.', $filename);
-        $ext = strtolower(array_pop($extArr));
-        if (array_key_exists($ext, $mime_types)) {
-            return $mime_types[$ext];
-        } elseif (function_exists('finfo_open')) {
-            $finfo = finfo_open(FILEINFO_MIME);
-            $mimetype = finfo_file($finfo, $filename);
-            finfo_close($finfo);
-            return $mimetype;
-        } else {
-            return 'application/octet-stream';
+        $mimeTypes = self::getMimeArray();
+        $ext = self::getExtension($filename);
+        if (array_key_exists($ext, $mimeTypes)) {
+            return $mimeTypes[$ext];
         }
+        if (is_readable($filename)) {
+            if (function_exists('mime_content_type')) {     // Deprecated function in PHP
+                return mime_content_type($filename);
+            }
+            if (function_exists('finfo_open')) {
+                $finfo = finfo_open(FILEINFO_MIME);
+                $mimetype = current(explode(';', finfo_file($finfo, $filename)));
+                finfo_close($finfo);
+                return $mimetype;
+            }
+        }
+
+        // if all else fails
+        return 'application/octet-stream';
     }
 
+    /**
+     * @return array
+     */
+    static public function getMimeArray() {
+        $config = \Tk\Config::getInstance();        // Not good
+        $mimeFile = self::$CACHE_MIME_FILE;
+        if (strstr($mimeFile, $config->getSitePath()) == false)
+            $mimeFile = $config->getDataPath() .'/'. trim(self::$CACHE_MIME_FILE, '/');
+        $mimeFileContents = null;
+
+        // Update Cache
+        if (@is_file($mimeFile)) {
+            if ((@filemtime($mimeFile) < (time() - self::$CACHE_MIME_SEC))) {
+                $mimeFileContents = @file_get_contents(self::$MIME_TYPES_URL);
+                if ($mimeFileContents !== false) {
+                    @file_put_contents($mimeFile, $mimeFileContents);
+                }
+            }
+            $mimeFileContents = @file_get_contents($mimeFile);
+        } else {
+            $mimeFileContents = @file_get_contents(self::$MIME_TYPES_URL);
+            if ($mimeFileContents !== false) {
+                @file_put_contents($mimeFile, $mimeFileContents);
+            }
+        }
+
+        $s = array();
+        foreach(@explode("\n", $mimeFileContents) as $x) {
+            if (isset($x[0]) && $x[0] !== '#' && preg_match_all('#([^\s]+)#', $x, $out) && isset($out[1]) && ($c = count($out[1])) > 1)
+                for ($i = 1; $i < $c; $i++) {
+                    $s[$out[1][$i]] = $out[1][0];
+                }
+        }
+        @ksort($s);
+        return $s;
+    }
 }
