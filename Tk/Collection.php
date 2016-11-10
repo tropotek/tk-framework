@@ -194,7 +194,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public function toArray()
     {
-        return $this->data;
+        return $this->all();
     }
 
     /**
