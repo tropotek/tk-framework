@@ -156,6 +156,7 @@ class Config extends Collection
         $config['log'] = new NullLogger();
         $config['system.log.path'] = ini_get('error_log');
         $config['system.log.level'] = 'error';
+        $config['date.timezone'] = 'Australia/Victoria';
 
         $config['system.data.path'] =     '/data';
         $config['system.cache.path'] =    '/data/cache';
