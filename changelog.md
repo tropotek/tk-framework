@@ -1,5 +1,26 @@
 #CHANGELOG#
 
+Ver 2.0.5 [2016-11-11]:
+-------------------------------
+ - Minor Code Updates
+ - 252s-dev.vet.unimelb.edu.au
+ - Merge branch 'master' of https://github.com/tropotek/tk-framework
+ - That will do fine
+ - Deprecated debug lib in favor of the framework \Tk\Debug objects and new framework functions folder
+ - Updated status ribbons
+ - Added attachments to contact form
+ - Added new Color object
+ - Updated Public content pages
+ - Fixed course copy method
+ - Added screenshots
+ - Added OrderBy sortable javascript
+ - Started new comment rating sections
+ - Fixed some url path issues, added PageBytes Dom Filter
+ - Updated the edit project and files page
+ - Finished the Project Listing
+ - Fixed intitution edit, cron job script
+
+
 Ver 2.0.4 [2016-10-04]:
 -------------------------------
 
