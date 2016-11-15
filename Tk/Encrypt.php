@@ -16,18 +16,28 @@ class Encrypt
     /**
      * @var string
      */
-    private $key = '';
+    private $key = '@@_Default_TK_@@';
 
     /**
      * Encrypt constructor.
      *
      * @param string $key
      */
-    public function __construct($key = '@@_Default_TK_@@')
+    public function __construct($key = null)
     {
-        $this->key = $key;
+        if ($key)
+            $this->key = $key;
     }
 
+    /**
+     *
+     * @param string $key
+     * @return Encrypt
+     */
+    static public function create($key = null)
+    {
+        return new self($key);
+    }
 
     /**
      *  encrypt

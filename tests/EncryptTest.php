@@ -15,11 +15,13 @@ class EncryptTest extends \PHPUnit_Framework_TestCase
     public $text = 'This is an un-encrypted string';
     public $eyncryptedText = 'lKip0mTO2YHW2pTUwnjErqOyuc+4ysqB6ODmyMKy';
 
+    private $encrypt = null;
 
 
     public function __construct()
     {
         parent::__construct('Encypt Test');
+        $this->encrypt = new \Tk\Encrypt();
     }
 
     public function setUp()
@@ -34,13 +36,13 @@ class EncryptTest extends \PHPUnit_Framework_TestCase
 
     public function testEncrypt()
     {
-        $str = Encrypt::encode($this->text);
+        $str = $this->encrypt->encode($this->text);
         $this->assertEquals($str, $this->eyncryptedText, 'encode()');
     }
 
     public function testDecrypt()
     {
-        $str = Encrypt::decode($this->eyncryptedText);
+        $str = $this->encrypt->decode($this->eyncryptedText);
         $this->assertEquals($this->text, $str, 'decode()');
     }
 

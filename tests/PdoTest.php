@@ -20,37 +20,42 @@ class PdoTest extends \PHPUnit_Framework_TestCase
      */
     private $db = null;
 
-
+    /**
+     * PdoTest constructor.
+     */
     public function __construct()
     {
         parent::__construct('Pdo Test');
-
     }
 
+    /**
+     * setUp
+     */
     public function setUp()
     {
-        
-        
-        
-        
-        
-        $dbcon = Config::getInstance()->get('db.connect.default');
-        if (!$dbcon['dbname']) {
+        $dbcon = array();
+        //$dbcon = Config::getInstance()->getGroup('db');
+        if (!$dbcon || !$dbcon['db.name']) {
             // Stop here and mark this test as incomplete.
-            $this->markTestSkipped('No database connection parameters, test skipped....');
+            //$this->markTestSkipped('No database connection parameters, test skipped....');
             return;
         }
 
-        $this->db = Config::getInstance()->getDb();
+        $this->db = Pdo::getInstance('default', $dbcon);
+        Config::getInstance()->set('db', $dbcon);
+
         // Create a table add some data
         $sql = file_get_contents(dirname(__FILE__) . '/data/ztest.sql');
         if ($this->db->tableExists(self::TBL)) {
             $sql = sprintf('DROP TABLE `%s`', self::TBL);
             $this->db->query($sql);
         }
-        $this->db->multiQuery($sql);
+        $this->db->exec($sql);
     }
 
+    /**
+     * tearDown
+     */
     public function tearDown()
     {
         // Delete table and data....
@@ -58,12 +63,10 @@ class PdoTest extends \PHPUnit_Framework_TestCase
         
         $sql = sprintf('DROP TABLE `%s`', self::TBL);
         $this->db->query($sql);
-
     }
 
-
     /**
-     *
+     * testSelect
      *
      */
     public function testSelect()
@@ -135,8 +138,6 @@ class PdoTest extends \PHPUnit_Framework_TestCase
 //        $sql = sprintf('SELECT * FROM `ztest`');
 //        $count = $this->db->countQuery($sql);
 //        $this->assertEquals($count, 265, 'Int of `265` expected');
-
-
 
     }
 
