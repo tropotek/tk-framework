@@ -104,7 +104,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
      * @param string $key The data key
      * @return $this
      */
-    public function zremove($key)
+    public function remove($key)
     {
         unset($this->data[$key]);
         return $this;
