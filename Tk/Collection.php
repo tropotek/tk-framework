@@ -70,10 +70,19 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * Get all items in collection
      *
+     * @param null|string $regex
      * @return array The collection's source data
      */
-    public function all()
+    public function all($regex = null)
     {
+        if ($regex) {
+            $array = array();
+            foreach ($this->data as $name => $value) {
+                if (!preg_match($regex, $name)) continue;
+                $array[$name] = $value;
+            }
+            return $array;
+        }
         return $this->data;
     }
 
