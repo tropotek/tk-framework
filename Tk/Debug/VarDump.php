@@ -13,8 +13,11 @@ class VarDump
     /**
      * @var VarDump
      */
-    static $instance = null;
-    
+    public static $instance = null;
+
+    /**
+     * @var string
+     */
     protected $sitePath = '';
 
     
@@ -32,7 +35,7 @@ class VarDump
      * @param string $sitePath
      * @return VarDump
      */
-    static function getInstance($sitePath = '')
+    public static function getInstance($sitePath = '')
     {
         if (static::$instance == null) {
             static::$instance = new static($sitePath);
@@ -78,7 +81,7 @@ class VarDump
      * @param int $nest
      * @return string
      */
-    static public function varToString($var, $depth = 4, $nest = 0)
+    public static function varToString($var, $depth = 4, $nest = 0)
     {
         $pad = '';
         for($i=0;$i<=$nest*2;$i++) $pad .= '  ';

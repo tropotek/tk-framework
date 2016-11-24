@@ -9,6 +9,5 @@ namespace Tk\Cache;
 /**
  * Tk\Cache\Exception
  *
- * @package Tk\Cache
  */
 class Exception extends \Tk\Exception { }

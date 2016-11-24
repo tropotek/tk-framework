@@ -34,7 +34,7 @@ class Encrypt
      * @param string $key
      * @return Encrypt
      */
-    static public function create($key = null)
+    public static function create($key = null)
     {
         return new self($key);
     }

@@ -15,17 +15,17 @@ class File
      * Default location of the mime.types remote file
      * @var string
      */
-    static $MIME_TYPES_URL      = 'http://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types';
+    public static $MIME_TYPES_URL      = 'http://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types';
 
     /**
      * @var string
      */
-    static $CACHE_MIME_FILE     = 'mime.types';
+    public static $CACHE_MIME_FILE     = 'mime.types';
 
     /**
      * @var int
      */
-    static $CACHE_MIME_SEC      = 60 * 60 * 24 * 28;     // 28 day cache
+    public static $CACHE_MIME_SEC      = 60 * 60 * 24 * 28;     // 28 day cache
 
 
     /**
@@ -34,7 +34,7 @@ class File
      * @param $pathname
      * @return bool true if path is absolute.
      */
-    static public function isAbsolute($pathname)
+    public static function isAbsolute($pathname)
     {
         return !empty($pathname) && ($pathname[0] === '/' || preg_match('/^[A-Z]:\\\\/i', $pathname) || substr($pathname, 0, 2) == '\\\\');
     }
@@ -45,7 +45,7 @@ class File
      * @param string $str
      * @return int
      */
-    static public function string2Bytes($str)
+    public static function string2Bytes($str)
     {
         $sUnit = substr($str, -1);
         $iSize = (int)substr($str, 0, -1);
@@ -77,7 +77,7 @@ class File
      * @return string
      * @author http://php-pdb.sourceforge.net/samples/viewSource.php?file=twister.php
      */
-    static public function bytes2String($bytes, $round = 2)
+    public static function bytes2String($bytes, $round = 2)
     {
         $tags = array('b', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
         $index = 0;
@@ -120,7 +120,7 @@ class File
      * @param string $path
      * @return int
      */
-    static public function diskSpace($path)
+    public static function diskSpace($path)
     {
         if (is_dir($path)) {
             $s = stat($path);
@@ -152,7 +152,7 @@ class File
      * @param $path
      * @return string
      */
-    static public function getExtension($path)
+    public static function getExtension($path)
     {
         return pathinfo($path, PATHINFO_EXTENSION);
     }
@@ -167,7 +167,7 @@ class File
      *
      * @return int
      */
-    static public function getMaxUploadSize()
+    public static function getMaxUploadSize()
     {
         $maxPost = self::string2Bytes(ini_get('post_max_size'));
         $maxUpload = self::string2Bytes(ini_get('upload_max_filesize'));
@@ -183,7 +183,7 @@ class File
      * @param string $path
      * @return bool
      */
-    static public function rmdir($path)
+    public static function rmdir($path)
     {
         if (is_file($path)) {
             if (is_writable($path)) {
@@ -220,9 +220,8 @@ class File
      *
      * @param string $filename
      * @return string
-     * @package Tk
-     */
-    static public function getMimeType($filename)
+         */
+    public static function getMimeType($filename)
     {
 
         $mimeTypes = self::getMimeArray();
@@ -249,7 +248,7 @@ class File
     /**
      * @return array
      */
-    static public function getMimeArray() {
+    public static function getMimeArray() {
         $config = \Tk\Config::getInstance();        // Not good
         $mimeFile = self::$CACHE_MIME_FILE;
         if (strstr($mimeFile, $config->getSitePath()) == false)

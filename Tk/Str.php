@@ -20,7 +20,7 @@ class Str
      * @param array $attrs Eg: array('onclick', 'onmouseup', 'onmousedown', ...);
      * @return string
      */
-    static public function stripAttrs($str, $attrs = null)
+    public static function stripAttrs($str, $attrs = null)
     {
         if ($attrs === null)
             $attrs = array('onabort', 'onactivate', 'onafterprint', 'onafterupdate', 'onbeforeactivate', 'onbeforecopy',
@@ -53,7 +53,7 @@ class Str
      * @param $str
      * @return string
      */
-    static public function lcFirst($str)
+    public static function lcFirst($str)
     {
         return strtolower($str[0]) . substr($str, 1);
     }
@@ -65,7 +65,7 @@ class Str
      * @param string $str
      * @return string
      */
-    static public function ucSplit($str)
+    public static function ucSplit($str)
     {
         return ucfirst(preg_replace('/[A-Z]/', ' $0', $str));
     }
@@ -81,7 +81,7 @@ class Str
      * @param integer $minword
      * @return string
      */
-    static public function wordcat($str, $length, $endStr = '', $minword = 3)
+    public static function wordcat($str, $length, $endStr = '', $minword = 3)
     {
         if (!$str) {
             return $str;
@@ -114,7 +114,7 @@ class Str
      * @param string $str The string to compute number of bytes
      * @return integer The length in bytes of the given string.
      */
-    static public function strByteSize($str)
+    public static function strByteSize($str)
     {
         // STRINGS ARE EXPECTED TO BE IN ASCII OR UTF-8 FORMAT
         // Number of characters in string
@@ -167,9 +167,8 @@ class Str
      *
      * @param string $xml
      * @return string
-     * @package Tk
-     */
-    static public function numericEntities($xml)
+         */
+    public static function numericEntities($xml)
     {
         $list = get_html_translation_table(\HTML_ENTITIES, ENT_NOQUOTES);
         $mapping = array();
@@ -187,7 +186,7 @@ class Str
      * @param string $ch
      * @return integer
      */
-    static public function ord($ch)
+    public static function ord($ch)
     {
         $k = mb_convert_encoding($ch, 'UCS-2LE', 'UTF-8');
         $k1 = ord(substr($k, 0, 1));
@@ -202,7 +201,7 @@ class Str
      * @todo: Test this is working correctly
      * @return bool
      */
-    static public function isUtf8($string) { // v1.01
+    public static function isUtf8($string) { // v1.01
         $_is_utf8_split = 5000;
         if (strlen($string) > $_is_utf8_split) {
             // Based on: http://mobile-website.mobi/php-utf8-vs-iso-8859-1-59
@@ -234,7 +233,7 @@ class Str
      * @param $var
      * @return string
      */
-    static public function varToString($var)
+    public static function varToString($var)
     {
         if (is_object($var)) {
             return sprintf('Object(%s)', get_class($var));

@@ -9,7 +9,7 @@
 function vd() {
     $config = \Tk\Config::getInstance();
     $line = current(debug_backtrace());
-    /** @var \Psr\Log\LoggerInterface $log */
+    /* @var \Psr\Log\LoggerInterface $log */
     $log =  $config->getLog();
     if (!$log) $log = new \Psr\Log\NullLogger();
 
@@ -34,7 +34,7 @@ function vd() {
 function vdd() {
     $config = \Tk\Config::getInstance();
     $line = current(debug_backtrace());
-    /** @var \Psr\Log\LoggerInterface $log */
+    /* @var \Psr\Log\LoggerInterface $log */
     $log =  $config->getLog();
     if (!$log) $log = new \Psr\Log\NullLogger();
 

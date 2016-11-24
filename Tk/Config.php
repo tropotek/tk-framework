@@ -95,7 +95,7 @@ class Config extends Collection
     /**
      * @var Config
      */
-    static $instance = null;
+    public static $instance = null;
 
     /**
      * Reserved config keys
@@ -123,7 +123,7 @@ class Config extends Collection
      * @param string $sitePath Only required on first call to init the config paths
      * @return Config
      */
-    static function getInstance($sitePath = '', $siteUrl = '')
+    public static function getInstance($sitePath = '', $siteUrl = '')
     {
         if (static::$instance == null) {
             static::$instance = new static($sitePath, $siteUrl);

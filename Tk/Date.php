@@ -9,7 +9,6 @@ namespace Tk;
 /**
  * The DateRime utilities
  *
- * @package Tk
  */
 class Date
 {
@@ -19,7 +18,7 @@ class Date
      *
      * @var string
      */
-    static public $formFormat = 'd/m/Y';
+    public static $formFormat = 'd/m/Y';
 
     /**
      * EG: 2009-12-31 24:59:59
