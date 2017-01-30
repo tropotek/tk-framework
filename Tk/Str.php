@@ -17,7 +17,7 @@ class Str
      * By default the $attrs contains tag events
      *
      * @param string $str
-     * @param array $attrs Eg: array('onclick', 'onmouseup', 'onmousedown', ...);
+     * @param array $attrs Ems: array('onclick', 'onmouseup', 'onmousedown', ...);
      * @return string
      */
     public static function stripAttrs($str, $attrs = null)
