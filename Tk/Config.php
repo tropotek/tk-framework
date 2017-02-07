@@ -216,7 +216,7 @@ class Config extends Collection
 
     /**
      * @param boolean $truncateKeys If true then the supplied $prefixName will be removed from the returned keys
-     * @return int
+     * @return array
      */
     public function getSystemInfo($truncateKeys = false)
     {
