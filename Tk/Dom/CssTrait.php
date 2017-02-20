@@ -17,15 +17,28 @@ trait CssTrait
     protected $cssList = array();
 
 
+    /**
+     * Clean  CSS class replacing '.' with '-'
+     *
+     * @param $class
+     * @return mixed
+     */
+    public static function cleanCss($class)
+    {
+        return str_replace('.', '-', $class);
+    }
 
     /**
      * Add a css class
      *
      * @param string $class
+     * @param bool $fixName If set to true all '.' are replaced with '-' chars
      * @return $this
      */
-    public function addCss($class)
+    public function addCss($class, $fixName = true)
     {
+        if ($fixName)
+            $class = self::cleanCss($class);
         $this->cssList[$class] = $class;
         return $this;
     }
@@ -34,10 +47,13 @@ trait CssTrait
      * remove a css class
      *
      * @param string $class
+     * @param bool $fixName If set to true all '.' are replaced with '-' chars
      * @return $this
      */
-    public function removeCss($class)
+    public function removeCss($class, $fixName = true)
     {
+        if ($fixName)
+            $class = self::cleanCss($class);
         unset($this->cssList[$class]);
         return $this;
     }
