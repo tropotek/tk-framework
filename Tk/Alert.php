@@ -67,7 +67,7 @@ class Alert extends \Dom\Renderer\Renderer implements \Dom\Renderer\DisplayInter
      */
     public static function getInstance()
     {
-        throw new \Tk\Exception('Check the \App\Page\Iface and change to \Ts\Alert::someMethod() to \Ts\AlertCollection::someMethod()');
+        throw new \Tk\Exception('Check the \App\Page\Iface and change to \Tk\Alert::someMethod() to \Tk\AlertCollection::someMethod()');
     }
 
     /**
