@@ -1,5 +1,15 @@
 #CHANGELOG#
 
+Ver 2.0.8 [2017-02-22]:
+-------------------------------
+ - Fixed up the code with new lib updates
+ - Added new change password system
+ - Fixed recover password system
+ - Minor Code Updates
+ - 252s-dev.vet.unimelb.edu.au
+ - Finished Beta Plugin System
+
+
 Ver 2.0.7 [2017-01-20]:
 -------------------------------
  - Finalising Table column select action
