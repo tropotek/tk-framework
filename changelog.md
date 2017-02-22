@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 2.0.9 [2017-02-23]:
+-------------------------------
+ - Minor Code Updates
+
+
 Ver 2.0.8 [2017-02-22]:
 -------------------------------
  - Fixed up the code with new lib updates
