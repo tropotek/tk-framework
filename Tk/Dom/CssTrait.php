@@ -25,6 +25,9 @@ trait CssTrait
      */
     public static function cleanCss($class)
     {
+         if (is_array($class)) {
+             $class = implode(' ', $class);
+         }
         return str_replace('.', '-', $class);
     }
 
