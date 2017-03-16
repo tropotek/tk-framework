@@ -20,7 +20,7 @@ class Object
      * @param string $class
      * @return string
      */
-    static function toNamespaceSlash($class)
+    public static function toNamespaceSlash($class)
     {
         if (strpos($class, '\\') != -1 && strpos($class, '_') > -1) {
             $class = '\\'.str_replace('_', '\\', $class);
@@ -35,7 +35,7 @@ class Object
      * @param string $class
      * @return string
      */
-    static function toNamespaceUnderscore($class)
+    public static function toNamespaceUnderscore($class)
     {
         if (strpos($class, '_') != -1 && strpos($class, '\\') > -1) {
             $class = str_replace('\\', '_', $class);
@@ -51,7 +51,7 @@ class Object
      * @param string|Object $class
      * @return string
      */
-    static function classPath($class)
+    public static function classPath($class)
     {
         if (is_object($class)) {
             $class = get_class($class);
@@ -70,7 +70,7 @@ class Object
      * @param string $sitePath full path to the base of the site
      * @return string
      */
-    static function classUrl($class, $sitePath)
+    public static function classUrl($class, $sitePath)
     {
         $sitePath = rtrim($sitePath, '/');
         if (is_object($class)) {
@@ -86,12 +86,39 @@ class Object
     }
 
     /**
+     * Get a list of constant name value pairs for a passed class name
+     *
+     * @param string $class A
+     * @param string $prefix If set will only return const values whose name starts with this prefix
+     * @throws \InvalidArgumentException
+     * @return array
+     */
+    public static function getClassConstants($class, $prefix = '')
+    {
+        if (!class_exists($class)) {
+            throw new \InvalidArgumentException('Class Not Found!');
+        }
+        $oReflect = new \ReflectionClass($class);
+        $constList = $oReflect->getConstants();
+        if (!$prefix) {
+            return $constList;
+        }
+        $retList = array();
+        foreach ($constList as $k => $v) {
+            if (substr($k, 0, strlen($prefix)) == $prefix) {
+                $retList[$k] = $v;
+            }
+        }
+        return $retList;
+    }
+
+    /**
      * Convert a map array to a stdClass object
      *
      * @param array $array
      * @return \stdClass|null Returns null on error
      */
-    function arrayToObject($array)
+    public static function arrayToObject($array)
     {
         if (!is_array($array)) {
             return null;
