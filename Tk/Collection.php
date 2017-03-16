@@ -48,8 +48,8 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * Set an item in the collection
      *
-     * @param $key
-     * @param $value
+     * @param string $key
+     * @param mixed $value
      * @return $this
      */
     public function set($key, $value)
@@ -61,8 +61,8 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * Get collection item for key
      * 
-     * @param $key
-     * @param null|mixed $default
+     * @param string $key
+     * @param mixed $default Return value if the key does not exist
      * @return mixed
      */
     public function get($key, $default = null)

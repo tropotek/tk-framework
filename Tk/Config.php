@@ -316,7 +316,11 @@ class Config extends Collection
      */
     public function getCachePath()
     {
-        return $this->getSitePath() . $this->get('system.cache.path');
+        $path = $this->getSitePath() . $this->get('system.cache.path');
+        if (!is_dir($path)) {
+            mkdir($path, 0777, true);
+        }
+        return $path;
     }
 
     /**
@@ -380,7 +384,11 @@ class Config extends Collection
      */
     public function getTempPath()
     {
-        return $this->getSitePath() . $this->get('system.temp.path');
+        $path = $this->getSitePath() . $this->get('system.temp.path');
+        if (!is_dir($path)) {
+            mkdir($path, 0777, true);
+        }
+        return $path;
     }
 
     /**
