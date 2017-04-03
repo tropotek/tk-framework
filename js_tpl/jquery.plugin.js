@@ -139,119 +139,47 @@
 })(jQuery);
 
 
-/** --------------------------------------------------------------- **/
-
-/**
- * Template From http://www.capricasoftware.co.uk/corp/template.php
- *
- * In your application, outside of the plug-in, initialise the plug-in
- * like this:
- *
- *  $(selector).example();
- *  $(selector).example({
- *     propertyA: "something",
- *        propertyB: false,
- *        callbackC: function() {},
- *        callbackD: function(p1, p2, p3) {}
- *     });
- *
- * Invoke public methods like this:
- *
- * $(selector).example("publicFunctionA");
- * $(selector).example("publicFunctionB", "param1", 12345);
- *
- */
-;(function ($) {
-
-  var methods = {
-    /**
-     * init
-     */
-    init: function (options) {
-      return this.each(function () {
-        var $plugin = $(this);
-        var defaultOptions = {
-          // Setup any default options here
-          option1: 'defaultValue1'
-        };
-        // We prefer to reference everything through the $plugin object
-        if (options) {
-          $.extend(defaultOptions, options);
-        }
-        $plugin.options = defaultOptions;
-
-        // Code here
 
 
-      }); // END each()
-    }
+// A minified ready to use version of the above
 
-    // functions here....
+(function($) {
+  var pluginName = function(element, options) {
+    // plugin vars
+    var defaults = {
+      foo: 'bar',
+      onFoo: function() {}
+    };
+    var plugin = this;
+    plugin.settings = {};
 
+    // constructor method
+    plugin.init = function() {
+      plugin.settings = $.extend({}, defaults, options);
 
+      // TODO: code goes here
+
+    };
+
+    // private methods
+    //var foo_private_method = function() { };
+
+    // public methods
+    //plugin.foo_public_method = function() { };
+
+    // call the "constructor" method
+    plugin.init();
   };
 
-  $.fn.example = function (method) {
-    if (methods[method]) {
-      return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
-    } else if (typeof method === 'object' || !method) {
-      return methods.init.apply(this, arguments);
-    } else {
-      $.error("Method " + method + " does not exist on jQuery.example");
-    }
-  };
-
-})(jQuery);
-
-
-// --------------------------------------------------- //
-
-;(function ($) {
-  $.fn.extend({
-    //pass the options variable to the function
-    pluginname: function (options) {
-      //Set the default values, use comma to separate the settings, example:
-      var defaults = {
-        canvasId: 'demo1',
-        url : '/ajax/test.json',
-        callback : function () {}
+  // add the plugin to the jQuery.fn object
+  $.fn.pluginName = function(options) {
+    return this.each(function() {
+      if (undefined === $(this).data('pluginName')) {
+        var plugin = new pluginName(this, options);
+        $(this).data('pluginName', plugin);
       }
-      var options = $.extend(defaults, options);
-
-      return this.each(function () {
-        var o = options;
-        //Assign current element to variable, in this case is UL element
-        var obj = $(this);
-        // Get all li children from this object
-        var items = $("li", obj);
-
-
-        // call callback
-        o.callback(this);
-
-        //code to be inserted here
-        //you can access the value like this
-        vd(o.canvasId);
-      });
-
-    }
-  });
-
-
-  // a public method. for demonstration purposes only - remove it!
-  $.fn.pluginname.publicMethod = function() {
-    // code goes here
-  };
-
-  // Private function for debugging.
-  vd = function(obj) {
-    if (window.console && window.console.log) {
-      window.console.log(obj);
-    }
-  };
+    });
+  }
 
 })(jQuery);
-
-
-
 
