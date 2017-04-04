@@ -495,7 +495,7 @@ class Config extends Collection
             $sitePath = rtrim( dirname(dirname(dirname(dirname(dirname(__FILE__))))) , '/');
         }
         // Determine the default base url
-        if (!$siteUrl) {
+        if (!$siteUrl && isset($_SERVER['PHP_SELF'])) {
             $siteUrl = dirname($_SERVER['PHP_SELF']);
         }
         $siteUrl = rtrim($siteUrl, '/');
