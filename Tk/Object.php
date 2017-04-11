@@ -6,12 +6,110 @@ namespace Tk;
  * This object is a utility object to perform actions 
  * with class names and name-spacing issues.
  *
+ *
  * @author Michael Mifsud <info@tropotek.com>
  * @link http://www.tropotek.com/
  * @license Copyright 2015 Michael Mifsud
  */
 class Object
 {
+
+
+
+    /**
+     * Check if an object property exists ignoring the scope of that property.
+     *
+     * NOTE: Accessing private properties is possible, but care must be taken
+     * if that private property was defined lower into the inheritance chain.
+     * For example, if class A extends class B, and class B defines a private
+     * property called 'foo', getProperty will throw a ReflectionException.
+     *
+     * Instead, you can loop over getParentClass until it returns false to
+     * look for the private property, at which point you can access and/or
+     * modify its value as needed. (modify this method if needed)
+     *
+     * @param object $object
+     * @param string $name the property name
+     * @return bool
+     */
+    public static function objectPropertyExists($object, $name)
+    {
+        try {
+            $reflect = new \ReflectionClass($object);
+            $prop = $reflect->getProperty($name);
+            if ($prop) return true;
+        } catch (\Exception $e) {}
+        return false;
+    }
+
+    /**
+     * Allows for getting of an objects property value either through a getter method or by
+     * directly accessing the property itself ignoring the scope permissions  (IE: public,protected,private)
+     *
+     * NOTE: Accessing private properties is possible, but care must be taken
+     * if that private property was defined lower into the inheritance chain.
+     * For example, if class A extends class B, and class B defines a private
+     * property called 'foo', getProperty will throw a ReflectionException.
+     *
+     * Instead, you can loop over getParentClass until it returns false to
+     * look for the private property, at which point you can access and/or
+     * modify its value as needed. (modify this method if needed)
+     *
+     * @param object $object
+     * @param string $name The property name
+     * @return mixed|null
+     */
+    public static function getObjectPropertyValue($object, $name)
+    {
+        $reflect = new \ReflectionClass($object);
+        // Check if there are getter methods for this property
+        $pre = array('get', 'is', 'has');
+        foreach ($pre as $p) {
+            $m = $p . ucfirst($name);
+            if($reflect->hasMethod($m) && $reflect->getMethod($m)->isPublic()) {
+                return $object->$m();
+            }
+        }
+
+        // if not try to access the property directly
+        $property = $reflect->getProperty($name);
+        if ($property) {
+            $property->setAccessible(true);
+            return $property->getValue($object);
+        }
+        return null;
+    }
+
+    /**
+     * This method updates a value in an object first looking for a set.... method if that fails then the
+     * objects property is set directly ignoring the properties scope (IE: public,protected,private)
+     * This is useful for loading an object with data from data sources such as DB or JSON etc...
+     *
+     * @param mixed $object
+     * @param string $name
+     * @param mixed $value
+     */
+    public static function setObjectPropertyValue($object, $name, $value)
+    {
+        $reflect = new \ReflectionClass($object);
+        // Check if there are setter methods for this property
+        $pre = array('set');
+        foreach ($pre as $p) {
+            $m = $p . ucfirst($name);
+            if($reflect->hasMethod($m) && $reflect->getMethod($m)->isPublic()) {
+                $object->$m($value);
+                return;
+            }
+        }
+
+        // If not try to access the property directly
+        $property = $reflect->getProperty($name);
+        if ($property) {
+            $property->setAccessible(true);
+            $property->setValue($object, $value);
+        }
+    }
+
     
     /**
      * Take a class in the form of Tk_Some_Class
