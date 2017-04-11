@@ -144,6 +144,20 @@ class Object
     }
 
     /**
+     * Get the base classname of an object without the namespace
+     * The supplied parameter can be an object or a classname string
+     *
+     * @param object|string $class Can be an object or a classname string
+     * @return bool|int|string
+     */
+    public static function basename($class)
+    {
+        if (is_object($class)) $class = get_class($class);
+        if ($pos = strrpos($class, '\\')) return substr($class, $pos + 1);
+        return $pos;
+    }
+
+    /**
      * Get the path of a class
      *
      * @param string|Object $class
