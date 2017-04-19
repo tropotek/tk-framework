@@ -207,7 +207,9 @@ class Object
      */
     public static function getClassConstants($class, $prefix = '')
     {
-        if (!class_exists($class)) {
+        if (is_object($class)) {
+            $class = get_class($class);
+        } else if (!class_exists($class)) {
             throw new \InvalidArgumentException('Class Not Found!');
         }
         $oReflect = new \ReflectionClass($class);
