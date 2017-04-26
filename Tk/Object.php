@@ -63,7 +63,9 @@ class Object
     {
         $reflect = new \ReflectionClass($object);
         // Check if there are getter methods for this property
-        $pre = array('get', 'is', 'has');
+        //$pre = array('get', 'is', 'has');
+        // We removed 'has' as it implies that there is some computation of a value not directly related to the object [IE: hasRole(role)]
+        $pre = array('get', 'is');
         foreach ($pre as $p) {
             $m = $p . ucfirst($name);
             if($reflect->hasMethod($m) && $reflect->getMethod($m)->isPublic()) {
