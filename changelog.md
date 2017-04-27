@@ -1,5 +1,14 @@
 #CHANGELOG#
 
+Ver 2.0.12 [2017-04-27]:
+-------------------------------
+ - Minor Code Updates
+ - 252s-dev.vet.unimelb.edu.au
+ - Fixed up Status object and handlerInterface
+ - Added new supervisor table
+ - Removed CompanCourse objects as they did not work as elegantly as expected
+
+
 Ver 2.0.11 [2017-04-02]:
 -------------------------------
  - Minor Code Updates
