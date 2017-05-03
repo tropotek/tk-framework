@@ -84,26 +84,6 @@ class Alert extends \Dom\Renderer\Renderer implements \Dom\Renderer\DisplayInter
         return new self($message, $type, $title, $icon);
     }
 
-    public static function createSuccess($message, $title = '')
-    {
-        return self::create($message, self::TYPE_SUCCESS, $title, 'icon-ok-sign');
-    }
-
-    public static function createInfo($message, $title = '')
-    {
-        return self::create($message, self::TYPE_INFO, $title, 'icon-exclamation-sign');
-    }
-
-    public static function createWarning($message, $title = '')
-    {
-        return self::create($message, self::TYPE_WARNING, $title, 'icon-warning-sign');
-    }
-
-    public static function createError($message, $title = '')
-    {
-        return self::create($message, self::TYPE_ERROR, $title, 'icon-remove-sign');
-    }
-
 
 
     /**

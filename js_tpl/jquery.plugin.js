@@ -5,18 +5,12 @@
  * @author Michael Mifsud <info@tropotek.com>
  * @link http://www.tropotek.com/
  * @license Copyright 2007 Michael Mifsud
+ * @source http://stefangabos.ro/jquery/jquery-plugin-boilerplate-revisited/
  */
 
-
-
 /**
- * This plugin template is from http://stefangabos.ro/jquery/jquery-plugin-boilerplate-revisited/
+ * TODO: Change every instance of "pluginName" to the name of your plugin!
  *
- * jQuery Plugin Boilerplate
- * A boilerplate for jumpstarting jQuery plugins development
- * version 1.1, May 14th, 2011
- * by Stefan Gabos
- * 
  * <code>
  *   $(document).ready(function() {
  *     // attach the plugin to an element
@@ -31,8 +25,6 @@
  *   });
  * </code>
  */
-
-// remember to change every instance of "pluginName" to the name of your plugin!
 (function($) {
 
   /**
@@ -76,7 +68,7 @@
       // user-provided options (if any)
       plugin.settings = $.extend({}, defaults, options);
 
-      // code goes here
+      // TODO: code goes here
 
     };
 
@@ -117,7 +109,7 @@
     return this.each(function() {
 
       // if plugin has not already been attached to the element
-      if (undefined == $(this).data('pluginName')) {
+      if (undefined === $(this).data('pluginName')) {
 
         // create a new instance of the plugin
         // pass the DOM element and the user-provided options as arguments
@@ -141,8 +133,8 @@
 
 
 
-// A minified ready to use version of the above
-
+// An optimised ready to use version of the above
+/*
 (function($) {
   var pluginName = function(element, options) {
     // plugin vars
@@ -182,4 +174,4 @@
   }
 
 })(jQuery);
-
+*/
