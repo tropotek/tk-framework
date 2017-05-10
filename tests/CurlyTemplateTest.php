@@ -25,6 +25,7 @@ class CurlyTemplateTest extends \PHPUnit_Framework_TestCase
     public function __construct()
     {
         parent::__construct('CurlyTemplate Test');
+        $config = \App\Factory::getConfig();
 
     }
 
@@ -38,19 +39,13 @@ class CurlyTemplateTest extends \PHPUnit_Framework_TestCase
   </head>
   <body>
     <h1>{pageTitle}</h1>
-    <table>
-      {rowBlock}
-        <tr>
-        {dataBlock}
-          <td>{dataValue}</td>
-        {/dataBlock}
-        </tr>
-      {/rowBlock}
+    <table>{rowBlock}
+        <tr>{dataBlock}
+          <td>{dataValue}</td>{/dataBlock}
+        </tr>{/rowBlock}
     </table>
-    <ul>
-      {listBlock}
-      <li><a href="{linkUrl}">{linkText}</a></li>
-      {\listBlock}
+    <ul>{listBlock}
+      <li><a href="{linkUrl}">{linkText}</a></li>{\listBlock}
     </ul>
   </body>
 </html>
@@ -110,54 +105,33 @@ HTML;
   <body>
     <h1>This is the main page title.</h1>
     <table>
-      
         <tr>
-        
           <td>dataValue1.1</td>
-        
           <td>dataValue1.2</td>
-        
           <td>dataValue1.3</td>
-        
         </tr>
-      
         <tr>
-        
           <td>dataValue2.1</td>
-        
           <td>dataValue2.2</td>
-        
           <td>dataValue2.3</td>
-        
         </tr>
-      
         <tr>
-        
           <td>dataValue3.1</td>
-        
           <td>dataValue3.2</td>
-        
           <td>dataValue3.3</td>
-        
         </tr>
-      
     </table>
     <ul>
-      
       <li><a href="link1.html">Link 1</a></li>
-      
       <li><a href="link2.html">Link 2</a></li>
-      
       <li><a href="link3.html">Link 3</a></li>
-      
       <li><a href="link4.html">Link 4</a></li>
-      
     </ul>
   </body>
 </html>
 HTML;
 
-        $this->assertEquals($str, $res);
+        $this->assertEquals($res, $str);
     }
 
     public function testChoiceBlocks()
@@ -178,25 +152,47 @@ HTML;
   <body>
     <h1>This is the main page title.</h1>
     <table>
-      
         <tr>
-        
           <td>This is a test</td>
-        
         </tr>
-      
     </table>
     <ul>
-      
-      <li><a href="{linkUrl}">{linkText}</a></li>
-      
     </ul>
   </body>
 </html>
 HTML;
 
 
-        $this->assertEquals($str, $res);
+        $this->assertEquals($res, $str);
+    }
+
+
+    public function testChoiceBlocksTwo()
+    {
+        $str = $this->template->parse(array(
+            'headTitle' => 'This is the Head Title.',
+            'pageTitle' => 'This is the main page title.',
+            'rowBlock' => false,
+            'dataBlock' => true,
+            'dataValue' => 'This is a test'
+        ));
+
+        $res = <<<HTML
+<html>
+  <head>
+    <title>This is the Head Title.</title>
+  </head>
+  <body>
+    <h1>This is the main page title.</h1>
+    <table>
+    </table>
+    <ul>
+    </ul>
+  </body>
+</html>
+HTML;
+
+        $this->assertEquals($res, $str);
     }
 
 

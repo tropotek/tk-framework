@@ -119,6 +119,7 @@ class CurlyTemplate extends Object
     public function __construct($template)
     {
         $this->template = $template;
+
     }
 
 
@@ -182,18 +183,15 @@ class CurlyTemplate extends Object
     {
         $ld = preg_quote($this->ld);
         $rd = preg_quote($this->rd);
-        
-        // original regex, not working?
-        //$reg = '#' . $ld . '([^' . $ld . ']*?)' .  $rd . '((?:[^{]|{(?!/?(.+)})|(?R))+)' . $ld . '[^' . $ld . ']\1' . $rd . '#si';
-        
-        // My interpretation that seems to work
+
+        // Reg to find the curly text blocks
         $reg = '#' . $ld . '([^' . $ld . ']*?)' .  $rd . '(.*?)' . $ld . '[^' . $ld . ']\1' . $rd . '#si';
         $template = preg_replace_callback($reg, function ($matches) use ($data) {
             $tplData = $data;
             if (isset($matches[0])) {
                 $tpl = $matches[2];
                 $name = $matches[1];
-                if (isset($tplData[$name])) {
+                if (isset($tplData[$name]) && $tplData[$name] !== false) {
                     if (isset($tplData[$name][0])) {
                         $block = '';
                         foreach($tplData[$name] as $rowData) {
@@ -201,13 +199,17 @@ class CurlyTemplate extends Object
                         }
                         return $block;
                     } else {
-                        return $this->parseRecursive($tpl, $tplData[$name]);
+                        if ($tplData[$name] === true) {
+                            return $this->parseRecursive($tpl, $tplData);
+                        } else {
+                            return $this->parseRecursive($tpl, $tplData[$name]);
+                        }
                     }
                 }
-                return $this->parseRecursive($tpl, $tplData);
             }
             return '';
         }, $template);
+
         return $this->parseBlock($template, $data);
     }
 
@@ -224,7 +226,5 @@ class CurlyTemplate extends Object
         $this->rd = $rd;
         return $this;
     }
-
-
 
 }
