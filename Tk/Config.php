@@ -157,6 +157,8 @@ class Config extends Collection
         $config['system.log.path'] = ini_get('error_log');
         $config['system.log.level'] = 'error';
         $config['date.timezone'] = 'Australia/Victoria';
+        $config['file.mask'] = 0664;
+        $config['dir.mask'] = 0775;
 
         $config['system.data.path'] =     '/data';
         $config['system.cache.path'] =    '/data/cache';
@@ -221,6 +223,26 @@ class Config extends Collection
     public function getSystemInfo($truncateKeys = false)
     {
         return $this->getGroup('system.info', $truncateKeys);
+    }
+
+    /**
+     * Get the octal permission mask for files
+     * 
+     * @return int
+     */
+    public function getFileMask()
+    {
+        return $this->get('file.mask');
+    }
+
+    /**
+     * Get the octal permission mask for directories
+     * 
+     * @return int
+     */
+    public function getDirMask()
+    {
+        return $this->get('dir.mask');
     }
 
     /**
@@ -318,7 +340,7 @@ class Config extends Collection
     {
         $path = $this->getSitePath() . $this->get('system.cache.path');
         if (!is_dir($path)) {
-            mkdir($path, 0777, true);
+            mkdir($path, $this->getDirMask(), true);
         }
         return $path;
     }
@@ -386,7 +408,7 @@ class Config extends Collection
     {
         $path = $this->getSitePath() . $this->get('system.temp.path');
         if (!is_dir($path)) {
-            mkdir($path, 0777, true);
+            mkdir($path, $this->getDirMask(), true);
         }
         return $path;
     }

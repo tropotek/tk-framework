@@ -44,7 +44,7 @@ class Filesystem implements Iface
     public function store($key, $data, $ttl = 0)
     {
         if (!is_dir($this->cachePath)) {
-            mkdir($this->cachePath, 0777, true);
+            mkdir($this->cachePath, \Tk\Config::getInstance()->getDirMask(), true);
         }
         // Opening the file in read/write mode
         $h = fopen($this->getFileName($key), 'a+');
