@@ -1,6 +1,7 @@
 /*
  * Plugin: Example
  * Version: 1.0
+ * Date: 11/05/17
  *
  * @author Michael Mifsud <info@tropotek.com>
  * @link http://www.tropotek.com/
@@ -81,7 +82,7 @@
 
       // code goes here
 
-    };
+    };  // END init()
 
     // public methods
     // these methods can be called like:
@@ -151,7 +152,7 @@
 
       // TODO: code goes here
 
-    };
+    };  // END init()S
 
     // private methods
     //var foo_private_method = function() { };

@@ -154,7 +154,7 @@ class File
      */
     public static function getExtension($path)
     {
-        return pathinfo($path, PATHINFO_EXTENSION);
+        return strtolower(pathinfo($path, PATHINFO_EXTENSION));
     }
 
     /**
