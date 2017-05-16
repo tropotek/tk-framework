@@ -23,7 +23,12 @@ class Date
     /**
      * EG: 2009-12-31 24:59:59
      */
-    const FORMAT_ISO_DATE = 'Y-m-d H:i:s';
+    const FORMAT_ISO_DATETIME = 'Y-m-d H:i:s';
+
+    /**
+     * EG: 2009-12-31
+     */
+    const FORMAT_ISO_DATE = 'Y-m-d';
 
     /**
      * EG: Tuesday, 23 Apr 2009
@@ -39,6 +44,11 @@ class Date
      * EG: 23/09/2009 24:59:59
      */
     const FORMAT_SHORT_DATETIME = 'd/m/Y H:i:s';
+
+    /**
+     * EG: 23/09/2009
+     */
+    const FORMAT_SHORT_DATE = 'd/m/Y';
 
     /**
      * EG: 23 Apr 2009
