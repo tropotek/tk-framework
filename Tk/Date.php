@@ -151,19 +151,20 @@ class Date
      * @param $dateStr
      * @param null $timezone
      * @return \DateTime
+     * @throws Exception
      */
     static function createFormDate($dateStr, $timezone = null)
     {
+        if (!$dateStr) return null;
         if ($timezone && is_string($timezone)) {
             $timezone = new \DateTimeZone($timezone);
         }
         if (!$timezone) {
             $timezone = new \DateTimeZone(date_default_timezone_get());
         }
-
         $date = \DateTime::createFromFormat(self::$formFormat, $dateStr);
-        //$date = new \DateTime($time, $timezone);
-        $date->setTimezone($timezone);
+        if ($date)
+            $date->setTimezone($timezone);
         return $date;
 
     }
