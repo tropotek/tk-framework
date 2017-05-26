@@ -1,5 +1,13 @@
 #CHANGELOG#
 
+Ver 2.0.13 [2017-05-26]:
+-------------------------------
+ - Minor Code Updates
+ - 252s-dev.vet.unimelb.edu.au
+ - Fixed crumbs, company table, Ui Tables, added logo2mapMarker converter
+ - Added TailLog page for debugging
+
+
 Ver 2.0.12 [2017-04-27]:
 -------------------------------
  - Minor Code Updates
