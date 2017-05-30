@@ -20,6 +20,7 @@ namespace Tk\Dom;
  */
 trait AttributesTrait
 {
+
     /**
      * @var array
      */
@@ -29,16 +30,20 @@ trait AttributesTrait
     /**
      * Set an attribute
      *
-     * @param string $name
+     * @param string|array $name
      * @param string $value
      * @return $this
      */
     public function setAttr($name, $value = null)
     {
-        $name = strip_tags(trim($name));
-        if ($value === null)
-            $value = $name;
-        $this->attrList[$name] = $value;
+        if (is_array($name)) {
+            array_merge($this->attrList, $name);
+        } else {
+            $name = strip_tags(trim($name));
+            if ($value === null)
+                $value = $name;
+            $this->attrList[$name] = $value;
+        }
         return $this;
     }
 
@@ -95,7 +100,6 @@ trait AttributesTrait
      *
      * Eg:
      *   'id="test-id" style="color: #000;" data-attr="test"'
-     *
      *
      * @return string
      */
