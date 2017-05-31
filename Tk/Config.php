@@ -433,6 +433,16 @@ class Config extends Collection
         return $this->get('cli');
     }
 
+    /**
+     * Get the database
+     *
+     * @return \Tk\Db\Pdo
+     */
+    public function getDb()
+    {
+        return $this->get('db');
+    }
+
 
     /**
      * Allow call to parameters via a get and set
