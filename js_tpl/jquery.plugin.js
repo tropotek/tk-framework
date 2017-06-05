@@ -144,6 +144,7 @@
       onFoo: function() {}
     };
     var plugin = this;
+    var el = $(element);
     plugin.settings = {};
 
     // constructor method
@@ -152,7 +153,7 @@
 
       // TODO: code goes here
 
-    };  // END init()S
+    };  // END init()
 
     // private methods
     //var foo_private_method = function() { };
