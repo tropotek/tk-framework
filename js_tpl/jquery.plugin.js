@@ -26,7 +26,7 @@
  *   });
  * </code>
  */
-(function($) {
+;(function($) {
 
   /**
    *
@@ -38,7 +38,6 @@
     // plugin's default options
     // this is private property and is  accessible only from inside the plugin
     var defaults = {
-
       foo: 'bar',
 
       // if your plugin is event-driven, you may provide callback capabilities
@@ -53,14 +52,14 @@
     // current instance of the object
     var plugin = this;
 
+    var $element = $(element); // reference to the jQuery version of DOM element
+
     // this will hold the merged default, and user-provided options
     // plugin's properties will be available through this object like:
     // plugin.settings.propertyName from inside the plugin or
     // element.data('pluginName').settings.propertyName from outside the plugin, 
     // where "element" is the element the plugin is attached to;
     plugin.settings = {};
-
-    var $element = $(element); // reference to the jQuery version of DOM element
 
     // the "constructor" method that gets called when the object is created
     plugin.init = function() {
@@ -136,7 +135,7 @@
 
 // An optimised ready to use version of the above
 /*
-(function($) {
+;(function($) {
   var pluginName = function(element, options) {
     // plugin vars
     var defaults = {
@@ -144,7 +143,7 @@
       onFoo: function() {}
     };
     var plugin = this;
-    var el = $(element);
+    var $element = $(element);
     plugin.settings = {};
 
     // constructor method
