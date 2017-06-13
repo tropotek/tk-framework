@@ -120,6 +120,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
     {
         unset($this->data[$key]);
         return $this;
+        // TODO: Should we return $this->data[$key] here
     }
 
     /**
