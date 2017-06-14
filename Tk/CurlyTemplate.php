@@ -26,6 +26,8 @@ namespace Tk;
  *          </tr>
  *        {/rowBlock}
  *      </table>
+ *
+ *      <div>{dynamicData}</div>
  *    </body>
  *  </html>
  *
@@ -70,7 +72,8 @@ namespace Tk;
  *         array('linkUrl' => 'link3.html', 'linkText' => 'Link 3'),
  *         array('linkUrl' => 'link4.html', 'linkText' => 'Link 4')
  *       )
- *     )
+ *     ),
+ *     'dynamicData' => function ($curlyTemplate) use ($message) { return 'Some String...'; }   // <---- must return a string...
  *   );
  * 
  * </code>
@@ -83,7 +86,7 @@ namespace Tk;
  *       'pageTitle' => 'This is the main page title.',
  *       'rowBlock' => true,
  *       'dataBlock' => true,
- *       'dataValue' => 'This is a fuckin test'
+ *       'dataValue' => 'This is a fricken` test'
  *     )
  *   )
  * </code>
@@ -93,7 +96,7 @@ namespace Tk;
  * @license Copyright 2016 Michael Mifsud
  * @todo Add caching ability
  */
-class CurlyTemplate extends Object
+class CurlyTemplate
 {
     
     /**
@@ -161,11 +164,16 @@ class CurlyTemplate extends Object
      * @param string $str
      * @param array $data
      * @return string
+     * @throws Exception
      */
     private function parseBlock($str, $data)
     {
         if (!is_array($data)) return $str;
         foreach($data as $k => $v) {
+            if (is_callable($v)) {
+                $v = call_user_func_array($v, array($this));
+                if (!is_string($v)) throw new \Tk\Exception('Invalid return type. Function must return a string.');
+            }
             if (!is_string($v)) continue;
             $str = str_replace($this->ld . $k . $this->rd, $v, $str);
         }
