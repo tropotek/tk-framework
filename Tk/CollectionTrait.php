@@ -77,5 +77,15 @@ trait CollectionTrait
         $this->getCollection()->remove($key);
         return $this;
     }
+
+    /**
+     * Get all items from the collection
+     *
+     * @return array
+     */
+    public function all()
+    {
+        return $this->getCollection()->all();
+    }
     
 }
