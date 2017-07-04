@@ -37,7 +37,7 @@ trait AttributesTrait
     public function setAttr($name, $value = null)
     {
         if (is_array($name)) {
-            array_merge($this->attrList, $name);
+            $this->attrList = array_merge($this->attrList, $name);
         } else {
             $name = strip_tags(trim($name));
             if ($value === null)
