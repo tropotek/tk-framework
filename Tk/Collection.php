@@ -73,7 +73,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * Get all items in collection
      *
-     * @param null|string $regex
+     * @param null|string|array $regex
      * @return array The collection's source data
      */
     public function all($regex = null)
@@ -81,7 +81,11 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
         if ($regex) {
             $array = array();
             foreach ($this->data as $name => $value) {
-                if (!preg_match($regex, $name)) continue;
+                if (is_string($regex) && !preg_match($regex, $name)) {
+                    continue;
+                } else if (is_array($regex) && !in_array($name, $regex)) {
+                    continue;
+                }
                 $array[$name] = $value;
             }
             return $array;
