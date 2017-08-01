@@ -59,7 +59,7 @@ class Str
     }
     
     /**
-     * Convert camele case words so "testFunc" would convert to "Test Func"
+     * Convert camel case words so "testFunc" would convert to "Test Func"
      * Adds a capital at the first char and ass a space before all other upper case chars
      *
      * @param string $str
@@ -259,10 +259,18 @@ class Str
         }
         return (string) $var;
     }
-    
-    
-    
-    
+
+
+    /**
+     * Is the string a HTML string
+     *
+     * @param $str
+     * @return bool
+     */
+    public static function isHtml($str)
+    {
+        return (strlen($str) != strlen(strip_tags($str)));
+    }
     
     
     
