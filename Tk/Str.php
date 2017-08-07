@@ -89,16 +89,15 @@ class Str
         $sub = '';
         $len = 0;
 
-        foreach (explode(' ', $str) as $word)
-        {
+        foreach (explode(' ', $str) as $word) {
             $part = (($sub != '') ? ' ' : '') . $word;
             $sub .= $part;
             $len += strlen($part);
-            if (strlen($word) > $minword && strlen($sub) >= $length)
-            {
+            if (strlen($word) > $minword && strlen($sub) >= $length) {
                 break;
             }
         }
+
         return $sub . (($len < strlen($str)) ? $endStr : '');
     }
 
