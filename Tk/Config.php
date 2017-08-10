@@ -340,7 +340,9 @@ class Config extends Collection
     {
         $path = $this->getSitePath() . $this->get('system.cache.path');
         if (!is_dir($path)) {
-            mkdir($path, $this->getDirMask(), true);
+            if(!@mkdir($path, $this->getDirMask(), true)) {
+                throw new \Tk\Exception('Please change the permissions on your sites data path.');
+            }
         }
         return $path;
     }
