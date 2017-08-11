@@ -1,5 +1,5 @@
 /*
- * Plugin: Example
+ * Plugin: pluginName
  * Version: 1.0
  * Date: 11/05/17
  *
