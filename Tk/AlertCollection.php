@@ -113,10 +113,11 @@ class AlertCollection extends \Dom\Renderer\Renderer implements \Dom\Renderer\Di
     /**
      * show
      *
-     * @return AlertCollection
+     * @return \Dom\Template
      */
     public function show()
     {
+        $template = null;
         if (self::hasMessages()) {
             $this->template = null; // Render with new template each time
             $template = $this->getTemplate();
@@ -128,7 +129,7 @@ class AlertCollection extends \Dom\Renderer\Renderer implements \Dom\Renderer\Di
             }
             $this->clear();
         }
-        return $this;
+        return $template;
     }
 
     /**
