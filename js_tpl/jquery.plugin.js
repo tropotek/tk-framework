@@ -48,18 +48,18 @@
 
     };
 
+    // this will hold the merged default, and user-provided options
+    // plugin's properties will be available through this object like:
+    // plugin.settings.propertyName from inside the plugin or
+    // element.data('pluginName').settings.propertyName from outside the plugin,
+    // where "element" is the element the plugin is attached to;
+    plugin.settings = {};
+
     // to avoid confusions, use "plugin" to reference the 
     // current instance of the object
     var plugin = this;
 
     var $element = $(element); // reference to the jQuery version of DOM element
-
-    // this will hold the merged default, and user-provided options
-    // plugin's properties will be available through this object like:
-    // plugin.settings.propertyName from inside the plugin or
-    // element.data('pluginName').settings.propertyName from outside the plugin, 
-    // where "element" is the element the plugin is attached to;
-    plugin.settings = {};
 
     // the "constructor" method that gets called when the object is created
     plugin.init = function() {
@@ -137,20 +137,26 @@
 /*
 ;(function($) {
   var pluginName = function(element, options) {
-    // plugin vars
+    var plugin = this;
+    plugin.settings = {};
+    var $element = $(element);
+
+    // plugin settings
     var defaults = {
       foo: 'bar',
       onFoo: function() {}
     };
-    var plugin = this;
-    var $element = $(element);
-    plugin.settings = {};
+
+    // plugin vars
+    var foo = '';
 
     // constructor method
     plugin.init = function() {
       plugin.settings = $.extend({}, defaults, options);
 
       // TODO: code goes here
+
+
 
     };  // END init()
 
