@@ -16,6 +16,18 @@ class Exception extends \Exception
      */
     protected $dump = '';
 
+    /**
+     * @param \Exception $src
+     * @return static
+     */
+    public static function create($src)
+    {
+        $e = new static($src->message, $src->code);
+        $e->file = $src->file;
+        $e->line = $src->line;
+        return $e;
+    }
+    
 
     /**
      * Set any memory, code dump data to display in the exception error

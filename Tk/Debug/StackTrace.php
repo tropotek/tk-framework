@@ -72,7 +72,9 @@ class StackTrace {
                         $o = get_class($o);
                     }
                     if (is_array($o)) {
-                        $o = print_r($o, true);
+                        // ToDO: We get a recursive error here for some reason????
+                        //$o = print_r($o, true);
+                        $o = 'Array['.count($o).']';
                     }
                     if (is_string($o) || $o == '') $o = "'" . str_replace(array("\n", "\r"), ' ', substr($o, 0, 32)) . "'";
                     $astr .= $o . ', ';
