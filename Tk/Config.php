@@ -113,6 +113,7 @@ class Config extends Collection
     public function __construct($sitePath = '', $siteUrl = '')
     {
         parent::__construct();
+        $this->setTimezone('Australia/Victoria');
         $this->init($sitePath, $siteUrl);
     }
 
