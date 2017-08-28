@@ -136,9 +136,15 @@ class Config extends Collection
      *
      * @param string $sitePath
      * @param string $siteUrl
+     * @throws \Exception
      */
     protected function init($sitePath = '', $siteUrl = '')
     {
+        // php version must be high enough to support traits
+        if (version_compare(phpversion(), '5.3.0', '<')) {
+            throw new \Exception('Your PHP5 version must be greater than 5.3.0 [Curr Ver: '.phpversion().']');
+        }
+
         $config = $this;
         $config['script.time'] = microtime(true);
 
@@ -149,17 +155,24 @@ class Config extends Collection
         }
 
         // setup site path and URL
-        list($config['site.path'], $config['site.url']) = $this->getDefaultPaths($sitePath, $siteUrl);
+        list($config['site.path'], $config['site.url']) = $config->getDefaultPaths($sitePath, $siteUrl);
+        \Tk\Uri::$BASE_URL_PATH = $config->getSiteUrl();
 
+        /**
+         * This makes our life easier when dealing with paths. Everything is relative
+         * to the application root now.
+         */
+        chdir($config->getSitePath());
 
-        $config['debug'] = false;
-        $config['log'] = new NullLogger();
-        $config['system.log.path'] = ini_get('error_log');
-        $config['system.log.level'] = 'error';
-        $config['date.timezone'] = 'Australia/Victoria';
+        $config->setDebug(false);
+        ini_set('display_errors', 'Off');
+        $config->setLog(new NullLogger());
+        $config->setTimezone('Australia/Victoria');
+        $config->setLogPath(ini_get('error_log'));
+        $config->setLogLevel('error');
+
         $config['file.mask'] = 0664;
         $config['dir.mask'] = 0775;
-
         $config['system.data.path'] =     '/data';
         $config['system.cache.path'] =    '/data/cache';
         $config['system.temp.path'] =     '/data/temp';
@@ -168,7 +181,6 @@ class Config extends Collection
         $config['system.plugin.path'] =   '/plugin';
         $config['system.assets.path'] =   '/assets';
         $config['system.template.path'] = '/html';
-
 
         // Site information
         $config['system.info.project'] = 'Untitled Site';
@@ -179,8 +191,8 @@ class Config extends Collection
         $config['system.info.authors'] = '';
         $config['system.info.stability'] = '';
 
-        if (is_file($this->getSitePath() . '/composer.json')) {
-            $composer = json_decode(file_get_contents($this->getSitePath() . '/composer.json'));
+        if (is_file($config->getSitePath() . '/composer.json')) {
+            $composer = json_decode(file_get_contents($config->getSitePath() . '/composer.json'));
             if (isset($composer->name))
                 $config['system.info.project'] = $composer->name;
             if (isset($composer->description))
@@ -204,6 +216,27 @@ class Config extends Collection
                 $config['system.info.minimumStability'] = $composer->{'minimum-stability'};
             }
         }
+    }
+
+    /**
+     * Set the system timezone:
+     * EG: Australia/Victoria, America/Los_Angeles
+     *
+     * See DateTimeZone::listIdentifiers() to get an array of identifiers
+     *
+     * @param string $tz
+     */
+    public function setTimezone($tz) {
+        date_default_timezone_set($tz);
+        $this->set('date.timezone', $tz);
+    }
+
+    /**
+     * @return string
+     */
+    public function getTimezone()
+    {
+        return $this->get('date.timezone');
     }
 
     /**
@@ -259,6 +292,54 @@ class Config extends Collection
     public function getLog()
     {
         return $this->get('log');
+    }
+
+    /**
+     *
+     * @param \Psr\Log\LoggerInterface $logger
+     * @return $this
+     */
+    public function setLog($logger)
+    {
+        $this->set('log', $logger);
+        return $this;
+    }
+
+    /**
+     * TODO: should we use this to setup the php system log levels???
+     *
+     * @param $level
+     * @return $this
+     */
+    public function setLogLevel($level)
+    {
+        return $this->set('log.level', $level);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLogLevel()
+    {
+        return $this->get('log.level');
+    }
+
+    /**
+     * @param string $path
+     * @return $this
+     */
+    public function setLogPath($path)
+    {
+        ini_set('error_log', $path);
+        return $this->set('log.path', $path);
+    }
+
+    /**
+     * @return string
+     */
+    public function getLogPath()
+    {
+        return $this->get('log.path');
     }
 
     /**
@@ -335,6 +416,7 @@ class Config extends Collection
 
     /**
      * @return string
+     * @throws Exception
      */
     public function getCachePath()
     {
@@ -405,6 +487,7 @@ class Config extends Collection
 
     /**
      * @return string
+     * @throws Exception
      */
     public function getTempPath()
     {
@@ -426,6 +509,15 @@ class Config extends Collection
     public function isDebug()
     {
         return $this->get('debug');
+    }
+
+    /**
+     * @param boolean $b
+     * @return $this
+     */
+    public function setDebug($b)
+    {
+        return $this->set('debug', $b);
     }
 
     /**
@@ -538,4 +630,57 @@ class Config extends Collection
         $siteUrl = rtrim($siteUrl, '/');
         return array($sitePath, $siteUrl);
     }
+
+
+
+
+
+
+
+    /**
+     * @param string $path
+     * @return Config
+     * @deprecated Use setLogPath()
+     */
+    public function setSystemLogPath($path)
+    {
+        return $this->setLogPath($path);
+    }
+
+    /**
+     * @return string
+     * @deprecated Use getLogLevel()
+     */
+    public function getSystemLogLevel()
+    {
+        return $this->getLogLevel();
+    }
+
+    /**
+     * @param string $l
+     * @return Config
+     * @deprecated Use setLogLevel()
+     */
+    public function setSystemLogLevel($l)
+    {
+        return $this->setLogLevel($l);
+    }
+
+    /**
+     * @param string $tz
+     * @deprecated Use setTimezone()
+     */
+    public function setDateTimezone($tz) {
+        return $this->setTimezone($tz);
+    }
+
+    /**
+     * @return string
+     * @deprecated Use getTimezone()
+     */
+    public function getDateTimezone()
+    {
+        return $this->getTimezone();
+    }
+
 }
