@@ -48,6 +48,17 @@ trait AttributesTrait
     }
 
     /**
+     * Does the attribute exist
+     *
+     * @param string $name
+     * @return bool
+     */
+    public function hasAttr($name)
+    {
+        return array_key_exists($name, $this->attrList);
+    }
+
+    /**
      * Get an attributes value string
      *
      * @param $name

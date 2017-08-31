@@ -32,6 +32,17 @@ trait CssTrait
     }
 
     /**
+     * Does the css class exist
+     *
+     * @param string $class
+     * @return bool
+     */
+    public function hasCss($class)
+    {
+        return array_key_exists($class, $this->attrList);
+    }
+
+    /**
      * Add a css class
      *
      * @param string $class

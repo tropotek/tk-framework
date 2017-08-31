@@ -165,8 +165,10 @@ class Config extends Collection
          */
         chdir($config->getSitePath());
 
+        error_reporting(-1);
+        ini_set('display_errors', 'On');
+
         $config->setDebug(false);
-        ini_set('display_errors', 'Off');
         $config->setLog(new NullLogger());
         $config->setTimezone('Australia/Victoria');
         $config->setLogPath(ini_get('error_log'));
