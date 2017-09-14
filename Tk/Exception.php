@@ -40,9 +40,9 @@ class Exception extends \Exception
      * @param string $dump
      * @since 5.1.0
      */
-    public function __construct($message = "", $code = 0, \Throwable $previous = null, $dump = '')
+    public function __construct($message = "", $code = 0, $previous = null, $dump = '')
     {
-        parent::__construct($message, $code, $previous);
+        parent::__construct($message, (int)$code, $previous);
         $this->dump = $dump;
     }
 
