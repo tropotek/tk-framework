@@ -101,7 +101,8 @@ class Config extends Collection
      * Reserved config keys
      * @var array
      */
-    protected $reserved = array('data.url', 'data.path', 'vendor.url', 'vendor.path', 'src.url', 'src.path', 'cache.url', 'cache.path', 'temp.url', 'temp.path');
+    protected $reserved = array('data.url', 'data.path', 'vendor.url', 'vendor.path', 'src.url', 'src.path', 'cache.url',
+        'cache.path', 'temp.url', 'temp.path');
 
 
     /**
@@ -174,25 +175,26 @@ class Config extends Collection
         $config->setLogPath(ini_get('error_log'));
         $config->setLogLevel('error');
 
-        $config['file.mask'] = 0664;
-        $config['dir.mask'] = 0775;
-        $config['system.data.path'] =     '/data';
-        $config['system.cache.path'] =    '/data/cache';
-        $config['system.temp.path'] =     '/data/temp';
-        $config['system.src.path'] =      '/src';
-        $config['system.vendor.path'] =   '/vendor';
-        $config['system.plugin.path'] =   '/plugin';
-        $config['system.assets.path'] =   '/assets';
-        $config['system.template.path'] = '/html';
+        $config['file.mask']                = 0664;
+        $config['dir.mask']                 = 0775;
+        $config['system.data.path']         = '/data';
+        $config['system.cache.path']        = '/data/cache';
+        $config['system.temp.path']         = '/data/temp';
+        $config['system.src.path']          = '/src';
+        $config['system.vendor.path']       = '/vendor';
+        $config['system.plugin.path']       = '/plugin';
+        $config['system.assets.path']       = '/assets';
+        $config['system.template.path']     = '/html';
 
         // Site information
-        $config['system.info.project'] = 'Untitled Site';
-        $config['system.info.description'] = '';
-        $config['system.info.version'] = '0.0';
-        $config['system.info.licence'] = '';
-        $config['system.info.released'] = '';
-        $config['system.info.authors'] = '';
-        $config['system.info.stability'] = '';
+        $config['system.info.project']      = 'Untitled Site';
+        $config['system.info.description']  = '';
+        $config['system.info.version']      = '0.0';
+        $config['system.info.licence']      = '';
+        $config['system.info.released']     = '';
+        $config['system.info.authors']      = '';
+        $config['system.info.stability']    = '';
+
 
         if (is_file($config->getSitePath() . '/composer.json')) {
             $composer = json_decode(file_get_contents($config->getSitePath() . '/composer.json'));
