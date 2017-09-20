@@ -17,33 +17,18 @@ class Exception extends \Exception
     protected $dump = '';
 
     /**
-     * @param \Exception $src
-     * @return static
-     */
-//    public static function createCopy($src, $dump = null)
-//    {
-//        $e = new static($src->message, $src->code);
-//        $e->file = $src->file;
-//        $e->line = $src->line;
-//        if ($dump) {
-//            $e->dump = $dump;
-//        }
-//        return $e;
-//    }
-
-    /**
      * Construct the exception. Note: The message is NOT binary safe.
      * @link http://php.net/manual/en/exception.construct.php
      * @param string $message [optional] The Exception message to throw.
      * @param int $code [optional] The Exception code.
      * @param \Throwable $previous [optional] The previous throwable used for the exception chaining.
-     * @param string $dump
+     * @param string $sql
      * @since 5.1.0
      */
-    public function __construct($message = "", $code = 0, $previous = null, $dump = '')
+    public function __construct($message = "", $code = 0, $previous = null, $sql = '')
     {
         parent::__construct($message, (int)$code, $previous);
-        $this->dump = $dump;
+        $this->dump = $sql;
     }
 
     /**

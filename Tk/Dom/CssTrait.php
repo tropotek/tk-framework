@@ -39,7 +39,7 @@ trait CssTrait
      */
     public function hasCss($class)
     {
-        return array_key_exists($class, $this->attrList);
+        return array_key_exists($class, $this->cssList);
     }
 
     /**
