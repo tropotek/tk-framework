@@ -1,5 +1,14 @@
 #CHANGELOG#
 
+Ver 2.0.15 [2017-09-27]:
+-------------------------------
+ - Minor Code Updates
+ - Added student create and confirm placement pages
+ - Fixed student company search table renderer
+ - 252s-dev.vet.unimelb.edu.au
+ - Final implementation of dynamic field system
+
+
 Ver 2.0.14 [2017-06-15]:
 -------------------------------
  - Minor Code Updates
