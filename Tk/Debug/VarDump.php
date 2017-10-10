@@ -81,7 +81,7 @@ class VarDump
      * @param int $nest
      * @return string
      */
-    public static function varToString($var, $depth = 4, $nest = 0)
+    public static function varToString($var, $depth = 5, $nest = 0)
     {
         $pad = '';
         for($i=0;$i<=$nest*2;$i++) $pad .= '  ';
