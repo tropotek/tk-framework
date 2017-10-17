@@ -14,8 +14,6 @@ namespace Tk;
 class Object
 {
 
-
-
     /**
      * Check if an object property exists ignoring the scope of that property.
      *
@@ -36,9 +34,9 @@ class Object
     {
         try {
             $reflect = new \ReflectionClass($object);
-            $prop = $reflect->getProperty($name);
-            if ($prop) return true;
+            return $reflect->hasProperty($name);
         } catch (\Exception $e) {}
+
         return false;
     }
 
@@ -62,23 +60,12 @@ class Object
     public static function getObjectPropertyValue($object, $name)
     {
         $reflect = new \ReflectionClass($object);
-        // Check if there are getter methods for this property
-        //$pre = array('get', 'is', 'has');
-        // We removed 'has' as it implies that there is some computation of a value not directly related to the object [IE: hasRole(role)]
-        $pre = array('get', 'is');
-        foreach ($pre as $p) {
-            $m = $p . ucfirst($name);
-            if($reflect->hasMethod($m) && $reflect->getMethod($m)->isPublic()) {
-                return $object->$m();
-            }
-        }
-
-        // if not try to access the property directly
         $property = $reflect->getProperty($name);
         if ($property) {
             $property->setAccessible(true);
             return $property->getValue($object);
         }
+
         return null;
     }
 
@@ -90,26 +77,18 @@ class Object
      * @param mixed $object
      * @param string $name
      * @param mixed $value
+     * @return mixed
      */
     public static function setObjectPropertyValue($object, $name, $value)
     {
         $reflect = new \ReflectionClass($object);
-        // Check if there are setter methods for this property
-        $pre = array('set');
-        foreach ($pre as $p) {
-            $m = $p . ucfirst($name);
-            if($reflect->hasMethod($m) && $reflect->getMethod($m)->isPublic()) {
-                $object->$m($value);
-                return;
-            }
-        }
-
-        // If not try to access the property directly
         $property = $reflect->getProperty($name);
         if ($property) {
             $property->setAccessible(true);
             $property->setValue($object, $value);
         }
+
+        return $value;
     }
 
     
