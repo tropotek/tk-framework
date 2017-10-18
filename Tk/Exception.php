@@ -22,13 +22,13 @@ class Exception extends \Exception
      * @param string $message [optional] The Exception message to throw.
      * @param int $code [optional] The Exception code.
      * @param \Throwable $previous [optional] The previous throwable used for the exception chaining.
-     * @param string $sql
+     * @param string $dump
      * @since 5.1.0
      */
-    public function __construct($message = "", $code = 0, $previous = null, $sql = '')
+    public function __construct($message = "", $code = 0, $previous = null, $dump = '')
     {
         parent::__construct($message, (int)$code, $previous);
-        $this->dump = $sql;
+        $this->dump = $dump;
     }
 
     /**

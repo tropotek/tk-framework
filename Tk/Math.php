@@ -37,14 +37,8 @@ class Math
      */
     public static function average($arr)
     {
-        $count = count($arr); //total numbers in array
-        $total = 0;
-        foreach ($arr as $value) {
-            $total = $total + $value; // total value of array numbers
-        }
-        if ($count == 0) return 0;
-        $average = ($total/$count); // get average value
-        return $average;
+        if (!count($arr)) return 0;
+        return array_sum($arr)/count($arr);
     }
 
 }
