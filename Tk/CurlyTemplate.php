@@ -174,7 +174,7 @@ class CurlyTemplate
                 $v = call_user_func_array($v, array($this));
                 if (!is_string($v)) throw new \Tk\Exception('Invalid return type. Function must return a string.');
             }
-            if (!is_string($v)) continue;
+            if (!is_string($v) && !is_numeric($v)) continue;
             $str = str_replace($this->ld . $k . $this->rd, $v, $str);
         }
         return $str;
