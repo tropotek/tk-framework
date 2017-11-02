@@ -215,6 +215,23 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
+     * Use this to return the items in an array that match the expression
+     *
+     * @param $array
+     * @param $regex
+     * @return array
+     */
+    public static function regexArray($array, $regex)
+    {
+        $a= array();
+        foreach ($array as $name => $value) {
+            if(!preg_match($regex, $name)) continue;
+            $a[$name] = $value;
+        }
+        return $a;
+    }
+
+    /**
      * toString
      *
      * @return string
