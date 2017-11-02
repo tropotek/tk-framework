@@ -261,7 +261,7 @@ class Date
      */
     static function getMonthStart(\DateTime $date)
     {
-        return new \DateTime($date->format('Y-1-d 00:00:00'), $date->getTimezone());
+        return new \DateTime($date->format('Y-m-01 00:00:00'), $date->getTimezone());
     }
 
     /**
@@ -273,7 +273,7 @@ class Date
     static function getMonthEnd(\DateTime $date)
     {
         $lastDay = self::getMonthDays($date->format('n'), $date->format('Y'));
-        return new \DateTime($date->format('Y-'.$lastDay.'-d 23:59:59'), $date->getTimezone());
+        return new \DateTime($date->format('Y-m-'.$lastDay.' 23:59:59'), $date->getTimezone());
     }
 
     
