@@ -1,4 +1,5 @@
 <?php
+
 namespace Tk;
 
 
@@ -12,7 +13,7 @@ namespace Tk;
  */
 class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
 {
-    
+
     protected $data = array();
 
 
@@ -60,7 +61,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
 
     /**
      * Get collection item for key
-     * 
+     *
      * @param string $key
      * @param mixed $default Return value if the key does not exist
      * @return mixed
@@ -69,7 +70,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
     {
         return $this->has($key) ? $this->data[$key] : $default;
     }
-    
+
     /**
      * Get all items in collection
      *
@@ -129,7 +130,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
 
     /**
      * Remove all items from collection
-     * 
+     *
      * @return $this
      */
     public function clear()
@@ -137,10 +138,8 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
         $this->data = array();
         return $this;
     }
-    
-    
-    
-    
+
+
     /**
      * Does this collection have a given key?
      *
@@ -168,8 +167,8 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * Set collection item
      *
-     * @param string $key   The data key
-     * @param mixed  $value The data value
+     * @param string $key The data key
+     * @param mixed $value The data value
      */
     public function offsetSet($key, $value)
     {
@@ -221,14 +220,45 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
      * @param $regex
      * @return array
      */
-    public static function regexArray($array, $regex)
+    public static function arrayKeyRegex($array, $regex)
     {
-        $a= array();
+        $a = array();
         foreach ($array as $name => $value) {
-            if(!preg_match($regex, $name)) continue;
+            if (!preg_match($regex, $name)) continue;
             $a[$name] = $value;
         }
         return $a;
+    }
+
+    /**
+     * Return the difference of 2 multidimensinal arrays
+     * If no difference null is returned.
+     *
+     * @param array $array1
+     * @param array $array2
+     * @return null|array   Returns null if there are no differences
+     * @site http://php.net/manual/en/function.array-diff-assoc.php
+     * @author telefoontoestel at hotmail dot com
+     */
+    public static function arrayDiffRecursive($array1, $array2)
+    {
+        foreach ($array1 as $key => $value) {
+            if (is_array($value)) {
+                if (!isset($array2[$key])) {
+                    $difference[$key] = $value;
+                } elseif (!is_array($array2[$key])) {
+                    $difference[$key] = $value;
+                } else {
+                    $new_diff = self::arrayDiffRecursive($value, $array2[$key]);
+                    if ($new_diff != false) {
+                        $difference[$key] = $new_diff;
+                    }
+                }
+            } elseif (!array_key_exists($key, $array2) || $array2[$key] != $value) {
+                $difference[$key] = $value;
+            }
+        }
+        return !isset($difference) ? null : $difference;
     }
 
     /**
