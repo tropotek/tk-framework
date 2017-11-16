@@ -29,12 +29,12 @@
   },
   "require": {
     "php": ">=5.0.0",
-    "psr/log": "^1.0"
+    "psr/log": "^1.0",
+    "monolog/monolog": "^1.0"
   },
   "extra": {
     "branch-alias": {
-      "dev-master": "2.0.x-dev",
-      "monolog/monolog": "^1.0"
+      "dev-master": "2.0.x-dev"
     }
   }
 }
