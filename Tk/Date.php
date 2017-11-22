@@ -388,6 +388,8 @@ class Date
      * convert a date into a string that tells how long
      * ago that date was.... eg: 2 days ago, 3 minutes ago.
      *
+     * Note: Only works for dates in the past...
+     *
      * @param \DateTime $date
      * @return string
      */
@@ -397,7 +399,7 @@ class Date
         $p = array('year', 'mon', 'mday', 'hours', 'minutes', 'seconds');
         $display = array('year', 'month', 'day', 'hour', 'minute', 'second');
         $factor = array(0, 12, 30, 24, 60, 60);
-        preg_match("/([0-9]{4})(\\-)([0-9]{2})(\\-)([0-9]{2}) ([0-9]{2})(\\:)([0-9]{2})(\\:)([0-9]{2})/", $date->format(self::ISO_DATE), $matches);
+        preg_match("/([0-9]{4})(\\-)([0-9]{2})(\\-)([0-9]{2}) ([0-9]{2})(\\:)([0-9]{2})(\\:)([0-9]{2})/", $date->format(self::FORMAT_ISO_DATETIME), $matches);
         $d = array(
             'seconds' => $matches[10],
             'minutes' => $matches[8],
