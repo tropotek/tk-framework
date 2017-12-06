@@ -231,6 +231,20 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
+     * flatten a multi-dimensional array to a single-dimensional array
+     * NOTE: All key values will be lost.
+     *
+     * @param array $array
+     * @return array
+     */
+    public static function arrayFlatten($array)
+    {
+        $return = array();
+        array_walk_recursive($array, function($a) use (&$return) { if ($a !== null) $return[] = $a; });
+        return $return;
+    }
+
+    /**
      * Return the difference of 2 multidimensinal arrays
      * If no difference null is returned.
      *
