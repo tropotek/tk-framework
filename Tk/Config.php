@@ -110,6 +110,7 @@ class Config extends Collection
      *
      * @param string $siteUrl
      * @param string $sitePath
+     * @throws \Exception
      */
     public function __construct($sitePath = '', $siteUrl = '')
     {
