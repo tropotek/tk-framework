@@ -14,8 +14,11 @@ function vd() {
     if (!$log) $log = new \Psr\Log\NullLogger();
 
     $path = str_replace($config->getSitePath(), '', $line['file']);
-    $str = sprintf('vd(%s [%s])', $path, $line['line']) . "\n";
+    $str = '';
+    $str .= sprintf('vd()') . "\n";
+    //$str = sprintf('vd(%s [%s])', $path, $line['line']) . "\n";
     $str .= \Tk\Debug\VarDump::getInstance($config->getSitePath())->makeDump(func_get_args());
+    $str .= "\n" . sprintf('{ %s [%s] }', $path, $line['line']) . "\n";
 
     //if (!$config->isCli()) {
     if (!$log instanceof \Psr\Log\NullLogger) {
@@ -40,8 +43,10 @@ function vdd() {
     if (!$log) $log = new \Psr\Log\NullLogger();
 
     $path = str_replace($config->getSitePath(), '', $line['file']);
-    $str = sprintf('vdd(%s [%s])', $path, $line['line']) . "\n";
+    $str = '';
+    $str .= sprintf('vdd()') . "\n";
     $str .= \Tk\Debug\VarDump::getInstance($config->getSitePath())->makeDump(func_get_args(), true);
+    $str .= "\n" . sprintf('{ %s [%s] }', $path, $line['line']) . "\n";
 
     //if (!$config->isCli()) {
     if (!$log instanceof \Psr\Log\NullLogger) {
