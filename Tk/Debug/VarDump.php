@@ -72,6 +72,24 @@ class VarDump
         return $output;
     }
 
+    /**
+     * return the types of the argument array
+     *
+     * @param $args
+     * @return array
+     */
+    public function getTypeArray($args)
+    {
+        $arr = array();
+        foreach ($args as $a) {
+            $type = gettype($a);
+            if ($type == 'object')
+                $type = get_class($a);
+            $arr[] = $type;
+        }
+        return $arr;
+    }
+
 
     /**
      * return a var dump string from an array of arguments
