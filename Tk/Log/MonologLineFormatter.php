@@ -53,9 +53,8 @@ class MonologLineFormatter extends LineFormatter
 
         $output = parent::format($record);
         //$pre = sprintf('[%5.2f][%9s]', round($this->scriptDuration(), 2), \Tk\File::bytes2String(memory_get_usage(false)));
-        $pre = sprintf('[%8s]', \Tk\File::bytes2String(memory_get_usage(false)));
+        $pre = sprintf('[%9s]', \Tk\File::bytes2String(memory_get_usage(false)));
         $output = str_replace('%post%', $pre, $output);
-
         //return \Tk\Color::getCliString($output, 'white');
         return $output;
     }
