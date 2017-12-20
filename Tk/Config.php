@@ -124,7 +124,7 @@ class Config extends Collection
      *
      * @param string $siteUrl Only required on first call to init the config paths
      * @param string $sitePath Only required on first call to init the config paths
-     * @return Config
+     * @return static
      */
     public static function getInstance($sitePath = '', $siteUrl = '')
     {
