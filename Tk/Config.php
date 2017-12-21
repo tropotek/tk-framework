@@ -110,7 +110,6 @@ class Config extends Collection
      *
      * @param string $siteUrl
      * @param string $sitePath
-     * @throws \Exception
      */
     public function __construct($sitePath = '', $siteUrl = '')
     {
@@ -124,14 +123,14 @@ class Config extends Collection
      *
      * @param string $siteUrl Only required on first call to init the config paths
      * @param string $sitePath Only required on first call to init the config paths
-     * @return Config
+     * @return static
      */
     public static function getInstance($sitePath = '', $siteUrl = '')
     {
-        if (static::$instance == null) {
-            static::$instance = new static($sitePath, $siteUrl);
+        if (self::$instance == null) {
+            self::$instance = new static($sitePath, $siteUrl);
         }
-        return static::$instance;
+        return self::$instance;
     }
 
     /**
@@ -139,13 +138,13 @@ class Config extends Collection
      *
      * @param string $sitePath
      * @param string $siteUrl
-     * @throws \Exception
      */
     protected function init($sitePath = '', $siteUrl = '')
     {
         // php version must be high enough to support traits
         if (version_compare(phpversion(), '5.3.0', '<')) {
-            throw new \Exception('Your PHP5 version must be greater than 5.3.0 [Curr Ver: '.phpversion().']');
+            \Tk\Log::error('Your PHP5 version must be greater than 5.3.0 [Curr Ver: '.phpversion().']');
+            return;
         }
 
         $config = $this;
@@ -225,16 +224,73 @@ class Config extends Collection
     }
 
     /**
+     * @param array|Session $session
+     * @return $this
+     */
+    public function setSession($session)
+    {
+        $this->set('session', $session);
+        return $this;
+    }
+
+    /**
+     * @return array|Session
+     */
+    public function getSession()
+    {
+        return $this->get('session');
+    }
+
+    /**
+     * @param array|Request $request
+     * @return $this
+     */
+    public function setRequest($request)
+    {
+        $this->set('request', $request);
+        return $this;
+    }
+
+    /**
+     * @return array|Request
+     */
+    public function getRequest()
+    {
+        return $this->get('request');
+    }
+
+    /**
+     * @param array|Cookie $cookie
+     * @return $this
+     */
+    public function setCookie($cookie)
+    {
+        $this->set('cookie', $cookie);
+        return $this;
+    }
+
+    /**
+     * @return array|Cookie
+     */
+    public function getCookie()
+    {
+        return $this->get('cookie');
+    }
+
+
+    /**
      * Set the system timezone:
      * EG: Australia/Victoria, America/Los_Angeles
      *
      * See DateTimeZone::listIdentifiers() to get an array of identifiers
      *
      * @param string $tz
+     * @return Config
      */
     public function setTimezone($tz) {
         date_default_timezone_set($tz);
         $this->set('date.timezone', $tz);
+        return $this;
     }
 
     /**
