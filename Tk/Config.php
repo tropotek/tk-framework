@@ -119,18 +119,31 @@ class Config extends Collection
     }
 
     /**
-     * Get an instance of this object
+     * Create an instance of this object
      *
      * @param string $siteUrl Only required on first call to init the config paths
      * @param string $sitePath Only required on first call to init the config paths
      * @return static
      */
-    public static function getInstance($sitePath = '', $siteUrl = '')
+    public static function create($sitePath = '', $siteUrl = '')
     {
         if (self::$instance == null) {
             self::$instance = new static($sitePath, $siteUrl);
         }
         return self::$instance;
+    }
+
+    /**
+     * Get an instance of this object
+     *
+     * @return static
+     */
+    public static function getInstance()
+    {
+        if (static::$instance) {
+            return static::$instance;
+        }
+        \Tk\Log::error('Error: Config needs to be initiated call Config::create() first.');
     }
 
     /**
