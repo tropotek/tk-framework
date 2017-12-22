@@ -143,7 +143,8 @@ class Config extends Collection
         if (static::$instance) {
             return static::$instance;
         }
-        \Tk\Log::error('Error: Config needs to be initiated call Config::create() first.');
+        error_log('Error: Config needs to be initiated call Config::create() first.');
+        //\Tk\Log::error('Error: Config needs to be initiated call Config::create() first.');
     }
 
     /**
