@@ -1,5 +1,14 @@
 #CHANGELOG#
 
+Ver 2.0.16 [2018-01-15]:
+-------------------------------
+ - Merge branch 'master' of https://github.com/tropotek/tk-framework
+ - Minor Code Updates
+ - Added placement status plot to Client Dashboard
+ - Finished the company public update request
+ - Completed status event and message system
+
+
 Ver 2.0.15 [2017-09-27]:
 -------------------------------
  - Minor Code Updates
