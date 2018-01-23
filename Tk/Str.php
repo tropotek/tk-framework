@@ -103,6 +103,23 @@ class Str
 
 
     /**
+     * concatenate a sting and add a suffix to the end if it is concatenated.
+     *
+     * @param string $str
+     * @param int $length
+     * @param string $suffix
+     * @return string
+     */
+    public static function strcat($str, $length, $suffix = '...')
+    {
+        if (strlen($str) > $length) {
+            $str = substr($str, 0, $length) . $suffix;
+        }
+        return $str;
+    }
+
+
+    /**
      * Count the number of bytes of a given string.
      * Input string is expected to be ASCII or UTF-8 encoded.
      * Warning: the function doesn't return the number of chars
