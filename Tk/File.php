@@ -178,6 +178,36 @@ class File
     }
 
     /**
+     * Copy the contents of a source directory
+     * to the destination directory, the destination
+     * will be created if not exists
+     *
+     * @param $source
+     * @param $destination
+     */
+    public static function copyDir($source, $destination)
+    {
+        if (!file_exists($destination)) {
+            mkdir($destination);
+        }
+        $splFileInfoArr = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($source), \RecursiveIteratorIterator::SELF_FIRST);
+        foreach ($splFileInfoArr as $fullPath => $splFileinfo) {
+            //skip . ..
+            if (in_array($splFileinfo->getBasename(), [".", ".."])) {
+                continue;
+            }
+            //get relative path of source file or folder
+            $path = str_replace($source, "", $splFileinfo->getPathname());
+            if ($splFileinfo->isDir()) {
+                mkdir($destination . "/" . $path);
+            } else {
+                copy($fullPath, $destination . "/" . $path);
+            }
+        }
+    }
+
+
+    /**
      * Recursively delete all files and directories from the given path
      *
      * @param string $path
@@ -223,7 +253,6 @@ class File
          */
     public static function getMimeType($filename)
     {
-
         $mimeTypes = self::getMimeArray();
         $ext = self::getExtension($filename);
         if (array_key_exists($ext, $mimeTypes)) {
