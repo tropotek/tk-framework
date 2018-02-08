@@ -66,9 +66,10 @@
 
       // the plugin's final properties are the merged default and 
       // user-provided options (if any)
-      plugin.settings = $.extend({}, defaults, options);
+      plugin.settings = $.extend({}, defaults, $element.data(), options);
 
       // TODO: code goes here
+      console.log(plugin.settings);
 
     };
 
@@ -152,9 +153,10 @@
 
     // constructor method
     plugin.init = function() {
-      plugin.settings = $.extend({}, defaults, options);
+      plugin.settings = $.extend({}, defaults, $element.data(), options);
 
       // TODO: code goes here
+      console.log(plugin.settings);
 
 
 
