@@ -186,8 +186,13 @@ class Config extends Collection
         $config->setDebug(false);
         $config->setLog(new NullLogger());
         $config->setTimezone('Australia/Victoria');
-        if (ini_get('error_log'))
+
+        if (ini_get('error_log')) {
             $config->setLogPath(ini_get('error_log'));
+        } else {        // Default if none set in the php.ini
+            $config->setLogPath('/var/log/apache2/error.log');
+        }
+
         $config->setLogLevel('error');
 
         $config['file.mask']                = 0664;
