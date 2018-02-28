@@ -186,7 +186,8 @@ class Config extends Collection
         $config->setDebug(false);
         $config->setLog(new NullLogger());
         $config->setTimezone('Australia/Victoria');
-        $config->setLogPath(ini_get('error_log'));
+        if (ini_get('error_log'))
+            $config->setLogPath(ini_get('error_log'));
         $config->setLogLevel('error');
 
         $config['file.mask']                = 0664;
