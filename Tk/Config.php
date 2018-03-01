@@ -711,7 +711,6 @@ class Config extends Collection
             $siteUrl = dirname($_SERVER['PHP_SELF']);
         }
         $siteUrl = rtrim($siteUrl, '/');
-        vd($_SERVER, $sitePath, $siteUrl);
         return array($sitePath, $siteUrl);
     }
 
