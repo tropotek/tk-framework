@@ -710,6 +710,8 @@ class Config extends Collection
         if (!$siteUrl && isset($_SERVER['PHP_SELF'])) {
             $siteUrl = dirname($_SERVER['PHP_SELF']);
         }
+        error_log($sitePath);
+        error_log($siteUrl);
         $siteUrl = rtrim($siteUrl, '/');
         return array($sitePath, $siteUrl);
     }
