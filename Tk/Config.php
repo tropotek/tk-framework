@@ -174,6 +174,7 @@ class Config extends Collection
         list($config['site.path'], $config['site.url']) = $config->getDefaultPaths($sitePath, $siteUrl);
         \Tk\Uri::$BASE_URL_PATH = $config->getSiteUrl();
 
+
         /**
          * This makes our life easier when dealing with paths. Everything is relative
          * to the application root now.
@@ -710,6 +711,7 @@ class Config extends Collection
             $siteUrl = dirname($_SERVER['PHP_SELF']);
         }
         $siteUrl = rtrim($siteUrl, '/');
+        vd($_SERVER, $sitePath, $siteUrl);
         return array($sitePath, $siteUrl);
     }
 
