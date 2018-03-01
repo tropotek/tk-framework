@@ -711,16 +711,8 @@ class Config extends Collection
             $siteUrl = dirname($_SERVER['PHP_SELF']);
         }
         $siteUrl = rtrim($siteUrl, '/');
-        error_log($sitePath);
-        error_log($siteUrl);
         return array($sitePath, $siteUrl);
     }
-
-
-
-
-
-
 
     /**
      * @param string $path
