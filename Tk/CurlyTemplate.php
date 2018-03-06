@@ -141,16 +141,18 @@ class CurlyTemplate
 
     /**
      * Parse the template with the supplied data.
-     * 
-     * This is a mutable object and parse() can be called multiple times with 
+     *
+     * This is a mutable object and parse() can be called multiple times with
      * different data collections without issue.
-     * 
-     * 
+     *
+     *
      * @param array $data
      * @return string
+     * @throws Exception
      */
     function parse($data)
     {
+//        vd($data);
         $template = $this->template;
         $template = $this->parseRecursive($template, $data);
         $template = $this->parseBlock($template, $data);
@@ -186,6 +188,7 @@ class CurlyTemplate
      * @return string
      *
      * @todo Add escape delimiters '{{' and '}}
+     * @throws Exception
      */
     private function parseRecursive($template, $data = null)
     {
@@ -194,7 +197,8 @@ class CurlyTemplate
 
         // Reg to find the curly text blocks
         $reg = '#' . $ld . '([^' . $ld . ']*?)' .  $rd . '(.*?)' . $ld . '[^' . $ld . ']\1' . $rd . '#si';
-        $template = preg_replace_callback($reg, function ($matches) use ($data) {
+        $ctpl = $this;
+        $template = preg_replace_callback($reg, function ($matches) use ($data, $ctpl) {
             $tplData = $data;
             if (isset($matches[0])) {
                 $tpl = $matches[2];
@@ -203,14 +207,14 @@ class CurlyTemplate
                     if (isset($tplData[$name][0])) {
                         $block = '';
                         foreach($tplData[$name] as $rowData) {
-                            $block .= $this->parseRecursive($tpl, $rowData);
+                            $block .= $ctpl->parseRecursive($tpl, $rowData);
                         }
                         return $block;
                     } else {
                         if ($tplData[$name] === true) {
-                            return $this->parseRecursive($tpl, $tplData);
+                            return $ctpl->parseRecursive($tpl, $tplData);
                         } else {
-                            return $this->parseRecursive($tpl, $tplData[$name]);
+                            return $ctpl->parseRecursive($tpl, $tplData[$name]);
                         }
                     }
                 }
