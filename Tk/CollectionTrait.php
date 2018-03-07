@@ -79,6 +79,18 @@ trait CollectionTrait
     }
 
     /**
+     * Add a list of items to the collection
+     *
+     * @param array|Collection $items Key-value array of data to append to this collection
+     * @return $this
+     */
+    public function replace($items)
+    {
+        $this->getCollection()->replace($items);
+        return $this;
+    }
+
+    /**
      * Get all items from the collection
      *
      * @return array
