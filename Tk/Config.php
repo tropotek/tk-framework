@@ -173,6 +173,9 @@ class Config extends Collection
         // setup site path and URL
         list($config['site.path'], $config['site.url']) = $config->getDefaultPaths($sitePath, $siteUrl);
         \Tk\Uri::$BASE_URL_PATH = $config->getSiteUrl();
+        if (!empty($_SERVER['HTTP_HOST'])) {
+            $config['site.host'] = $_SERVER['HTTP_HOST'];
+        }
 
 
         /**
@@ -439,6 +442,14 @@ class Config extends Collection
     public function getSitePath()
     {
         return $this->get('site.path');
+    }
+
+    /**
+     * @return string
+     */
+    public function getSiteHost()
+    {
+        return $this->get('site.host');
     }
 
     /**
