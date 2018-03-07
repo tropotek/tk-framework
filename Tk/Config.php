@@ -156,10 +156,10 @@ class Config extends Collection
     protected function init($sitePath = '', $siteUrl = '')
     {
         // php version must be high enough to support traits
-        if (version_compare(phpversion(), '5.3.0', '<')) {
-            \Tk\Log::error('Your PHP5 version must be greater than 5.3.0 [Curr Ver: '.phpversion().']');
-            return;
-        }
+//        if (version_compare(phpversion(), '5.3.0', '<')) {
+//            \Tk\Log::error('Your PHP5 version must be greater than 5.3.0 [Curr Ver: '.phpversion().']');
+//            return;
+//        }
 
         $config = $this;
         $config['script.time'] = microtime(true);
