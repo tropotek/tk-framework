@@ -198,7 +198,7 @@ class File
             }
             //get relative path of source file or folder
             $path = str_replace($source, "", $splFileinfo->getPathname());
-            if ($splFileinfo->isDir()) {
+            if (!$splFileinfo->isDir()) {
                 mkdir($destination . "/" . $path);
             } else {
                 copy($fullPath, $destination . "/" . $path);
