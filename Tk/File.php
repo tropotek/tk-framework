@@ -188,7 +188,7 @@ class File
     public static function copyDir($source, $destination)
     {
         if (!file_exists($destination)) {
-            mkdir($destination, 0777, true);
+            mkdir($destination);
         }
 
         $splFileInfoArr = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($source), \RecursiveIteratorIterator::SELF_FIRST);
@@ -201,13 +201,35 @@ class File
             $path = str_replace($source, '', $splFileinfo->getPathname());
             if ($splFileinfo->isDir()) {
                 if (!is_dir($splFileinfo->getPathname())) {
-                    mkdir($destination . '/' . $path);
+                   mkdir($destination . '/' . $path);
                 }
             } else {
                 copy($fullPath, $destination . '/' . $path);
             }
         }
     }
+
+    /**
+     * @param $src
+     * @param $dst
+     */
+    public function recursiveCopy($src, $dst)
+    {
+        $dir = opendir($src);
+        @mkdir($dst);
+        while(false !== ( $file = readdir($dir)) ) {
+            if (( $file != '.' ) && ( $file != '..' )) {
+                if ( is_dir($src . '/' . $file) ) {
+                    recurse_copy($src . '/' . $file,$dst . '/' . $file);
+                }
+                else {
+                    copy($src . '/' . $file,$dst . '/' . $file);
+                }
+            }
+        }
+        closedir($dir);
+    }
+
 
 
     /**
