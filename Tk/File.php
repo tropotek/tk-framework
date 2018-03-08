@@ -200,7 +200,7 @@ class File
             //get relative path of source file or folder
             $path = str_replace($source, '', $splFileinfo->getPathname());
             if ($splFileinfo->isDir()) {
-                if (!is_dir($splFileinfo->getPathname())) {
+                if (!file_exists($splFileinfo->getPathname())) {
                    mkdir($destination . '/' . $path);
                 }
             } else {
@@ -216,7 +216,9 @@ class File
     public static function recursiveCopy($src, $dst)
     {
         $dir = opendir($src);
-        @mkdir($dst);
+        if (!file_exists($dst)) {
+            @mkdir($dst);
+        }
         while(false !== ( $file = readdir($dir)) ) {
             if (( $file != '.' ) && ( $file != '..' )) {
                 if ( is_dir($src . '/' . $file) ) {
