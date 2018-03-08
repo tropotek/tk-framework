@@ -188,23 +188,23 @@ class File
     public static function copyDir($source, $destination)
     {
         if (!file_exists($destination)) {
-            mkdir(escapeshellarg($destination), 0777, true);
+            mkdir($destination, 0777, true);
         }
 
         $splFileInfoArr = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($source), \RecursiveIteratorIterator::SELF_FIRST);
         /** @var \SplFileInfo $splFileinfo */
         foreach ($splFileInfoArr as $fullPath => $splFileinfo) {
-            if (in_array($splFileinfo->getBasename(), [".", ".."])) {
+            if (in_array($splFileinfo->getBasename(), ['.', '..'])) {
                 continue;
             }
             //get relative path of source file or folder
-            $path = str_replace($source, "", $splFileinfo->getPathname());
+            $path = str_replace($source, '', $splFileinfo->getPathname());
             if ($splFileinfo->isDir()) {
                 if (!is_dir($splFileinfo->getPathname())) {
-                    mkdir(escapeshellarg($destination . "/" . $path));
+                    mkdir($destination . '/' . $path);
                 }
             } else {
-                copy(escapeshellarg($fullPath), escapeshellarg($destination . "/" . $path));
+                copy($fullPath, $destination . '/' . $path);
             }
         }
     }
@@ -247,7 +247,7 @@ class File
             return false;
         }
     }
-    
+
     /**
      * Get the mime type of a file based on its extension
      *
