@@ -83,11 +83,15 @@ class Str
      */
     public static function wordcat($str, $length, $endStr = '', $minword = 3)
     {
+        if ($length < 1) return $str;
         if (!$str) {
             return $str;
         }
         $sub = '';
         $len = 0;
+
+        if (count(explode(' ', $str)) == 1)
+            return self::strcat($str, $length, $endStr);
 
         foreach (explode(' ', $str) as $word) {
             $part = (($sub != '') ? ' ' : '') . $word;
