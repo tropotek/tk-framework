@@ -213,7 +213,7 @@ class File
      * @param $src
      * @param $dst
      */
-    public function recursiveCopy($src, $dst)
+    public static function recursiveCopy($src, $dst)
     {
         $dir = opendir($src);
         @mkdir($dst);
