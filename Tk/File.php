@@ -194,7 +194,6 @@ class File
         $splFileInfoArr = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($source), \RecursiveIteratorIterator::SELF_FIRST);
         /** @var \SplFileInfo $splFileinfo */
         foreach ($splFileInfoArr as $fullPath => $splFileinfo) {
-            //skip . ..
             if (in_array($splFileinfo->getBasename(), [".", ".."])) {
                 continue;
             }
@@ -202,10 +201,10 @@ class File
             $path = str_replace($source, "", $splFileinfo->getPathname());
             if ($splFileinfo->isDir()) {
                 if (!is_dir($splFileinfo->getPathname())) {
-                    mkdir($destination . "/" . $path);
+                    mkdir(escapeshellarg($destination . "/" . $path));
                 }
             } else {
-                copy($fullPath, $destination . "/" . $path);
+                copy(escapeshellarg($fullPath), escapeshellarg($destination . "/" . $path));
             }
         }
     }
