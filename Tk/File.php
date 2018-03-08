@@ -190,7 +190,9 @@ class File
         if (!file_exists($destination)) {
             mkdir($destination, 0777, true);
         }
+
         $splFileInfoArr = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($source), \RecursiveIteratorIterator::SELF_FIRST);
+        /** @var \SplFileInfo $splFileinfo */
         foreach ($splFileInfoArr as $fullPath => $splFileinfo) {
             //skip . ..
             if (in_array($splFileinfo->getBasename(), [".", ".."])) {
@@ -198,8 +200,10 @@ class File
             }
             //get relative path of source file or folder
             $path = str_replace($source, "", $splFileinfo->getPathname());
-            if (!$splFileinfo->isDir()) {
-                mkdir($destination . "/" . $path);
+            if ($splFileinfo->isDir()) {
+                if (!is_dir($splFileinfo->getPathname())) {
+                    mkdir($destination . "/" . $path);
+                }
             } else {
                 copy($fullPath, $destination . "/" . $path);
             }
