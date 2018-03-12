@@ -188,7 +188,7 @@ class File
     public static function copyDir($source, $destination)
     {
         if (!file_exists($destination)) {
-            mkdir($destination);
+            mkdir($destination, 0777, true);
         }
 
         $splFileInfoArr = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($source), \RecursiveIteratorIterator::SELF_FIRST);
@@ -217,7 +217,7 @@ class File
     {
         $dir = opendir($src);
         if (!file_exists($dst)) {
-            @mkdir($dst);
+            @mkdir($dst, 0777, true);
         }
         while(false !== ( $file = readdir($dir)) ) {
             if (( $file != '.' ) && ( $file != '..' )) {
