@@ -202,10 +202,10 @@ class File
             $path = str_replace($source, '', $splFileinfo->getPathname());
             if ($splFileinfo->isDir()) {
                 if (!file_exists($splFileinfo->getPathname())) {
-                   mkdir($destination . '/' . $path);
+                   mkdir($destination . '/' . trim($path, '/'));
                 }
             } else {
-                copy($fullPath, $destination . '/' . $path);
+                copy($fullPath, $destination . '/' . trim($path, '/'));
             }
         }
     }
