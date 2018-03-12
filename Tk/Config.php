@@ -433,7 +433,7 @@ class Config extends Collection
      */
     public function getSiteUrl()
     {
-        return $this->get('site.url');
+        return rtrim($this->get('site.url'), '/');
     }
 
     /**
@@ -441,7 +441,7 @@ class Config extends Collection
      */
     public function getSitePath()
     {
-        return $this->get('site.path');
+        return rtrim($this->get('site.path'). '/');
     }
 
     /**
@@ -457,7 +457,7 @@ class Config extends Collection
      */
     public function getDataUrl()
     {
-        return $this->getSiteUrl() . $this->get('system.data.path');
+        return $this->getSiteUrl() . rtrim($this->get('system.data.path'). '/');
     }
 
     /**
@@ -465,7 +465,7 @@ class Config extends Collection
      */
     public function getDataPath()
     {
-        return $this->getSitePath() . $this->get('system.data.path');
+        return $this->getSitePath() . rtrim($this->get('system.data.path'). '/');
     }
 
     /**
@@ -473,7 +473,7 @@ class Config extends Collection
      */
     public function getTemplateUrl()
     {
-        return $this->getSiteUrl() . $this->get('system.template.path');
+        return $this->getSiteUrl() . rtrim($this->get('system.template.path'). '/');
     }
 
     /**
@@ -481,7 +481,7 @@ class Config extends Collection
      */
     public function getTemplatePath()
     {
-        return $this->getSitePath() . $this->get('system.template.path');
+        return $this->getSitePath() . rtrim($this->get('system.template.path'). '/');
     }
 
     /**
@@ -489,7 +489,7 @@ class Config extends Collection
      */
     public function getSrcUrl()
     {
-        return $this->getSiteUrl() . $this->get('system.src.path');
+        return $this->getSiteUrl() . rtrim($this->get('system.src.path'). '/');
     }
 
     /**
@@ -497,7 +497,7 @@ class Config extends Collection
      */
     public function getSrcPath()
     {
-        return $this->getSitePath() . $this->get('system.src.path');
+        return $this->getSitePath() . rtrim($this->get('system.src.path'). '/');
     }
 
     /**
@@ -505,7 +505,7 @@ class Config extends Collection
      */
     public function getCacheUrl()
     {
-        return $this->getSiteUrl() . $this->get('system.cache.path');
+        return $this->getSiteUrl() . rtrim($this->get('system.cache.path'). '/');
     }
 
     /**
@@ -514,7 +514,7 @@ class Config extends Collection
      */
     public function getCachePath()
     {
-        $path = $this->getSitePath() . $this->get('system.cache.path');
+        $path = $this->getSitePath() . rtrim($this->get('system.cache.path'). '/');
         if (!is_dir($path)) {
             if(!@mkdir($path, $this->getDirMask(), true)) {
                 throw new \Tk\Exception('Please change the permissions on your sites data path.');
@@ -528,7 +528,7 @@ class Config extends Collection
      */
     public function getVendorUrl()
     {
-        return $this->getSiteUrl() . $this->get('system.vendor.path');
+        return $this->getSiteUrl() . rtrim($this->get('system.vendor.path'). '/');
     }
 
     /**
@@ -536,7 +536,7 @@ class Config extends Collection
      */
     public function getVendorPath()
     {
-        return $this->getSitePath() . $this->get('system.vendor.path');
+        return $this->getSitePath() . rtrim($this->get('system.vendor.path'). '/');
     }
 
     /**
@@ -544,7 +544,7 @@ class Config extends Collection
      */
     public function getPluginUrl()
     {
-        return $this->getSiteUrl() . $this->get('system.plugin.path');
+        return $this->getSiteUrl() . rtrim($this->get('system.plugin.path'). '/');
     }
 
     /**
@@ -552,7 +552,7 @@ class Config extends Collection
      */
     public function getPluginPath()
     {
-        return $this->getSitePath() . $this->get('system.plugin.path');
+        return $this->getSitePath() . rtrim($this->get('system.plugin.path'). '/');
     }
 
     /**
@@ -560,7 +560,7 @@ class Config extends Collection
      */
     public function getAssetsUrl()
     {
-        return $this->getSiteUrl() . $this->get('system.assets.path');
+        return $this->getSiteUrl() . rtrim($this->get('system.assets.path'). '/');
     }
 
     /**
@@ -568,7 +568,7 @@ class Config extends Collection
      */
     public function getAssetsPath()
     {
-        return $this->getSitePath() . $this->get('system.assets.path');
+        return $this->getSitePath() . rtrim($this->get('system.assets.path'). '/');
     }
 
     /**
@@ -576,7 +576,7 @@ class Config extends Collection
      */
     public function getTempUrl()
     {
-        return $this->getSiteUrl() . $this->get('system.temp.path');
+        return $this->getSiteUrl() . rtrim($this->get('system.temp.path'). '/');
     }
 
     /**
@@ -586,7 +586,7 @@ class Config extends Collection
     public function getTempPath()
     {
         
-        $path = $this->getSitePath() . $this->get('system.temp.path');
+        $path = $this->getSitePath() . rtrim($this->get('system.temp.path'). '/');
         if (!is_dir($path)) {
             if(!@mkdir($path, $this->getDirMask(), true)) {
                 throw new \Tk\Exception('Please change the permissions on your sites data path.');
