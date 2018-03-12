@@ -185,11 +185,10 @@ class File
      * @param $source
      * @param $destination
      */
-    public static function copyDir($source, $destination)
+    public static function copyDir_stuffed($source, $destination)
     {
         if (!file_exists($destination)) {
-
-            mkdir($destination);
+            mkdir($destination, 0777, true);
         }
 
         $splFileInfoArr = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($source), \RecursiveIteratorIterator::SELF_FIRST);
@@ -200,11 +199,11 @@ class File
             }
             //get relative path of source file or folder
             $path = str_replace($source, '', $splFileinfo->getPathname());
-            if ($splFileinfo->isDir()) {
-                if (!file_exists($splFileinfo->getPathname())) {
-                   mkdir($destination . '/' . trim($path, '/'));
-                }
-            } else {
+
+            if (!file_exists(dirname($destination . '/' . trim($path, '/')))) {
+               mkdir($destination . '/' . trim($path, '/'), 0777, true);
+            }
+            if (!$splFileinfo->isDir()) {
                 copy($fullPath, $destination . '/' . trim($path, '/'));
             }
         }
@@ -214,7 +213,7 @@ class File
      * @param $src
      * @param $dst
      */
-    public static function recursiveCopy($src, $dst)
+    public static function copyDir($src, $dst)
     {
         $dir = opendir($src);
         if (!file_exists($dst)) {
@@ -223,7 +222,7 @@ class File
         while(false !== ( $file = readdir($dir)) ) {
             if (( $file != '.' ) && ( $file != '..' )) {
                 if ( is_dir($src . '/' . $file) ) {
-                    self::recursiveCopy($src . '/' . $file,$dst . '/' . $file);
+                    self::copyDir($src . '/' . $file,$dst . '/' . $file);
                 }
                 else {
                     copy($src . '/' . $file,$dst . '/' . $file);
