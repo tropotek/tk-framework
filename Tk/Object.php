@@ -56,6 +56,7 @@ class Object
      * @param object $object
      * @param string $name The property name
      * @return mixed|null
+     * @throws \ReflectionException
      */
     public static function getObjectPropertyValue($object, $name)
     {
@@ -78,6 +79,7 @@ class Object
      * @param string $name
      * @param mixed $value
      * @return mixed
+     * @throws \ReflectionException
      */
     public static function setObjectPropertyValue($object, $name, $value)
     {
@@ -143,6 +145,7 @@ class Object
      *
      * @param string|Object $class
      * @return string
+     * @throws \ReflectionException
      */
     public static function classPath($class)
     {
@@ -155,13 +158,14 @@ class Object
 
     /**
      * Get the site relative url path of a class
-     * 
+     *
      * Use \Tk\Uri to get the full URL
      *  - \Tk\Uri::create(ClassTool::classUrl('\Tk\SomeClass', $config->getAppPath));
      *
      * @param string|Object $class
      * @param string $sitePath full path to the base of the site
      * @return string
+     * @throws \ReflectionException
      */
     public static function classUrl($class, $sitePath)
     {
@@ -183,8 +187,8 @@ class Object
      *
      * @param string $class A
      * @param string $prefix If set will only return const values whose name starts with this prefix
-     * @throws \InvalidArgumentException
      * @return array
+     * @throws \ReflectionException
      */
     public static function getClassConstants($class, $prefix = '')
     {

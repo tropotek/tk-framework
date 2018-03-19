@@ -114,6 +114,7 @@ class AlertCollection extends \Dom\Renderer\Renderer implements \Dom\Renderer\Di
      * show
      *
      * @return \Dom\Template
+     * @throws \Dom\Exception
      */
     public function show()
     {

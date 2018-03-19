@@ -139,6 +139,7 @@ class Alert extends \Dom\Renderer\Renderer implements \Dom\Renderer\DisplayInter
      *
      * @param \Dom\Template $template
      * @return \Dom\Template
+     * @throws \Dom\Exception
      */
     public function show($template = null)
     {

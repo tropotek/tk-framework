@@ -151,7 +151,6 @@ class Date
      * @param $dateStr
      * @param null $timezone
      * @return \DateTime
-     * @throws Exception
      */
     static function createFormDate($dateStr, $timezone = null)
     {

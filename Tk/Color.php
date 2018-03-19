@@ -68,14 +68,15 @@ class Color
      *  - Color: A Color object to copy, in which case the other params are ignored
      *  - hex: a 3-6 digit HEX color value in which case the other params are ignored
      *  - array: A 3-4 length array of red, green, blue, alpha decimal numbers (For static function calls self:Hsl2RGB())
-     * 
+     *
      * Each number has a range of [0-255] Except alpha which has a range of [0.0 - 1.0]
-     * 
+     *
      * @param int $red
      * @param int $green
      * @param int $blue
      * @param float $alpha
      * @return Color
+     * @throws Exception
      */
     static function create($red = 0, $green = 0, $blue = 0, $alpha = 1.0)
     {
@@ -120,18 +121,19 @@ class Color
 
     /**
      * Set the color object's value from a mix of available types
-     * 
+     *
      * The first parameter ($red) can be of the types:
      *  - int: for the decimal red portion of the color
      *  - Color: A Color object to copy, in which case the other params are ignored
      *  - hex: a 3-6 digit HEX color value in which case the other params are ignored
      *
      *
-     * @param int|Color|string $red   If hex string or color object then the other params are ignored
+     * @param int|Color|string $red If hex string or color object then the other params are ignored
      * @param int $green (optional)
      * @param int $blue (optional)
      * @param int $alpha (optional)
      * @return Color
+     * @throws Exception
      */
     public function setColor($red, $green = 0, $blue = 0, $alpha = 1)
     {
@@ -272,11 +274,12 @@ class Color
         return $this->alpha;
     }
 
-    
+
     /**
      * Get the inverse color to this color.
-     * 
+     *
      * @return Color
+     * @throws Exception
      */
     public function getInverse()
     {

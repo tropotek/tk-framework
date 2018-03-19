@@ -58,6 +58,7 @@ class Image
      * constructor
      *
      * @param string $filename
+     * @throws \Tk\Exception
      */
     public function __construct($filename = null)
     {
@@ -79,6 +80,7 @@ class Image
     /**
      * @param string $filename
      * @return Image
+     * @throws \Tk\Exception
      */
     static function create($filename)
     {
@@ -691,6 +693,7 @@ class Image
      * @param int $x_offset horizontal offset in pixels
      * @param int $y_offset vertical offset in pixels
      * @return $this
+     * @throws \Tk\Exception
      */
     public function overlay($overlay_file, $position = 'center', $opacity = 1, $x_offset = 0, $y_offset = 0)
     {

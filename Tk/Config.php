@@ -760,6 +760,7 @@ class Config extends Collection
     /**
      * @param string $tz
      * @deprecated Use setTimezone()
+     * @return Config
      */
     public function setDateTimezone($tz) {
         return $this->setTimezone($tz);
