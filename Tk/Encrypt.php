@@ -8,7 +8,7 @@ namespace Tk;
  * An object to handle string encryption based on a key
  *
  * @author Michael Mifsud <info@tropotek.com>
- * @link http://www.tropotek.com/
+ * @see http://www.tropotek.com/
  * @license Copyright 2015 Michael Mifsud
  */
 class Encrypt

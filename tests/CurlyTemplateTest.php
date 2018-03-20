@@ -6,7 +6,7 @@ namespace tests;
  * Class EncryptTest
  *
  * @author Michael Mifsud <info@tropotek.com>
- * @link http://www.tropotek.com/
+ * @see http://www.tropotek.com/
  * @license Copyright 2016 Michael Mifsud
  */
 class CurlyTemplateTest extends \PHPUnit_Framework_TestCase

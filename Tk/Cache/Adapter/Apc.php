@@ -5,7 +5,7 @@ namespace Tk\Cache\Adapter;
  * An Apc cache class
  *
  * @author Michael Mifsud <info@tropotek.com>
- * @link http://www.tropotek.com/
+ * @see http://www.tropotek.com/
  * @license Copyright 2015 Michael Mifsud
  */
 class Apc implements Iface

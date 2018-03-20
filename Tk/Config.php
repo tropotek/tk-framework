@@ -72,7 +72,7 @@ use Psr\Log\NullLogger;
  *
  *
  * @author Michael Mifsud <info@tropotek.com>
- * @link http://www.tropotek.com/
+ * @see http://www.tropotek.com/
  * @license Copyright 2007 Michael Mifsud
  *
  * @todo Should we remove this object??, it causes us to rely on it at times, that also influences the code for bad object design

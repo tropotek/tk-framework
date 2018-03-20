@@ -15,7 +15,7 @@ namespace Tk\Dom;
  *
  *
  * @author Michael Mifsud <info@tropotek.com>
- * @link http://www.tropotek.com/
+ * @see http://www.tropotek.com/
  * @license Copyright 2017 Michael Mifsud
  */
 trait AttributesTrait
