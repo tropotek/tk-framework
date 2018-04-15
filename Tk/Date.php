@@ -214,8 +214,9 @@ class Date
      * @param \DateTime $date
      * @return \DateTime[]
      */
-    static function getFinancialYear(\DateTime $date)
+    static function getFinancialYear(\DateTime $date = null)
     {
+        if (!$date) $date = self::create();
         $month = intval($date->format('n'), 10);
         $startYear = intval($date->format('Y'), 10);
         $endYear = $startYear + 1;
@@ -236,8 +237,9 @@ class Date
      * @param \DateTime $date
      * @return \DateTime
      */
-    static function ceil(\DateTime $date)
+    static function ceil(\DateTime $date = null)
     {
+        if (!$date) $date = self::create();
         return new \DateTime($date->format('Y-m-d 23:59:59'), $date->getTimezone());
     }
 
@@ -247,8 +249,9 @@ class Date
      * @param \DateTime $date
      * @return \DateTime
      */
-    static function floor(\DateTime $date)
+    static function floor(\DateTime $date = null)
     {
+        if (!$date) $date = self::create();
         return new \DateTime($date->format('Y-m-d 00:00:00'), $date->getTimezone());
     }
 
@@ -258,8 +261,9 @@ class Date
      * @param \DateTime $date
      * @return \DateTime
      */
-    static function getMonthStart(\DateTime $date)
+    static function getMonthStart(\DateTime $date = null)
     {
+        if (!$date) $date = self::create();
         return new \DateTime($date->format('Y-m-01 00:00:00'), $date->getTimezone());
     }
 
@@ -269,8 +273,9 @@ class Date
      * @param \DateTime $date
      * @return \DateTime
      */
-    static function getMonthEnd(\DateTime $date)
+    static function getMonthEnd(\DateTime $date = null)
     {
+        if (!$date) $date = self::create();
         $lastDay = self::getMonthDays($date->format('n'), $date->format('Y'));
         return new \DateTime($date->format('Y-m-'.$lastDay.' 23:59:59'), $date->getTimezone());
     }
@@ -392,8 +397,9 @@ class Date
      * @param \DateTime $date
      * @return string
      */
-    static function toRelativeString(\DateTime $date)
+    static function toRelativeString(\DateTime $date = null)
     {
+        if (!$date) $date = self::create();
         $c = getdate();
         $p = array('year', 'mon', 'mday', 'hours', 'minutes', 'seconds');
         $display = array('year', 'month', 'day', 'hour', 'minute', 'second');
