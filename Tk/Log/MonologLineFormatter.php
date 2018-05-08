@@ -12,7 +12,8 @@ use Monolog\Formatter\LineFormatter;
  */
 class MonologLineFormatter extends LineFormatter
 {
-    const APP_FORMAT = "[%datetime%]%post% %channel%.%level_name%: %message% %context% %extra%\n";
+    //const APP_FORMAT = "[%datetime%]%post% %channel%.%level_name%: %message% %context% %extra%\n";
+    const APP_FORMAT = "[%datetime%]%post% %level_name%: %message% %context% %extra%\n";
 
     protected $scriptTime = 0;
 
@@ -34,21 +35,33 @@ class MonologLineFormatter extends LineFormatter
      */
     public function format(array $record)
     {
-
         $colors = array(
-            'emergency' => 'red',
-            'alert' => 'light_cyan',
-            'critical' => 'light_red',
-            'error' => 'light_red',
-            'warning' => 'yellow',
-            'notice' => 'light_purple',
-            'info' => 'white',
-            'debug' => 'light_gray'
+            'emergency'     => 'brown',
+            'alert'         => 'yellow',
+            'critical'      => 'red',
+            'error'         => 'light_red',
+            'warning'       => 'light_cyan',
+
+            'notice'        => 'light_purple',
+            'info'          => 'white',
+            'debug'         => 'light_gray'
+        );
+        $abbrev = array(
+            'emergency'     => 'EMR',
+            'alert'         => 'ALT',
+            'critical'      => 'CRT',
+            'error'         => 'ERR',
+            'warning'       => 'WRN',
+            'notice'        => 'NTC',
+            'info'          => 'INF',
+            'debug'         => 'DBG'
         );
 
         //error_log(print_r($record, true));
         $levelName = $record['level_name'];
-        $record['level_name'] = $levelName[0];
+        //$record['level_name'] = $levelName[0];
+        //$record['level_name'] = substr($levelName, 0, 3);
+        $record['level_name'] = $abbrev[strtolower($levelName)];
         $record['message'] = \Tk\Color::getCliString($record['message'], $colors[strtolower($levelName)]);
 
         $output = parent::format($record);

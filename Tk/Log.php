@@ -64,7 +64,7 @@ class Log
     public static function emergency($message, array $context = array())
     {
         $l = self::getInstance()->getLogger();
-        $l->emergency($message, $context);
+        $l->emergency(self::getCallerLine() . $message, $context);
     }
 
     /**
@@ -81,7 +81,7 @@ class Log
     public static function alert($message, array $context = array())
     {
         $l = self::getInstance()->getLogger();
-        $l->alert($message, $context);
+        $l->alert(self::getCallerLine() . $message, $context);
     }
 
     /**
@@ -97,7 +97,7 @@ class Log
     public static function critical($message, array $context = array())
     {
         $l = self::getInstance()->getLogger();
-        $l->critical($message, $context);
+        $l->critical(self::getCallerLine() . $message, $context);
     }
 
     /**
@@ -112,7 +112,7 @@ class Log
     public static function error($message, array $context = array())
     {
         $l = self::getInstance()->getLogger();
-        $l->error($message, $context);
+        $l->error(self::getCallerLine() . $message, $context);
     }
 
     /**
@@ -129,7 +129,7 @@ class Log
     public static function warning($message, array $context = array())
     {
         $l = self::getInstance()->getLogger();
-        $l->warning($message, $context);
+        $l->warning(self::getCallerLine() . $message, $context);
     }
 
     /**
@@ -190,4 +190,23 @@ class Log
         $l = self::getInstance()->getLogger();
         $l->log($level, $message, $context);
     }
+
+    /**
+     * @return string
+     */
+    private static function getCallerLine()
+    {
+        $bt = debug_backtrace();
+        array_shift($bt);
+        $caller = array_shift($bt);
+        $str = '';
+        if ($caller) {
+            $config = \Tk\Config::getInstance();
+            $line = $caller['line'];
+            $file = str_replace($config->getSitePath(), '', $caller['file']);
+            $str = sprintf('[%s:%s] ', $file, $line);
+        }
+        return $str;
+    }
+
 }
