@@ -1,4 +1,4 @@
-# Tk Framework :boom: 
+# Tk Framework 
 
 __Project:__ [ttek/tk-framework](http://packagist.org/packages/ttek/tk-framework)  
 __Published:__ 01 Nov 2015

@@ -100,6 +100,7 @@ class Log
         $l->critical(self::getCallerLine() . $message, $context);
     }
 
+
     /**
      * Runtime errors that do not require immediate action but should typically
      * be logged and monitored.
