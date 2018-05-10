@@ -511,14 +511,13 @@ class Config extends Collection
 
     /**
      * @return string
-     * @throws Exception
      */
     public function getCachePath()
     {
         $path = $this->getSitePath() . rtrim($this->get('system.cache.path'), '/');
         if (!is_dir($path)) {
             if(!@mkdir($path, $this->getDirMask(), true)) {
-                throw new \Tk\Exception('Please change the permissions on your sites data path.');
+                \Tk\Log::error('Please change the permissions on your sites cache path: ' . $this->get('system.cache.path'));
             }
         }
         return $path;
@@ -582,7 +581,6 @@ class Config extends Collection
 
     /**
      * @return string
-     * @throws Exception
      */
     public function getTempPath()
     {
@@ -590,7 +588,7 @@ class Config extends Collection
         $path = $this->getSitePath() . rtrim($this->get('system.temp.path'), '/');
         if (!is_dir($path)) {
             if(!@mkdir($path, $this->getDirMask(), true)) {
-                throw new \Tk\Exception('Please change the permissions on your sites data path.');
+                error_log('Please change the permissions on your sites temp path: ' . $this->get('system.temp.path'));
             }
         }
         return $path;
