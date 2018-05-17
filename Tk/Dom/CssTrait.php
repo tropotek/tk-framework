@@ -71,7 +71,10 @@ trait CssTrait
     {
         if ($fixName)
             $class = self::cleanCss($class);
-        unset($this->cssList[$class]);
+        foreach (explode(' ', $class) as $c) {
+            if (!$c) continue;
+            unset($this->cssList[$c]);
+        }
         return $this;
     }
 
