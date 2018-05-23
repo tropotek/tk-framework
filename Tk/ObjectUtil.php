@@ -11,7 +11,7 @@ namespace Tk;
  * @see http://www.tropotek.com/
  * @license Copyright 2015 Michael Mifsud
  */
-class Object
+class ObjectUtil
 {
 
     /**
@@ -26,7 +26,7 @@ class Object
      * look for the private property, at which point you can access and/or
      * modify its value as needed. (modify this method if needed)
      *
-     * @param object $object
+     * @param ObjectUtil $object
      * @param string $name the property name
      * @return bool
      */
@@ -53,7 +53,7 @@ class Object
      * look for the private property, at which point you can access and/or
      * modify its value as needed. (modify this method if needed)
      *
-     * @param object $object
+     * @param ObjectUtil $object
      * @param string $name The property name
      * @return mixed|null
      * @throws \ReflectionException
@@ -130,7 +130,7 @@ class Object
      * Get the base classname of an object without the namespace
      * The supplied parameter can be an object or a classname string
      *
-     * @param object|string $class Can be an object or a classname string
+     * @param ObjectUtil|string $class Can be an object or a classname string
      * @return bool|int|string
      */
     public static function basename($class)
@@ -143,7 +143,7 @@ class Object
     /**
      * Get the path of a class
      *
-     * @param string|Object $class
+     * @param string|ObjectUtil $class
      * @return string
      * @throws \ReflectionException
      */
@@ -162,7 +162,7 @@ class Object
      * Use \Tk\Uri to get the full URL
      *  - \Tk\Uri::create(ClassTool::classUrl('\Tk\SomeClass', $config->getAppPath));
      *
-     * @param string|Object $class
+     * @param string|ObjectUtil $class
      * @param string $sitePath full path to the base of the site
      * @return string
      * @throws \ReflectionException
