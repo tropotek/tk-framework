@@ -3,8 +3,6 @@ namespace Tk;
 
 
 /**
- * Class Color
- * 
  * This class is used to manage an RGB colors for web and CLI
  * 
  * @author Michael Mifsud <info@tropotek.com>
