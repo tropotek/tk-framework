@@ -147,11 +147,11 @@ class Date
     /**
      * Create a date from a string returned from the self::$formFormat string
      *
-     * @param $dateStr
+     * @param string $dateStr
      * @param null $timezone
      * @return \DateTime
      */
-    static function createFormDate($dateStr, $timezone = null)
+    static function createFormDate($dateStr, $timezone = null, $format = null)
     {
         if (!$dateStr) return null;
         if ($timezone && is_string($timezone)) {
@@ -160,9 +160,13 @@ class Date
         if (!$timezone) {
             $timezone = new \DateTimeZone(date_default_timezone_get());
         }
-        $date = \DateTime::createFromFormat(self::$formFormat, $dateStr);
-        if ($date)
+        if (!$format) {
+            $format = self::$formFormat;
+        }
+        $date = \DateTime::createFromFormat($format, $dateStr);
+        if ($date) {
             $date->setTimezone($timezone);
+        }
         return $date;
 
     }
