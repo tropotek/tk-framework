@@ -2,7 +2,6 @@
 namespace Tk;
 
 use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
 
 
 /**
@@ -188,7 +187,7 @@ class Config extends Collection
         ini_set('display_errors', 'On');
 
         $config->setDebug(false);
-        $config->setLog(new NullLogger());
+        $config->setLog(new \Tk\Log\NullLogger());
         $config->setTimezone('Australia/Victoria');
 
         if (ini_get('error_log')) {
@@ -516,9 +515,7 @@ class Config extends Collection
     {
         $path = $this->getSitePath() . rtrim($this->get('system.cache.path'), '/');
         if (!is_dir($path)) {
-            if(!@mkdir($path, $this->getDirMask(), true)) {
-                \Tk\Log::error('Please change the permissions on your sites cache path: ' . $this->get('system.cache.path'));
-            }
+            @mkdir($path, $this->getDirMask(), true);
         }
         return $path;
     }

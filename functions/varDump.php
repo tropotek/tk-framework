@@ -11,7 +11,7 @@ function vd() {
     $line = current(debug_backtrace());
     /* @var \Psr\Log\LoggerInterface $log */
     $log =  $config->getLog();
-    if (!$log) $log = new \Psr\Log\NullLogger();
+    if (!$log) $log = new \Tk\Log\NullLogger();
 
     $vd = \Tk\Debug\VarDump::getInstance($config->getSitePath());
     $path = str_replace($config->getSitePath(), '', $line['file']);
@@ -21,12 +21,7 @@ function vd() {
     $str .= $vd->makeDump(func_get_args());
     $str .= sprintf('vd(%s) %s [%s];', implode(', ', $vd->getTypeArray(func_get_args())), $path, $line['line']) . "\n";
 
-    //if (!$config->isCli()) {
-    if (!$log instanceof \Psr\Log\NullLogger) {
-        $log->info($str);
-    } else {
-        error_log($str);
-    }
+    $log->info($str);
     return $str;
 }
 
@@ -41,7 +36,7 @@ function vdd() {
     $line = current(debug_backtrace());
     /* @var \Psr\Log\LoggerInterface $log */
     $log = $config->getLog();
-    if (!$log) $log = new \Psr\Log\NullLogger();
+    if (!$log) $log = new \Tk\Log\NullLogger();
 
     $vd = \Tk\Debug\VarDump::getInstance($config->getSitePath());
     $path = str_replace($config->getSitePath(), '', $line['file']);
@@ -50,11 +45,7 @@ function vdd() {
     $str .= $vd->makeDump(func_get_args(), true);
     $str .= sprintf('vdd(%s) %s [%s]', implode(', ', $vd->getTypeArray(func_get_args())), $path, $line['line']) . "\n";
 
-    //if (!$config->isCli()) {
-    if (!$log instanceof \Psr\Log\NullLogger) {
-        $log->info($str);
-    } else {
-        error_log($str);
-    }
+
+    $log->info($str);
     return $str;
 }

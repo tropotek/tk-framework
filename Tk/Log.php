@@ -29,7 +29,7 @@ class Log
 
     protected function __construct($logger = null)
     {
-        if (!$logger) $logger = new \Psr\Log\NullLogger();
+        if (!$logger) $logger = new \Tk\Log\NullLogger();
         $this->logger = $logger;
     }
 
