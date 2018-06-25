@@ -187,7 +187,7 @@ class Config extends Collection
         ini_set('display_errors', 'On');
 
         $config->setDebug(false);
-        $config->setLog(new \Tk\Log\NullLogger());
+        $config->setLog(new \Psr\Log\NullLogger());
         $config->setTimezone('Australia/Victoria');
 
         if (ini_get('error_log')) {
