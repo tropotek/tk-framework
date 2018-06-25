@@ -26,20 +26,23 @@ class Log
     private $logger = null;
 
 
-
-    protected function __construct($logger = null)
+    /**
+     * Log constructor.
+     * @param \Psr\Log\LoggerInterface $logger
+     */
+    protected function __construct($logger)
     {
-        if (!$logger) $logger = new \Tk\Log\NullLogger();
         $this->logger = $logger;
     }
 
     /**
-     * @param \Psr\Log\LoggerInterface $logger
+     * @param \Psr\Log\LoggerInterface|null $logger
      * @return Log|static
      */
     public static function getInstance($logger = null)
     {
         if (!self::$instance) {
+            if (!$logger) $logger = new \Psr\Log\NullLogger();
             self::$instance = new static($logger);
         }
         return self::$instance;
