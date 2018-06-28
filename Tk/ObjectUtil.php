@@ -26,7 +26,7 @@ class ObjectUtil
      * look for the private property, at which point you can access and/or
      * modify its value as needed. (modify this method if needed)
      *
-     * @param ObjectUtil $object
+     * @param mixed $object
      * @param string $name the property name
      * @return bool
      */
@@ -53,7 +53,7 @@ class ObjectUtil
      * look for the private property, at which point you can access and/or
      * modify its value as needed. (modify this method if needed)
      *
-     * @param ObjectUtil $object
+     * @param mixed $object
      * @param string $name The property name
      * @return mixed|null
      * @throws \ReflectionException
