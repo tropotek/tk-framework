@@ -770,4 +770,22 @@ class Config extends Collection
         return $this->getTimezone();
     }
 
+    /**
+     * Create a random password
+     *
+     * @param int $length
+     * @return string
+     */
+    public static function createPassword($length = 8)
+    {
+        $chars = '234567890abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ';
+        $i = 0;
+        $password = '';
+        while ($i <= $length) {
+            $password .= $chars[mt_rand(0, strlen($chars) - 1)];
+            $i++;
+        }
+        return $password;
+    }
+
 }
