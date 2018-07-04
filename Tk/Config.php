@@ -135,7 +135,7 @@ class Config extends Collection
     /**
      * Get an instance of this object
      *
-     * @return static
+     * @return static|Config
      */
     public static function getInstance()
     {
@@ -786,6 +786,19 @@ class Config extends Collection
             $i++;
         }
         return $password;
+    }
+
+    /**
+     * Return the back URI if available, otherwise it will return the home URI
+     *
+     * @return Uri
+     */
+    public function getBackUrl()
+    {
+        if ($this->getRequest()->getReferer()) {
+            return $this->getRequest()->getReferer();
+        }
+        return Uri::create('/index.html');
     }
 
 }
