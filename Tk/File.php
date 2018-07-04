@@ -273,6 +273,28 @@ class File
         }
     }
 
+
+    /**
+     * @param string $path
+     * @param callable $onDelete
+     * @return bool
+     */
+    public static function removeEmptyFolders($path, $onDelete = null)
+    {
+        $empty=true;
+        foreach (glob($path.DIRECTORY_SEPARATOR."*") as $file) {
+            $empty &= is_dir($file) && self::removeEmptyFolders($file, $onDelete);
+        }
+
+        if ($empty) {
+            if (is_callable($onDelete))
+                call_user_func_array($onDelete, array($path));
+            rmdir($path);
+        }
+        return $empty;
+        //return $empty && rmdir($path);
+    }
+
     /**
      * Get the mime type of a file based on its extension
      *
