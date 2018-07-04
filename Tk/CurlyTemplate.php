@@ -204,8 +204,9 @@ class CurlyTemplate
                 $tpl = $matches[2];
                 $name = $matches[1];
                 if (isset($tplData[$name]) && $tplData[$name] !== false) {
-                    if (isset($tplData[$name][0])) {
+                    if (is_array($tplData[$name]) && isset($tplData[$name][0])) {
                         $block = '';
+                        vd($tplData[$name]);
                         foreach($tplData[$name] as $rowData) {
                             $block .= $ctpl->parseRecursive($tpl, $rowData);
                         }
