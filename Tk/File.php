@@ -281,18 +281,17 @@ class File
      */
     public static function removeEmptyFolders($path, $onDelete = null)
     {
-        $empty=true;
-        foreach (glob($path.DIRECTORY_SEPARATOR."*") as $file) {
+        $empty = true;
+        foreach (glob($path . DIRECTORY_SEPARATOR . '*') as $file) {
             $empty &= is_dir($file) && self::removeEmptyFolders($file, $onDelete);
         }
-
         if ($empty) {
             if (is_callable($onDelete))
-                call_user_func_array($onDelete, array($path));
-            rmdir($path);
+                $conf = call_user_func_array($onDelete, array($path));
+            if ($conf === true || $conf === null)
+                @rmdir($path);
         }
         return $empty;
-        //return $empty && rmdir($path);
     }
 
     /**
