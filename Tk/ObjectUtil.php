@@ -2,7 +2,7 @@
 namespace Tk;
 
 /**
- * Class ClassTool
+ * Class ObjectUtil
  * This object is a utility object to perform actions 
  * with class names and name-spacing issues.
  *
@@ -26,7 +26,7 @@ class ObjectUtil
      * look for the private property, at which point you can access and/or
      * modify its value as needed. (modify this method if needed)
      *
-     * @param mixed $object
+     * @param object $object
      * @param string $name the property name
      * @return bool
      */
@@ -53,7 +53,7 @@ class ObjectUtil
      * look for the private property, at which point you can access and/or
      * modify its value as needed. (modify this method if needed)
      *
-     * @param mixed $object
+     * @param object $object
      * @param string $name The property name
      * @return mixed|null
      * @throws \ReflectionException
@@ -75,7 +75,7 @@ class ObjectUtil
      * objects property is set directly ignoring the properties scope (IE: public,protected,private)
      * This is useful for loading an object with data from data sources such as DB or JSON etc...
      *
-     * @param mixed $object
+     * @param object $object
      * @param string $name
      * @param mixed $value
      * @return mixed
@@ -98,11 +98,12 @@ class ObjectUtil
      * Take a class in the form of Tk_Some_Class
      * And convert it to a class like \Tk\Some\Class
      *
-     * @param string $class
+     * @param string|object $class
      * @return string
      */
     public static function toNamespaceSlash($class)
     {
+        if (is_object($class)) $class = get_class($class);
         if (strpos($class, '\\') != -1 && strpos($class, '_') > -1) {
             $class = '\\'.str_replace('_', '\\', $class);
         }
@@ -113,11 +114,12 @@ class ObjectUtil
      * Take a class in the form of \Tk\Some\Class
      * And convert it to a namespace class like Tk_Some_Class
      *
-     * @param string $class
+     * @param string|object $class
      * @return string
      */
     public static function toNamespaceUnderscore($class)
     {
+        if (is_object($class)) $class = get_class($class);
         if (strpos($class, '_') != -1 && strpos($class, '\\') > -1) {
             $class = str_replace('\\', '_', $class);
             if ($class[0] == '_')
@@ -130,7 +132,7 @@ class ObjectUtil
      * Get the base classname of an object without the namespace
      * The supplied parameter can be an object or a classname string
      *
-     * @param ObjectUtil|string $class Can be an object or a classname string
+     * @param object|string $class Can be an object or a classname string
      * @return bool|int|string
      */
     public static function basename($class)
@@ -143,7 +145,7 @@ class ObjectUtil
     /**
      * Get the path of a class
      *
-     * @param string|ObjectUtil $class
+     * @param string|object $class
      * @return string
      * @throws \ReflectionException
      */
@@ -162,7 +164,7 @@ class ObjectUtil
      * Use \Tk\Uri to get the full URL
      *  - \Tk\Uri::create(ClassTool::classUrl('\Tk\SomeClass', $config->getAppPath));
      *
-     * @param string|ObjectUtil $class
+     * @param string|object $class
      * @param string $sitePath full path to the base of the site
      * @return string
      * @throws \ReflectionException
@@ -185,7 +187,7 @@ class ObjectUtil
     /**
      * Get a list of constant name value pairs for a passed class name
      *
-     * @param string $class A
+     * @param string|object $class A
      * @param string $prefix If set will only return const values whose name starts with this prefix
      * @return array
      * @throws \ReflectionException
