@@ -128,6 +128,8 @@ class Config extends Collection
     {
         if (self::$instance == null) {
             self::$instance = new static($sitePath, $siteUrl);
+            // Load any site config files
+            self::$instance->loadConfig();
         }
         return self::$instance;
     }
@@ -244,6 +246,28 @@ class Config extends Collection
                 $config['system.info.minimumStability'] = $composer->{'minimum-stability'};
             }
         }
+    }
+
+    /**
+     * Load the site route config files
+     */
+    public function loadConfig()
+    {
+        // Site Files
+        if (is_file($this->getSrcPath() . '/config/application.php'))
+            include($this->getSrcPath() . '/config/application.php');
+        if (is_file($this->getSrcPath() . '/config/config.php'))
+            include($this->getSrcPath() . '/config/config.php');
+    }
+
+    /**
+     * Load the site route config files
+     */
+    public function loadRoutes()
+    {
+        // Site Files
+        if (is_file($this->getSrcPath() . '/config/routes.php'))
+            include($this->getSrcPath() . '/config/routes.php');
     }
 
     /**
