@@ -11,7 +11,7 @@ use Psr\Log\LoggerInterface;
  * Example usage:
  * <code>
  * $request = Request::createFromGlobals();
- * $cfg = \Tk\Config::getInstance();
+ * $cfg = \Tk\Config::cerate();     // required for first call then use getInstance()
  *
  * $cfg->setAppPath($sitePath);
  * $cfg->setRequest($request);
@@ -106,28 +106,33 @@ class Config extends Collection
 
     /**
      * Construct the config object and initiate default settings
-     *
-     * @param string $siteUrl
-     * @param string $sitePath
      */
-    public function __construct($sitePath = '', $siteUrl = '')
+    public function __construct()
     {
-        $this->setTimezone('Australia/Victoria');
         parent::__construct();
-        $this->init($sitePath, $siteUrl);
+        $this->init();
     }
 
     /**
      * Create an instance of this object
      *
-     * @param string $siteUrl Only required on first call to init the config paths
-     * @param string $sitePath Only required on first call to init the config paths
-     * @return static
+     * @return Config|static
+     * @deprecated Do not think we need this now we have changed the path params
      */
-    public static function create($sitePath = '', $siteUrl = '')
+    public static function create()
+    {
+        return self::getInstance();
+    }
+
+    /**
+     * Get an instance of this object
+     *
+     * @return Config\static
+     */
+    public static function getInstance()
     {
         if (self::$instance == null) {
-            self::$instance = new static($sitePath, $siteUrl);
+            self::$instance = new static();
             // Load any site config files
             self::$instance->loadConfig();
         }
@@ -135,33 +140,10 @@ class Config extends Collection
     }
 
     /**
-     * Get an instance of this object
-     *
-     * @return static|Config
-     */
-    public static function getInstance()
-    {
-        if (static::$instance) {
-            return static::$instance;
-        }
-        error_log('Error: Config needs to be initiated call Config::create() first.');
-        //\Tk\Log::error('Error: Config needs to be initiated call Config::create() first.');
-    }
-
-    /**
      * init the default params.
-     *
-     * @param string $sitePath
-     * @param string $siteUrl
      */
-    protected function init($sitePath = '', $siteUrl = '')
+    protected function init()
     {
-        // php version must be high enough to support traits
-//        if (version_compare(phpversion(), '5.3.0', '<')) {
-//            \Tk\Log::error('Your PHP5 version must be greater than 5.3.0 [Curr Ver: '.phpversion().']');
-//            return;
-//        }
-
         $config = $this;
         $config['script.time'] = microtime(true);
 
@@ -170,14 +152,21 @@ class Config extends Collection
         if (substr(php_sapi_name(), 0, 3) == 'cli') {
             $config['cli'] = true;
         }
+        $config->setLogLevel('error');
+
+        $config['file.mask']                = 0664;
+        $config['dir.mask']                 = 0775;
+        $config['system.data.path']         = '/data';
+        $config['system.cache.path']        = '/data/cache';
+        $config['system.temp.path']         = '/data/temp';
+        $config['system.src.path']          = '/src';
+        $config['system.vendor.path']       = '/vendor';
+        $config['system.plugin.path']       = '/plugin';
+        $config['system.assets.path']       = '/assets';
+        $config['system.template.path']     = '/html';
 
         // setup site path and URL
-        list($config['site.path'], $config['site.url']) = $config->getDefaultPaths($sitePath, $siteUrl);
-        \Tk\Uri::$BASE_URL_PATH = $config->getSiteUrl();
-        if (!empty($_SERVER['HTTP_HOST'])) {
-            $config['site.host'] = $_SERVER['HTTP_HOST'];
-        }
-
+        $config->initDefaultPaths();
 
         /**
          * This makes our life easier when dealing with paths. Everything is relative
@@ -198,18 +187,6 @@ class Config extends Collection
             $config->setLogPath('/var/log/apache2/error.log');
         }
 
-        $config->setLogLevel('error');
-
-        $config['file.mask']                = 0664;
-        $config['dir.mask']                 = 0775;
-        $config['system.data.path']         = '/data';
-        $config['system.cache.path']        = '/data/cache';
-        $config['system.temp.path']         = '/data/temp';
-        $config['system.src.path']          = '/src';
-        $config['system.vendor.path']       = '/vendor';
-        $config['system.plugin.path']       = '/plugin';
-        $config['system.assets.path']       = '/assets';
-        $config['system.template.path']     = '/html';
 
         // Site information
         $config['system.info.project']      = 'Untitled Site';
@@ -258,6 +235,20 @@ class Config extends Collection
             include($this->getSrcPath() . '/config/application.php');
         if (is_file($this->getSrcPath() . '/config/config.php'))
             include($this->getSrcPath() . '/config/config.php');
+
+        // Could be handy for cli scripts using the \Tk\Uri
+        if (!empty($_SERVER['HTTP_HOST'])) {
+            $host = $_SERVER['HTTP_HOST'];
+            if (is_writable($this->getCachePath())) { // Cache host
+                file_put_contents($this->getCachePath().'/hostname', $host);
+            }
+        } else {    // Attempt to get the cached host
+            if (is_readable($this->getCachePath().'/hostname')) {
+                $host = file_get_contents($this->getCachePath() . '/hostname');
+                if ($host)
+                    $this->set('site.host', $host);
+            }
+        }
     }
 
     /**
@@ -268,6 +259,42 @@ class Config extends Collection
         // Site Files
         if (is_file($this->getSrcPath() . '/config/routes.php'))
             include($this->getSrcPath() . '/config/routes.php');
+    }
+
+    /**
+     * This function tries to automatically determine the project path, url and host
+     */
+    protected function initDefaultPaths()
+    {
+        $sitePath = dirname(dirname(dirname(dirname(dirname(__FILE__)))));
+        $sitePath = rtrim($sitePath, '/');
+        $this->set('site.path', $sitePath);
+
+        $siteUrl = '/';
+        // $_SERVER['SCRIPT_NAME']
+        // $_SERVER['SCRIPT_FILENAME']
+        if (isset($_SERVER['PHP_SELF']) && !isset($_SERVER['argv']) && !$_SERVER['PHP_SELF'][0] != '.') {
+            $siteUrl = dirname($_SERVER['PHP_SELF']);
+        } else {
+            $htaccessFile = $this->getSitePath().'/.htaccess';
+            if (@is_readable($htaccessFile)) {
+                $htaccess = file_get_contents($htaccessFile);
+                if ($htaccess && preg_match('/\s*RewriteBase (\/.*)\s+/i', $htaccess, $regs)) {
+                    $siteUrl = $regs[1];
+                }
+            }
+        }
+        $siteUrl = rtrim($siteUrl, '/');
+        $this->set('site.url', $siteUrl);
+        \Tk\Uri::$BASE_URL_PATH = $siteUrl;
+
+        $host = '';
+        if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
+            $host = $_SERVER['HTTP_X_FORWARDED_HOST'];
+        } else if (isset($_SERVER['HTTP_HOST'])) {
+            $host = $_SERVER['HTTP_HOST'];
+        }
+        $this->set('site.host', $host);
     }
 
     /**
@@ -453,6 +480,7 @@ class Config extends Collection
 
 
     /**
+     * Get the site host domain name
      * @return string
      */
     public function getSiteHost()
@@ -461,6 +489,7 @@ class Config extends Collection
     }
 
     /**
+     * Get the URL path to the root of the project
      * @return string
      */
     public function getSiteUrl()
@@ -469,6 +498,7 @@ class Config extends Collection
     }
 
     /**
+     * Get the filesystem path to the root of the project
      * @return string
      */
     public function getSitePath()
@@ -725,26 +755,6 @@ class Config extends Collection
             }
         }
         return $arr;
-    }
-
-    /**
-     * This function tries to automatically determine the app path and url
-     * @param string $sitePath
-     * @param string $siteUrl
-     * @return array
-     */
-    protected function getDefaultPaths($sitePath = '', $siteUrl = '')
-    {
-        // Determine the default path
-        if (!$sitePath) {
-            $sitePath = rtrim( dirname(dirname(dirname(dirname(dirname(__FILE__))))) , '/');
-        }
-        // Determine the default base url
-        if (!$siteUrl && isset($_SERVER['PHP_SELF'])) {
-            $siteUrl = dirname($_SERVER['PHP_SELF']);
-        }
-        $siteUrl = rtrim($siteUrl, '/');
-        return array($sitePath, $siteUrl);
     }
 
     /**
