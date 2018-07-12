@@ -230,6 +230,14 @@ class Config extends Collection
      */
     public function loadConfig()
     {
+        $this->loadAppConfig();
+    }
+
+    /**
+     * Load the site route config files
+     */
+    protected function loadAppConfig()
+    {
         // Site Files
         if (is_file($this->getSrcPath() . '/config/application.php'))
             include($this->getSrcPath() . '/config/application.php');
@@ -255,6 +263,14 @@ class Config extends Collection
      * Load the site route config files
      */
     public function loadRoutes()
+    {
+        $this->loadAppRoutes();
+    }
+
+    /**
+     * Load the site route config files
+     */
+    public function loadAppRoutes()
     {
         // Site Files
         if (is_file($this->getSrcPath() . '/config/routes.php'))
