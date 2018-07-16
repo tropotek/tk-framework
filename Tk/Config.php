@@ -189,7 +189,7 @@ class Config extends Collection
 
 
         // Site information
-        $config['system.info.project']      = 'Untitled Site';
+        $config['system.info.project']      = 'untitledSite';
         $config['system.info.description']  = '';
         $config['system.info.version']      = '0.0';
         $config['system.info.licence']      = '';
@@ -851,4 +851,48 @@ class Config extends Collection
         return Uri::create('/index.html');
     }
 
+
+    /**
+     * getEmailGateway
+     *
+     * @return \Tk\Mail\Gateway
+     */
+    public function getEmailGateway()
+    {
+        if (!$this->get('email.gateway')) {
+            $gateway = new \Tk\Mail\Gateway($this);
+            $this->set('email.gateway', $gateway);
+        }
+        return $this->get('email.gateway');
+    }
+
+    /**
+     * @param string $xtplFile The mail template filename as found in the /html/xtpl/mail folder
+     * @return \Tk\Mail\CurlyMessage
+     */
+    public function createMessage($xtplFile = 'default')
+    {
+        $config = self::getInstance();
+        $request = $config->getRequest();
+
+        $template = '{content}';
+        $xtplFile = str_replace(array('./', '../'), '', strip_tags(trim($xtplFile)));
+        $xtplFile = $config->get('template.xtpl.path') . '/mail/' . $xtplFile . $config->get('template.xtpl.ext');
+        if (is_file($xtplFile))
+            $template = file_get_contents($xtplFile);
+
+        $message = \Tk\Mail\CurlyMessage::create($template);
+        $message->setFrom($config->get('site.email'));
+
+        if ($request->getUri())
+            $message->set('_uri', \Tk\Uri::create('')->toString());
+        if ($request->getReferer())
+            $message->set('_referer', $request->getReferer()->toString());
+        if ($request->getIp())
+            $message->set('_ip', $request->getIp());
+        if ($request->getUserAgent())
+            $message->set('_user_agent', $request->getUserAgent());
+
+        return $message;
+    }
 }
