@@ -878,8 +878,13 @@ class Config extends Collection
         $template = '{content}';
         $xtplFile = str_replace(array('./', '../'), '', strip_tags(trim($xtplFile)));
         $xtplFile = $config->get('template.xtpl.path') . '/mail/' . $xtplFile . $config->get('template.xtpl.ext');
-        if (is_file($xtplFile))
+        if (is_file($xtplFile)) {
             $template = file_get_contents($xtplFile);
+            if (!$template) {
+                \Tk\Alert::addWarning('Template file not found, using default template: ' . $xtplFile);
+                $template = '{content}';
+            }
+        }
 
         $message = \Tk\Mail\CurlyMessage::create($template);
         $message->setFrom($config->get('site.email'));
