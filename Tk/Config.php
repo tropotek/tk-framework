@@ -245,18 +245,24 @@ class Config extends Collection
             include($this->getSrcPath() . '/config/config.php');
 
         // Could be handy for cli scripts using the \Tk\Uri
-        if (!empty($_SERVER['HTTP_HOST'])) {
+        $host = '';
+        if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
+            $host = $_SERVER['HTTP_X_FORWARDED_HOST'];
+        } else if (isset($_SERVER['HTTP_HOST'])) {
             $host = $_SERVER['HTTP_HOST'];
+        }
+        if ($host) {
             if (is_writable($this->getCachePath())) { // Cache host
                 file_put_contents($this->getCachePath().'/hostname', $host);
             }
         } else {    // Attempt to get the cached host
-            if (is_readable($this->getCachePath().'/hostname')) {
+            if (is_readable($this->getDataPath().'/hostname')) {    // Can be set manually
                 $host = file_get_contents($this->getCachePath() . '/hostname');
-                if ($host)
-                    $this->set('site.host', $host);
+            } else if (is_readable($this->getCachePath().'/hostname')) {
+                $host = file_get_contents($this->getCachePath() . '/hostname');
             }
         }
+        $this->set('site.host', $host);
     }
 
     /**
