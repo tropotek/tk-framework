@@ -1,40 +1,40 @@
 {
-  "name": "ttek/tk-framework",
-  "type": "library",
-  "description": "Tropotek Framework V2",
-  "keywords": [
-    "Tk",
-    "framework",
-    "tropotek"
-  ],
-  "homepage": "http://www.tropotek.com/",
-  "time": "2010-12-09",
-  "license": "MIT",
-  "version": "trunk",
-  "authors": [
-    {
-      "name": "Michael Mifsud",
-      "email": "info@tropotek.com",
-      "homepage": "http://www.tropotek.com/"
-    }
-  ],
-  "autoload": {
-    "psr-0": {
-      "Tk\\": ""
+    "name": "ttek/tk-framework",
+    "type": "library",
+    "description": "Tropotek Framework V2",
+    "keywords":  [
+        "Tk",
+        "framework",
+        "tropotek"
+    ],
+    "homepage": "http://www.tropotek.com/",
+    "time": "2018-07-19",
+    "license": "MIT",
+    "version": "2.0.50",
+    "authors":  [
+         {
+            "name": "Michael Mifsud",
+            "email": "info@tropotek.com",
+            "homepage": "http://www.tropotek.com/"
+        }
+    ],
+    "autoload":  {
+        "psr-0":  {
+            "Tk\\": ""
+        },
+        "files":  [
+            "Tk/Exception.php",
+            "functions/varDump.php"
+        ]
     },
-    "files": [
-      "Tk/Exception.php",
-      "functions/varDump.php"
-    ]
-  },
-  "require": {
-    "php": ">=5.3.0",
-    "psr/log": "^1.0",
-    "monolog/monolog": "^1.0"
-  },
-  "extra": {
-    "branch-alias": {
-      "dev-master": "2.0.x-dev"
+    "require":  {
+        "php": ">=5.3.0",
+        "psr/log": "^1.0",
+        "monolog/monolog": "^1.0"
+    },
+    "extra":  {
+        "branch-alias":  {
+            "dev-master": "2.0.x-dev"
+        }
     }
-  }
 }
