@@ -135,11 +135,8 @@ class Alert extends \Dom\Renderer\Renderer implements \Dom\Renderer\DisplayInter
     }
 
     /**
-     * show
-     *
      * @param \Dom\Template $template
-     * @return \Dom\Template
-     * @throws \Dom\Exception
+     * @return \Dom\Renderer\Renderer|\Dom\Template|null|string
      */
     public function show($template = null)
     {
@@ -150,7 +147,13 @@ class Alert extends \Dom\Renderer\Renderer implements \Dom\Renderer\DisplayInter
             $template->insertText('title', htmlentities($this->title));
             $template->setChoice('title');
         }
-        $template->insertHtml('message', $this->message);
+
+        try {
+            $template->insertHtml('message', $this->message);
+        } catch (\Dom\Exception $e) {
+            \Tk\Log::warning($e->__toString());
+        }
+
         $template->addCss('alert', $this->getCss());
         $template->setAttr('alert', 'data-type', $this->type);
         if ($this->icon) {
