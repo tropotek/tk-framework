@@ -591,7 +591,9 @@ class Config extends Collection
     {
         $path = $this->getSitePath() . rtrim($this->get('system.cache.path'), '/');
         if (!is_dir($path)) {
-            @mkdir($path, $this->getDirMask(), true);
+            if (!mkdir($path, $this->getDirMask(), true)) {
+                die('Error: Cannot create Cache directory.');
+            }
         }
         return $path;
     }
@@ -661,7 +663,7 @@ class Config extends Collection
         $path = $this->getSitePath() . rtrim($this->get('system.temp.path'), '/');
         if (!is_dir($path)) {
             if(!@mkdir($path, $this->getDirMask(), true)) {
-                error_log('Please change the permissions on your sites temp path: ' . $this->get('system.temp.path'));
+                dir('Error: Cannot create tmp directory.');
             }
         }
         return $path;
