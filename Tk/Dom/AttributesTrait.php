@@ -40,7 +40,10 @@ trait AttributesTrait
             $this->attrList = array_merge($this->attrList, $name);
         } else {
             $name = strip_tags(trim($name));
-            if ($value === null) $value = $name;
+
+            if ($value === null) {
+                $value = $name;
+            }
             $this->attrList[$name] = $value;
         }
         return $this;
