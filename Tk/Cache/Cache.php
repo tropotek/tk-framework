@@ -8,7 +8,7 @@ namespace Tk\Cache;
  * <code>
  * <?php
  * // constructing our cache engine
- * $cache = new Tk\Cache(new Tk\Cache\Adapter\Filesystem());
+ * $cache = new \Tk\Cache(new \Tk\Cache\Adapter\Filesystem());
  *
  * function getUsers() {
  *   global $cache;
