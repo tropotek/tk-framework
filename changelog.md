@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 2.0.58 [2018-07-25]:
+-------------------------------
+  - Added a new scss Dom modifier object to the template lib
+
+
 Ver 2.0.56 [2018-07-24]:
 -------------------------------
   - Upgraded the site to further use the new base and uni libs
