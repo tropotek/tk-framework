@@ -124,7 +124,7 @@ class Filesystem implements Iface
      */
     public function clear()
     {
-        return \Tk\Util\Filesystem::rmdir($this->cachePath);
+        return \Tk\File::rmdir($this->cachePath);
     }
 
     /**
@@ -136,6 +136,14 @@ class Filesystem implements Iface
     private function getFileName($key)
     {
         return $this->cachePath . '/s_cache-' . md5($key);
+    }
+
+    /**
+     * @return string
+     */
+    public function getCachePath()
+    {
+        return $this->cachePath;
     }
 
 }
