@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 2.0.60 [2018-07-26]:
+-------------------------------
+Updated the form field group renderer to be more usable
+
+
 Ver 2.0.58 [2018-07-25]:
 -------------------------------
   - Added a new scss Dom modifier object to the template lib
