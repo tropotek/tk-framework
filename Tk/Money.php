@@ -6,6 +6,7 @@ namespace Tk;
  * @created: 2/08/18
  * @link http://www.tropotek.com/
  * @license Copyright 2018 Tropotek
+ * @todo Write a unit test for this and the Currency objects
  */
 class Money implements \Serializable
 {
@@ -88,7 +89,6 @@ class Money implements \Serializable
     public function unserialize($data)
     {
         $data = unserialize($data);
-        vd($data, $this);
         $this->amount = $data['amount'];
         $this->setCurrency(Currency::getInstance($data['currencyCode']));
     }
@@ -128,12 +128,11 @@ class Money implements \Serializable
      *
      * @param Money $other
      * @return Money
-     * @throws Exception
      */
     function add(Money $other)
     {
         $this->assertCurrency($other);
-        return static::create($this->amount + $other->amount);
+        return static::create($this->getAmount() + $other->getAmount());
     }
 
     /**
@@ -141,12 +140,11 @@ class Money implements \Serializable
      *
      * @param Money $other
      * @return Money
-     * @throws Exception
      */
     function subtract(Money $other)
     {
         $this->assertCurrency($other);
-        return static::create($this->amount - $other->amount);
+        return static::create($this->getAmount() - $other->getAmount());
     }
 
     /**
@@ -161,7 +159,7 @@ class Money implements \Serializable
         if ($denominator === 0) {
             throw new Exception('Divide by zero exception.');
         }
-        return static::create($this->amount / $denominator);
+        return static::create($this->getAmount() / $denominator);
     }
 
     /**
@@ -170,21 +168,91 @@ class Money implements \Serializable
      * @param double $multiplier
      * @return Money
      */
-    function multiply($multiplyer)
+    function multiply($multiplier)
     {
-        return static::create((int)round($this->amount * $multiplyer), $this->currency);
+        return static::create((int)round($this->getAmount() * $multiplier), $this->getCurrency());
+    }
+
+
+    
+    /**
+     * Compares the value to another instance of money.
+     *
+     * @param Money $other
+     * @return integer Returns the difference, 0 = equal.
+     */
+    function compareTo(Money $other)
+    {
+        $this->assertCurrency($other);
+        return $this->getAmount() - $other->getAmount();
+    }
+    
+    /**
+     * Checks if the money value is greater than the value of another instance of money.
+     *
+     * @param Money $other
+     * @return boolean
+     */
+    function greaterThan(Money $other)
+    {
+        return $this->compareTo($other) > 0;
+    }
+    
+    /**
+     * Checks if the money value is greater than or equal the value of another instance of money.
+     *
+     * @param Money $other
+     * @return boolean
+     */
+    function greaterThanEqual(Money $other)
+    {
+        return ($this->compareTo($other) > 0) || ($other->getAmount() == $this->getAmount());
+    }
+    
+    /**
+     * Checks if the money value is less than the value of another instance of money.
+     *
+     * @param Money $other
+     * @return boolean
+     */
+    function lessThan(Money $other)
+    {
+        return $this->compareTo($other) < 0;
+    }
+    
+    /**
+     * Checks if the money value is less than or equal the value of another instance of money.
+     *
+     * @param Money $other
+     * @return boolean
+     */
+    function lessThanEqual(Money $other)
+    {
+        return ($this->compareTo($other) < 0) || ($other->getAmount() == $this->getAmount());
+    }
+    
+    /**
+     * Checks if the money value is equal to the value of another instance of money.
+     *
+     * @param Money $other
+     * @return boolean
+     */
+    function equals(Money $other)
+    {
+        return ($this->compareTo($other) == 0);
     }
 
     /**
      * Test for the same currency instance
      *
+     * @todo Rather than throw an exception I have chosen to log the error for now. See how it goes
      * @param Money $arg
-     * @throws Exception
      */
     private function assertCurrency(Money $arg)
     {
-        if ($this->currency !== $arg->currency) {
-            throw new Exception('Money math currency instance mismatch.');
+        if ($this->getCurrency() !== $arg->getCurrency()) {
+            \Tk\log::error('Money currency instance mismatch ['.$arg->getCurrency()->getCode().' => '.$this->getCurrency()->getCode().'].');
+            //throw new Exception('Money currency instance mismatch ['.$arg->getCurrency()->getCode().' => '.$this->getCurrency()->getCode().'].');
         }
     }
 
