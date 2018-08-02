@@ -48,7 +48,7 @@ class Currency
     private $code = '';
 
     /**
-     * @param string $currencyCode (optional) Default value is 'AUD'
+     * @param string $currencyCode (optional)
      */
     private function __construct($currencyCode = 'AUD')
     {

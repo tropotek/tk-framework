@@ -54,24 +54,26 @@ class Money implements \Serializable
     /**
      * Create a money object from a string representation
      *
-     * @param string $amount An amount string: '200.00', '$200.00'
+     * @param string $amount An amount string: '20,000.00', '$20,000.00'
      * @param null|Currency $currency
-     * @return Money Returns null on invalid format
-     * @throws Exception
+     * @param string $thousandthSep Default ','
+     * @return Money|null Returns null on invalid format
      */
-    static function parseFromString($amount, $currency = null)
+    static function parseFromString($amount, $currency = null, $thousandthSep = ',')
     {
         if (!$currency) {
             $currency = Currency::getInstance(Currency::$default);
         }
         $digits = $currency->getFractionDigits();
         //if (!preg_match("/^(\$)?(\-)?[0-9]+((\.)[0-9]{1,{$digits}})?$/", $amount)) {
-        if (!preg_match("/(\$)?(\-)?[0-9]+((\.)[0-9]{1,{$digits}})?$/", $amount)) {
+        $amt = str_replace(array($thousandthSep, $currency->getSymbol(), $currency->getLocal()), '', $amount);
+        vd($amount, $amt);
+        if (!preg_match("/(\-)?[0-9]+((\.)[0-9]{1,{$digits}})?$/", $amt)) {
+            \Tk\Log::warning('Cannot parse Money string: ' . $amount);
             return null;
         }
-        $amount = str_replace(array(',', '$'), array('', ''), $amount);
-        $amount = floatval($amount);
-        return static::create($amount * 100, $currency);
+        $amt = floatval($amt);
+        return static::create($amt * 100, $currency);
     }
 
     /**
@@ -97,7 +99,7 @@ class Money implements \Serializable
      * @param Currency $currency
      * @return $this
      */
-    public function setCurrency(Currency $currency)
+    protected function setCurrency(Currency $currency)
     {
         $this->currency = $currency;
         $this->currencyCode = $currency->getCode();
@@ -258,13 +260,13 @@ class Money implements \Serializable
 
 
     /**
-     * Return a string amount as a 2 point precision float. Eg: '200,000.00'
+     * Return a string amount as a 2 point precision float. Eg: '2000.00'
      *
      * @param string $decSep
      * @param string $thousandthSep
      * @return string
      */
-    function toFloatString($decSep = '.', $thousandthSep = ',')
+    function toFloatString($decSep = '.', $thousandthSep = '')
     {
         return number_format(($this->getAmount() / 100), $this->getCurrency()->getFractionDigits(), $decSep, $thousandthSep);
     }
@@ -278,7 +280,7 @@ class Money implements \Serializable
      */
     function toString($decSep = '.', $thousandthSep = ',')
     {
-        $strValue = $this->getCurrency()->getSymbol() . $this->toFloatString();
+        $strValue = $this->getCurrency()->getSymbol() . $this->toFloatString($decSep, $thousandthSep);
         return $strValue;
     }
 
