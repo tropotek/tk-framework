@@ -67,7 +67,6 @@ class Money implements \Serializable
         $digits = $currency->getFractionDigits();
         //if (!preg_match("/^(\$)?(\-)?[0-9]+((\.)[0-9]{1,{$digits}})?$/", $amount)) {
         $amt = str_replace(array($thousandthSep, $currency->getSymbol(), $currency->getLocal()), '', $amount);
-        vd($amount, $amt);
         if (!preg_match("/(\-)?[0-9]+((\.)[0-9]{1,{$digits}})?$/", $amt)) {
             \Tk\Log::warning('Cannot parse Money string: ' . $amount);
             return null;
