@@ -33,6 +33,16 @@ class Filesystem implements Iface
     }
 
     /**
+     * @param string $cachePath
+     * @return Filesystem
+     */
+    public static function create($cachePath = '')
+    {
+        $obj = new static($cachePath);
+        return $obj;
+    }
+
+    /**
      * This is the function you store information with
      *
      * @param string $key
@@ -44,7 +54,9 @@ class Filesystem implements Iface
     public function store($key, $data, $ttl = 0)
     {
         if (!is_dir($this->cachePath)) {
-            mkdir($this->cachePath, \Tk\Config::getInstance()->getDirMask(), true);
+            if (!mkdir($this->cachePath, \Tk\Config::getInstance()->getDirMask(), true)) {
+                \Tk\Log::error('Cannot create path: ' . $this->cachePath);
+            }
         }
         // Opening the file in read/write mode
         $h = fopen($this->getFileName($key), 'a+');

@@ -61,6 +61,16 @@ class Cache
     }
 
     /**
+     * @param Adapter\Iface $adapter
+     * @return Cache
+     */
+    public static function create(Adapter\Iface $adapter)
+    {
+        $obj = new static($adapter);
+        return $obj;
+    }
+
+    /**
      * Enable/Disable the cache
      *
      * @param bool $b
