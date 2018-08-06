@@ -204,8 +204,12 @@ class Config extends Collection
                 $config['system.info.project'] = $composer->name;
             if (isset($composer->description))
                 $config['system.info.description'] = $composer->description;
-            if (isset($composer->version))
+            if (isset($composer->version)) {
                 $config['system.info.version'] = $composer->version;
+                if ($composer->version == 'master' && isset($composerObj->extra->{'branch-alias'}->{'dev-master'})) {
+                    $config['system.info.version'] = $composer->extra->{'branch-alias'}->{'dev-master'};
+                }
+            }
             if (isset($composer->license))
                 $config['system.info.licence'] = $composer->license;
             if (isset($composer->time))
