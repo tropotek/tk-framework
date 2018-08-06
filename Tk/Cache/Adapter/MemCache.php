@@ -42,6 +42,15 @@ class MemCache implements Iface
     }
 
     /**
+     * @return MemCache
+     */
+    public static function create()
+    {
+        $obj = new static();
+        return $obj;
+    }
+
+    /**
      * add memcache search server
      *
      * @param string $host

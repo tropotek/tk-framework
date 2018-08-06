@@ -56,17 +56,20 @@ class ObjectUtil
      * @param object $object
      * @param string $name The property name
      * @return mixed|null
-     * @throws \ReflectionException
      */
     public static function getObjectPropertyValue($object, $name)
     {
-        $reflect = new \ReflectionClass($object);
-        $property = $reflect->getProperty($name);
-        if ($property) {
-            $property->setAccessible(true);
-            return $property->getValue($object);
-        }
+        try {
+            $reflect = new \ReflectionClass($object);
+            $property = $reflect->getProperty($name);
+            if ($property) {
+                $property->setAccessible(true);
+                return $property->getValue($object);
+            }
 
+        } catch (\ReflectionException $e) {
+            \Tk\Log::warning($e->__toString());
+        }
         return null;
     }
 
@@ -79,15 +82,18 @@ class ObjectUtil
      * @param string $name
      * @param mixed $value
      * @return mixed
-     * @throws \ReflectionException
      */
     public static function setObjectPropertyValue($object, $name, $value)
     {
-        $reflect = new \ReflectionClass($object);
-        $property = $reflect->getProperty($name);
-        if ($property) {
-            $property->setAccessible(true);
-            $property->setValue($object, $value);
+        try {
+            $reflect = new \ReflectionClass($object);
+            $property = $reflect->getProperty($name);
+            if ($property) {
+                $property->setAccessible(true);
+                $property->setValue($object, $value);
+            }
+        } catch (\ReflectionException $e) {
+            \Tk\Log::warning($e->__toString());
         }
 
         return $value;
@@ -147,15 +153,20 @@ class ObjectUtil
      *
      * @param string|object $class
      * @return string
-     * @throws \ReflectionException
      */
     public static function classPath($class)
     {
         if (is_object($class)) {
             $class = get_class($class);
         }
-        $rc = new \ReflectionClass($class);
-        return $rc->getFileName();
+        $file = '';
+        try {
+            $rc = new \ReflectionClass($class);
+            $file = $rc->getFileName();
+        } catch (\ReflectionException $e) {
+            \Tk\Log::warning($e->__toString());
+        }
+        return $file;
     }
 
     /**
@@ -167,7 +178,6 @@ class ObjectUtil
      * @param string|object $class
      * @param string $sitePath full path to the base of the site
      * @return string
-     * @throws \ReflectionException
      */
     public static function classUrl($class, $sitePath)
     {
@@ -175,11 +185,16 @@ class ObjectUtil
         if (is_object($class)) {
             $class = get_class($class);
         }
-        $rc = new \ReflectionClass($class);
-        $path = $rc->getFileName();
-        
-        if (strpos($path, $sitePath) === 0) {
-            return str_replace($sitePath, '' , $path);
+        $path = $sitePath;
+        try {
+            $rc = new \ReflectionClass($class);
+            $path = $rc->getFileName();
+
+            if (strpos($path, $sitePath) === 0) {
+                return str_replace($sitePath, '' , $path);
+            }
+        } catch (\ReflectionException $e) {
+            \Tk\Log::warning($e->__toString());
         }
         return basename($path);
     }
@@ -190,25 +205,29 @@ class ObjectUtil
      * @param string|object $class A
      * @param string $prefix If set will only return const values whose name starts with this prefix
      * @return array
-     * @throws \ReflectionException
      */
     public static function getClassConstants($class, $prefix = '')
     {
         if (is_object($class)) {
             $class = get_class($class);
         } else if (!class_exists($class)) {
-            throw new \InvalidArgumentException('Class Not Found!');
-        }
-        $oReflect = new \ReflectionClass($class);
-        $constList = $oReflect->getConstants();
-        if (!$prefix) {
-            return $constList;
+            \Tk\Log::warning('Class Not Found: ' . $class);
+            return array();
         }
         $retList = array();
-        foreach ($constList as $k => $v) {
-            if (substr($k, 0, strlen($prefix)) == $prefix) {
-                $retList[$k] = $v;
+        try {
+            $oReflect = new \ReflectionClass($class);
+            $constList = $oReflect->getConstants();
+            if (!$prefix) {
+                return $constList;
             }
+            foreach ($constList as $k => $v) {
+                if (substr($k, 0, strlen($prefix)) == $prefix) {
+                    $retList[$k] = $v;
+                }
+            }
+        } catch (\ReflectionException $e) {
+            \Tk\Log::warning($e->__toString());
         }
         return $retList;
     }

@@ -10,9 +10,9 @@ namespace Tk;
  */
 class Alert extends \Dom\Renderer\Renderer implements \Dom\Renderer\DisplayInterface
 {
-    /**
-     *
-     */
+    use \Tk\Dom\AttributesTrait;
+    use \Tk\Dom\CssTrait;
+
     const TYPE_WARNING = 'warning';
     const TYPE_SUCCESS = 'success';
     const TYPE_INFO = 'info';
@@ -85,7 +85,6 @@ class Alert extends \Dom\Renderer\Renderer implements \Dom\Renderer\DisplayInter
     }
 
 
-
     /**
      * add a message to display on next page load
      *
@@ -93,32 +92,54 @@ class Alert extends \Dom\Renderer\Renderer implements \Dom\Renderer\DisplayInter
      * @param string $title
      * @param string $type Use the constants \Mod\Alert::TYPE_INFO, etc
      * @param string $icon
+     * @return Alert
      */
     public static function add($message, $title = 'Warning', $type = '', $icon = '')
     {
-        $msg = self::create($message, $type, $title, $icon);
-        AlertCollection::getInstance()->messages[$type][] = $msg;
+        $alert = self::create($message, $type, $title, $icon);
+        AlertCollection::getInstance()->messages[$type][] = $alert;
         AlertCollection::getInstance()->session[AlertCollection::SID] = AlertCollection::getInstance()->messages;
+        return $alert;
     }
 
+    /**
+     * @param $message
+     * @param string $title
+     * @return Alert
+     */
     public static function addSuccess($message, $title = 'Success')
     {
-        self::add($message, $title, self::TYPE_SUCCESS, 'icon-ok-sign');
+        return self::add($message, $title, self::TYPE_SUCCESS, 'icon-ok-sign');
     }
 
+    /**
+     * @param $message
+     * @param string $title
+     * @return Alert
+     */
     public static function addWarning($message, $title = 'Warning')
     {
-        self::add($message, $title, self::TYPE_WARNING, 'icon-warning-sign');
+        return self::add($message, $title, self::TYPE_WARNING, 'icon-warning-sign');
     }
 
+    /**
+     * @param $message
+     * @param string $title
+     * @return Alert
+     */
     public static function addError($message, $title = 'Error')
     {
-        self::add($message, $title, self::TYPE_ERROR, 'icon-remove-sign');
+        return self::add($message, $title, self::TYPE_ERROR, 'icon-remove-sign');
     }
 
+    /**
+     * @param $message
+     * @param string $title
+     * @return Alert
+     */
     public static function addInfo($message, $title = 'Information')
     {
-        self::add($message, $title, self::TYPE_INFO, 'icon-exclamation-sign');
+        return self::add($message, $title, self::TYPE_INFO, 'icon-exclamation-sign');
     }
 
     /**
@@ -160,6 +181,9 @@ class Alert extends \Dom\Renderer\Renderer implements \Dom\Renderer\DisplayInter
             $template->addCss('icon', $this->icon);
             $template->setChoice('icon');
         }
+
+        $template->setAttr('alert', $this->getAttrList());
+        $template->addCss('alert', $this->getCssList());
 
         return $template;
     }

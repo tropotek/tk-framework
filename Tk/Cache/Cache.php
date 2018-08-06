@@ -8,7 +8,7 @@ namespace Tk\Cache;
  * <code>
  * <?php
  * // constructing our cache engine
- * $cache = new Tk\Cache(new Tk\Cache\Adapter\Filesystem());
+ * $cache = new \Tk\Cache(new \Tk\Cache\Adapter\Filesystem());
  *
  * function getUsers() {
  *   global $cache;
@@ -35,8 +35,6 @@ namespace Tk\Cache;
  * @author Michael Mifsud <info@tropotek.com>
  * @see http://www.tropotek.com/
  * @license Copyright 2015 Michael Mifsud
- * 
- * @todo Move this to its own lib ?????
  */
 class Cache
 {
@@ -60,6 +58,16 @@ class Cache
     public function __construct(Adapter\Iface $adapter)
     {
         $this->adapter = $adapter;
+    }
+
+    /**
+     * @param Adapter\Iface $adapter
+     * @return Cache
+     */
+    public static function create(Adapter\Iface $adapter)
+    {
+        $obj = new static($adapter);
+        return $obj;
     }
 
     /**
