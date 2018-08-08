@@ -248,25 +248,22 @@ class Config extends Collection
         if (is_file($this->getSrcPath() . '/config/config.php'))
             include($this->getSrcPath() . '/config/config.php');
 
-        // Could be handy for cli scripts using the \Tk\Uri
-        $host = '';
-        if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
-            $host = $_SERVER['HTTP_X_FORWARDED_HOST'];
-        } else if (isset($_SERVER['HTTP_HOST'])) {
-            $host = $_SERVER['HTTP_HOST'];
-        }
+
+        // Required for cli scripts when no hostname is available and using the \Tk\Uri
+        $host = $this->get('site.host');
         if ($host) {
+            // TODO: maybe we can assign specific pages that cache the hostname and ignored on others
             if (is_writable($this->getCachePath())) { // Cache host
-                file_put_contents($this->getCachePath().'/hostname', $host);
+                file_put_contents($this->getCachePath() . '/hostname', $host);
             }
         } else {    // Attempt to get the cached host
-            if (is_readable($this->getDataPath().'/hostname')) {    // Can be set manually
+            if (is_readable($this->getDataPath() . '/hostname')) {    // Can be set manually
                 $host = file_get_contents($this->getCachePath() . '/hostname');
-            } else if (is_readable($this->getCachePath().'/hostname')) {
+            } else if (is_readable($this->getCachePath() . '/hostname')) {
                 $host = file_get_contents($this->getCachePath() . '/hostname');
             }
+            $this->set('site.host', $host);
         }
-        $this->set('site.host', $host);
     }
 
     /**
