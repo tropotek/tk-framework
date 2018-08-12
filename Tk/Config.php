@@ -204,8 +204,12 @@ class Config extends Collection
                 $config['system.info.project'] = $composer->name;
             if (isset($composer->description))
                 $config['system.info.description'] = $composer->description;
-            if (isset($composer->version))
+            if (isset($composer->version)) {
                 $config['system.info.version'] = $composer->version;
+                if ($composer->version == 'master' && isset($composerObj->extra->{'branch-alias'}->{'dev-master'})) {
+                    $config['system.info.version'] = $composer->extra->{'branch-alias'}->{'dev-master'};
+                }
+            }
             if (isset($composer->license))
                 $config['system.info.licence'] = $composer->license;
             if (isset($composer->time))
@@ -244,25 +248,22 @@ class Config extends Collection
         if (is_file($this->getSrcPath() . '/config/config.php'))
             include($this->getSrcPath() . '/config/config.php');
 
-        // Could be handy for cli scripts using the \Tk\Uri
-        $host = '';
-        if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
-            $host = $_SERVER['HTTP_X_FORWARDED_HOST'];
-        } else if (isset($_SERVER['HTTP_HOST'])) {
-            $host = $_SERVER['HTTP_HOST'];
-        }
+
+        // Required for cli scripts when no hostname is available and using the \Tk\Uri
+        $host = $this->get('site.host');
         if ($host) {
+            // TODO: maybe we can assign specific pages that cache the hostname and ignored on others
             if (is_writable($this->getCachePath())) { // Cache host
-                file_put_contents($this->getCachePath().'/hostname', $host);
+                file_put_contents($this->getCachePath() . '/hostname', $host);
             }
         } else {    // Attempt to get the cached host
-            if (is_readable($this->getDataPath().'/hostname')) {    // Can be set manually
+            if (is_readable($this->getDataPath() . '/hostname')) {    // Can be set manually
                 $host = file_get_contents($this->getCachePath() . '/hostname');
-            } else if (is_readable($this->getCachePath().'/hostname')) {
+            } else if (is_readable($this->getCachePath() . '/hostname')) {
                 $host = file_get_contents($this->getCachePath() . '/hostname');
             }
+            $this->set('site.host', $host);
         }
-        $this->set('site.host', $host);
     }
 
     /**
@@ -591,7 +592,9 @@ class Config extends Collection
     {
         $path = $this->getSitePath() . rtrim($this->get('system.cache.path'), '/');
         if (!is_dir($path)) {
-            @mkdir($path, $this->getDirMask(), true);
+            if (!mkdir($path, $this->getDirMask(), true)) {
+                die('Error: Cannot create Cache directory.');
+            }
         }
         return $path;
     }
@@ -661,7 +664,7 @@ class Config extends Collection
         $path = $this->getSitePath() . rtrim($this->get('system.temp.path'), '/');
         if (!is_dir($path)) {
             if(!@mkdir($path, $this->getDirMask(), true)) {
-                error_log('Please change the permissions on your sites temp path: ' . $this->get('system.temp.path'));
+                dir('Error: Cannot create tmp directory.');
             }
         }
         return $path;
@@ -876,14 +879,14 @@ class Config extends Collection
      * @param string $xtplFile The mail template filename as found in the /html/xtpl/mail folder
      * @return \Tk\Mail\CurlyMessage
      */
-    public function createMessage($xtplFile = 'default')
+    public function createMessage($xtplFile = 'mail.default')
     {
         $config = self::getInstance();
         $request = $config->getRequest();
 
         $template = '{content}';
         $xtplFile = str_replace(array('./', '../'), '', strip_tags(trim($xtplFile)));
-        $xtplFile = $config->get('template.xtpl.path') . '/mail/' . $xtplFile . $config->get('template.xtpl.ext');
+        $xtplFile = $config->getSitePath() . $config->get('template.xtpl.path') . '/mail/' . $xtplFile . $config->get('template.xtpl.ext');
         if (is_file($xtplFile)) {
             $template = file_get_contents($xtplFile);
             if (!$template) {

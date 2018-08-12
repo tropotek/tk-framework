@@ -122,7 +122,6 @@ class CurlyTemplate
     public function __construct($template)
     {
         $this->template = $template;
-
     }
 
 

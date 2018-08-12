@@ -12,6 +12,15 @@ class Apc implements Iface
 {
 
     /**
+     * @return Apc
+     */
+    public static function create()
+    {
+        $obj = new static();
+        return $obj;
+    }
+
+    /**
      * Fetch
      *
      * @param string $key
