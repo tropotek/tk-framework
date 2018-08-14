@@ -1,5 +1,9 @@
 #CHANGELOG#
 
+Ver 2.0.74 [2018-08-15]:
+-------------------------------
+
+
 Ver 2.0.72 [2018-08-13]:
 -------------------------------
   - Merge branch 'master' of https://github.com/tropotek/tk-framework
