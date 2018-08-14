@@ -878,6 +878,7 @@ class Config extends Collection
     /**
      * @param string $xtplFile The mail template filename as found in the /html/xtpl/mail folder
      * @return \Tk\Mail\CurlyMessage
+     * @TODO: Should this be a direct filepath so we can create a message with any template?
      */
     public function createMessage($xtplFile = 'mail.default')
     {
