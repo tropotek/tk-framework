@@ -127,7 +127,7 @@ class Config extends Collection
     /**
      * Get an instance of this object
      *
-     * @return Config\static
+     * @return Config|static
      */
     public static function getInstance()
     {
