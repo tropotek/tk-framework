@@ -888,7 +888,6 @@ class Config extends Collection
         $template = '{content}';
         $xtplFile = str_replace(array('./', '../'), '', strip_tags(trim($xtplFile)));
         $xtplFile = $config->getSitePath() . $config->get('template.xtpl.path') . '/mail/' . $xtplFile . $config->get('template.xtpl.ext');
-        vd($xtplFile);
         if (is_file($xtplFile)) {
             $template = file_get_contents($xtplFile);
             if (!$template) {
