@@ -189,13 +189,13 @@ class Config extends Collection
 
 
         // Site information
-        $config['system.info.project']      = 'untitledSite';
+        $config['system.info.project']      = 'untitled';
         $config['system.info.description']  = '';
-        $config['system.info.version']      = '0.0';
-        $config['system.info.licence']      = '';
-        $config['system.info.released']     = '';
-        $config['system.info.authors']      = '';
-        $config['system.info.stability']    = '';
+        $config['system.info.version']      = '1.0';
+        $config['system.info.licence']      = 'PGP';
+        $config['system.info.released']     = \Tk\Date::create()->format(\Tk\Date::FORMAT_ISO_DATE);
+        $config['system.info.authors']      = 'www.tropotek.com';
+        $config['system.info.stability']    = 'dev';
 
 
         if (is_file($config->getSitePath() . '/composer.json')) {
@@ -206,7 +206,7 @@ class Config extends Collection
                 $config['system.info.description'] = $composer->description;
             if (isset($composer->version)) {
                 $config['system.info.version'] = $composer->version;
-                if ($composer->version == 'master' && isset($composerObj->extra->{'branch-alias'}->{'dev-master'})) {
+                if ($composer->version == 'master' && isset($composer->extra->{'branch-alias'}->{'dev-master'})) {
                     $config['system.info.version'] = $composer->extra->{'branch-alias'}->{'dev-master'};
                 }
             }
@@ -374,6 +374,17 @@ class Config extends Collection
         return $this->get('cookie');
     }
 
+    /**
+     * @return string
+     */
+    public function getVersion()
+    {
+        $v = '1.0';
+        if ($this->get('system.info.version')) {
+            $v = $this->get('system.info.version');
+        }
+        return $v;
+    }
 
     /**
      * Set the system timezone:
