@@ -171,7 +171,7 @@ class CurlyTemplate
     {
         if (!is_array($data)) return $str;
         foreach($data as $k => $v) {
-            if (is_callable($v)) {
+            if (!is_string($v) && is_callable($v)) {
                 $v = call_user_func_array($v, array($this));
                 if (!is_string($v)) throw new \Tk\Exception('Invalid return type. Function must return a string.');
             }
