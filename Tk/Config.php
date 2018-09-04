@@ -106,34 +106,43 @@ class Config extends Collection
 
     /**
      * Construct the config object and initiate default settings
+     * @param null|string $siteUrl
+     * @param null|string $sitePath
      */
-    public function __construct()
+    public function __construct($siteUrl = null, $sitePath = null)
     {
         parent::__construct();
+        if ($siteUrl !== null)
+            $this->set('site.url', $siteUrl);
+        if ($sitePath !== null)
+            $this->set('site.path', $sitePath);
         $this->init();
     }
 
     /**
      * Create an instance of this object
      *
+     * @param null|string $siteUrl
+     * @param null|string $sitePath
      * @return Config|static
      * @deprecated Do not think we need this now we have changed the path params
      */
-    public static function create()
+    public static function create($siteUrl = null, $sitePath = null)
     {
-        return self::getInstance();
+        return self::getInstance($siteUrl, $sitePath);
     }
 
     /**
      * Get an instance of this object
      *
+     * @param null|string $siteUrl
+     * @param null|string $sitePath
      * @return Config|static
      */
-    public static function getInstance()
+    public static function getInstance($siteUrl = null, $sitePath = null)
     {
         if (self::$instance == null) {
-            self::$instance = new static();
-            // Load any site config files
+            self::$instance = new static($siteUrl, $sitePath);
             self::$instance->loadConfig();
         }
         return self::$instance;
@@ -230,6 +239,46 @@ class Config extends Collection
     }
 
     /**
+     * This function tries to automatically determine the project path, url and host
+     */
+    protected function initDefaultPaths()
+    {
+        if (!$this->has('site.path')) {
+            $sitePath = dirname(dirname(dirname(dirname(dirname(__FILE__)))));
+            $sitePath = rtrim($sitePath, '/');
+            $this->set('site.path', $sitePath);
+        }
+
+        if (!$this->has('site.url')) {
+            $siteUrl = '/';
+            // $_SERVER['SCRIPT_NAME']
+            // $_SERVER['SCRIPT_FILENAME']
+            if (isset($_SERVER['PHP_SELF']) && !isset($_SERVER['argv']) && !$_SERVER['PHP_SELF'][0] != '.') {
+                $siteUrl = dirname($_SERVER['PHP_SELF']);
+            } else {
+                $htaccessFile = $this->getSitePath() . '/.htaccess';
+                if (@is_readable($htaccessFile)) {
+                    $htaccess = file_get_contents($htaccessFile);
+                    if ($htaccess && preg_match('/\s*RewriteBase (\/.*)\s+/i', $htaccess, $regs)) {
+                        $siteUrl = $regs[1];
+                    }
+                }
+            }
+            $siteUrl = rtrim($siteUrl, '/');
+            $this->set('site.url', $siteUrl);
+        }
+        \Tk\Uri::$BASE_URL_PATH = $this->get('site.url');
+
+        $host = '';
+        if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
+            $host = $_SERVER['HTTP_X_FORWARDED_HOST'];
+        } else if (isset($_SERVER['HTTP_HOST'])) {
+            $host = $_SERVER['HTTP_HOST'];
+        }
+        $this->set('site.host', $host);
+    }
+
+    /**
      * Load the site route config files
      */
     public function loadConfig()
@@ -282,42 +331,6 @@ class Config extends Collection
         // Site Files
         if (is_file($this->getSrcPath() . '/config/routes.php'))
             include($this->getSrcPath() . '/config/routes.php');
-    }
-
-    /**
-     * This function tries to automatically determine the project path, url and host
-     */
-    protected function initDefaultPaths()
-    {
-        $sitePath = dirname(dirname(dirname(dirname(dirname(__FILE__)))));
-        $sitePath = rtrim($sitePath, '/');
-        $this->set('site.path', $sitePath);
-
-        $siteUrl = '/';
-        // $_SERVER['SCRIPT_NAME']
-        // $_SERVER['SCRIPT_FILENAME']
-        if (isset($_SERVER['PHP_SELF']) && !isset($_SERVER['argv']) && !$_SERVER['PHP_SELF'][0] != '.') {
-            $siteUrl = dirname($_SERVER['PHP_SELF']);
-        } else {
-            $htaccessFile = $this->getSitePath().'/.htaccess';
-            if (@is_readable($htaccessFile)) {
-                $htaccess = file_get_contents($htaccessFile);
-                if ($htaccess && preg_match('/\s*RewriteBase (\/.*)\s+/i', $htaccess, $regs)) {
-                    $siteUrl = $regs[1];
-                }
-            }
-        }
-        $siteUrl = rtrim($siteUrl, '/');
-        $this->set('site.url', $siteUrl);
-        \Tk\Uri::$BASE_URL_PATH = $siteUrl;
-
-        $host = '';
-        if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
-            $host = $_SERVER['HTTP_X_FORWARDED_HOST'];
-        } else if (isset($_SERVER['HTTP_HOST'])) {
-            $host = $_SERVER['HTTP_HOST'];
-        }
-        $this->set('site.host', $host);
     }
 
     /**
