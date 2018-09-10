@@ -303,13 +303,13 @@ class Config extends Collection
         if ($host) {
             // TODO: maybe we can assign specific pages that cache the hostname and ignored on others
             if (is_writable($this->getCachePath())) { // Cache host
-                file_put_contents($this->getCachePath() . '/hostname', $host);
+                @file_put_contents($this->getCachePath() . '/hostname', $host);
             }
         } else {    // Attempt to get the cached host
-            if (is_file($this->getDataPath() . '/hostname') && is_readable($this->getDataPath() . '/hostname')) {    // Can be set manually
-                $host = file_get_contents($this->getDataPath() . '/hostname');
+            if (@is_readable($this->getDataPath() . '/hostname')) {    // Can be set manually
+                $host = @file_get_contents($this->getDataPath() . '/hostname');
             } else if (is_file($this->getCachePath() . '/hostname') && is_readable($this->getCachePath() . '/hostname')) {
-                $host = file_get_contents($this->getCachePath() . '/hostname');
+                $host = @file_get_contents($this->getCachePath() . '/hostname');
             }
             $this->set('site.host', $host);
         }
