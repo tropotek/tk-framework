@@ -120,19 +120,6 @@ class Config extends Collection
     }
 
     /**
-     * Create an instance of this object
-     *
-     * @param null|string $siteUrl
-     * @param null|string $sitePath
-     * @return Config|static
-     * @deprecated Do not think we need this now we have changed the path params
-     */
-    public static function create($siteUrl = null, $sitePath = null)
-    {
-        return self::getInstance($siteUrl, $sitePath);
-    }
-
-    /**
      * Get an instance of this object
      *
      * @param null|string $siteUrl
