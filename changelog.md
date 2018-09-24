@@ -1,5 +1,9 @@
 #CHANGELOG#
 
+Ver 2.0.94 [2018-09-24]:
+-------------------------------
+
+
 Ver 2.0.92 [2018-09-11]:
 -------------------------------
   - Fixed Historic placement sending email issue
