@@ -333,7 +333,7 @@ class Date
     }
 
     /**
-     * Checks if the date value is greater than the value of another instance of date.
+     * Checks if the $from Date is greater than the $to Date
      *
      * @param \DateTime $from
      * @param \DateTime $to
