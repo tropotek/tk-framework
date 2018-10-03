@@ -841,6 +841,25 @@ class Config extends Collection
     }
 
     /**
+     * Check if the user requested a cache refresh using Ctrl+Shif+R
+     * 
+     * @return bool
+     */
+    public function isRefreshCacheRequest()
+    {
+        $is = false;
+        if (function_exists('apache_request_headers')) {
+            $headers = apache_request_headers();
+            if (isset($headers['Pragma']) && $headers['Pragma'] == 'no-cache')
+                $is = true;
+            if (isset($headers['Cache-Control']) && $headers['Cache-Control'] == 'no-cache')
+                $is = true;
+        }
+        return $is;
+    }
+
+
+    /**
      * Create a random password
      *
      * @param int $length
