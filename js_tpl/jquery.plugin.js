@@ -11,6 +11,8 @@
 
 /**
  * TODO: Change every instance of "pluginName" to the name of your plugin!
+ * Description:
+ *   {Add a good description so you can identify the plugin when reading the code.}
  *
  * <code>
  *   $(document).ready(function() {
