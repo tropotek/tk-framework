@@ -48,6 +48,7 @@ class Money implements \Serializable
      */
     static function create($amount = 0, $currency = null)
     {
+        if ($amount instanceof Money) return $amount;
         return new static($amount, $currency);
     }
 
