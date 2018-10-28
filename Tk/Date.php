@@ -221,15 +221,22 @@ class Date
     static function getFinancialYear(\DateTime $date = null)
     {
         if (!$date) $date = self::create();
-        $month = intval($date->format('n'), 10);
-        $startYear = intval($date->format('Y'), 10);
-        $endYear = $startYear + 1;
-        if ($month < 7) {
-            $startYear = $startYear - 1;
-            $endYear = $startYear;
+        $start = new \DateTime($date->format('Y').'-07-01 00:00:00', $date->getTimezone());
+        $startYear = (int)$date->format('Y');
+        if ($date < $start) {
+            $startYear = $startYear-1;
         }
-        $start = new \DateTime($startYear.'-07-01 00:00:00', $date->getTimezone());
-        $end = new \DateTime($endYear.'-06-30 23:59:59', $date->getTimezone());
+        $end = new \DateTime(($startYear+1).'-06-30 23:59:59', $date->getTimezone());
+
+//        $month = (int)$date->format('n');
+//        $startYear = intval($date->format('Y'), 10);
+//        $endYear = $startYear + 1;
+//        if ($month < 7) {
+//            $startYear = $startYear - 1;
+//            $endYear = $startYear;
+//        }
+//        $start = new \DateTime($startYear.'-07-01 00:00:00', $date->getTimezone());
+//        $end = new \DateTime($endYear.'-06-30 23:59:59', $date->getTimezone());
         
         return array($start, $end);
     }
