@@ -878,6 +878,23 @@ class Config extends Collection
     }
 
     /**
+     * Hash a string using the system config set algorithm
+     *
+     * @param string $str
+     * @param string $salt (optional)
+     * @param string $algo Name of selected hashing algorithm (i.e. "md5", "sha256", "haval160,4", etc..)
+     * @return string
+     * @link http://php.net/manual/en/function.hash.php
+     */
+    public function hash($str, $salt = '', $algo = 'md5')
+    {
+        if ($salt) $str .= $salt;
+        if ($this->get('hash.function'))
+            $algo = $this->get('hash.function');
+        return hash($algo, $str);
+    }
+
+    /**
      * Return the back URI if available, otherwise it will return the home URI
      *
      * @return Uri
