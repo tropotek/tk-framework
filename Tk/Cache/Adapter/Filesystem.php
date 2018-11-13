@@ -53,9 +53,9 @@ class Filesystem implements Iface
      */
     public function store($key, $data, $ttl = 0)
     {
-        if (!is_dir($this->cachePath)) {
-            if (!mkdir($this->cachePath, \Tk\Config::getInstance()->getDirMask(), true)) {
-                \Tk\Log::error('Cannot create path: ' . $this->cachePath);
+        if (!is_dir($this->getCachePath())) {
+            if (!mkdir($this->getCachePath(), \Tk\Config::getInstance()->getDirMask(), true)) {
+                \Tk\Log::error('Cannot create path: ' . $this->getCachePath());
             }
         }
         // Opening the file in read/write mode
@@ -136,7 +136,7 @@ class Filesystem implements Iface
      */
     public function clear()
     {
-        return \Tk\File::rmdir($this->cachePath);
+        return \Tk\File::rmdir($this->getCachePath());
     }
 
     /**
@@ -147,7 +147,9 @@ class Filesystem implements Iface
      */
     private function getFileName($key)
     {
-        return $this->cachePath . '/s_cache-' . md5($key);
+        //return $this->getCachePath() . '/s_cache-' . md5($key);
+        //return $this->getCachePath() . '/' . $key . '.cache';
+        return $this->getCachePath() . '/' . $key;
     }
 
     /**

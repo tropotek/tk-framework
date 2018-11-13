@@ -19,6 +19,8 @@ class Math
     {
         sort($arr);
         $count = count($arr); //total numbers in array
+        if ($count && $count < 2) return $arr[0];
+        if (!$count) return 0;
         $middleval = floor(($count-1)/2); // find the middle value, or the lowest middle value
         if($count % 2) { // odd number, middle is the median
             $median = $arr[$middleval];
