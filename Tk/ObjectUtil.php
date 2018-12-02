@@ -36,7 +36,6 @@ class ObjectUtil
             $reflect = new \ReflectionClass($object);
             return $reflect->hasProperty($name);
         } catch (\Exception $e) {}
-
         return false;
     }
 
@@ -88,18 +87,19 @@ class ObjectUtil
         try {
             $reflect = new \ReflectionClass($object);
             $property = $reflect->getProperty($name);
+
             if ($property) {
                 $property->setAccessible(true);
                 $property->setValue($object, $value);
+            } else {
+                \Tk\Log::warning('TODO: Do we set an objects props here???');
             }
         } catch (\ReflectionException $e) {
             \Tk\Log::warning($e->__toString());
         }
-
         return $value;
     }
 
-    
     /**
      * Take a class in the form of Tk_Some_Class
      * And convert it to a class like \Tk\Some\Class
@@ -189,7 +189,6 @@ class ObjectUtil
         try {
             $rc = new \ReflectionClass($class);
             $path = $rc->getFileName();
-
             if (strpos($path, $sitePath) === 0) {
                 return str_replace($sitePath, '' , $path);
             }
