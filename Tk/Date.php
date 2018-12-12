@@ -138,9 +138,13 @@ class Date
         if (preg_match('/^[0-9]{1,11}$/', $time)) {
             $time = '@'.$time;
         }
-        
-        $date = new \DateTime($time, $timezone);
-        //$date->setTimezone($timezone);
+
+        try {
+            $date = new \DateTime($time, $timezone);
+            //$date->setTimezone($timezone);
+        } catch (\Exception $e) {
+            \Tk\Log::error($e->getMessage());
+        }
         return $date;
     }
 
@@ -148,8 +152,8 @@ class Date
      * Create a date from a string returned from the self::$formFormat string
      *
      * @param string $dateStr
-     * @param null $timezone
      * @param null|string $format
+     * @param null $timezone
      * @return \DateTime
      */
     static function createFormDate($dateStr, $timezone = null, $format = null)
