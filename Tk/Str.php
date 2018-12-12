@@ -48,6 +48,22 @@ class Str
     }
 
     /**
+     * prepend each line with an index number
+     *
+     * @param $str
+     * @return string
+     */
+    public static function lineNumbers($str)
+    {
+        $lines = explode("\n", $str);
+        foreach ($lines as $i => $line) {
+            $lines[$i] = ($i+1) . '  ' . $line;
+        }
+        return implode("\n", $lines);
+    }
+
+
+    /**
      * Return the string with the first character lowercase
      * 
      * @param $str
