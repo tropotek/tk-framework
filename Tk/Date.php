@@ -286,6 +286,30 @@ class Date
         return new \DateTime($date->format('Y-m-'.$lastDay.' 23:59:59'), $date->getTimezone());
     }
 
+
+    /**
+     * Get the first day of this dates month
+     *
+     * @param \DateTime $date
+     * @return \DateTime
+     */
+    static function getYearStart(\DateTime $date = null)
+    {
+        if (!$date) $date = self::create();
+        return new \DateTime($date->format('Y-01-01 00:00:00'), $date->getTimezone());
+    }
+
+    /**
+     * Get the last day of this dates month
+     *
+     * @param \DateTime $date
+     * @return \DateTime
+     */
+    static function getYearEnd(\DateTime $date = null)
+    {
+        if (!$date) $date = self::create();
+        return new \DateTime($date->format('Y-12-31 23:59:59'), $date->getTimezone());
+    }
     
     
     
