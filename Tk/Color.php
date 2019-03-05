@@ -468,6 +468,14 @@ class Color
         );
 
     }
+
+    /**
+     * @param float $hue
+     * @param float $saturation
+     * @param float $luminosity
+     * @return array
+     * @deprecated use hsl2Rgb()
+     */
     public static function _hsl2Rgb($hue = 0.0, $saturation = 0.0, $luminosity = 0.0)
     {
         $hue /= 60;
