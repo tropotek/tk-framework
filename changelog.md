@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 2.0.118 [2019-04-18]:
+-------------------------------
+  - Added new Diff field to the Change Request Form
+
+
 Ver 2.0.116 [2019-03-06]:
 -------------------------------
 
