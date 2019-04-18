@@ -142,10 +142,10 @@ class Date
         try {
             $date = new \DateTime($time, $timezone);
             //$date->setTimezone($timezone);
+            return $date;
         } catch (\Exception $e) {
             \Tk\Log::error($e->getMessage());
         }
-        return $date;
     }
 
     /**
