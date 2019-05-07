@@ -25,6 +25,9 @@
         "files":  [
             "Tk/Exception.php",
             "functions/varDump.php"
+        ],
+        "exclude-from-classmap": [
+            "/tests/"
         ]
     },
     "require":  {
