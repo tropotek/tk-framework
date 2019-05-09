@@ -1,7 +1,6 @@
 # Tk Framework 
 
-__Project:__ [ttek/tk-framework](http://packagist.org/packages/ttek/tk-framework)  
-__Published:__ 01 Nov 2015
+__Project:__ [ttek/tk-framework](http://packagist.org/packages/ttek/tk-framework)
 __Web:__ <http://www.tropotek.com/>  
 __Authors:__ Michael Mifsud <http://www.tropotek.com/>  
   
@@ -25,7 +24,7 @@ composer require ttek/tk-framework
 Or add the following to your composer.json file:
 
 ```json
-"ttek/tk-framework": "~2.0"
+"ttek/tk-framework": "~3.0"
 ```
 
 If you do not use Composer, you can grab the code from GitHub, and use any
