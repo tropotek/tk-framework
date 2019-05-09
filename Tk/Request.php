@@ -53,10 +53,10 @@ class Request extends \Symfony\Component\HttpFoundation\Request
 //    }
 
 
-    public function get($key, $default = null)
-    {
-        parent::get($key, $default);
-    }
+//    public function get($key, $default = null)
+//    {
+//        return parent::get($key, $default);
+//    }
 
     /**
      * @return Uri
