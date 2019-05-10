@@ -946,7 +946,7 @@ class Config extends Collection
         $message = \Tk\Mail\CurlyMessage::create($template);
         $message->setFrom($config->get('site.email'));
 
-        if ($request->getUri())
+        if ($request->getTkUri())
             $message->set('_uri', \Tk\Uri::create('')->toString());
         if ($request->getReferer())
             $message->set('_referer', $request->getReferer()->toString());
