@@ -145,7 +145,7 @@ class Request extends \Symfony\Component\HttpFoundation\Request
      */
     public function getUploadedFile($name)
     {
-        $this->files->get($name);
+        return $this->files->get($name);
     }
     
     
