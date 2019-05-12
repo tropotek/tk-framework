@@ -1,7 +1,7 @@
 {
     "name": "ttek/tk-framework",
     "type": "library",
-    "description": "Tropotek Framework V2",
+    "description": "Tropotek Framework",
     "keywords":  ["Tk", "framework", "tropotek"],
     "time": "2019-04-09",
     "license": "MIT",
