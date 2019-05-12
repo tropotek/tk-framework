@@ -1,7 +1,6 @@
 # Tk Framework 
 
 __Project:__ [ttek/tk-framework](http://packagist.org/packages/ttek/tk-framework)  
-__Published:__ 01 Nov 2015
 __Web:__ <http://www.tropotek.com/>  
 __Authors:__ Michael Mifsud <http://www.tropotek.com/>  
   
