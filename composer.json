@@ -8,9 +8,9 @@
         "tropotek"
     ],
     "homepage": "http://www.tropotek.com/",
-    "time": "2019-05-12",
+    "time": "2018-07-19",
     "license": "MIT",
-    "version": "2.0.120",
+    "version": "2.0.50",
     "authors":  [
          {
             "name": "Michael Mifsud",
@@ -26,7 +26,7 @@
             "Tk/Exception.php",
             "functions/varDump.php"
         ],
-        "exclude-from-classmap":  [
+        "exclude-from-classmap": [
             "/tests/"
         ]
     },
