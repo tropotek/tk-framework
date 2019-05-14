@@ -30,7 +30,7 @@
         "monolog/monolog": "^1.0",
         "ttek/tk-installers": "~3.0",
 
-        "symfony/http-foundation": "^4.2"
+        "symfony/http-foundation": "~4.0"
     },
     "extra":  {
         "branch-alias":  {
