@@ -157,6 +157,7 @@ class Request extends \Symfony\Component\HttpFoundation\Request
      * REQUIRED to originate from $_SERVER.
      *
      * @return array
+     * @deprecated Use $this->server->all()
      */
     public function getServerParams()
     {
@@ -167,6 +168,7 @@ class Request extends \Symfony\Component\HttpFoundation\Request
      * @param $name
      * @param null $default
      * @return null
+     * @deprecated Use $this->server->get($name)
      */
     public function getServerParam($name, $default = null)
     {
@@ -183,6 +185,7 @@ class Request extends \Symfony\Component\HttpFoundation\Request
      * will be application and request specific, and CAN be mutable.
      *
      * @return array Attributes derived from the request.
+     * @deprecated Use $this->attributes->all()
      */
     public function getAttributes()
     {
@@ -203,6 +206,7 @@ class Request extends \Symfony\Component\HttpFoundation\Request
      * @param string $name The attribute name.
      * @param mixed $default Default value to return if the attribute does not exist.
      * @return mixed
+     * @deprecated Use $this->attributes->get($name)
      */
     public function getAttribute($name, $default = null)
     {
@@ -215,6 +219,7 @@ class Request extends \Symfony\Component\HttpFoundation\Request
      * @param $name
      * @param $value
      * @return $this
+     * @deprecated Use $this->attributes->set($name, $value)
      */
     public function setAttribute($name, $value) 
     {
@@ -227,6 +232,7 @@ class Request extends \Symfony\Component\HttpFoundation\Request
      * 
      * @param $name
      * @return $this
+     * @deprecated Use $this->attributes->remove($name)
      */
     public function removeAttribute($name)
     {
@@ -239,6 +245,7 @@ class Request extends \Symfony\Component\HttpFoundation\Request
      * 
      * @param $name
      * @return bool
+     * @deprecated Use $this->attributes->has($name)
      */
     public function hasAttribute($name)
     {
@@ -250,6 +257,7 @@ class Request extends \Symfony\Component\HttpFoundation\Request
      *
      * @param array $items Key-value array of data to append to this collection
      * @return Request
+     * @deprecated Use $this->attributes->replace($items)
      */
     public function replaceAttribute(array $items)
     {
@@ -262,6 +270,7 @@ class Request extends \Symfony\Component\HttpFoundation\Request
      * Get the client IP address.
      *
      * @return string|null IP address or null if none found.
+     * @deprecated Use $this->attributes->getClientIp()
      */
     public function getIp()
     {
@@ -330,10 +339,11 @@ class Request extends \Symfony\Component\HttpFoundation\Request
      * Get collection iterator
      *
      * @return \ArrayIterator
+     * @deprecated Use appropriate request parameter
      */
     public function getIterator()
     {
-        return new \ArrayIterator($this->request);
+        return new \ArrayIterator($this->request->all());
     }
     
 }
