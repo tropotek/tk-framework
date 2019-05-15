@@ -32,6 +32,9 @@
 
         "symfony/http-foundation": "^4.2.0"
     },
+    "require-dev":  {
+        "symfony/http-foundation": "4.2-dev"
+    },
     "extra":  {
         "branch-alias":  {
             "dev-master": "3.0.x-dev"
