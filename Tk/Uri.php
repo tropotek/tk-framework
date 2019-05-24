@@ -748,13 +748,26 @@ class Uri implements \Serializable, \IteratorAggregate
     }
 
     /**
-     * Return a string representation of this object
+     * Return a string representation of this object without the dev path
      *
      * @param bool $showHost
      * @param bool $showScheme
      * @return string
      */
-    public function toString($showHost = true, $showScheme = true)
+    public function toRelativeString($showHost = true, $showScheme = true)
+    {
+        return $this->toString($showHost, $showScheme, true);
+    }
+
+    /**
+     * Return a string representation of this object
+     *
+     * @param bool $showHost
+     * @param bool $showScheme
+     * @param bool $relativePath
+     * @return string
+     */
+    public function toString($showHost = true, $showScheme = true, $relativePath = false)
     {
         if (!$this->isUrl()) {
             return $this->spec;
@@ -771,7 +784,10 @@ class Uri implements \Serializable, \IteratorAggregate
             $uri .= $this->getAuthority();
         }
         if ($this->getPath() != '') {
-            $uri .= $this->getPath();
+            if ($relativePath)
+                $uri .= $this->getRelativePath();
+            else
+                $uri .= $this->getPath();
         }
         $query = $this->getQuery();
         if ($query != '') {
