@@ -198,6 +198,15 @@ class Str
     }
 
     /**
+     * @param string $str
+     * @return string|string[]|null
+     */
+    public static function stripEntities($str)
+    {
+        return preg_replace('/&#?[a-z0-9]+;/i','', $str);
+    }
+
+    /**
      * Convert html special characters to nemeric entities (eg: &nbsp; to &#160;)
      * Usefull for XML encoding strings
      *
