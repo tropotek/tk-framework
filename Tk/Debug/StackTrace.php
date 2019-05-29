@@ -89,4 +89,29 @@ class StackTrace {
         return trim($str);
     }
 
+    /**
+     * @param int $dumpLine
+     * @param bool $showClass
+     * @param bool $showFunction
+     * @return string
+     */
+    public static function dumpLine($dumpLine = 1, $showClass = false, $showFunction = false)
+    {
+        $line = debug_backtrace();
+        $line = $line[$dumpLine];
+
+        $class = '';
+        if ($showClass && !empty($line['object'])) {
+            $class = ': ' . get_class($line['object']);
+        }
+
+        if ($showFunction && !empty($line['function'])) {
+            $class .= '::' . $line['function'] . '()';
+
+        }
+
+        $path = str_replace(\Tk\Config::getInstance()->getSitePath(), '', $line['file']);
+        $str  = sprintf('%s [%s]%s', $path, $line['line'], $class);
+        return $str;
+    }
 }
