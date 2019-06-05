@@ -40,8 +40,10 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
         if ($items instanceof Collection) {
             $items = $items->all();
         }
-        foreach ($items as $key => $value) {
-            $this->set($key, $value);
+        if (is_array($items)) {
+            foreach ($items as $key => $value) {
+                $this->set($key, $value);
+            }
         }
         return $this;
     }
