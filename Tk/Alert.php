@@ -166,7 +166,7 @@ class Alert extends \Dom\Renderer\Renderer implements \Dom\Renderer\DisplayInter
 
         if ($this->title) {
             $template->insertText('title', htmlentities($this->title));
-            $template->setChoice('title');
+            $template->setVisible('title');
         }
 
         try {
@@ -179,7 +179,7 @@ class Alert extends \Dom\Renderer\Renderer implements \Dom\Renderer\DisplayInter
         $template->setAttr('alert', 'data-type', $this->type);
         if ($this->icon) {
             $template->addCss('icon', $this->icon);
-            $template->setChoice('icon');
+            $template->setVisible('icon');
         }
 
         $template->setAttr('alert', $this->getAttrList());
