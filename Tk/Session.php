@@ -78,7 +78,7 @@ class Session implements \ArrayAccess
         $this->params = $params;
         
         if (!$request)
-            $request = Request::create();
+            $request = Request::createFromGlobals();
         if (!$cookie)
             $cookie = new Cookie();
 

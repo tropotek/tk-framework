@@ -3,6 +3,8 @@ namespace Tk;
 
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
+
+
 /**
  * This is a rewritten Request object with the PSR7 interfaces taken into consideration,
  * However you will need to extend these objects to make them completely PSR7 compatible.
@@ -347,3 +349,10 @@ class Request extends \Symfony\Component\HttpFoundation\Request
     }
     
 }
+
+/**
+ * @todo Romvce this oneday when the request is completly symfony compatible.
+ */
+\Tk\Request::setFactory(function (array $query = [], array $request = [], array $attributes = [], array $cookies = [], array $files = [], array $server = [], $content = null) {
+    return new \Tk\Request($query, array_merge($query, $request), $attributes, $cookies, $files, $server, $content);
+});
