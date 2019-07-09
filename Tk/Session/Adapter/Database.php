@@ -20,7 +20,7 @@ namespace Tk\Session\Adapter;
  */
 class Database implements Iface
 {
-    static $DB_TABLE = 'sys_session';
+    static $DB_TABLE = '_session';
 
     /**
      * @var \Tk\Db\Pdo
