@@ -359,4 +359,19 @@ class File
         @ksort($s);
         return $s;
     }
+
+    /**
+     * Remove all spaces and special chars from a file/path name
+     *
+     * Warning: Do not send full paths only the folder or filename in question
+     *
+     * @param string $filename
+     * @return string
+     */
+    public function cleanFilename($filename)
+    {
+        $filename = basename($filename);
+        $filename = preg_replace('^([^a-zA-Z0-9_-]+)$', '_', trim($filename));
+        return $filename;
+    }
 }
