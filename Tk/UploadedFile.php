@@ -7,7 +7,7 @@ namespace Tk;
  * @see http://www.tropotek.com/
  * @license Copyright 2016 Michael Mifsud
  * @notes Adapted from http://git.snooey.net/Mirrors/php-slim/
- * @deprecated Use the request from symfony
+ * @deprecated Use the request from symfony \Symfony\Component\HttpFoundation\File\UploadedFile
  */
 class UploadedFile
 {

@@ -368,10 +368,10 @@ class File
      * @param string $filename
      * @return string
      */
-    public function cleanFilename($filename)
+    public static function cleanFilename($filename)
     {
         $filename = basename($filename);
-        $filename = preg_replace('^([^a-zA-Z0-9_-]+)$', '_', trim($filename));
+        $filename = preg_replace('/^([^a-zA-Z0-9_-]+)$/', '_', trim($filename));
         return $filename;
     }
 }
