@@ -371,7 +371,7 @@ class File
     public static function cleanFilename($filename)
     {
         $filename = basename($filename);
-        $filename = preg_replace('/^([^a-zA-Z0-9\s_-]+)$/', '_', trim($filename));
+        $filename = preg_replace('/^([^a-zA-Z0-9\s-]+)$/', '_', $filename);
         return $filename;
     }
 }
