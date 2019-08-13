@@ -1,11 +1,8 @@
 <?php
 namespace Tk;
 
-use Tk\Exception;
 
 /**
- * Class Image
- *
  * @author Michael Mifsud <info@tropotek.com>
  * @see http://www.tropotek.com/
  * @license Copyright 2016 Michael Mifsud
@@ -29,7 +26,7 @@ class Image
     private $currentMem = '16M';
 
     /**
-     * @var null
+     * @var null|resource
      */
     private $image = null;
     
@@ -88,6 +85,36 @@ class Image
     }
 
     /**
+     * @param int $width
+     * @param int $height
+     * @param null|\Tk\Color $bgcolour
+     * @return Image
+     * @throws Exception
+     */
+    static function createBlankPng($width = 256, $height = 256, $bgcolour = null)
+    {
+        $obj = new static();
+        $obj->image = imagecreatetruecolor($width, $height);
+        imagealphablending($obj->image, false);
+        imagesavealpha($obj->image, true);
+        $transparent = imagecolorallocatealpha($obj->image, 0, 0, 0, 127);
+        imagefill($obj->image, 0, 0, $transparent);
+        if ($bgcolour) {
+            $c = imagecolorallocate($obj->image, $bgcolour->getRed(), $bgcolour->getGreen(), $bgcolour->getBlue());
+            imagefill($obj->image, 0, 0, $c);
+        }
+
+        $obj->originalInfo = array(
+            'width' => $width,
+            'height' => $height,
+            'orientation' => $obj->getOrientation(),
+            'format' => 'png',
+            'mime' => 'image/png'
+        );
+        return $obj;
+    }
+
+    /**
      * Load an image
      *
      * @param string $filename the image to be loaded (required)
@@ -115,6 +142,8 @@ class Image
                 break;
             case 'image/png':
                 $this->image = imagecreatefrompng($this->filename);
+//                imagealphablending($this->image, false);
+                imagesavealpha($this->image, true);
                 break;
             default:
                 throw new Exception('Invalid image: ' . $this->filename);
@@ -150,9 +179,12 @@ class Image
         if (!$filename)
             $filename = $this->filename;
         // Determine format via file extension (fall back to original format)
-        $format = $this->fileExt($filename);
-        if (!$format)
+        $format = 'png';
+        if ($this->fileExt($filename)) {
+            $format = $this->fileExt($filename);
+        } else if (!empty($this->originalInfo['format'])) {
             $format = $this->originalInfo['format'];
+        }
 
         // Determine output format
         switch (strtolower($format)) {
@@ -190,9 +222,12 @@ class Image
      */
     public function stream($quality = null)
     {
-        $format = $this->fileExt($this->filename);
-        if (!$format)
+        $format = 'png';
+        if ($this->fileExt($this->filename)) {
+            $format = $this->fileExt($this->filename);
+        } else if (!empty($this->originalInfo['format'])) {
             $format = $this->originalInfo['format'];
+        }
 
         switch (strtolower($format)) {
             case 'jpeg' :
@@ -236,6 +271,14 @@ class Image
     public function getOriginalInfo()
     {
         return $this->originalInfo;
+    }
+
+    /**
+     * @return null|resource
+     */
+    public function getImage()
+    {
+        return $this->image;
     }
 
     /**
@@ -822,6 +865,40 @@ class Image
     }
 
 
+    /**
+     * This function will overlay four tiles on top of this image
+     *
+     * @param array $imageList and array of up to 4 image paths to time on this image
+     * @param int $padding The padding between the images in pixels
+     * @throws Exception
+     */
+    public function makeTileMontage($imageList, $padding = 10)
+    {
+        $thumbW = ($this->getWidth()-$padding*3)/2;
+        $files = array();
+        foreach ($imageList as $i => $path) {
+            if (is_file($path)) {
+                $files[] = $path;
+                $img = \Tk\Image::create($path);
+                $img->squareCrop($thumbW);
+                switch ($i) {
+                    case 0:
+                        imagecopymerge($this->getImage(), $img->getImage(), $padding, $padding, 0, 0, $img->getWidth(), $img->getHeight(), 100);
+                        break;
+                    case 1:
+                        imagecopymerge($this->getImage(), $img->getImage(), $padding, $padding+$thumbW+$padding, 0, 0, $img->getWidth(), $img->getHeight(), 100);
+                        break;
+                    case 2:
+                        imagecopymerge($this->getImage(), $img->getImage(), $padding+$thumbW+$padding, $padding, 0, 0, $img->getWidth(), $img->getHeight(), 100);
+                        break;
+                    case 3:
+                        imagecopymerge($this->getImage(), $img->getImage(), $padding+$thumbW+$padding, $padding+$thumbW+$padding, 0, 0, $img->getWidth(), $img->getHeight(), 100);
+                        break;
+                }
+
+            }
+        }
+    }
 
 
 
