@@ -11,7 +11,6 @@ namespace Tk;
 class Str
 {
 
-
     /**
      * Strip tag attributes and their values from html
      * By default the $attrs contains tag events
@@ -61,7 +60,6 @@ class Str
         }
         return implode("\n", $lines);
     }
-
 
     /**
      * Return the string with the first character lowercase
@@ -121,7 +119,6 @@ class Str
         return $sub . (($len < strlen($str)) ? $endStr : '');
     }
 
-
     /**
      * concatenate a sting and add a suffix to the end if it is concatenated.
      *
@@ -137,7 +134,6 @@ class Str
         }
         return $str;
     }
-
 
     /**
      * Count the number of bytes of a given string.
@@ -270,8 +266,6 @@ class Str
 
     }
 
-
-
     /**
      * varToString
      *
@@ -305,7 +299,6 @@ class Str
         return (string) $var;
     }
 
-
     /**
      * Is the string a HTML string
      *
@@ -316,7 +309,5 @@ class Str
     {
         return (strlen($str) != strlen(strip_tags($str)));
     }
-    
-    
-    
+
 }

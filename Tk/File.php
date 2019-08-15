@@ -158,6 +158,13 @@ class File
         return strtolower(pathinfo($path, PATHINFO_EXTENSION));
     }
 
+
+    public static function removeExtension($path)
+    {
+        return strtolower(pathinfo($path, PATHINFO_FILENAME));
+    }
+
+
     /**
      * This function returns the maxumim download size allowed in bytes
      * To Change this modify the php.ini file or use:
