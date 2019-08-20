@@ -40,9 +40,6 @@ class ObjectUtil
     }
 
     /**
-     * Allows for getting of an objects property value either through a getter method or by
-     * directly accessing the property itself ignoring the scope permissions  (IE: public,protected,private)
-     *
      * NOTE: Accessing private properties is possible, but care must be taken
      * if that private property was defined lower into the inheritance chain.
      * For example, if class A extends class B, and class B defines a private
@@ -73,8 +70,6 @@ class ObjectUtil
     }
 
     /**
-     * This method updates a value in an object first looking for a set.... method if that fails then the
-     * objects property is set directly ignoring the properties scope (IE: public,protected,private)
      * This is useful for loading an object with data from data sources such as DB or JSON etc...
      *
      * @param object $object
