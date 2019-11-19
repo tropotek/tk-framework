@@ -144,6 +144,19 @@ class ObjectUtil
     }
 
     /**
+     * Return the Base namespace for this object
+     *
+     * @param string|object $class
+     * @return string
+     */
+    public static function getBaseNamespace($class)
+    {
+        if (is_object($class)) $class = get_class($class);
+        $list = explode('\\', $class);
+        return current($list);
+    }
+
+    /**
      * Get the path of a class
      *
      * @param string|object $class
