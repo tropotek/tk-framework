@@ -715,9 +715,9 @@ class Config extends Collection
     /**
      * Get the database
      *
-     * @return \Tk\Db\Pdo
+     * @return \Tk\Db\Pdo|\PDO|null
      */
-    public function getDb()
+    public function getDb($name = 'db')
     {
         return $this->get('db');
     }
