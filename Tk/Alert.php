@@ -19,10 +19,16 @@ class Alert extends \Dom\Renderer\Renderer implements \Dom\Renderer\DisplayInter
     const TYPE_ERROR = 'danger';
 
     /**
-     * Change this if you have a different alert class prefix
+     * Change this if you have a different alert class prefix for colors
      * @var string
      */
     public static $CSS_PREFIX = 'alert-';
+
+    /**
+     * Change this if you have a different alert class
+     * @var string
+     */
+    public static $CSS = 'alert';
 
     /**
      * @var string
@@ -146,13 +152,12 @@ class Alert extends \Dom\Renderer\Renderer implements \Dom\Renderer\DisplayInter
      * Get the class for hte alert containing div
      * Returns the self::$CSS_PREFIX . $this->type
      *
-     * Change the $CSS_PREFIX in your sites bootstrap/config if needed
-     *
      * @return string
+     * @todo: We need to change this an make it them a property of the object and change it via methods.
      */
     public function getCss()
     {
-        return self::$CSS_PREFIX . $this->type;
+        return self::$CSS . ' ' . self::$CSS_PREFIX . $this->type;
     }
 
     /**
@@ -191,7 +196,7 @@ class Alert extends \Dom\Renderer\Renderer implements \Dom\Renderer\DisplayInter
     public function getHtmlTemplate()
     {
         $html = <<<HTML
-  <div class="alert" var="alert">
+  <div class="" var="alert">
     <button class="close noblock" data-dismiss="alert">&times;</button>
     <h4 choice="title"><i choice="icon" var="icon"></i> <strong var="title"></strong></h4>
     <span var="message"></span>
