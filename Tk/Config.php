@@ -193,19 +193,19 @@ class Config extends Collection
         $config['system.info.authors']      = 'www.tropotek.com';
         $config['system.info.stability']    = 'dev';
 
-
+        $composer = null;
         if (is_file($config->getSitePath() . '/composer.json')) {
             $composer = json_decode(file_get_contents($config->getSitePath() . '/composer.json'));
             if (isset($composer->name))
                 $config['system.info.project'] = $composer->name;
             if (isset($composer->description))
                 $config['system.info.description'] = $composer->description;
-            if (isset($composer->version)) {
-                $config['system.info.version'] = $composer->version;
-                if ($composer->version == 'master' && isset($composer->extra->{'branch-alias'}->{'dev-master'})) {
-                    $config['system.info.version'] = $composer->extra->{'branch-alias'}->{'dev-master'};
-                }
-            }
+//            if (isset($composer->version)) {
+//                $config['system.info.version'] = $composer->version;
+//                if ($composer->version == 'master' && isset($composer->extra->{'branch-alias'}->{'dev-master'})) {
+//                    $config['system.info.version'] = $composer->extra->{'branch-alias'}->{'dev-master'};
+//                }
+//            }
             if (isset($composer->license))
                 $config['system.info.licence'] = $composer->license;
             if (isset($composer->time))
@@ -221,6 +221,13 @@ class Config extends Collection
             if (isset($composer->{'minimum-stability'})) {
                 $config['system.info.stability'] = $composer->{'minimum-stability'};
                 $config['system.info.minimumStability'] = $composer->{'minimum-stability'};
+            }
+        }
+        if (is_file($config->getSitePath() . '/version.md')) {
+            $version = file_get_contents($config->getSitePath() . '/version.md');
+            $config['system.info.version'] = $version;
+            if (($version == 'master' || $version == 'dev') && isset($composer->extra->{'branch-alias'}->{'dev-master'})) {
+                $config['system.info.version'] = $composer->extra->{'branch-alias'}->{'dev-master'};
             }
         }
     }
@@ -950,8 +957,8 @@ class Config extends Collection
             $message->set('_uri', \Tk\Uri::create('')->toString());
         if ($request->getReferer())
             $message->set('_referer', $request->getReferer()->toString());
-        if ($request->getIp())
-            $message->set('_ip', $request->getIp());
+        if ($request->getClientIp())
+            $message->set('_ip', $request->getClientIp());
         if ($request->getUserAgent())
             $message->set('_user_agent', $request->getUserAgent());
 
