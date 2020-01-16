@@ -90,6 +90,13 @@ class Alert extends \Dom\Renderer\Renderer implements \Dom\Renderer\DisplayInter
         return new self($message, $type, $title, $icon);
     }
 
+    /**
+     * Clear all messages in the queue
+     */
+    public static function clear()
+    {
+        AlertCollection::getInstance()->clear();
+    }
 
     /**
      * add a message to display on next page load
