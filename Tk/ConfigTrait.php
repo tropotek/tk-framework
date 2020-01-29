@@ -45,11 +45,11 @@ trait ConfigTrait
 
     /**
      * Return the currently authenticated (logged in) user
-     * @return \Uni\Db\User|\Uni\Db\UserIface|\App\Db\User
+     * @return \Bs\Db\UserIface|\App\Db\User
      */
-    public function getUser()
+    public function getAuthUser()
     {
-        return $this->getConfig()->getUser();
+        return $this->getConfig()->getAuthUser();
     }
 
     /**
