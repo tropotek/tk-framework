@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 3.0.34 [2020-01-30]:
+-------------------------------
+  - Merge branch 'master' of ssh://github.com/tropotek/tk-framework
+
+
 Ver 3.0.32 [2020-01-29]:
 -------------------------------
 
