@@ -63,7 +63,7 @@ class Str
 
     /**
      * Return the string with the first character lowercase
-     * 
+     *
      * @param $str
      * @return string
      */
@@ -71,7 +71,7 @@ class Str
     {
         return strtolower($str[0]) . substr($str, 1);
     }
-    
+
     /**
      * Convert camel case words so "testFunc" would convert to "Test Func"
      * Adds a capital at the first char and ass a space before all other upper case chars
@@ -160,7 +160,7 @@ class Str
          * escaping with a slash or encoding to UTF-8 where necessary
          */
         for($c = 0; $c < $strlen_var; ++$c) {
-            $ord_var_c = ord($str{$c});
+            $ord_var_c = ord($str[$c]);
             switch (true) {
                 case (($ord_var_c >= 0x20) && ($ord_var_c <= 0x7F)) :
                     // characters U-00000000 - U-0000007F (same as ASCII)
@@ -219,7 +219,7 @@ class Str
         $xml = str_replace(array_keys($mapping), $mapping, $xml);
         return $xml;
     }
-    
+
     /**
      * Since PHP's ord() function is not compatible with UTF-8
      * Here is a workaround.... GGRRR!!!!
