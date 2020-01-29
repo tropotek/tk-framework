@@ -43,7 +43,6 @@ trait ConfigTrait
         return $this->getConfig()->getSession();
     }
 
-
     /**
      * Return the currently authenticated (logged in) user
      * @return \Uni\Db\User|\Uni\Db\UserIface|\App\Db\User
