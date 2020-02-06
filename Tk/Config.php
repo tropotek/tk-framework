@@ -253,7 +253,8 @@ class Config extends Collection
                 $htaccessFile = $this->getSitePath() . '/.htaccess';
                 if (@is_readable($htaccessFile)) {
                     $htaccess = file_get_contents($htaccessFile);
-                    if ($htaccess && preg_match('/\s*RewriteBase (\/.*)\s+/i', $htaccess, $regs)) {
+                    //if ($htaccess && preg_match('/\s*RewriteBase (\/.*)\s+/i', $htaccess, $regs)) {
+                    if ($htaccess && preg_match('/\s+RewriteBase (\/.*)\s+/i', $htaccess, $regs)) {
                         $siteUrl = $regs[1];
                     }
                 }
