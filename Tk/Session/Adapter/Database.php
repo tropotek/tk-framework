@@ -181,6 +181,7 @@ SQL;
      */
     public function destroy($id)
     {
+        \Tk\Log::alert('Destroying Session: ' . $id);
         $query = sprintf('DELETE FROM %s WHERE session_id = %s LIMIT 1', $this->getTable(), $this->getDb()->quote($id));
         $this->getDb()->query($query);
         $this->sessionId = null;
