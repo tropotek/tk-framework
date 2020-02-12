@@ -171,8 +171,8 @@ class Session implements \ArrayAccess
         if(!$this->has(self::KEY_DATA)) {
             $this->setData('session_id', $this->getId());
             $this->setData('user_agent', $this->getRequest()->getUserAgent());
-            $this->setData('ip_address', $this->getRequest()->getIp());
-            $this->setData('scheme', $this->getRequest()->getServerParam('REQUEST_SCHEME', 'http'));
+            $this->setData('ip_address', $this->getRequest()->getClientIp());
+            $this->setData('scheme', $this->getRequest()->server->get('REQUEST_SCHEME', 'http'));
             if ($referer) {
                 $this->setData('site_referer', $referer->toString());
                 if (!$this->getData('page_referer') || ($this->getData('page_referer') != $referer)) {
@@ -205,11 +205,11 @@ class Session implements \ArrayAccess
                             return $this->start();
                         break;
                     case 'scheme' :
-                        if ($this->getData($valid) !== $this->getRequest()->getServerParam('REQUEST_SCHEME', 'http'))
+                        if ($this->getData($valid) !== $this->getRequest()->server->get('REQUEST_SCHEME', 'http'))
                             return $this->start();
                         break;
                     case 'ip_address' :
-                        if ($this->getData($valid) !== $this->getRequest()->getIp())
+                        if ($this->getData($valid) !== $this->getRequest()->getClientIp())
                             return $this->start();
                         break;
                     case 'expiration' :

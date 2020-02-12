@@ -46,7 +46,7 @@ class PdoTest extends \PHPUnit_Framework_TestCase
 
         // Create a table add some data
         $sql = file_get_contents(dirname(__FILE__) . '/data/ztest.sql');
-        if ($this->db->tableExists(self::TBL)) {
+        if ($this->db->hasTable(self::TBL)) {
             $sql = sprintf('DROP TABLE `%s`', self::TBL);
             $this->db->query($sql);
         }
