@@ -61,7 +61,7 @@ class Callback
         if (!$callable) return $this;
         if (!isset($this->callbackList[$priority]))
             $this->callbackList[$priority] = array();
-        $this->callbackList[$priority] = array($callable) + $this->callbackList[$priority];
+        $this->callbackList[$priority] = array_merge(array($callable), $this->callbackList[$priority]);
         return $this;
     }
 
