@@ -93,7 +93,6 @@ class ErrorHandler
             case E_USER_DEPRECATED:     $e = new UserDeprecatedException   ($errstr, $errno); break;
             default: $e = new Exception($errstr, $errno);
         }
-
         if ($errno == E_DEPRECATED || $errno == E_USER_DEPRECATED || $errno == E_RECOVERABLE_ERROR || $errno == E_WARNING || $errno == E_NOTICE) {
             // Log the error in debug modes
             //if (\Tk\Config::getInstance()->isDebug()) {
