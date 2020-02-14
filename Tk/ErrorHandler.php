@@ -103,7 +103,7 @@ class ErrorHandler
                     error_log($e->__toString()."\n");
                 }
             //}
-            return false; 
+            return false;
         }
         throw $e;
     }
