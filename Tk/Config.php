@@ -723,6 +723,7 @@ class Config extends Collection
     /**
      * Get the database
      *
+     * @param string $name
      * @return \Tk\Db\Pdo|\PDO|null
      */
     public function getDb($name = 'db')
