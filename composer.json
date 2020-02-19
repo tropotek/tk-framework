@@ -32,10 +32,5 @@
 
         "monolog/monolog": "^1.0",
         "symfony/http-foundation": "4.2.*"
-    },
-    "extra":  {
-        "branch-alias":  {
-            "dev-master": "3.0.x-dev"
-        }
     }
 }
