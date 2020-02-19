@@ -25,11 +25,12 @@
         ]
     },
     "require":  {
+        "ttek/tk-installers": "~3.0.0",
+
         "psr/log": "^1.0",
         "ext-json": "*",
-        "monolog/monolog": "^1.0",
-        "ttek/tk-installers": "~3.0",
 
+        "monolog/monolog": "^1.0",
         "symfony/http-foundation": "4.2.*"
     },
     "extra":  {
