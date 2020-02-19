@@ -1,6 +1,14 @@
 <?php
 namespace Tk\Session\Adapter;
 
+use DateTime;
+use Tk\Date;
+use \Exception;
+use Tk\Db\Pdo;
+use Tk\Db\PDOStatement;
+use Tk\Encrypt;
+use Tk\Log;
+
 /**
  * A PDO DB session object
  *
@@ -23,7 +31,7 @@ class Database implements Iface
     static $DB_TABLE = '_session';
 
     /**
-     * @var \Tk\Db\Pdo
+     * @var Pdo
      */
     protected $db = null;
 
@@ -41,10 +49,10 @@ class Database implements Iface
     /**
      * Create a Database session adaptor.
      *
-     * @param \Tk\Db\Pdo $db
-     * @param \Tk\Encrypt $encrypt
+     * @param Pdo $db
+     * @param Encrypt $encrypt
      */
-    public function __construct(\Tk\Db\Pdo $db, $encrypt = null)
+    public function __construct(Pdo $db, $encrypt = null)
     {
         $this->encrypt = $encrypt;
         $this->setDb($db);
@@ -68,8 +76,8 @@ CREATE TABLE $tbl (
 );
 SQL;
             $this->getDb()->exec($sql);
-        } catch (\Exception $e) {
-            \Tk\Log::error($e->__toString());
+        } catch (Exception $e) {
+            Log::error($e->__toString());
         }
     }
 
@@ -107,7 +115,7 @@ SQL;
      *
      * @param string $id
      * @return string
-     * @throws \Tk\Db\Exception
+     * @throws Exception
      */
     public function read($id)
     {
@@ -133,7 +141,7 @@ SQL;
      * @param string $id
      * @param string $data
      * @return bool
-     * @throws \Tk\Db\Exception
+     * @throws Exception
      */
     public function write($id, $data)
     {
@@ -150,20 +158,20 @@ SQL;
             // Insert a new session
             $query = sprintf('INSERT INTO %s VALUES (%s, %s, %s, %s)', 
                 $this->getTable(), $this->getDb()->quote($id), $this->getDb()->quote($data),
-                $this->getDb()->quote($this->createDate()->format(\Tk\Date::FORMAT_ISO_DATE)),
-                $this->getDb()->quote($this->createDate()->format(\Tk\Date::FORMAT_ISO_DATE)) );
+                $this->getDb()->quote($this->createDate()->format(Date::FORMAT_ISO_DATE)),
+                $this->getDb()->quote($this->createDate()->format(Date::FORMAT_ISO_DATE)) );
 
             $this->getDb()->query($query);
         } else if ($id === $this->sessionId) {
             // Update the existing session
             $query = sprintf("UPDATE %s SET modified = %s, data = %s WHERE session_id = %s", 
-                $this->getTable(), $this->getDb()->quote($this->createDate()->format(\Tk\Date::FORMAT_ISO_DATE)),
+                $this->getTable(), $this->getDb()->quote($this->createDate()->format(Date::FORMAT_ISO_DATE)),
                 $this->getDb()->quote($data), $this->getDb()->quote($id));
             $this->getDb()->query($query);
         } else {
             // Update the session and id
             $query = sprintf("UPDATE %s SET session_id = %s, modified = %s, data = %s WHERE session_id = %s", 
-                $this->getTable(), $this->getDb()->quote($id), $this->getDb()->quote($this->createDate()->format(\Tk\Date::FORMAT_ISO_DATE)),
+                $this->getTable(), $this->getDb()->quote($id), $this->getDb()->quote($this->createDate()->format(Date::FORMAT_ISO_DATE)),
                 $this->getDb()->quote($data), $this->getDb()->quote($this->sessionId) );
             $this->getDb()->query($query);
             // Set the new session id
@@ -177,11 +185,11 @@ SQL;
      *
      * @param string $id
      * @return bool
-     * @throws \Tk\Db\Exception
+     * @throws Exception
      */
     public function destroy($id)
     {
-        \Tk\Log::alert('Destroying Session: ' . $id);
+        Log::alert('Destroying Session: ' . $id);
         $query = sprintf('DELETE FROM %s WHERE session_id = %s LIMIT 1', $this->getTable(), $this->getDb()->quote($id));
         $this->getDb()->query($query);
         $this->sessionId = null;
@@ -192,7 +200,7 @@ SQL;
      * regenerate and return new session id
      *
      * @return string
-     * @throws \Tk\Db\Exception
+     * @throws Exception
      */
     public function regenerate()
     {
@@ -200,7 +208,7 @@ SQL;
         if (session_regenerate_id()) {
             $nid = session_id();
             $query = sprintf("UPDATE %s SET session_id = %s, modified = %s WHERE id = %s",
-                $this->getTable(), $this->getDb()->quote($nid), $this->getDb()->quote($this->createDate()->format(\Tk\Date::FORMAT_ISO_DATE)),
+                $this->getTable(), $this->getDb()->quote($nid), $this->getDb()->quote($this->createDate()->format(Date::FORMAT_ISO_DATE)),
                 $this->getDb()->quote($oid));
             $this->getDb()->query($query);
         }
@@ -212,12 +220,12 @@ SQL;
      *
      * @param int $maxlifetime
      * @return bool
-     * @throws \Tk\Db\Exception
+     * @throws Exception
      */
     public function gc($maxlifetime)
     {
         // Delete all expired sessions
-        $query = sprintf('DELETE FROM %s WHERE modified < %s', $this->getTable(), $this->getDb()->quote($this->createDate(time() - $maxlifetime)->format(\Tk\Date::FORMAT_ISO_DATE)));
+        $query = sprintf('DELETE FROM %s WHERE modified < %s', $this->getTable(), $this->getDb()->quote($this->createDate(time() - $maxlifetime)->format(Date::FORMAT_ISO_DATE)));
         $this->getDb()->query($query);
         return true;
     }
@@ -225,8 +233,8 @@ SQL;
     /**
      * Get all the sessionRecords
      *
-     * @return \Tk\Db\PDOStatement
-     * @throws \Tk\Db\Exception
+     * @return PDOStatement
+     * @throws Exception
      */
     public function getSessionRecords()
     {
@@ -237,7 +245,7 @@ SQL;
 
 
     /**
-     * @return \Tk\Db\Pdo
+     * @return Pdo
      */
     public function getDb()
     {
@@ -245,7 +253,7 @@ SQL;
     }
 
     /**
-     * @param \Tk\Db\Pdo $db
+     * @param Pdo $db
      * @return $this
      */
     public function setDb($db)
@@ -292,10 +300,10 @@ SQL;
      *
      * @param string $time
      * @param null $timezone
-     * @return \DateTime
+     * @return DateTime
      */
     private function createDate($time = 'now', $timezone = null)
     {
-        return \Tk\Date::create($time, $timezone);
+        return Date::create($time, $timezone);
     }
 }
