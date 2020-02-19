@@ -147,14 +147,6 @@ SQL;
     {
         $data = $this->encode($data);
         if ($this->sessionId === null && !$this->read($id)) {
-
-            // TODO: Alana seems to generate an error here where the session_id is null and tries to re-insert the session.
-            // TODO:
-            // TODO: I am unsure how this is occurring. Something to keep an eye on.
-            // TODO:
-            // TODO:  NOTE: I have slightly changed the code and how the $id is handled, lets see what that does. (see read() )
-            // TODO:
-
             // Insert a new session
             $query = sprintf('INSERT INTO %s VALUES (%s, %s, %s, %s)', 
                 $this->getTable(), $this->getDb()->quote($id), $this->getDb()->quote($data),
