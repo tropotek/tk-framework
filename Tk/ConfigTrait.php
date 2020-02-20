@@ -53,6 +53,16 @@ trait ConfigTrait
     }
 
     /**
+     * Do we have an authorized user logged in
+     * @return bool
+     */
+    public function hasAuthUser()
+    {
+        return $this->getConfig()->hasAuthUser();
+    }
+
+
+    /**
      * @return Uri
      */
     public function getBackUrl()
