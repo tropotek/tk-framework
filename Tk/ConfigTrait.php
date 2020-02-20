@@ -45,7 +45,7 @@ trait ConfigTrait
 
     /**
      * Return the currently authenticated (logged in) user
-     * @return \Bs\Db\UserIface|\App\Db\User
+     * @return \Bs\Db\UserIface|\Bs\Db\User|\App\Db\User
      */
     public function getAuthUser()
     {
