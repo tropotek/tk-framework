@@ -2,8 +2,12 @@
     "name": "ttek/tk-framework",
     "type": "library",
     "description": "Tropotek Framework",
-    "keywords":  ["Tk", "framework", "tropotek"],
-    "time": "2019-04-09",
+    "keywords":  [
+        "Tk",
+        "framework",
+        "tropotek"
+    ],
+    "time": "2020-02-25",
     "license": "MIT",
     "authors":  [
          {
@@ -20,7 +24,7 @@
             "Tk/Exception.php",
             "functions/varDump.php"
         ],
-        "exclude-from-classmap": [
+        "exclude-from-classmap":  [
             "/tests/"
         ]
     },
@@ -29,7 +33,6 @@
         "ext-json": "*",
         "monolog/monolog": "^1.0",
         "ttek/tk-installers": "~3.0.0",
-
         "symfony/http-foundation": "4.2.*"
     },
     "extra":  {
