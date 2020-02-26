@@ -61,7 +61,7 @@ class Request extends \Symfony\Component\HttpFoundation\Request
 //    }
 
     /**
-     * @return Uri
+     * @return \Tk\Uri
      */
     public function getTkUri()
     {
