@@ -432,14 +432,15 @@ class Session implements \ArrayAccess
      * or null if data is bound under the name.
      *
      * @param string $key The key to retrieve the data.
+     * @param null|mixed $default
      * @return mixed
      */
-    public function get($key)
+    public function get($key, $default = null)
     {
         if (isset($_SESSION[$key])) {
             return $_SESSION[$key];
         }
-        return null;
+        return $default;
     }
 
     /**
