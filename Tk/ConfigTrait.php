@@ -19,12 +19,11 @@ trait ConfigTrait
     }
 
     /**
-     * @param string $name
      * @return \PDO|Db\Pdo|null
      */
-    public function getDb($name = 'db')
+    public function getDb()
     {
-        return $this->getConfig()->getDb($name);
+        return $this->getConfig()->getDb();
     }
 
     /**
