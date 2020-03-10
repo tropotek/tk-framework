@@ -1,44 +1,44 @@
 {
-    "name": "ttek/tk-framework",
-    "type": "library",
-    "description": "Tropotek Framework",
-    "keywords":  [
-        "Tk",
-        "framework",
-        "tropotek"
-    ],
-    "time": "2020-03-11",
-    "license": "MIT",
-    "authors":  [
-         {
-            "name": "Michael Mifsud",
-            "email": "info@tropotek.com",
-            "homepage": "http://www.tropotek.com/"
-        }
-    ],
-    "autoload":  {
-        "psr-0":  {
-            "Tk\\": ""
-        },
-        "files":  [
-            "Tk/Exception.php",
-            "functions/varDump.php"
-        ],
-        "exclude-from-classmap":  [
-            "/tests/"
-        ]
-    },
-    "require":  {
-        "php": "^7.3.0",
-        "psr/log": "^1.0",
-        "ext-json": "*",
-        "monolog/monolog": "^1.0",
-        "ttek/tk-installers": "~3.0.0",
-        "symfony/http-foundation": "4.2.*"
-    },
-    "extra":  {
-        "branch-alias":  {
-            "dev-master": "3.0.x-dev"
-        }
+  "name": "ttek/tk-framework",
+  "type": "library",
+  "description": "Tropotek Framework",
+  "keywords": [
+    "Tk",
+    "framework",
+    "tropotek"
+  ],
+  "time": "2019-04-09",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Michael Mifsud",
+      "email": "info@tropotek.com",
+      "homepage": "http://www.tropotek.com/"
     }
+  ],
+  "autoload": {
+    "psr-0": {
+      "Tk\\": ""
+    },
+    "files": [
+      "Tk/Exception.php",
+      "functions/varDump.php"
+    ],
+    "exclude-from-classmap": [
+      "/tests/"
+    ]
+  },
+  "require": {
+    "php": "^7.3.0",
+    "psr/log": "^1.0",
+    "ext-json": "*",
+    "monolog/monolog": "^1.0",
+    "ttek/tk-installers": "~3.0.0",
+    "symfony/http-foundation": "4.2.*"
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "3.0.x-dev"
+    }
+  }
 }
