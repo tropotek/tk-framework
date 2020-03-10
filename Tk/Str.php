@@ -52,23 +52,12 @@ class Str
      * @param array $styles
      * @return string
      */
-    public static function stripStyles($html, $tags = array('table', 'tr', 'tbody', 'thead'), $styles = array('height', 'width'))
+    public static function stripStyles($html, $tags = array('table', 'th', 'tr', 'td', 'tbody', 'thead'), $styles = array('height', 'width'))
     {
         foreach ($styles as $style) {
-            $reg = sprintf('/<(%s)(.*)(%s: [0-9a-z]+;)/i', implode('|', $tags), $style);
+            $reg = sprintf('/(<%s)(.*)(%s: [0-9a-z]+;)/i', implode('|', $tags), $style);
             $html = preg_replace($reg, '$1$2', $html);
         }
-        return $html;
-    }
-
-    /**
-     * @param $html
-     * @return string|string[]|null
-     */
-    public static function stripHeightWidthStyles($html)
-    {
-        $html = preg_replace('/(<table|tr|td|tbody|thead)(.*)(width: [0-9]+px;)/i', '$1$2', $html);
-        $html = preg_replace('/(<table|tr|td|tbody|thead)(.*)(height: [0-9]+px;)/i', '$1$2', $html);
         return $html;
     }
 
