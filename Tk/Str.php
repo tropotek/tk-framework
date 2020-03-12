@@ -210,11 +210,12 @@ class Str
 
     /**
      * @param string $str
+     * @param string $replacement
      * @return string|string[]|null
      */
-    public static function stripEntities($str)
+    public static function stripEntities($str, $replacement = '')
     {
-        return preg_replace('/&#?[a-z0-9]+;/i','', $str);
+        return preg_replace('/&#?[a-z0-9]+;/i',$replacement, $str);
     }
 
     /**
