@@ -290,19 +290,45 @@ class File
         }
     }
 
+    /**
+     * @param string $path
+     * @param null|callable $onDelete
+     */
+    public static function removeEmptyFolders($path, $onDelete = null) {
+
+        if(substr($path,-1)!= DIRECTORY_SEPARATOR){
+            $path .= DIRECTORY_SEPARATOR;
+        }
+        $d2 = array('.','..');
+        $dirs = array_diff(glob($path.'*', GLOB_ONLYDIR),$d2);
+        foreach($dirs as $d){
+            self::removeEmptyFolders($d);
+        }
+
+        if(count(array_diff(glob($path.'*'),$d2))===0){
+            $conf = null;
+            if (is_callable($onDelete))
+                $conf = call_user_func_array($onDelete, array($path));
+            if ($conf === true || $conf === null)
+                rmdir($path);
+        }
+
+    }
 
     /**
      * @param string $path
      * @param callable $onDelete
      * @return bool
+     * @deprecated Use the above function instead this one seemed to have issues
      */
-    public static function removeEmptyFolders($path, $onDelete = null)
+    public static function removeEmptyFolders1($path, $onDelete = null)
     {
         $empty = true;
-        foreach (glob($path . DIRECTORY_SEPARATOR . '*') as $file) {
-            $empty &= is_dir($file) && self::removeEmptyFolders($file, $onDelete);
+        foreach (glob($path . \DIRECTORY_SEPARATOR . '{,.}[!.,!..]*',GLOB_MARK | GLOB_BRACE) as $file) {
+            $empty &= is_dir($file) && self::removeEmptyFolders1($file, $onDelete);
         }
         if ($empty) {
+            $conf = null;
             if (is_callable($onDelete))
                 $conf = call_user_func_array($onDelete, array($path));
             if ($conf === true || $conf === null)
