@@ -96,15 +96,17 @@ class ErrorHandler
             //if (\Tk\Config::getInstance()->isDebug()) {
                 if ($this->log) {
                     if ($this->getConfig()->isDebug()) {
-                        $this->log->warning($e->__toString());
+                        $this->log->warning(trim($e->getMessage()));
+                        //$this->log->warning($e->__toString());
                     } else {
-                        $this->log->warning($e->getMessage());
+                        $this->log->warning(trim($e->getMessage()));
                     }
                 } else {
                     if ($this->getConfig()->isDebug()) {
-                        error_log($e->__toString() . "\n");
+                        error_log(trim($e->getMessage()) . "\n");
+                        //error_log($e->__toString() . "\n");
                     } else {
-                        error_log($e->getMessage() . "\n");
+                        error_log(trim($e->getMessage()) . "\n");
                     }
                 }
             //}
