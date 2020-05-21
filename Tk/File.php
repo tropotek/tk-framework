@@ -155,13 +155,23 @@ class File
      */
     public static function getExtension($path)
     {
-        return strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        if (substr($path, -6) == 'tar.gz') {
+            return 'tar.gz';
+        }
+        $str = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        return $str;
     }
 
-
+    /**
+     * remove the extension part of a filename
+     *
+     * @param string $path
+     * @return string
+     */
     public static function removeExtension($path)
     {
-        return strtolower(pathinfo($path, PATHINFO_FILENAME));
+        $str = str_replace('.'.self::getExtension($path), '', $path);
+        return $str;
     }
 
 

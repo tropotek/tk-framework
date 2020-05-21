@@ -127,8 +127,8 @@ class Image
         if (!extension_loaded('gd')) {
             throw new Exception('Required extension GD is not loaded.');
         }
-        if (!is_file($filename)) {
-            throw new Exception('File Not Found: ' . basename($filename));
+        if (!is_file($filename) && !filter_var($filename, \FILTER_VALIDATE_URL)) {
+            throw new Exception('File Not Found: ' . $filename);
         }
         $this->filename = $filename;
         $this->memAlloc();
