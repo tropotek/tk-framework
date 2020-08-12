@@ -207,6 +207,19 @@ class ObjectUtil
     }
 
     /**
+     * Return the classname of an object or return the given parameter
+     *
+     * @param string|object $obj
+     * @return mixed|string
+     */
+    public static function getClass($obj)
+    {
+        if (is_object($obj))
+            return get_class($obj);
+        return $obj;
+    }
+
+    /**
      * Get a list of constant name value pairs for a passed class name
      *
      * @param string|object $class A
