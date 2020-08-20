@@ -84,7 +84,8 @@ class ObjectUtil
             $property = $reflect->getProperty($name);
 
             if ($property) {
-                $property->setAccessible(true);
+                if (!$property->isPublic())
+                    $property->setAccessible(true);
                 $property->setValue($object, $value);
             } else {
                 \Tk\Log::warning('TODO: Do we set an objects props here???');
@@ -217,6 +218,22 @@ class ObjectUtil
         if (is_object($obj))
             return get_class($obj);
         return $obj;
+    }
+
+    /**
+     * Return true if a class uses the given trail
+     *
+     * @param object|string $obj An object (class instance) or a string (class name).
+     * @param string $trait
+     * @return bool
+     */
+    public static function classUses($obj, $trait)
+    {
+        $arr = class_uses($obj);
+        foreach ($arr as $v) {
+            if ($v == $trait) return true;
+        }
+        return false;
     }
 
     /**
