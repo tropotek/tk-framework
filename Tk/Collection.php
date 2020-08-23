@@ -276,6 +276,25 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
         return !isset($difference) ? null : $difference;
     }
 
+
+    /**
+     * prefix a string to all array keys
+     *
+     * @param array $array
+     * @param string $prefix
+     * @return array
+     */
+    public static function prefixArrayKeys(array $array, string $prefix)
+    {
+        if ($prefix != '' && is_string($prefix)) {
+            foreach ($array as $k => $v) {
+                $array[$prefix . $k] = $v;
+                unset($array[$k]);
+            }
+        }
+        return $array;
+    }
+
     /**
      * toString
      *
