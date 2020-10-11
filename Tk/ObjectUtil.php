@@ -241,9 +241,10 @@ class ObjectUtil
      *
      * @param string|object $class A
      * @param string $prefix If set will only return const values whose name starts with this prefix
+     * @param bool $autoName Not be sure that there are no duplicate constant values if this option is true
      * @return array
      */
-    public static function getClassConstants($class, $prefix = '')
+    public static function getClassConstants($class, $prefix = '', $autoName = false)
     {
         if (is_object($class)) {
             $class = get_class($class);
@@ -260,6 +261,9 @@ class ObjectUtil
             }
             foreach ($constList as $k => $v) {
                 if (substr($k, 0, strlen($prefix)) == $prefix) {
+                    if ($autoName) {
+                        $k = ucwords(preg_replace('/[A-Z]/', ' $0', $v));
+                    }
                     $retList[$k] = $v;
                 }
             }
