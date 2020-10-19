@@ -99,6 +99,34 @@ class Str
         return ucfirst(preg_replace('/[A-Z]/', ' $0', $str));
     }
 
+
+    /**
+     * Explode using multiple delimiters
+     *
+     * @param array $delimiters
+     * @param string $string
+     * @return false|string[]
+     */
+    public static function explode(array $delimiters, string $string)
+    {
+        return explode( chr( 1 ), str_replace( $delimiters, chr( 1 ), $string ) );
+    }
+
+    /**
+     * @param string[] $arr
+     * @return string[]
+     */
+    public static function trimArray(array $arr)
+    {
+        $a = array();
+        foreach ($arr as $k => $v) {
+            if ($v == null || trim($v) == '') continue;
+            $a[$k] = trim($v);
+        }
+        return $a;
+    }
+
+
     /**
      * Substring without losing word meaning and
      * tiny words (length 3 by default) are included on the result.
