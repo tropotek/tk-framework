@@ -156,9 +156,23 @@ class Session implements \ArrayAccess
             session_id($this->getRequest()->get($sesName));
         }
         // Start the session!
-        session_set_cookie_params(time() + (int)$this->getParam('session.gc_maxlifetime'),
-            $this->getCookie()->getPath(), $this->getCookie()->getDomain(),
-            $this->getCookie()->isSecure(), $this->getCookie()->isHttponly());
+        if (PHP_VERSION_ID >= 70300) {
+            $s = (int)$this->getCookie()->isSecure();
+            $ho = (int)$this->getCookie()->isHttponly();
+            session_set_cookie_params([
+                'lifetime' =>  time() + (int)$this->getParam('session.gc_maxlifetime'),
+                'path' => $this->getCookie()->getPath(),
+                'domain' => $this->getCookie()->getDomain(),
+                'secure' => "$s",
+                'httponly' => "$ho",
+                'samesite' => 'None',
+            ]);
+
+        } else {
+            session_set_cookie_params(time() + (int)$this->getParam('session.gc_maxlifetime'),
+                $this->getCookie()->getPath(), $this->getCookie()->getDomain(),
+                $this->getCookie()->isSecure(), $this->getCookie()->isHttponly());
+        }
         session_start();
         $this->started = true;
 
