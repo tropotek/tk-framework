@@ -154,23 +154,30 @@ class Session implements \ArrayAccess
         session_name($sesName);
         if ($this->getRequest()->has($sesName) && isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == 'on') {
             session_id($this->getRequest()->get($sesName));
+            vd();
         }
         // Start the session!
         if (PHP_VERSION_ID >= 70300) {
             $s = (int)$this->getCookie()->isSecure();
             $ho = (int)$this->getCookie()->isHttponly();
-            session_set_cookie_params([
+            $cfg = [
                 'lifetime' =>  time() + (int)$this->getParam('session.gc_maxlifetime'),
                 'path' => $this->getCookie()->getPath(),
                 'domain' => $this->getCookie()->getDomain(),
                 'secure' => "$s",
                 'httponly' => "$ho",
-                'samesite' => 'None',
-            ]);
+                'samesite' => 'strict',
+                //'samesite' => 'None',
+            ];
+            vd($cfg);
+            session_set_cookie_params($cfg);
 
         } else {
+//            if ($this->getCookie()->isSecure()) {
+//                ini_set('session.cookie_secure', 'On');
+//            }
             session_set_cookie_params(time() + (int)$this->getParam('session.gc_maxlifetime'),
-                $this->getCookie()->getPath(), $this->getCookie()->getDomain(),
+                $this->getCookie()->getPath() . '; samesite=strict', $this->getCookie()->getDomain(),
                 $this->getCookie()->isSecure(), $this->getCookie()->isHttponly());
         }
         session_start();

@@ -157,7 +157,21 @@ class Cookie implements \ArrayAccess
     {
         if (!headers_sent()) {
             $expire = $expire + time();
-            $r = @setcookie($key, $value, $expire, $this->path, $this->domain, $this->secure, $this->httponly);
+            $r = null;
+            if (PHP_VERSION_ID >= 70300) {
+                $cfg = [
+                    'expires' => $expire,
+                    //'path' => $this->path . '; samesite=strict',
+                    'path' => $this->path,
+                    'domain' => $this->domain,
+                    'secure' => $this->secure,
+                    'httponly' => $this->httponly,
+                    'samesite' => 'strict'
+                ];
+                $r = @setcookie($key, $value, $cfg);
+            } else {
+                $r = @setcookie($key, $value, $expire, $this->path . '; samesite=strict', $this->domain, $this->secure, $this->httponly);
+            }
             if ($r) {
                 $_COOKIE[$key] = $value;
             }
@@ -175,7 +189,20 @@ class Cookie implements \ArrayAccess
     public function delete($key, $removeGlobal = true)
     {
         if (!headers_sent()) {
-            setcookie($key, '', -3600, $this->path, $this->domain, $this->secure, $this->httponly);
+            if (PHP_VERSION_ID >= 70300) {
+                $cfg = [
+                    'expires' => -3600,
+                    //'path' => $this->path . '; samesite=strict',
+                    'path' => $this->path,
+                    'domain' => $this->domain,
+                    'secure' => $this->secure,
+                    'httponly' => $this->httponly,
+                    'samesite' => 'strict'
+                ];
+                setcookie($key, '', $cfg);
+            } else {
+                setcookie($key, '', -3600, $this->path . '; samesite=strict', $this->domain, $this->secure, $this->httponly);
+            }
             if ($removeGlobal) {
                 unset($_COOKIE[$key]);
                 unset($_REQUEST[$key]);
