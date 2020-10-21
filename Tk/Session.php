@@ -154,7 +154,6 @@ class Session implements \ArrayAccess
         session_name($sesName);
         if ($this->getRequest()->has($sesName) && isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == 'on') {
             session_id($this->getRequest()->get($sesName));
-            vd();
         }
         // Start the session!
         if (PHP_VERSION_ID >= 70300) {
@@ -169,7 +168,6 @@ class Session implements \ArrayAccess
                 'samesite' => 'strict',
                 //'samesite' => 'None',
             ];
-            vd($cfg);
             session_set_cookie_params($cfg);
 
         } else {
