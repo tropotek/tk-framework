@@ -1,5 +1,22 @@
 #CHANGELOG#
 
+Ver 3.0.72 [2020-11-23]:
+-------------------------------
+  - Tagging and releasing branch `3.0` with version `3.0.68`.
+  - Tagging and releasing branch `3.0` with version `3.0.66`.
+  - Tagging and releasing branch `3.0` with version `3.0.64`.
+  - Tagging and releasing branch `3.0` with version `3.0.62`.
+  - Tagging and releasing branch `3.0` with version `3.0.60`.
+  - Tagging and releasing branch `3.0` with version `3.0.58`.
+  - Tagging and releasing branch `3.0` with version `3.0.56`.
+  - Tagging and releasing branch `3.0` with version `3.0.54`.
+  - Tagging and releasing branch `3.0` with version `3.0.52`.
+  - Tagging and releasing branch `3.0` with version `3.0.50`.
+  - Tagging and releasing branch `3.0` with version `3.0.48`.
+  - Added LTI 1.3 plugin
+  - Tagging and releasing branch `M	Tk/Config.php` with version `3.0.46`.
+
+
 Ver 3.0.68 [2020-10-21]:
 -------------------------------
 
