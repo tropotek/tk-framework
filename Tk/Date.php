@@ -168,9 +168,7 @@ class Date
         if (!$format) {
             $format = self::$formFormat;
         }
-
         $date = \DateTime::createFromFormat($format, $dateStr);
-
         if (!$date && str_ends_with($dateStr, 'Z')) {   // could be ISO format of: 2020-11-23T01:20:27.164Z
             $date = new \DateTime($dateStr);
         }
