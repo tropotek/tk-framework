@@ -34,7 +34,11 @@ class Uri implements \Serializable, \IteratorAggregate
      * @var string
      */
     public static $BASE_URL_PATH = '';
-    
+
+    const SCHEME_HTTP = 'http';
+    const SCHEME_HTTP_SSL = 'https';
+    const SCHEME_FTP = 'ftp';
+
     /**
      * This is the supplied full/partial uri
      * @var string
