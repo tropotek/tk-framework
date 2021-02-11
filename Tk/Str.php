@@ -88,6 +88,18 @@ class Str
     }
 
     /**
+     * Convert to CamelCase so "Test FuncName" would convert to "testFuncName"
+     * Adds a capital at the first char and ass a space before all other upper case chars
+     *
+     * @param string $str
+     * @return string
+     */
+    public static function toCamelCase($str)
+    {
+        return lcfirst(str_replace(' ', '', ucwords(str_replace(['_', '-'], ' ', $str))));
+    }
+
+    /**
      * Convert camel case words so "testFunc" would convert to "Test Func"
      * Adds a capital at the first char and ass a space before all other upper case chars
      *
