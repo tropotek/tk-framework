@@ -38,6 +38,8 @@ class Callback
     }
 
     /**
+     * Callback: function (\Dom\Template $fieldGroup, \Tk\Form\Renderer\FieldGroup $element) { }
+     *
      * @param callable|null $callable
      * @param int $priority
      * @return $this
@@ -52,6 +54,8 @@ class Callback
     }
 
     /**
+     * Callback: function (\Dom\Template $fieldGroup, \Tk\Form\Renderer\FieldGroup $element) { }
+     *
      * @param callable|null $callable
      * @param int $priority
      * @return $this
