@@ -296,15 +296,14 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
-     * toString
+     * Return a readable string representation of this object
      *
+     * @param $arr
      * @return string
      */
-    public function toString()
+    public static function arrayToString($arr)
     {
         $str = "";
-        $arr = $this->data;
-        ksort($arr);
         foreach ($arr as $k => $v) {
             if (is_object($v)) {
                 $str .= "[$k] => {" . get_class($v) . "}\n";
@@ -315,6 +314,19 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
             }
         }
         return $str;
+
+    }
+
+    /**
+     * toString
+     *
+     * @return string
+     */
+    public function toString()
+    {
+        $arr = self::arrayToString($this->data);
+        //ksort($arr);
+        return $arr;
     }
 
 }
