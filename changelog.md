@@ -1,5 +1,9 @@
 #CHANGELOG#
 
+Ver 3.0.84 [2021-04-20]:
+-------------------------------
+
+
 Ver 3.0.82 [2021-02-18]:
 -------------------------------
   - Merge branch '3.0' of ssh://github.com/tropotek/tk-framework into 3.0
