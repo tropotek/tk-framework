@@ -168,7 +168,10 @@ class Uri implements \Serializable, \IteratorAggregate
         }
 
         //vd($_SERVER['HTTPS'], $_SERVER['REQUEST_SCHEME'], $_SERVER['SERVER_PORT']);
-        if ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') || $_SERVER['REQUEST_SCHEME'] == self::SCHEME_HTTP_SSL || $_SERVER['SERVER_PORT']) {
+        if ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ||
+            (isset($_SERVER['HTTPS']) && $_SERVER['REQUEST_SCHEME'] == self::SCHEME_HTTP_SSL) ||
+            (isset($_SERVER['HTTPS']) && $_SERVER['SERVER_PORT']))
+        {
         //if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
             $this->scheme = self::SCHEME_HTTP_SSL;
         }
