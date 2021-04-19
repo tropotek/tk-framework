@@ -167,8 +167,10 @@ class Uri implements \Serializable, \IteratorAggregate
             return;
         }
 
-        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
-            $this->scheme = 'https';
+        //vd($_SERVER['HTTPS'], $_SERVER['REQUEST_SCHEME'], $_SERVER['SERVER_PORT']);
+        if ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') || $_SERVER['REQUEST_SCHEME'] == self::SCHEME_HTTP_SSL || $_SERVER['SERVER_PORT']) {
+        //if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
+            $this->scheme = self::SCHEME_HTTP_SSL;
         }
 
         if (\Tk\Config::getInstance()->get('site.host')) {
