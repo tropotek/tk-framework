@@ -355,7 +355,7 @@ class Uri implements \Serializable, \IteratorAggregate
      * Add a field to the query string
      *
      * @param string $field
-     * @param string $value
+     * @param string|string[] $value
      * @return static
      */
     public function set($field, $value = null)
