@@ -85,6 +85,17 @@ class Callback
     }
 
     /**
+     * Alias for reset()
+     *
+     * @param null $priority
+     * @return callable
+     */
+    public function clear($priority = null)
+    {
+        return $this->reset($priority);
+    }
+
+    /**
      * @param int $priority
      * @param null|int $index
      * @return $this
