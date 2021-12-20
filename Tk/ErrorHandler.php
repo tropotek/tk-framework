@@ -94,20 +94,25 @@ class ErrorHandler
         if ($errno == E_DEPRECATED || $errno == E_USER_DEPRECATED || $errno == E_RECOVERABLE_ERROR || $errno == E_WARNING || $errno == E_NOTICE) {
             // Log the error in debug modes
             //if (\Tk\Config::getInstance()->isDebug()) {
+
+            $msg = trim($e->getMessage()) . ' in ' . $errfile . ' on line ' . $errline;
+
                 if ($this->log) {
-                    if ($this->getConfig()->isDebug()) {
-                        $this->log->warning(trim($e->getMessage()));
-                        //$this->log->warning($e->__toString());
-                    } else {
-                        $this->log->warning(trim($e->getMessage()));
-                    }
+                    $this->log->warning($msg);
+//                    if ($this->getConfig()->isDebug()) {
+//                        $this->log->warning(trim($e->getMessage()));
+//                        //$this->log->warning($e->__toString());
+//                    } else {
+//                        $this->log->warning(trim($e->getMessage()));
+//                    }
                 } else {
-                    if ($this->getConfig()->isDebug()) {
-                        error_log(trim($e->getMessage()) . "\n");
-                        //error_log($e->__toString() . "\n");
-                    } else {
-                        error_log(trim($e->getMessage()) . "\n");
-                    }
+                    error_log($msg . "\n");
+//                    if ($this->getConfig()->isDebug()) {
+//                        error_log(trim($e->getMessage()) . "\n");
+//                        //error_log($e->__toString() . "\n");
+//                    } else {
+//                        error_log(trim($e->getMessage()) . "\n");
+//                    }
                 }
             //}
             return false;
