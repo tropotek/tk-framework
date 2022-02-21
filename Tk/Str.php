@@ -111,6 +111,16 @@ class Str
         return ucfirst(preg_replace('/[A-Z]/', ' $0', $str));
     }
 
+    /**
+     * @param $str
+     * @return string
+     */
+    public static function singleNewLines($str)
+    {
+        //return preg_replace('~(*BSR_ANYCRLF)\R~', "\n", $str);
+        return preg_replace('~(*BSR_ANYCRLF)\R{2}~', '<br />', $str);
+    }
+
 
     /**
      * Explode using multiple delimiters
