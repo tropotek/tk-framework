@@ -112,13 +112,17 @@ class Str
     }
 
     /**
-     * @param $str
+     * Replace any double control/linefeed characters with a single
+     * character
+     *
+     * @param string $str
+     * @param string $replace (optional) The newline replacement string
      * @return string
      */
-    public static function singleNewLines($str)
+    public static function singleNewLines($str, $replace = "\n")
     {
-        //return preg_replace('~(*BSR_ANYCRLF)\R~', "\n", $str);
-        return preg_replace('~(*BSR_ANYCRLF)\R{2}~', '<br />', $str);
+        //return preg_replace('~(*BSR_ANYCRLF)\R~', $replace, $str);
+        return preg_replace('~(*BSR_ANYCRLF)\R{2}~', $replace, $str);
     }
 
 
