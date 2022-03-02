@@ -1,6 +1,6 @@
 # Tk Framework 
 
-__Project:__ [ttek/tk-framework](http://packagist.org/packages/ttek/tk-framework)
+__Project:__ [uom/tk-framework](http://packagist.org/packages/uom/tk-framework)
 __Web:__ <http://www.tropotek.com/>  
 __Authors:__ Michael Mifsud <http://www.tropotek.com/>  
   
@@ -15,25 +15,23 @@ This is the base lib for the Tropotek Tk PHP Framework
 
 ## Installation
 
-Available on Packagist ([ttek/tk-framework](http://packagist.org/packages/ttek/tk-framework))
+Available on Packagist ([uom/tk-framework](https://github.com/fvas-elearning/tk-framework))
 and as such installable via [Composer](http://getcomposer.org/).
 
 ```bash
-composer require ttek/tk-framework
+composer require uom/tk-framework
 ```
 
 Or add the following to your composer.json file:
 
 ```json
-"ttek/tk-framework": "~3.0"
+"uom/tk-framework": "~3.0"
 ```
 
 If you do not use Composer, you can grab the code from GitHub, and use any
-PSR-0 compatible autoloader (e.g. the [PHP DomTemplate](https://github.com/tropotek/tk-framework))
-to load the classes.
+PSR-0 compatible autoloader to load the classes.
 
 ## Introduction
 
-__NOTICE:__ The new Tk Framework is currently under construction and unstable. Use previous versions 
-for production site.
+TODO
 
