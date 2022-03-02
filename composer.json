@@ -1,5 +1,5 @@
 {
-  "name": "ttek/tk-framework",
+  "name": "uom/tk-framework",
   "type": "library",
   "description": "Tropotek Framework",
   "keywords": [
@@ -14,12 +14,6 @@
       "name": "Michael Mifsud",
       "email": "info@tropotek.com",
       "homepage": "http://www.tropotek.com/"
-    }
-  ],
-  "funding": [
-    {
-      "type": "Paypal",
-      "url": "https://www.paypal.me/tropotek"
     }
   ],
   "autoload": {
@@ -38,7 +32,7 @@
     "php": "^7.3||^8.0",
     "psr/log": "^1.0",
     "ext-json": "*",
-    "ttek/tk-installers": "~3.0.0",
+    "uom/tk-installers": "~3.0.0",
     "monolog/monolog": "^1.0",
     "symfony/http-foundation": "4.2.*",
     "lasserafn/php-initial-avatar-generator": "4.2.*"
