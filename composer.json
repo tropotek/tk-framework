@@ -12,7 +12,6 @@
   "authors": [
     {
       "name": "Michael Mifsud",
-      "email": "info@tropotek.com",
       "homepage": "http://www.tropotek.com/"
     }
   ],
@@ -32,13 +31,13 @@
     "php": "^7.3||^8.0",
     "psr/log": "^1.0",
     "ext-json": "*",
-    "uom/tk-installers": "~3.0.0",
+    "uom/tk-installers": "~3.2.0",
     "monolog/monolog": "^1.0",
     "symfony/http-foundation": "4.2.*"
   },
   "extra": {
     "branch-alias": {
-      "dev-master": "3.0.x-dev"
+      "dev-master": "3.2.x-dev"
     }
   }
 }
