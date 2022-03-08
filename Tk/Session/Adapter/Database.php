@@ -217,7 +217,9 @@ SQL;
      */
     public function gc($maxlifetime)
     {
-        $query = sprintf('DELETE FROM %s WHERE created < %s', $this->getTable(), $this->getDb()->quote($this->createDate(time() - $maxlifetime)->format(Date::FORMAT_ISO_DATE)));
+        $query = sprintf('DELETE FROM %s WHERE created < %s',
+            $this->getTable(),
+            $this->getDb()->quote($this->createDate(time() - $maxlifetime)->format(Date::FORMAT_ISO_DATETIME)));
         $this->getDb()->query($query);
         return true;
     }

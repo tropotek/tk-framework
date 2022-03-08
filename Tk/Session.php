@@ -311,6 +311,24 @@ class Session implements \ArrayAccess
     }
 
     /**
+     * Clean expired sessions
+     *   $maxlifetime = 60 * 60 * 24 * 2; // 3 days
+     *
+     * @param int $maxlifetime
+     * @return bool
+     * @throws Exception
+     */
+    public function clearExpired($maxlifetime)
+    {
+        if ($this->adapter) {
+            return $this->adapter->gc($maxlifetime);
+        } else {
+            // todo???? delete expired session files???
+        }
+        return true;
+    }
+
+    /**
      * @param $key
      * @return mixed|string
      */
