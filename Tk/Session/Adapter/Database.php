@@ -208,7 +208,8 @@ SQL;
     }
 
     /**
-     * garbage collect
+     * garbage collect, Clean expired sessions
+     *  $maxlifetime = 60 * 60 * 24 * 2; // 3 days
      *
      * @param int $maxlifetime
      * @return bool
@@ -216,8 +217,7 @@ SQL;
      */
     public function gc($maxlifetime)
     {
-        // Delete all expired sessions
-        $query = sprintf('DELETE FROM %s WHERE modified < %s', $this->getTable(), $this->getDb()->quote($this->createDate(time() - $maxlifetime)->format(Date::FORMAT_ISO_DATE)));
+        $query = sprintf('DELETE FROM %s WHERE created < %s', $this->getTable(), $this->getDb()->quote($this->createDate(time() - $maxlifetime)->format(Date::FORMAT_ISO_DATE)));
         $this->getDb()->query($query);
         return true;
     }
