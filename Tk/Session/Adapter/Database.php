@@ -120,7 +120,8 @@ SQL;
     public function read($id)
     {
         // Load the session
-        $query = sprintf('SELECT * FROM %s WHERE session_id = %s LIMIT 1', $this->getDb()->quoteParameter($this->getTable()), $this->getDb()->quote($id));
+        $query = sprintf('SELECT * FROM %s WHERE session_id = %s LIMIT 1',
+            $this->getDb()->quoteParameter($this->getTable()), $this->getDb()->quote($id));
         $result = $this->getDb()->query($query);
         $row = $result->fetchObject();
         if (!$row) {  // No current session
@@ -200,7 +201,8 @@ SQL;
         if (session_regenerate_id()) {
             $nid = session_id();
             $query = sprintf("UPDATE %s SET session_id = %s, modified = %s WHERE id = %s",
-                $this->getTable(), $this->getDb()->quote($nid), $this->getDb()->quote($this->createDate()->format(Date::FORMAT_ISO_DATE)),
+                $this->getTable(),
+                $this->getDb()->quote($nid), $this->getDb()->quote($this->createDate()->format(Date::FORMAT_ISO_DATETIME)),
                 $this->getDb()->quote($oid));
             $this->getDb()->query($query);
         }
