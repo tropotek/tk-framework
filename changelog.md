@@ -1,5 +1,9 @@
 #CHANGELOG#
 
+Ver 3.2.10 [2022-03-18]:
+-------------------------------
+
+
 Ver 3.2.8 [2022-03-17]:
 -------------------------------
   - Fixed placement export list for terraDotta
