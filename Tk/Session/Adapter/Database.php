@@ -150,7 +150,7 @@ SQL;
         if ($this->sessionId === null && !$this->read($id)) {
             // Insert a new session
             $query = sprintf('INSERT INTO %s VALUES (%s, %s, %s, %s)', 
-                $this->getTable(), $this->getDb()->quozte($id), $this->getDb()->quote($data),
+                $this->getTable(), $this->getDb()->quote($id), $this->getDb()->quote($data),
                 $this->getDb()->quote($this->createDate()->format(Date::FORMAT_ISO_DATETIME)),
                 $this->getDb()->quote($this->createDate()->format(Date::FORMAT_ISO_DATETIME)) );
 
