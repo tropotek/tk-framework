@@ -148,22 +148,22 @@ SQL;
         $data = $this->encode($data);
         if ($this->sessionId === null && !$this->read($id)) {
             // Insert a new session
-            $query = sprintf('INSERT INTO %s VALUES (%s, %s, %s, %s)', 
+            $query = sprintf('INSERT INTO %s VALUES (%s, %s, %s, %s)',
                 $this->getTable(), $this->getDb()->quote($id), $this->getDb()->quote($data),
-                $this->getDb()->quote($this->createDate()->format(Date::FORMAT_ISO_DATE)),
-                $this->getDb()->quote($this->createDate()->format(Date::FORMAT_ISO_DATE)) );
+                $this->getDb()->quote($this->createDate()->format(Date::FORMAT_ISO_DATETIME)),
+                $this->getDb()->quote($this->createDate()->format(Date::FORMAT_ISO_DATETIME)) );
 
             $this->getDb()->query($query);
         } else if ($id === $this->sessionId) {
             // Update the existing session
-            $query = sprintf("UPDATE %s SET modified = %s, data = %s WHERE session_id = %s", 
-                $this->getTable(), $this->getDb()->quote($this->createDate()->format(Date::FORMAT_ISO_DATE)),
+            $query = sprintf("UPDATE %s SET modified = %s, data = %s WHERE session_id = %s",
+                $this->getTable(), $this->getDb()->quote($this->createDate()->format(Date::FORMAT_ISO_DATETIME)),
                 $this->getDb()->quote($data), $this->getDb()->quote($id));
             $this->getDb()->query($query);
         } else {
             // Update the session and id
-            $query = sprintf("UPDATE %s SET session_id = %s, modified = %s, data = %s WHERE session_id = %s", 
-                $this->getTable(), $this->getDb()->quote($id), $this->getDb()->quote($this->createDate()->format(Date::FORMAT_ISO_DATE)),
+            $query = sprintf("UPDATE %s SET session_id = %s, modified = %s, data = %s WHERE session_id = %s",
+                $this->getTable(), $this->getDb()->quote($id), $this->getDb()->quote($this->createDate()->format(Date::FORMAT_ISO_DATETIME)),
                 $this->getDb()->quote($data), $this->getDb()->quote($this->sessionId) );
             $this->getDb()->query($query);
             // Set the new session id
@@ -200,7 +200,7 @@ SQL;
         if (session_regenerate_id()) {
             $nid = session_id();
             $query = sprintf("UPDATE %s SET session_id = %s, modified = %s WHERE id = %s",
-                $this->getTable(), $this->getDb()->quote($nid), $this->getDb()->quote($this->createDate()->format(Date::FORMAT_ISO_DATE)),
+                $this->getTable(), $this->getDb()->quote($nid), $this->getDb()->quote($this->createDate()->format(Date::FORMAT_ISO_DATETIME)),
                 $this->getDb()->quote($oid));
             $this->getDb()->query($query);
         }
@@ -208,7 +208,8 @@ SQL;
     }
 
     /**
-     * garbage collect
+     * garbage collect, Clean expired sessions
+     *  $maxlifetime = 60 * 60 * 24 * 2; // 3 days
      *
      * @param int $maxlifetime
      * @return bool
@@ -216,8 +217,8 @@ SQL;
      */
     public function gc($maxlifetime)
     {
-        // Delete all expired sessions
-        $query = sprintf('DELETE FROM %s WHERE modified < %s', $this->getTable(), $this->getDb()->quote($this->createDate(time() - $maxlifetime)->format(Date::FORMAT_ISO_DATE)));
+        $query = sprintf('DELETE FROM %s WHERE created < %s',
+            $this->getTable(), $this->getDb()->quote($this->createDate(time() - $maxlifetime)->format(Date::FORMAT_ISO_DATETIME)));
         $this->getDb()->query($query);
         return true;
     }

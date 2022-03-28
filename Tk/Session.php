@@ -28,7 +28,7 @@ class Session implements \ArrayAccess
      * @var bool
      */
     private $started = false;
-    
+
     /**
      * @var \Tk\Session\Adapter\Iface
      */
@@ -76,7 +76,7 @@ class Session implements \ArrayAccess
     public function __construct($adapter = null, $params = array(), $request = null, $cookie = null)
     {
         $this->params = $params;
-        
+
         if (!$request)
             $request = Request::createFromGlobals();
         if (!$cookie)
@@ -85,7 +85,7 @@ class Session implements \ArrayAccess
         $this->adapter = $adapter;
         $this->request = $request;
         $this->cookie = $cookie;
-        
+
         if (!$this->getParam('session.name'))
             $this->params['session.name'] = md5($_SERVER['SERVER_NAME']);
         if (!$this->getParam('session.gc_maxlifetime')) {
@@ -122,7 +122,7 @@ class Session implements \ArrayAccess
         }
         return self::$instance;
     }
-    
+
     /**
      * Start this session
      *
@@ -311,6 +311,25 @@ class Session implements \ArrayAccess
     }
 
     /**
+     * Clean expired sessions
+     *   $maxlifetime = 60 * 60 * 24 * 2; // 3 days
+     *
+     * @param int $maxlifetime
+     * @return bool
+     * @throws Exception
+     */
+    public function clearExpired($maxlifetime)
+    {
+        if ($this->adapter) {
+            return $this->adapter->gc($maxlifetime);
+        } else {
+            // todo???? delete expired session files???
+        }
+        return true;
+    }
+
+
+    /**
      * @param $key
      * @return mixed|string
      */
@@ -342,7 +361,7 @@ class Session implements \ArrayAccess
         $this->set(self::KEY_DATA, $this->data);
         return $this;
     }
-    
+
     /**
      * looks for the $key in the params object,
      * if not found then prepends 'session.' to the key
@@ -365,7 +384,7 @@ class Session implements \ArrayAccess
 
     /**
      * Get the session param config list
-     * 
+     *
      * @return array|\ArrayAccess
      */
     public function getParamList()
@@ -522,8 +541,8 @@ class Session implements \ArrayAccess
     {
         return isset($_SESSION[$key]);
     }
-    
-    
+
+
     /**
      * Whether a offset exists
      *
@@ -589,6 +608,6 @@ class Session implements \ArrayAccess
     {
         $this->remove($offset);
     }
-    
-    
+
+
 }
