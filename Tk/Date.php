@@ -217,6 +217,42 @@ class Date
         }
     }
 
+    /**
+     * Use this function to find the next date
+     *
+     *
+     * @param string $frequency ['weekly', 'fortnightly', 'monthly']
+     * @param \DateTime $dateStart
+     * @param null|\DateTime $dateEnd
+     * @return array
+     */
+    static function getPeriodDates($frequency, $dateStart, $dateEnd = null) {
+        //$start_date is string e.g 06-23-2016
+        //$frequency is also string e.g weekly, fortnightly, monthly
+        //$end_date is optional string: limit to the dates to be generated. Default = today
+
+        $dates = [];
+        $dt = $dateStart;
+        $dtUntil = $dateEnd;
+        if (!$dateEnd)
+            $dtUntil = self::floor();
+
+        // conversion table: frequency to date modifier string
+        $modifiers = [
+            "weekly" => "+1 week",
+            "fortnightly" => "+2 weeks",
+            "monthly" => "+1 month"
+        ];
+        $modifier = $modifiers[$frequency];
+        $dt->modify($modifier);
+        while(self::floor($dt) <= self::floor($dtUntil)) {
+            //$dates[] = $dt->format("d-m-Y");
+            $dates[] = Date::create($dt->getTimestamp());
+            $dt->modify($modifier);
+            //$dt = self::floor($dt->modify($modifier));
+        }
+        return $dates; //array returned
+    }
 
     /**
      * Get the financial year of this date
