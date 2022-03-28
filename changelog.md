@@ -1,5 +1,11 @@
 #CHANGELOG#
 
+Ver 3.0.100 [2022-03-29]:
+-------------------------------
+  - Merge branch '3.0' of ssh://github.com/tropotek/tk-framework into 3.0
+  - Added timesheet export
+
+
 Ver 3.0.98 [2022-03-08]:
 -------------------------------
 
