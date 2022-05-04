@@ -27,8 +27,7 @@
       "Tk\\": ""
     },
     "files": [
-      "Tk/Exception.php",
-      "functions/varDump.php"
+      "Tk/Exception.php"
     ],
     "exclude-from-classmap": [
       "/tests/"
