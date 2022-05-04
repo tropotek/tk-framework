@@ -2,6 +2,11 @@
 namespace Tk;
 
 
+use Monolog\Formatter\LineFormatter;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
+use Psr\Log\LoggerInterface;
+
 /**
  * A basic log interface to help with logging through the PSR interface,
  * This must be initiated in the boostrap phase of the session
@@ -12,8 +17,12 @@ namespace Tk;
  * @author Michael Mifsud <info@tropotek.com>
  * @see http://www.tropotek.com/
  * @license Copyright 2017 Michael Mifsud
+ *
+ * @TODO: We need to implement the \Psr\Log\LoggerInterface correctly,
+ *        remove the static from the methods, we can create static aliases
+ *        Also implement the LoggerInterface object
  */
-class Log
+class Log  // implements LoggerInterface
 {
     /**
      * @var Log
@@ -33,6 +42,33 @@ class Log
     protected function __construct($logger)
     {
         $this->logger = $logger;
+    }
+
+    /**
+     * @param string $logPath
+     * @param int $logLevel
+     * @param LineFormatter $formatter
+     * @return Log
+     * @throws \Exception
+     */
+    public static function create($logPath = '', $logLevel = Logger::API, LineFormatter $formatter = null)
+    {
+        if (!self::$instance) {
+            if (!is_file($logPath)) {
+                $logger = new \Psr\Log\NullLogger();
+                return self::$instance = new static($logger);
+            }
+            $logger = new Logger('system');
+            $handler = new StreamHandler($logPath, $logLevel);
+            if (!$formatter) {
+                $formatter = new \Tk\Log\MonologLineFormatter();
+                $formatter->setScriptTime(microtime(true));
+            }
+            $handler->setFormatter($formatter);
+            $logger->pushHandler($handler);
+            self::$instance = new static($logger);
+        }
+        return self::$instance;
     }
 
     /**
