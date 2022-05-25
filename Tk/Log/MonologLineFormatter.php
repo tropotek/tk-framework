@@ -17,6 +17,8 @@ class MonologLineFormatter extends LineFormatter
 
     protected $scriptTime = 0;
 
+    protected $colorsEnabled = false;
+
     /**
      * @param string $format                     The format of the message
      * @param string $dateFormat                 The format of the timestamp: one supported by DateTime::format
@@ -33,7 +35,7 @@ class MonologLineFormatter extends LineFormatter
     /**
      * {@inheritdoc}
      */
-    public function format(array $record)
+    public function format(array $record) :string
     {
         $colors = array(
             'emergency'     => 'brown',
@@ -57,18 +59,15 @@ class MonologLineFormatter extends LineFormatter
             'debug'         => 'DBG'
         );
 
-        //error_log(print_r($record, true));
         $levelName = $record['level_name'];
-        //$record['level_name'] = $levelName[0];
-        //$record['level_name'] = substr($levelName, 0, 3);
         $record['level_name'] = $abbrev[strtolower($levelName)];
-        $record['message'] = \Tk\Color::getCliString($record['message'], $colors[strtolower($levelName)]);
+        
+        if ($this->isColorsEnabled())
+            $record['message'] = \Tk\Color::getCliString($record['message'], $colors[strtolower($levelName)]);
 
         $output = parent::format($record);
-        //$pre = sprintf('[%5.2f][%9s]', round($this->scriptDuration(), 2), \Tk\File::bytes2String(memory_get_usage(false)));
         $pre = sprintf('[%9s]', \Tk\File::bytes2String(memory_get_usage(false)));
         $output = str_replace('%post%', $pre, $output);
-        //return \Tk\Color::getCliString($output, 'white');
         return $output;
     }
 
@@ -91,6 +90,24 @@ class MonologLineFormatter extends LineFormatter
     public function scriptDuration()
     {
         return (string)(microtime(true) - $this->scriptTime);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isColorsEnabled()
+    {
+        return $this->colorsEnabled;
+    }
+
+    /**
+     * @param bool $colorsEnabled
+     * @return $this
+     */
+    public function setColorsEnabled($colorsEnabled)
+    {
+        $this->colorsEnabled = $colorsEnabled;
+        return $this;
     }
 
 }
