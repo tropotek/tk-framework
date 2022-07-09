@@ -181,9 +181,6 @@ class UploadedFile
         $this->file = $targetPath;
         $this->moved = true;
     }
-    
-
-    
 
     /**
      * Retrieve the error associated with the uploaded file.
@@ -244,7 +241,7 @@ class UploadedFile
      */
     public function setFileName($name)
     {
-        if ($this-$this->moved) {
+        if ($this->moved) {
             throw new \Tk\Exception('Cannot set the filename after a move operation.');
         }
         $this->name = $name;

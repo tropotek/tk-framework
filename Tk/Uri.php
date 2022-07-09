@@ -108,13 +108,11 @@ class Uri implements \Serializable, \IteratorAggregate
             $spec = trim(urldecode($spec));
             if ($spec && self::$BASE_URL_PATH) {
                 $p = parse_url($spec);
-                //if (!preg_match('/^\/\//', $spec) && !preg_match('/^(#|javascript|mailto|data)/i', $spec) && !isset($p['scheme'])) {
                 if (!preg_match('/^\/\//', $spec) && !isset($p['scheme'])) {
                     if (self::$BASE_URL_PATH) {
                         if (preg_match('/^' . preg_quote(self::$BASE_URL_PATH, '/') . '/', $spec)) {
                             $spec = preg_replace('/^' . preg_quote(self::$BASE_URL_PATH, '/') . '/', '', $spec);
                         }
-                        //$spec = str_replace(self::$BASE_URL_PATH, '', $spec);
                         $spec = trim($spec, '/');
                         $spec = self::$BASE_URL_PATH . '/' . $spec;
                     }
@@ -167,12 +165,10 @@ class Uri implements \Serializable, \IteratorAggregate
             return;
         }
 
-        //vd($_SERVER['HTTPS'], $_SERVER['REQUEST_SCHEME'], $_SERVER['SERVER_PORT']);
         if ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ||
             (isset($_SERVER['REQUEST_SCHEME']) && $_SERVER['REQUEST_SCHEME'] == self::SCHEME_HTTP_SSL) ||
             (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT']))
         {
-        //if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
             $this->scheme = self::SCHEME_HTTP_SSL;
         }
 
@@ -732,7 +728,6 @@ class Uri implements \Serializable, \IteratorAggregate
         if (preg_match('/^'.  preg_quote(self::$BASE_URL_PATH, '/') . '/', $path)) {
             $path = preg_replace('/^'.preg_quote(self::$BASE_URL_PATH, '/').'/', '', $path);
         }
-        //$path = str_replace(self::$BASE_URL_PATH, '', $path);
         return $path;
     }
 
@@ -943,13 +938,3 @@ class Uri implements \Serializable, \IteratorAggregate
     }
     
 }
-
-///**
-// * Class Url
-// *
-// * @author Michael Mifsud <info@tropotek.com>
-// * @see http://www.tropotek.com/
-// * @license Copyright 2016 Michael Mifsud
-// * @deprecated Use \Tk\Uri::create
-// */
-//class Url extends Uri {}

@@ -3,8 +3,6 @@ namespace Tk;
 
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
-
-
 /**
  * This is a rewritten Request object with the PSR7 interfaces taken into consideration,
  * However you will need to extend these objects to make them completely PSR7 compatible.
@@ -12,53 +10,12 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
  * The object uses the ArrayAccess interface so that the request object can be used like the $_REQUEST array
  * in situations that do not have the Request object.
  * 
- * 
- * @thought: I am not 100% sure that our libs currently needs to support PSR7 is its entirety.
- *
  * @author Michael Mifsud <info@tropotek.com>
  * @see http://www.tropotek.com/
  * @license Copyright 2015 Michael Mifsud
  */
 class Request extends \Symfony\Component\HttpFoundation\Request
 {
-
-
-//    public static function create($params = null, $serverParams = null, $uploadedFiles = null)
-//    {
-//        $uri = Uri::create();
-//        $method = 'GET';
-//        if (isset($_SERVER['REQUEST_METHOD'])) {
-//            $method = $_SERVER['REQUEST_METHOD'];
-//        }
-//
-//        $headers = Headers::create();
-//
-//        if ($params === null) {
-//            $params = $_REQUEST;
-//        }
-//
-//        if ($serverParams === null) {
-//            $serverParams = $_SERVER;
-//        }
-//
-//        $cookies = $_COOKIE;
-//
-//        if ($uploadedFiles === null) {
-//            $uploadedFiles = array();
-//            if (!empty($_FILES)) {
-//                $uploadedFiles = UploadedFile::parseUploadedFiles($_FILES);
-//            }
-//        }
-//
-//        $request = new static($uri, $method, $headers, $params, $serverParams, $cookies, $uploadedFiles);
-//        return $request;
-//    }
-
-
-//    public function get($key, $default = null)
-//    {
-//        return parent::get($key, $default);
-//    }
 
     /**
      * @return \Tk\Uri
@@ -88,7 +45,6 @@ class Request extends \Symfony\Component\HttpFoundation\Request
     {
         return $this->request->has($key);
     }
-    
 
     /**
      * Retrieve cookies.
@@ -104,7 +60,6 @@ class Request extends \Symfony\Component\HttpFoundation\Request
     {
         return $this->cookies->all();
     }
-
 
     /**
      * Retrieve query string arguments.
@@ -149,7 +104,6 @@ class Request extends \Symfony\Component\HttpFoundation\Request
     {
         return $this->files->get($name);
     }
-    
     
     /**
      * Retrieve server parameters.
@@ -267,7 +221,6 @@ class Request extends \Symfony\Component\HttpFoundation\Request
         return $this;
     }
 
-    
     /**
      * Get the client IP address.
      *
@@ -278,7 +231,6 @@ class Request extends \Symfony\Component\HttpFoundation\Request
     {
         return $this->getClientIp();
     }
-
 
     /**
      * Returns the referring \Tk\Uri if available.
@@ -310,7 +262,6 @@ class Request extends \Symfony\Component\HttpFoundation\Request
         return false;
     }
 
-
     /**
      * Get the browser userAgent string
      *
@@ -318,7 +269,7 @@ class Request extends \Symfony\Component\HttpFoundation\Request
      */
     public function getUserAgent()
     {
-        return $this->getServerParam('HTTP_USER_AGENT', '');
+        return $this->server->get('HTTP_USER_AGENT', '');
     }
     
     /**
@@ -332,10 +283,6 @@ class Request extends \Symfony\Component\HttpFoundation\Request
     {
         return file_get_contents("php://input");
     }
-
-
-
-
 
     /**
      * Get collection iterator

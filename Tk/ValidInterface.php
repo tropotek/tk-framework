@@ -7,6 +7,8 @@ namespace Tk;
  * @author Michael Mifsud <info@tropotek.com>
  * @see http://www.tropotek.com/
  * @license Copyright 2016 Michael Mifsud
+ * @deprecated 3.2 Start using the native PHP filter_var() 
+ * @see https://www.php.net/manual/en/function.filter-var.php
  */
 interface ValidInterface
 {

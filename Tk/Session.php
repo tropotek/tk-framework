@@ -148,7 +148,6 @@ class Session implements \ArrayAccess
         // Name the session, this will also be the name of the cookie
         $sesName = $this->getParam('session.name');
         if (!preg_match('~^(?=.*[a-z])[a-z0-9_]++$~iD', $sesName)) {
-            //throw new Exception('Invalid Session Name: ' . $sesName);
             error_log('Invalid Session Name: ' . $sesName);
         }
         session_name($sesName);
