@@ -151,7 +151,6 @@ class CurlyTemplate
      */
     function parse($data)
     {
-//        vd($data);
         $template = $this->template;
         $template = $this->parseRecursive($template, $data);
         $template = $this->parseBlock($template, $data);
@@ -205,7 +204,6 @@ class CurlyTemplate
                 if (isset($tplData[$name]) && $tplData[$name] !== false) {
                     if (is_array($tplData[$name]) && isset($tplData[$name][0])) {
                         $block = '';
-                        vd($tplData[$name]);
                         foreach($tplData[$name] as $rowData) {
                             $block .= $ctpl->parseRecursive($tpl, $rowData);
                         }

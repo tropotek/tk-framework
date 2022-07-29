@@ -14,7 +14,6 @@ function vd() {
     $path = str_replace($config->getSitePath(), '', $line['file']);
     $str = '';
     $str .= "\n";
-    //$str = sprintf('vd(%s [%s])', $path, $line['line']) . "\n";
     $str .= $vd->makeDump(func_get_args());
     $str .= sprintf('vd(%s) %s [%s];', implode(', ', $vd->getTypeArray(func_get_args())), $path, $line['line']) . "\n";
 
