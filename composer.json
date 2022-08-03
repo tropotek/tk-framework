@@ -1,50 +1,50 @@
 {
-  "name": "ttek/tk-framework",
-  "type": "library",
-  "description": "Tropotek Framework",
-  "keywords": [
-    "Tk",
-    "framework",
-    "tropotek"
-  ],
-  "time": "2019-04-09",
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "Michael Mifsud",
-      "email": "info@tropotek.com",
-      "homepage": "http://www.tropotek.com/"
-    }
-  ],
-  "funding": [
-    {
-      "type": "Paypal",
-      "url": "https://www.paypal.me/tropotek"
-    }
-  ],
-  "autoload": {
-    "psr-0": {
-      "Tk\\": ""
-    },
-    "files": [
-      "Tk/Exception.php"
+    "name": "ttek/tk-framework",
+    "type": "library",
+    "description": "Tropotek Framework",
+    "keywords":  [
+        "Tk",
+        "framework",
+        "tropotek"
     ],
-    "exclude-from-classmap": [
-      "/tests/"
-    ]
-  },
-  "require": {
-    "php": "^7.3||^8.0",
-    "psr/log": "^1.0",
-    "ext-json": "*",
-    "ttek/tk-installers": "~3.0.0",
-    "monolog/monolog": "^2.0",
-    "symfony/http-foundation": "4.2.*",
-    "lasserafn/php-initial-avatar-generator": "4.2.*"
-  },
-  "extra": {
-    "branch-alias": {
-      "dev-master": "3.0.x-dev"
+    "time": "2022-08-04",
+    "license": "MIT",
+    "authors":  [
+         {
+            "name": "Michael Mifsud",
+            "email": "info@tropotek.com",
+            "homepage": "http://www.tropotek.com/"
+        }
+    ],
+    "funding":  [
+         {
+            "type": "Paypal",
+            "url": "https://www.paypal.me/tropotek"
+        }
+    ],
+    "autoload":  {
+        "psr-0":  {
+            "Tk\\": ""
+        },
+        "files":  [
+            "Tk/Exception.php"
+        ],
+        "exclude-from-classmap":  [
+            "/tests/"
+        ]
+    },
+    "require":  {
+        "php": "^7.3||^8.0",
+        "psr/log": "^1.0",
+        "ext-json": "*",
+        "ttek/tk-installers": "~3.0.0",
+        "monolog/monolog": "^2.0",
+        "symfony/http-foundation": "4.2.*",
+        "lasserafn/php-initial-avatar-generator": "4.2.*"
+    },
+    "extra":  {
+        "branch-alias":  {
+            "dev-master": "3.0.x-dev"
+        }
     }
-  }
 }
