@@ -1,49 +1,49 @@
 {
-    "name": "ttek/tk-framework",
-    "type": "library",
-    "description": "Tropotek Framework",
-    "keywords":  [
-        "Tk",
-        "framework",
-        "tropotek"
-    ],
-    "time": "2022-08-05",
-    "license": "MIT",
-    "authors":  [
-         {
-            "name": "Michael Mifsud",
-            "homepage": "http://www.tropotek.com/"
-        }
-    ],
-    "funding":  [
-         {
-            "type": "Paypal",
-            "url": "https://www.paypal.me/tropotek"
-        }
-    ],
-    "autoload":  {
-        "psr-0":  {
-            "Tk\\": ""
-        },
-        "files":  [
-            "Tk/Exception.php"
-        ],
-        "exclude-from-classmap":  [
-            "/tests/"
-        ]
-    },
-    "require":  {
-        "php": "^7.3||^8.0",
-        "psr/log": "^1.0",
-        "ext-json": "*",
-        "ttek/tk-installers": "~3.2.0",
-        "monolog/monolog": "^2.0",
-        "symfony/http-foundation": "4.2.*",
-        "lasserafn/php-initial-avatar-generator": "4.2.*"
-    },
-    "extra":  {
-        "branch-alias":  {
-            "dev-master": "3.2.x-dev"
-        }
+  "name": "ttek/tk-framework",
+  "type": "library",
+  "description": "Tropotek Framework",
+  "keywords": [
+    "Tk",
+    "framework",
+    "tropotek"
+  ],
+  "time": "2019-04-09",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Michael Mifsud",
+      "homepage": "http://www.tropotek.com/"
     }
+  ],
+  "funding": [
+    {
+      "type": "Paypal",
+      "url": "https://www.paypal.me/tropotek"
+    }
+  ],
+  "autoload": {
+    "psr-0": {
+      "Tk\\": ""
+    },
+    "files": [
+      "Tk/Exception.php"
+    ],
+    "exclude-from-classmap": [
+      "/tests/"
+    ]
+  },
+  "require": {
+    "php": "^7.3||^8.0",
+    "psr/log": "^1.0",
+    "ext-json": "*",
+    "ttek/tk-installers": "~3.2.0",
+    "monolog/monolog": "^2.0",
+    "symfony/http-foundation": "4.2.*",
+    "lasserafn/php-initial-avatar-generator": "4.2.*"
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "3.2.x-dev"
+    }
+  }
 }
