@@ -157,6 +157,7 @@ class Config extends Collection
         $config['system.temp.path']         = '/data/temp';
         $config['system.src.path']          = '/src';
         $config['system.vendor.path']       = '/vendor';
+        $config['system.vendor.org.path']   = '/vendor/ttek';
         $config['system.plugin.path']       = '/plugin';
         $config['system.assets.path']       = '/assets';
         $config['system.template.path']     = '/html';
@@ -632,6 +633,24 @@ class Config extends Collection
     public function getVendorPath()
     {
         return $this->getSitePath() . rtrim($this->get('system.vendor.path'), '/');
+    }
+
+    /**
+     * Returns the organisations vendor path (Defaults: /vendor/ttek)
+     * @return string
+     */
+    public function getOrgVendorUrl()
+    {
+        return $this->getSiteUrl() . rtrim($this->get('system.vendor.org.path'), '/');
+    }
+
+    /**
+     * Returns the organisations vendor path (Defaults: /vendor/ttek)
+     * @return string
+     */
+    public function getOrgVendorPath()
+    {
+        return $this->getSitePath() . rtrim($this->get('system.vendor.org.path'), '/');
     }
 
     /**
