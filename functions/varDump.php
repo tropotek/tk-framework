@@ -5,6 +5,7 @@
  * Replacement for var_dump();
  *
  * @return string
+ * @deprecated use the new /Tk/Debug/VarDump object
  */
 function vd() {
     $config = \Tk\Config::getInstance();
@@ -30,6 +31,7 @@ function vd() {
  * Replacement for var_dump();
  *
  * @return string
+ * @deprecated use the new /Tk/Debug/VarDump object
  */
 function vdd() {
     $config = \Tk\Config::getInstance();
