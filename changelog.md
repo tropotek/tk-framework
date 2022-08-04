@@ -1,5 +1,20 @@
 #CHANGELOG#
 
+Ver 3.2.14 [2022-08-05]:
+-------------------------------
+  - Tagging and releasing branch `3.2` with version `3.0.106`.
+  - updated installers lib ver
+  - added comment
+  - Merge remote-tracking branch 'uom/3.2' into 3.2
+  - Tagging and releasing branch `3.0` with version `3.0.104`.
+  - removing comments
+  - Tagging and releasing branch `3.0` with version `3.0.102`.
+  - Tagging and releasing branch `3.0` with version `3.0.100`.
+  - Merge branch '3.0' of ssh://github.com/tropotek/tk-framework into 3.0
+  - Added timesheet export
+  - Tagging and releasing branch `3.0` with version `3.0.98`.
+
+
 Ver 3.0.106 [2022-08-05]:
 -------------------------------
   - updated installers lib ver
