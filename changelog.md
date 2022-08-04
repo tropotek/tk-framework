@@ -1,22 +1,37 @@
 #CHANGELOG#
 
-Ver 3.0.104 [2022-08-04]:
+Ver 3.2.12 [2022-08-03]:
 -------------------------------
-  - removing comments
-  - Tagging and releasing branch `3.0` with version `3.0.102`.
+  - removed comments
 
 
-Ver 3.0.102 [2022-05-13]:
+Ver 3.2.10 [2022-03-18]:
 -------------------------------
 
 
-Ver 3.0.100 [2022-03-29]:
+Ver 3.2.8 [2022-03-17]:
 -------------------------------
-  - Merge branch '3.0' of ssh://github.com/tropotek/tk-framework into 3.0
-  - Added timesheet export
+  - Fixed placement export list for terraDotta
 
 
-Ver 3.0.98 [2022-03-08]:
+Ver 3.2.6 [2022-03-08]:
+-------------------------------
+
+
+Ver 3.2.4 [2022-03-08]:
+-------------------------------
+
+
+Ver 3.2.2 [2022-03-08]:
+-------------------------------
+  - Added session cleanup to cron
+
+
+Ver 3.2.0 [2022-03-03]:
+-------------------------------
+
+
+Ver 3.0.98 [2022-03-03]:
 -------------------------------
 
 
