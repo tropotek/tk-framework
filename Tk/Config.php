@@ -639,6 +639,15 @@ class Config extends Collection
      * Returns the organisations vendor path (Defaults: /vendor/ttek)
      * @return string
      */
+    public function getOrgVendor()
+    {
+        return rtrim($this->get('system.vendor.org.path'), '/');
+    }
+
+    /**
+     * Returns the organisations vendor path (Defaults: /vendor/ttek)
+     * @return string
+     */
     public function getOrgVendorUrl()
     {
         return $this->getSiteUrl() . rtrim($this->get('system.vendor.org.path'), '/');
