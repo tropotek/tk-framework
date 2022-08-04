@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 3.2.20 [2022-08-05]:
+-------------------------------
+  - updated config to have orgVendorPath
+
+
 Ver 3.2.18 [2022-08-05]:
 -------------------------------
   - updated config to have orgVendorPath
