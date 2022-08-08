@@ -52,7 +52,6 @@ namespace Tk\Debug {
                     $logger = new NullLogger();
                 if (!$sitePath)
                     $sitePath = dirname(dirname(dirname(dirname(__FILE__))));
-
                 static::$instance = new static($logger, $sitePath);
             }
             return static::$instance;
@@ -211,7 +210,6 @@ namespace { // global code
      * @return string
      */
     function vd() {
-        //$vd = VarDump::getInstance();
         $vd = VarDump::getInstance(Config::getInstance()->getLog());
         $line = current(debug_backtrace());
         $path = str_replace($vd->getSitePath(), '', $line['file']);
@@ -230,7 +228,6 @@ namespace { // global code
      * @return string
      */
     function vdd() {
-        //$vd = VarDump::getInstance();
         $vd = VarDump::getInstance(Config::getInstance()->getLog());
         $line = current(debug_backtrace());
         $path = str_replace($vd->getSitePath(), '', $line['file']);

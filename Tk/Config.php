@@ -183,7 +183,6 @@ class Config extends Collection
             $config->setLogPath('/var/log/apache2/error.log');
         }
 
-
         // Site information
         $config['system.info.project']      = 'untitled';
         $config['system.info.description']  = '';
@@ -200,12 +199,8 @@ class Config extends Collection
                 $config['system.info.project'] = $composer->name;
             if (isset($composer->description))
                 $config['system.info.description'] = $composer->description;
-//            if (isset($composer->version)) {
-//                $config['system.info.version'] = $composer->version;
-//                if ($composer->version == 'master' && isset($composer->extra->{'branch-alias'}->{'dev-master'})) {
-//                    $config['system.info.version'] = $composer->extra->{'branch-alias'}->{'dev-master'};
-//                }
-//            }
+            if (isset($composer->keywords))
+                $config['system.info.keywords'] = $composer->keywords;
             if (isset($composer->license))
                 $config['system.info.licence'] = $composer->license;
             if (isset($composer->time))
