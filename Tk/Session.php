@@ -4,7 +4,7 @@ namespace Tk;
 /**
  * Class Session
  *
- * @author Michael Mifsud <info@tropotek.com>
+ * @author Michael Mifsud <http://www.tropotek.com/>
  * @see http://www.tropotek.com/
  * @license Copyright 2015 Michael Mifsud
  * @todo We need to check the session name and sessino ID values are correctly implemented???

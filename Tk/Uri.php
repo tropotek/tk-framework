@@ -23,7 +23,7 @@ namespace Tk;
  * 
  * @todo This object methods should all be mutable...
  * 
- * @author Michael Mifsud <info@tropotek.com>
+ * @author Michael Mifsud <http://www.tropotek.com/>
  * @see http://www.tropotek.com/
  * @see http://www.php-fig.org/psr/psr-7/#3-5-psr-http-message-uriinterface
  * @license Copyright 2007 Michael Mifsud

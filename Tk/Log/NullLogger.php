@@ -10,7 +10,7 @@ namespace Tk\Log;
  * is a good way to avoid littering your code with `if ($this->logger) { }`
  * blocks.
  *
- * @author Michael Mifsud <info@tropotek.com>
+ * @author Michael Mifsud <http://www.tropotek.com/>
  * @link http://www.tropotek.com/
  * @license Copyright 2018 Michael Mifsud
  */

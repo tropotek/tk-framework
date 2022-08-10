@@ -13,7 +13,7 @@ namespace Tk;
  *
  * @link http://www.iso.org/iso/en/prods-services/popstds/currencycodeslist.html
  *
- * @author Tropotek <info@tropotek.com>
+ * @author Tropotek <http://www.tropotek.com/>
  * @created: 2/08/18
  * @link http://www.tropotek.com/
  * @license Copyright 2018 Tropotek

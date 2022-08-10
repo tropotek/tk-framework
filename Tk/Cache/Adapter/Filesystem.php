@@ -10,7 +10,7 @@ namespace Tk\Cache\Adapter;
  *
  * @see http://www.rooftopsolutions.nl/blog/107
  *
- * @author Michael Mifsud <info@tropotek.com>
+ * @author Michael Mifsud <http://www.tropotek.com/>
  * @see http://www.tropotek.com/
  * @license Copyright 2015 Michael Mifsud
  */

@@ -5,7 +5,7 @@ namespace Tk;
  * Use this to store and execute an array of callback events for objects
  *
  *
- * @author Tropotek <info@tropotek.com>
+ * @author Tropotek <http://www.tropotek.com/>
  * @created: 2/08/18
  * @link http://www.tropotek.com/
  * @license Copyright 2018 Tropotek

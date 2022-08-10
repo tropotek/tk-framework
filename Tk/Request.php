@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
  * The object uses the ArrayAccess interface so that the request object can be used like the $_REQUEST array
  * in situations that do not have the Request object.
  * 
- * @author Michael Mifsud <info@tropotek.com>
+ * @author Michael Mifsud <http://www.tropotek.com/>
  * @see http://www.tropotek.com/
  * @license Copyright 2015 Michael Mifsud
  */

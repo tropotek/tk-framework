@@ -13,7 +13,7 @@ use Psr\Log\LoggerInterface;
  * see the php system log file if your php.ini is setup for it.
  * 
  *
- * @author Michael Mifsud <info@tropotek.com>
+ * @author Michael Mifsud <http://www.tropotek.com/>
  * @see http://www.tropotek.com/
  * @license Copyright 2015 Michael Mifsud
  */
