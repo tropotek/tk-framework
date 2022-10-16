@@ -3,6 +3,7 @@ namespace Tk;
 
 use Tk\Traits\ConfigTrait;
 use Tk\Traits\FactoryTrait;
+use Tk\Traits\RegistryTrait;
 use Tk\Traits\SingletonTrait;
 
 /**
@@ -20,6 +21,7 @@ class System
     use SingletonTrait;
     use ConfigTrait;
     use FactoryTrait;
+    use RegistryTrait;
 
 
     protected function __construct() { }
@@ -109,7 +111,7 @@ class System
     /**
      * Get the composer.json as an array
      */
-    public function getComposer(): array
+    public function getComposerJson(): array
     {
         static $composer = null;
         if (!$composer) {

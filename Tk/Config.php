@@ -7,12 +7,15 @@ use Tk\Traits\SystemTrait;
 
 /**
  * This will hold all the systems configuration params.
- * Query this when looking for a system configuration value from anywhere in the code.
+ * All data in the config object is recreated each session.
+ *
+ * Query this when looking for a system configuration value.
  *
  * NOTE: No objects should be saved in the Config storage, only primitive types.
  *
  *
  * @author Tropotek <http://www.tropotek.com/>
+ *
  */
 class Config extends Collection
 {

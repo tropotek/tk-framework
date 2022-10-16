@@ -46,19 +46,17 @@ class StartupHandler implements EventSubscriberInterface
      */
     public function onCommand($event)
     {
-        $this->init($event->getRequest());
+        $this->init();
     }
 
-    /**
-     */
-    private function init(Request $request)
+    private function init(?Request $request = null)
     {
         self::$SCRIPT_CALLED = true;
         $this->out(self::$SCRIPT_START);
 
         $siteName = $this->getSystem()->getConfig()->get('system.site.name', '');
-        if ($this->getSystem()->getComposer()) {
-            $siteName .= sprintf(' [%s]', $this->getSystem()->getComposer()['name']);
+        if ($this->getSystem()->getComposerJson()) {
+            $siteName .= sprintf(' [%s]', $this->getSystem()->getComposerJson()['name']);
         }
         if ($this->getSystem()->getVersion()) {
             $siteName .= sprintf(' [v%s]', $this->getSystem()->getVersion());
@@ -66,22 +64,23 @@ class StartupHandler implements EventSubscriberInterface
 
         $this->out('- Project: ' . trim($siteName));
         $this->out('- Date: ' . date('Y-m-d H:i:s'));
-        if (!$this->getSystem()->isCli()) {
+        if ($request) {
             $this->out('- Host: ' . $request->getScheme() . '://' . $request->getHost());
             $this->out('- Base Path: ' . $request->getPathInfo());
             $this->out('- Base URL: ' . $request->getBaseUrl());
             $this->out('- Method: ' . $request->getMethod());
             $this->out('- Client IP: ' . $request->getClientIp());
             $this->out('- User Agent: ' . $request->headers->get('User-Agent') );
+            if ($request->getSession()) {
+                $this->out('- Session Name: ' . $request->getSession()->getName());
+                $this->out('- Session ID: ' . $request->getSession()->getId());
+            }
         } else {
-            $this->out('- CLI: ' . implode(' ', $request->server->get('argv')));
-        }
-        if ($request->getSession()) {
-            $this->out('- Session Name: ' . $request->getSession()->getName());
-            $this->out('- Session ID: ' . $request->getSession()->getId());
+            $this->out('- CLI: ' . implode(' ', $_SERVER['argv']));
         }
         $this->out('- Path: ' . $this->getConfig()->getBasePath());
         $this->out('- PHP: ' . \PHP_VERSION);
+        $this->out(self::$SCRIPT_LINE);
     }
 
     /**
@@ -92,7 +91,6 @@ class StartupHandler implements EventSubscriberInterface
         if ($event->getRequest()->attributes->has('_route')) {
             $this->out('- Controller: ' . $event->getRequest()->attributes->get('_controller'));
         }
-        $this->out(self::$SCRIPT_LINE);
     }
 
     private function out(string $str)
@@ -107,7 +105,7 @@ class StartupHandler implements EventSubscriberInterface
     {
         return [
             KernelEvents::REQUEST => [['onInit', 255], ['onRequest']],
-           // \Symfony\Component\Console\ConsoleEvents::COMMAND  => 'onCommand'
+            \Symfony\Component\Console\ConsoleEvents::COMMAND  => 'onCommand'
         ];
     }
 

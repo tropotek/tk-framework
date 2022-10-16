@@ -3,6 +3,7 @@ namespace Tk\Traits;
 
 use Tk\Config;
 use Tk\Factory;
+use Tk\Registry;
 use Tk\System;
 
 /**
@@ -33,5 +34,13 @@ trait SystemTrait
     public function getConfig(): Config
     {
         return $this->getSystem()->getConfig();
+    }
+
+    /**
+     * @return Registry|\App\Registry
+     */
+    public function getRegistry(): Registry
+    {
+        return $this->getSystem()->getRegistry();
     }
 }

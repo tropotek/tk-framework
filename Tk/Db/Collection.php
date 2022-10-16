@@ -3,6 +3,7 @@ namespace Tk\Db;
 
 use Tk\Traits\ConfigTrait;
 use Tk\Traits\FactoryTrait;
+use Tk\Traits\SystemTrait;
 
 /**
  * A collection object that can store its values in a DB table.
@@ -17,8 +18,7 @@ use Tk\Traits\FactoryTrait;
  */
 class Collection extends \Tk\Collection
 {
-    use ConfigTrait;
-    use FactoryTrait;
+    use SystemTrait;
 
 
     protected string $table = '';

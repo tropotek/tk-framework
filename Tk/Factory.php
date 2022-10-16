@@ -31,6 +31,7 @@ use Tk\Mvc\Dispatch;
 use Tk\Mvc\FrontController;
 use Tk\Traits\SingletonTrait;
 use Tk\Traits\SystemTrait;
+use \Tk\Console\Command;
 
 /**
  * @author Tropotek <http://www.tropotek.com/>
@@ -308,17 +309,17 @@ class Factory extends Collection implements FactoryInterface
      */
     public function getConsole(): Application
     {
-        if (!$this->get('system.console')) {
-            $app = new Application($this->getConfig()->get('system.site.name'), $this->getSystem()->getVersion());
-            $app->setDispatcher($this->initEventDispatcher());
+        if (!$this->has('console')) {
+            $app = new Application($this->getRegistry()->getSiteName(), $this->getSystem()->getVersion());
+            $app->setDispatcher($this->getEventDispatcher());
 
             // Setup Global Console Commands
-//            $app->add(new \Bs\Console\Upgrade());
+            $app->add(new Command\CleanData());
+            $app->add(new Command\Upgrade());
 //            $app->add(new \Bs\Console\Maintenance());
 //            $app->add(new \Bs\Console\DbBackup());
 //            $app->add(new \Bs\Console\UserPass());
 //            $app->add(new \Bs\Console\Migrate());
-//            $app->add(new \Bs\Console\CleanData());
 //            if ($this->isDebug()) {
 //                $app->add(new \Bs\Console\MakeModel());
 //                $app->add(new \Bs\Console\MakeTable());
@@ -330,8 +331,8 @@ class Factory extends Collection implements FactoryInterface
 //                $app->add(new \Bs\Console\Mirror());
 //            }
 
-            $this->set('system.console', $app);
+            $this->set('console', $app);
         }
-        return $this->get('system.console');
+        return $this->get('console');
     }
 }

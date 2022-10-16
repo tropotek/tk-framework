@@ -23,21 +23,10 @@ class Bootstrap
          */
         chdir($this->getConfig()->getBasePath());
 
-        // ----------- CONFIG INIT ------------
-        // NOTE: This section sets up the site setting, be careful
-        //       what you do before this as objects may not be
-        //       constructed with the correct settings in the Factory
-
-        if ($this->getFactory()->getDb()) {
-            \Tk\Db\Collection::create('config')->installTable();
-            $this->getConfig()->replace(\Tk\Db\Collection::create('config')->all());
-        }
         // Apply all php config settings to php
         foreach ($this->getConfig()->getGroup('php', true) as $k => $v) {
             @ini_set($k, $v);
         }
-
-        // --------------- END ----------------
 
         \Tk\Uri::$SITE_HOSTNAME = $this->getFactory()->getRequest()->getHost();
         \Tk\Uri::$BASE_URL = $this->getConfig()->getBaseUrl();
