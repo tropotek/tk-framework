@@ -25,13 +25,10 @@ composer require ttek/tk-framework
 Or add the following to your composer.json file:
 
 ```json
-"ttek/tk-framework": "~3.2"
+"ttek/tk-framework": "^7.0"
 ```
 
 If you do not use Composer, you can grab the code from GitHub, and use any
 PSR-0 compatible autoloader to load the classes.
 
-## Introduction
-
-TODO
 

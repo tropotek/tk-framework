@@ -3,61 +3,44 @@ namespace Tk\Cache\Adapter;
 
 
 
+use Tk\FileUtil;
+
 /**
  * A filesystem cache class
  * This adapter uses a 10 byte header to test the time therefore should be faster than having
  * to read the entire cache file
  *
  * @see http://www.rooftopsolutions.nl/blog/107
- *
- * @author Michael Mifsud <http://www.tropotek.com/>
- * @see http://www.tropotek.com/
- * @license Copyright 2015 Michael Mifsud
+ * @author Tropotek <http://www.tropotek.com/>
  */
 class Filesystem implements Iface
 {
+    public static $DIR_MASK = 0777;
+
     /**
      * @var string
      */
-    protected $cachePath = '';
+    protected string $cachePath = '';
     
 
-    /**
-     * __construct
-     *
-     * @param string $cachePath
-     */
-    public function __construct($cachePath = '')
+    public function __construct(string $cachePath = '')
     {
         $this->cachePath = $cachePath;
     }
 
     /**
-     * @param string $cachePath
-     * @return Filesystem
-     */
-    public static function create($cachePath = '')
-    {
-        $obj = new static($cachePath);
-        return $obj;
-    }
-
-    /**
      * This is the function you store information with
      *
-     * @param string $key
      * @param mixed $data
-     * @param int $ttl
-     * @return bool|void
-     * @throws \Tk\Exception
+     * @return bool
+     * @throws \Exception
      */
-    public function store($key, $data, $ttl = 0)
+    public function store(string $key, $data, int $ttl = 0)
     {
-        if (!is_dir($this->getCachePath())) {
-            if (!mkdir($this->getCachePath(), \Tk\Config::getInstance()->getDirMask(), true)) {
-                \Tk\Log::error('Cannot create path: ' . $this->getCachePath());
-            }
+        if (!FileUtil::mkdir($this->getCachePath())) {
+            throw new \Tk\Cache\Exception('Cannot create path: ' . $this->getCachePath());
         }
+
         // Opening the file in read/write mode
         $h = fopen($this->getFileName($key), 'a+');
         if (!$h) {
@@ -75,15 +58,16 @@ class Filesystem implements Iface
             throw new \Tk\Cache\Exception('Could not write to cache');
         }
         fclose($h);
+        return true;
     }
 
     /**
      * The function to fetch data returns false on failure
      *
      * @param string $key
-     * @return bool
+     * @return mixed|bool
      */
-    public function fetch($key)
+    public function fetch(string $key)
     {
         $filename = $this->getFileName($key);
         if (!file_exists($filename)) {
@@ -116,10 +100,9 @@ class Filesystem implements Iface
     /**
      * Delete
      *
-     * @param string $key
      * @return bool
      */
-    public function delete($key)
+    public function delete(string $key)
     {
         $filename = $this->getFileName($key);
         if (file_exists($filename)) {
@@ -131,12 +114,10 @@ class Filesystem implements Iface
 
     /**
      * Delete all files in the cachePath
-     *
-     * @return bool
      */
-    public function clear()
+    public function clear(): bool
     {
-        return \Tk\File::rmdir($this->getCachePath());
+        return \Tk\FileUtil::rmdir($this->getCachePath());
     }
 
     /**
@@ -147,8 +128,6 @@ class Filesystem implements Iface
      */
     private function getFileName($key)
     {
-        //return $this->getCachePath() . '/s_cache-' . md5($key);
-        //return $this->getCachePath() . '/' . $key . '.cache';
         return $this->getCachePath() . '/' . $key;
     }
 

@@ -3,73 +3,47 @@ namespace Tk;
 
 
 /**
- * Class Encrypt
- * 
- * An object to handle string encryption based on a key
+ * An object to handle basic string encryption based on a secret key
  *
- * @author Michael Mifsud <http://www.tropotek.com/>
- * @see http://www.tropotek.com/
- * @license Copyright 2015 Michael Mifsud
+ * @author Tropotek <http://www.tropotek.com/>
  */
 class Encrypt
 {
     /**
-     * @var string
+     * This key needs to be the same to encrypt and decrypt a value.
      */
-    private $key = '@@_Default_TK_@@';
+    private string $secret;
 
-    /**
-     * Encrypt constructor.
-     *
-     * @param string $key
-     */
-    public function __construct($key = null)
+
+    public function __construct(string $secret)
     {
-        if ($key)
-            $this->key = $key;
+        $this->secret = $secret;
     }
 
-    /**
-     *
-     * @param string $key
-     * @return Encrypt
-     */
-    public static function create($key = null)
+    public static function create(string $secret): Encrypt
     {
-        return new self($key);
+        return new self($secret);
     }
 
-    /**
-     *  encrypt
-     *
-     * @param string $string
-     * @return string
-     */
-    public function encode($string)
+    public function encrypt(string $string): string
     {
         $result = '';
         for($i = 0; $i < strlen($string); $i++) {
             $char = substr($string, $i, 1);
-            $keychar = substr($this->key, ($i % strlen($this->key)) - 1, 1);
+            $keychar = substr($this->secret, ($i % strlen($this->secret)) - 1, 1);
             $char = chr(ord($char) + ord($keychar));
             $result .= $char;
         }
         return base64_encode($result);
     }
 
-    /**
-     * decrypt
-     *
-     * @param string $string
-     * @return string
-     */
-    public function decode($string)
+    public function decrypt(string $string): string
     {
         $result = '';
         $string = base64_decode($string);
         for($i = 0; $i < strlen($string); $i++) {
             $char = substr($string, $i, 1);
-            $keychar = substr($this->key, ($i % strlen($this->key)) - 1, 1);
+            $keychar = substr($this->secret, ($i % strlen($this->secret)) - 1, 1);
             $char = chr(ord($char) - ord($keychar));
             $result .= $char;
         }

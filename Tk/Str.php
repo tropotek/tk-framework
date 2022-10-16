@@ -4,9 +4,7 @@ namespace Tk;
 /**
  * An object filled with string utility methods.
  *
- * @author Michael Mifsud <http://www.tropotek.com/>
- * @see http://www.tropotek.com/
- * @license Copyright 2016 Michael Mifsud
+ * @author Tropotek <http://www.tropotek.com/>
  */
 class Str
 {
@@ -14,12 +12,8 @@ class Str
     /**
      * Strip tag attributes and their values from html
      * By default the $attrs contains tag events
-     *
-     * @param string $str
-     * @param array $attrs Eg: array('onclick', 'onmouseup', 'onmousedown', ...);
-     * @return string
      */
-    public static function stripAttrs($str, $attrs = null)
+    public static function stripAttrs(string $str, ?array $attrs = null): string
     {
         if ($attrs === null)
             $attrs = array('onabort', 'onactivate', 'onafterprint', 'onafterupdate', 'onbeforeactivate', 'onbeforecopy',
@@ -46,13 +40,7 @@ class Str
         return $str;
     }
 
-    /**
-     * @param string $html
-     * @param array $tags
-     * @param array $styles
-     * @return string
-     */
-    public static function stripStyles($html, $tags = array('table', 'th', 'tr', 'td', 'tbody', 'thead'), $styles = array('height', 'width'))
+    public static function stripStyles(string $html, array $tags = ['table', 'th', 'tr', 'td', 'tbody', 'thead'], array $styles = ['height', 'width']): string
     {
         foreach ($styles as $style) {
             $reg = sprintf('/(<%s)(.*)(%s: [0-9a-z]+;)/i', implode('|', $tags), $style);
@@ -63,11 +51,8 @@ class Str
 
     /**
      * prepend each line with an index number
-     *
-     * @param $str
-     * @return string
      */
-    public static function lineNumbers($str)
+    public static function lineNumbers(string $str): string
     {
         $lines = explode("\n", $str);
         foreach ($lines as $i => $line) {
@@ -78,60 +63,52 @@ class Str
 
     /**
      * Return the string with the first character lowercase
-     *
-     * @param $str
-     * @return string
      */
-    public static function lcFirst($str)
+    public static function lcFirst(string $str): string
     {
         return strtolower($str[0]) . substr($str, 1);
     }
 
     /**
-     * Convert to CamelCase so "Test FuncName" would convert to "testFuncName"
+     * Convert to CamelCase so "test_func_name" would convert to "testFuncName"
      * Adds a capital at the first char and ass a space before all other upper case chars
-     *
-     * @param string $str
-     * @return string
      */
-    public static function toCamelCase($str)
+    public static function toCamel(string $str): string
     {
         return lcfirst(str_replace(' ', '', ucwords(str_replace(['_', '-'], ' ', $str))));
     }
 
     /**
-     * Convert camel case words so "testFunc" would convert to "Test Func"
-     * Adds a capital at the first char and ass a space before all other upper case chars
+     * Convert to snake Case so "testFuncName" would convert to "test_func_name"
+     */
+    public static function toSnake(string $str, $ch = '_'): string
+    {
+        return strtolower(preg_replace('/(?<!^)[A-Z]+|(?<!^|\d)[\d]+/', $ch.'$0', $str));
+    }
+
+    /**
+     * Convert camel case to words "testFunc" => "Test Func"
      *
      * @param string $str
      * @return string
      */
-    public static function ucSplit($str)
+    public static function camel2words($str)
     {
         return ucfirst(preg_replace('/[A-Z]/', ' $0', $str));
     }
 
     /**
-     * Replace any double control/linefeed characters with a single
-     * character
-     *
-     * @param string $str
-     * @param string $replace (optional) The newline replacement string
-     * @return string
+     * Replace any double control/linefeed characters with a single character
      */
-    public static function singleNewLines($str, $replace = "\n")
+    public static function singleNewLines(string $str, string $replace = "\n"): string
     {
-        //return preg_replace('~(*BSR_ANYCRLF)\R~', $replace, $str);
         return preg_replace('~(*BSR_ANYCRLF)\R{2}~', $replace, $str);
     }
-
 
     /**
      * Explode using multiple delimiters
      *
-     * @param array $delimiters
-     * @param string $string
-     * @return false|string[]
+     * @return false|string[]|array
      */
     public static function explode(array $delimiters, string $string)
     {
@@ -139,32 +116,22 @@ class Str
     }
 
     /**
-     * @param string[] $arr
-     * @return string[]
+     * trim all strings in an array
      */
-    public static function trimArray(array $arr)
+    public static function trimArray(array $arr): array
     {
-        $a = array();
-        foreach ($arr as $k => $v) {
-            if ($v == null || trim($v) == '') continue;
-            $a[$k] = trim($v);
-        }
-        return $a;
+        return array_map('trim', $arr);
     }
 
-
     /**
-     * Substring without losing word meaning and
+     * Substring without cutting a word boundry
      * tiny words (length 3 by default) are included on the result.
      * "..." is added if result do not reach original string length
      *
-     * @param string $str
-     * @param integer $length
-     * @param string $endStr
-     * @param integer $minword
      * @return string
+     * @todo Lookup a more refined way of doing this
      */
-    public static function wordcat($str, $length, $endStr = '', $minword = 3)
+    public static function wordcat(string $str, int $length, string $endStr = '', int $minword = 3): string
     {
         if ($length < 1) return $str;
         if (!$str) {
@@ -190,13 +157,8 @@ class Str
 
     /**
      * concatenate a sting and add a suffix to the end if it is concatenated.
-     *
-     * @param string $str
-     * @param int $length
-     * @param string $suffix
-     * @return string
      */
-    public static function strcat($str, $length, $suffix = '...')
+    public static function strcat(string $str, int $length, string $suffix = '...'): string
     {
         if (strlen($str) > $length) {
             $str = substr($str, 0, $length) . $suffix;
@@ -211,17 +173,12 @@ class Str
      * in the string, but the number of bytes.
      * See http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
      * for information on UTF-8.
-     *
-     * @param string $str The string to compute number of bytes
-     * @return integer The length in bytes of the given string.
      */
-    public static function strByteSize($str)
+    public static function getByteSize(string $str): int
     {
         // STRINGS ARE EXPECTED TO BE IN ASCII OR UTF-8 FORMAT
         // Number of characters in string
         $strlen_var = strlen($str);
-
-        // string bytes counter
         $d = 0;
 
         /*
@@ -267,19 +224,15 @@ class Str
      * @param string $replacement
      * @return string|string[]|null
      */
-    public static function stripEntities($str, $replacement = '')
+    public static function stripEntities(string $str, string $replacement = '')
     {
         return preg_replace('/&#?[a-z0-9]+;/i',$replacement, $str);
     }
 
     /**
-     * Convert html special characters to nemeric entities (eg: &nbsp; to &#160;)
-     * Usefull for XML encoding strings
-     *
-     * @param string $xml
-     * @return string
-         */
-    public static function numericEntities($xml)
+     * Convert html special characters to numeric entities (eg: &nbsp; to &#160;)
+     */
+    public static function numericEntities(string $xml): string
     {
         $list = get_html_translation_table(\HTML_ENTITIES, ENT_NOQUOTES);
         $mapping = array();
@@ -293,11 +246,8 @@ class Str
     /**
      * Since PHP's ord() function is not compatible with UTF-8
      * Here is a workaround.... GGRRR!!!!
-     *
-     * @param string $ch
-     * @return integer
      */
-    public static function ord($ch)
+    public static function ord(string $ch): int
     {
         $k = mb_convert_encoding($ch, 'UCS-2LE', 'UTF-8');
         $k1 = ord(substr($k, 0, 1));
@@ -307,12 +257,10 @@ class Str
 
     /**
      * Test if a string is UTF-8 encoded
-     *
-     * @param string $string
      * @todo: Test this is working correctly
-     * @return bool
      */
-    public static function isUtf8($string) { // v1.01
+    public static function isUtf8(string $string): bool
+    {
         $_is_utf8_split = 5000;
         if (strlen($string) > $_is_utf8_split) {
             // Based on: http://mobile-website.mobi/php-utf8-vs-iso-8859-1-59
@@ -339,10 +287,9 @@ class Str
     /**
      * varToString
      *
-     * @param $var
-     * @return string
+     * @param mixed $var
      */
-    public static function varToString($var)
+    public static function varToString($var): string
     {
         if (is_object($var)) {
             return sprintf('Object(%s)', get_class($var));
@@ -370,12 +317,9 @@ class Str
     }
 
     /**
-     * Is the string a HTML string
-     *
-     * @param $str
-     * @return bool
+     * Is the string an HTML/XML string
      */
-    public static function isHtml($str)
+    public static function isHtml(string $str): bool
     {
         return (strlen($str) != strlen(strip_tags($str)));
     }

@@ -1,10 +1,9 @@
 <?php
 namespace Tk;
 
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
-/** A URI class.
- *
- * <b>[[&lt;scheme&gt;://][[&lt;user&gt;[:&lt;password&gt;]@]&lt;host&gt;[:&lt;port&gt;]]][/[&lt;path&gt;][?&lt;query&gt;][#&lt;fragment&gt;]]</b>
+/**
  *
  * Where:
  *
@@ -18,83 +17,79 @@ namespace Tk;
  * //  http://localhost/full/uri/path/index.html
  * </code>
  *
- * If the static $BASE_URL_PATH is set this will be prepended to all relative paths
+ * If the static $BASE_URL is set this will be prepended to all relative paths
  * when creating a URI
- * 
- * @todo This object methods should all be mutable...
- * 
- * @author Michael Mifsud <http://www.tropotek.com/>
- * @see http://www.tropotek.com/
- * @see http://www.php-fig.org/psr/psr-7/#3-5-psr-http-message-uriinterface
- * @license Copyright 2007 Michael Mifsud
+ *
+ * @author Tropotek <http://www.tropotek.com/>
  */
 class Uri implements \Serializable, \IteratorAggregate
 {
     /**
-     * @var string
+     * Absolute http and https URIs require a host per RFC 7230 Section 2.7
+     * but in generic URIs the host can be empty. So for http(s) URIs
+     * we apply this default host when no host is given yet to form a
+     * valid URI.
      */
-    public static $BASE_URL_PATH = '';
+    private const HTTP_DEFAULT_HOST = 'localhost';
 
     const SCHEME_HTTP = 'http';
     const SCHEME_HTTP_SSL = 'https';
     const SCHEME_FTP = 'ftp';
 
-    /**
-     * This is the supplied full/partial uri
-     * @var string
-     */
-    protected $spec = '';
+    private const DEFAULT_PORTS = [
+        'http'  => 80,
+        'https' => 443,
+        'ftp' => 21,
+        'gopher' => 70,
+        'nntp' => 119,
+        'news' => 119,
+        'telnet' => 23,
+        'tn3270' => 23,
+        'imap' => 143,
+        'pop' => 110,
+        'ldap' => 389,
+    ];
 
     /**
-     * @var string
+     * Set this in your bootstrap code if you are not using the root path for your site path
      */
-    protected $fragment = '';
+    public static string $BASE_URL = '';
 
     /**
-     * @var string
+     * The site hostname.
+     * NOTE: Be sure to set this in your boostrap code for CLI scripts
      */
-    protected $host = '';
+    public static string $SITE_HOSTNAME = '';
 
     /**
-     * @var string
+     * This is the supplied uri string
      */
-    protected $password = '';
+    protected string $spec = '';
 
-    /**
-     * @var string
-     */
-    protected $path = '';
 
-    /**
-     * @var int
-     */
-    protected $port = 80;
+    protected string $scheme = 'http';
 
-    /**
-     * @var array
-     */
-    protected $query = array();
+    protected int $port = 80;
 
-    /**
-     * @var string
-     */
-    protected $scheme = 'http';
+    protected string $username = '';
 
-    /**
-     * @var string
-     */
-    protected $username = '';
+    protected string $password = '';
+
+    protected string $host = '';
+
+    protected string $path = '';
+
+    protected string $fragment = '';
+
+    protected array $query = [];
 
 
 
     /**
      * Paths that do not start with a scheme section to the uri are prepended with the  self::$BASE_URL . '/' string
-     *
-     * @param string $spec The String to parse as a URL
      */
-    public function __construct($spec = null)
+    public function __construct(?string $spec = null)
     {
-        $this->spec = $spec;
         if ($spec === null) {   // Create an auto request uri.
             $spec = '/';
             if (isset($_SERVER['REQUEST_URI'])) {
@@ -104,17 +99,17 @@ class Uri implements \Serializable, \IteratorAggregate
                 }
             }
         }
-        if ($this->isUrl()) {
+        if (!$this->isApplicationScheme()) {
             $spec = trim(urldecode($spec));
-            if ($spec && self::$BASE_URL_PATH) {
+            if ($spec && self::$BASE_URL) {
                 $p = parse_url($spec);
                 if (!preg_match('/^\/\//', $spec) && !isset($p['scheme'])) {
-                    if (self::$BASE_URL_PATH) {
-                        if (preg_match('/^' . preg_quote(self::$BASE_URL_PATH, '/') . '/', $spec)) {
-                            $spec = preg_replace('/^' . preg_quote(self::$BASE_URL_PATH, '/') . '/', '', $spec);
+                    if (self::$BASE_URL) {
+                        if (preg_match('/^' . preg_quote(self::$BASE_URL, '/') . '/', $spec)) {
+                            $spec = preg_replace('/^' . preg_quote(self::$BASE_URL, '/') . '/', '', $spec);
                         }
                         $spec = trim($spec, '/');
-                        $spec = self::$BASE_URL_PATH . '/' . $spec;
+                        $spec = self::$BASE_URL . '/' . $spec;
                     }
                 }
             }
@@ -130,13 +125,11 @@ class Uri implements \Serializable, \IteratorAggregate
      *   \Tk\Uri::create('http://example.com/test');
      * </code>
      *
-     * @param $spec
-     * @return static
+     * @param string|Uri|null $spec
      */
-    public static function create($spec = null)
+    public static function create($spec = null): Uri
     {
-        if ($spec instanceof Uri)
-            return clone $spec;
+        if ($spec instanceof Uri) return clone $spec;
         return new static($spec);
     }
 
@@ -145,7 +138,7 @@ class Uri implements \Serializable, \IteratorAggregate
     {
         return serialize(array('spec' => $this->spec));
     }
-    
+
     public function unserialize($data)
     {
         $arr = unserialize($data);
@@ -159,21 +152,22 @@ class Uri implements \Serializable, \IteratorAggregate
     private function init()
     {
         $spec = $this->spec;
-        $host = 'localhost';
 
-        if (!$this->isUrl()) {
+        if ($this->isApplicationScheme()) {
             return;
         }
 
-        if ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ||
-            (isset($_SERVER['REQUEST_SCHEME']) && $_SERVER['REQUEST_SCHEME'] == self::SCHEME_HTTP_SSL) ||
-            (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT']))
-        {
-            $this->scheme = self::SCHEME_HTTP_SSL;
-        }
+        $this->scheme = $_SERVER['REQUEST_SCHEME'] ?? self::SCHEME_HTTP_SSL;
+//        if ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ||
+//            (isset($_SERVER['REQUEST_SCHEME']) && $_SERVER['REQUEST_SCHEME'] == self::SCHEME_HTTP_SSL) ||
+//            (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT']))
+//        {
+//            $this->scheme = self::SCHEME_HTTP_SSL;
+//        }
 
-        if (\Tk\Config::getInstance()->get('site.host')) {
-            $host = \Tk\Config::getInstance()->get('site.host');
+        $host = self::HTTP_DEFAULT_HOST;
+        if (!empty(self::$SITE_HOSTNAME)) {
+            $host = self::$SITE_HOSTNAME;
         } else if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
             $host = $_SERVER['HTTP_X_FORWARDED_HOST'];
         } else if (isset($_SERVER['HTTP_HOST'])) {
@@ -204,12 +198,6 @@ class Uri implements \Serializable, \IteratorAggregate
             }
             if (array_key_exists('port', $components)) {
                 $this->setPort($components['port']);
-            } else if (isset($_SERVER['SERVER_PORT']) &&
-                ($_SERVER['SERVER_PORT'] != 80 || $this->scheme != 'http') &&
-                ($_SERVER['SERVER_PORT'] != 443 || $this->scheme != 'https') &&
-                $this->getHost() == $host)
-            {
-                $this->setPort($_SERVER['SERVER_PORT']);
             }
             if (array_key_exists('user', $components)) {
                 $this->setUsername($components['user']);
@@ -232,23 +220,17 @@ class Uri implements \Serializable, \IteratorAggregate
 
     /**
      * returns true if the uri is a link/URL and not a data/script type uri
-     *
-     * @return bool
      */
-    public function isUrl()
+    public function isApplicationScheme(): bool
     {
-        return !preg_match('/^(#|javascript|mailto|data)/i', $this->spec);
+        return preg_match('/^(#|javascript|mailto|data)/i', $this->spec);
     }
 
     /**
      * Compare 2 uris by path if $queryString is false
      * or by complete uri if $queryString is true.
-     *
-     * @param \Tk\Uri $uri
-     * @param bool $queryString
-     * @return bool
      */
-    public function equals($uri, $queryString = false)
+    public function equals(Uri $uri, bool $queryString = false): bool
     {
         if (!$queryString && $this->getPath() == $uri->getPath()) {
             return true;
@@ -260,22 +242,12 @@ class Uri implements \Serializable, \IteratorAggregate
     }
 
 
-    /**
-     * Get the user
-     *
-     * @return string
-     */
-    public function getUsername()
+    public function getUsername(): string
     {
         return $this->username;
     }
 
-    /**
-     * Get the password if available
-     *
-     * @return string
-     */
-    public function getPassword()
+    public function getPassword(): string
     {
         return $this->password;
     }
@@ -283,93 +255,59 @@ class Uri implements \Serializable, \IteratorAggregate
     /**
      * Returns file extension for this pathname.
      *
-     * A the last period ('.') in the pathname is used to delimit the file
+     * At the last period ('.') in the pathname is used to delimit the file
      * extension .If the pathname does not have a file extension null is
      * returned.
      *
-     * @return string
      */
-    public function getExtension()
+    public function getExtension(): string
     {
-        if ($this->isUrl()) {
-            if (substr($this->getPath(), -6) == 'tar.gz') {
-                return 'tar.gz';
-            }
-            return pathinfo($this->getPath(), PATHINFO_EXTENSION);
-        }
-        return '';
+        return FileUtil::getExtension($this->getPath());
     }
 
     /**
      * Get the basename of this uri with or without its extension.
-     *
-     * @return string
-     * @deprecated Use Uri::basename();
      */
-    public function getBasename()
-    {
-        return $this->basename();
-    }
-
-    /**
-     * Get the basename of this uri with or without its extension.
-     *
-     * @return string
-     */
-    public function basename()
+    public function basename(): string
     {
         return basename($this->getPath());
     }
 
     /**
      * Get the basename of this uri with or without its extension.
-     *
-     * @return Uri
      */
-    public function dirname()
+    public function dirname(): Uri
     {
-        $url = clone $this;
-        if ($this->isUrl()) {
-            $url->spec = dirname($url->getPath());
-            $url->setPath(dirname($url->getPath()));
-        }
-        return $url;
+        $uri = clone $this;
+        if ($this->isApplicationScheme()) $uri;
+        $uri->spec = dirname($uri->getPath());
+        $uri->setPath(dirname($uri->getPath()));
+        return $uri;
     }
 
     /**
      * clear and reset the query string
-     *
-     * @return static
      */
-    public function reset()
+    public function reset(): Uri
     {
-        $this->query = array();
+        $this->query = [];
         return $this;
     }
 
     /**
      * Add a field to the query string
-     *
-     * @param string $field
-     * @param string|string[] $value
-     * @return static
      */
-    public function set($field, $value = null)
+    public function set(string $field, ?string $value = null): Uri
     {
-        if ($value === null) {
-            $value = $field;
-        }
+        if ($value === null)  $value = $field;
         $this->query[$field] = $value;
         return $this;
     }
 
     /**
      * Get a value from the query string.
-     *
-     * @param string $field
-     * @return string
      */
-    public function get($field)
+    public function get(string $field): string
     {
         if (isset($this->query[$field])) {
             return $this->query[$field];
@@ -379,32 +317,24 @@ class Uri implements \Serializable, \IteratorAggregate
 
     /**
      * Get all the query params
-     *
-     * @return array
      */
-    public function all()
+    public function all(): array
     {
         return $this->query;
     }
 
     /**
      * Check if a query field exists in the array
-     *
-     * @param string $field
-     * @return bool
      */
-    public function has($field)
+    public function has(string $field): bool
     {
         return isset($this->query[$field]);
     }
 
     /**
      * Remove a field in the query string
-     *
-     * @param string $field
-     * @return static
      */
-    public function remove($field)
+    public function remove(string $field): Uri
     {
         if ($this->has($field)) {
             unset($this->query[$field]);
@@ -413,46 +343,20 @@ class Uri implements \Serializable, \IteratorAggregate
     }
 
     /**
-     * Remove a field in the query string
-     *
-     * @param string $field
-     * @return static
-     * @deprecated Use remove($field)
+     * IteratorAggregate for iterating over the query params
      */
-    public function delete($field)
-    {
-        return $this->remove($field);
-    }
-
-    /**
-     * IteratorAggregate for iterating over the object like an array.
-     *
-     * @return \ArrayIterator
-     */
-    public function getIterator()
+    public function getIterator(): \ArrayIterator
     {
         return new \ArrayIterator($this->query);
     }
 
-    /**
-     * Set the fragment portion of the uri
-     *
-     * @param string $fragment
-     * @return static
-     */
-    public function setFragment($fragment)
+    public function setFragment(string $fragment): Uri
     {
         $this->fragment = urldecode($fragment);
         return $this;
     }
 
-    /**
-     * Set the port of the uri
-     *
-     * @param int $port
-     * @return static
-     */
-    public function setPort($port)
+    public function setPort(int $port): Uri
     {
         $port = (int)$port;
         if ($port && ($port <= 0 || $port >= 65535)) {
@@ -466,66 +370,36 @@ class Uri implements \Serializable, \IteratorAggregate
         return $this;
     }
 
-    /**
-     * Set the scheme
-     *
-     * @param string $scheme
-     * @return static
-     */
-    public function setScheme($scheme)
+    public function setScheme(string $scheme): Uri
     {
         $this->scheme = $scheme;
         return $this;
     }
 
-    /**
-     * Set the host portion of the uri
-     *
-     * @param string $host
-     * @return static
-     */
-    public function setHost($host)
+    public function setHost(string $host): Uri
     {
         $this->host = $host;
         return $this;
     }
 
-    /**
-     * Set the path portion of the uri
-     *
-     * @param string $path
-     * @return static
-     */
-    public function setPath($path)
+    public function setPath(string $path): Uri
     {
         $this->path = $path;
         return $this;
     }
 
-    /**
-     * Set the password portion of the uri
-     *
-     * @param string $password
-     * @return static
-     */
-    public function setPassword($password)
+    public function setPassword(string $password): Uri
     {
         $this->password = $password;
         return $this;
     }
 
-    /**
-     * Set the user portion of the uri
-     *
-     * @param string $username
-     * @return static
-     */
-    public function setUsername($username)
+    public function setUsername(string $username): Uri
     {
         $this->username = $username;
         return $this;
     }
-    
+
     /**
      * Retrieve the authority component of the URI.
      *
@@ -544,14 +418,12 @@ class Uri implements \Serializable, \IteratorAggregate
      * @see https://tools.ietf.org/html/rfc3986#section-3.2
      * @return string The URI authority, in "[user-info@]host[:port]" format.
      */
-    public function getAuthority()
+    public function getAuthority(): string
     {
         $str = '';
-        if (!$this->getHost()) {
-            return $str;
-        }
+        if (!$this->getHost()) return $str;
         $str .= $this->getUserInfo();
-        $str .= $this->getHost();   
+        $str .= $this->getHost();
         if ($this->getPort() && $this->getPort() != 80) {
             $str .= ':' . $this->getPort();
         }
@@ -573,7 +445,7 @@ class Uri implements \Serializable, \IteratorAggregate
      *
      * @return string The URI user information, in "username[:password]" format.
      */
-    public function getUserInfo()
+    public function getUserInfo(): string
     {
         $str = '';
         if ($this->getUsername()) {
@@ -603,9 +475,8 @@ class Uri implements \Serializable, \IteratorAggregate
      *
      * @see https://tools.ietf.org/html/rfc3986#section-2
      * @see https://tools.ietf.org/html/rfc3986#section-3.4
-     * @return string The URI query string.
      */
-    public function getQuery()
+    public function getQuery(): string
     {
         $query = '';
         foreach ($this->query as $field => $value) {
@@ -622,15 +493,6 @@ class Uri implements \Serializable, \IteratorAggregate
     }
 
     /**
-     * Return the query name value pairs array
-     *
-     * @return array
-     */
-    public function getQueryArray() {
-        return $this->query;
-    }
-        
-    /**
      * Retrieve the fragment component of the URI.
      *
      * If no fragment is present, this method MUST return an empty string.
@@ -644,9 +506,8 @@ class Uri implements \Serializable, \IteratorAggregate
      *
      * @see https://tools.ietf.org/html/rfc3986#section-2
      * @see https://tools.ietf.org/html/rfc3986#section-3.5
-     * @return string The URI fragment.
      */
-    public function getFragment()
+    public function getFragment(): string
     {
         return $this->fragment;
     }
@@ -663,9 +524,8 @@ class Uri implements \Serializable, \IteratorAggregate
      * added.
      *
      * @see https://tools.ietf.org/html/rfc3986#section-3.1
-     * @return string The URI scheme.
      */
-    public function getScheme()
+    public function getScheme(): string
     {
         return $this->scheme;
     }
@@ -679,9 +539,8 @@ class Uri implements \Serializable, \IteratorAggregate
      * Section 3.2.2.
      *
      * @see http://tools.ietf.org/html/rfc3986#section-3.2.2
-     * @return string The URI host.
      */
-    public function getHost()
+    public function getHost(): string
     {
         return $this->host;
     }
@@ -709,24 +568,21 @@ class Uri implements \Serializable, \IteratorAggregate
      *
      * @see https://tools.ietf.org/html/rfc3986#section-2
      * @see https://tools.ietf.org/html/rfc3986#section-3.3
-     * @return string The URI path.
      */
-    public function getPath()
+    public function getPath(): string
     {
         return $this->path;
     }
 
     /**
      * If the $BASE_URL is set the path is returned with the $BASE_URL removed.
-     * 
-     * @return mixed|string
      */
-    public function getRelativePath()
+    public function getRelativePath(): string
     {
         $path = $this->getPath();
         $path = urldecode($path);
-        if (preg_match('/^'.  preg_quote(self::$BASE_URL_PATH, '/') . '/', $path)) {
-            $path = preg_replace('/^'.preg_quote(self::$BASE_URL_PATH, '/').'/', '', $path);
+        if (preg_match('/^'.  preg_quote(self::$BASE_URL, '/') . '/', $path)) {
+            $path = preg_replace('/^'.preg_quote(self::$BASE_URL, '/').'/', '', $path);
         }
         return $path;
     }
@@ -743,37 +599,45 @@ class Uri implements \Serializable, \IteratorAggregate
      *
      * If no port is present, but a scheme is present, this method MAY return
      * the standard port for that scheme, but SHOULD return null.
-     *
-     * @return null|int The URI port.
      */
-    public function getPort()
+    public function getPort(): int
     {
         return $this->port;
     }
 
     /**
      * Return a string representation of this object without the dev path
-     *
-     * @param bool $showHost
-     * @param bool $showScheme
-     * @return string
      */
-    public function toRelativeString($showHost = true, $showScheme = true)
+    public function toRelativeString(bool $showHost = true, bool $showScheme = true): ?string
     {
         return $this->toString($showHost, $showScheme, true);
     }
 
     /**
-     * Return a string representation of this object
+     * Return the string representation as a URI reference.
      *
-     * @param bool $showHost
-     * @param bool $showScheme
-     * @param bool $relativePath
-     * @return string
+     * Depending on which components of the URI are present, the resulting
+     * string is either a full URI or relative reference according to RFC 3986,
+     * Section 4.1. The method concatenates the various components of the URI,
+     * using the appropriate delimiters:
+     *
+     * - If a scheme is present, it MUST be suffixed by ":".
+     * - If an authority is present, it MUST be prefixed by "//".
+     * - The path can be concatenated without delimiters. But there are two
+     *   cases where the path has to be adjusted to make the URI reference
+     *   valid as PHP does not allow to throw an exception in __toString():
+     *     - If the path is rootless and an authority is present, the path MUST
+     *       be prefixed by "/".
+     *     - If the path is starting with more than one "/" and no authority is
+     *       present, the starting slashes MUST be reduced to one.
+     * - If a query is present, it MUST be prefixed by "?".
+     * - If a fragment is present, it MUST be prefixed by "#".
+     *
+     * @see http://tools.ietf.org/html/rfc3986#section-4.1
      */
-    public function toString($showHost = true, $showScheme = true, $relativePath = false)
+    public function toString(bool $showHost = true, bool $showScheme = true, bool $relativePath = false): ?string
     {
-        if (!$this->isUrl()) {
+        if ($this->isApplicationScheme()) {
             return $this->spec;
         }
         $uri = '';
@@ -803,6 +667,10 @@ class Uri implements \Serializable, \IteratorAggregate
         return $uri;
     }
 
+    public function __toString(): string
+    {
+        return $this->toString();
+    }
 
     /**
      * Redirect Codes:
@@ -862,11 +730,10 @@ class Uri implements \Serializable, \IteratorAggregate
      *
      * @see http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
      * @see http://edoceo.com/creo/php-redirect.php
-     * @param int $code
      */
-    public function redirect($code = 302)
+    public function redirect(int $code = 302)
     {
-        if (!$this->isUrl()) return;
+        if ($this->isApplicationScheme()) return;
         if (headers_sent()) {
             \Tk\Log::error('Invalid URL Redirect, Headers Already Sent.');
             exit();
@@ -901,7 +768,7 @@ class Uri implements \Serializable, \IteratorAggregate
 
         $arr = debug_backtrace();
         $arr = $arr[0];
-        \Tk\Log::notice($code . ' REDIRECT `'.$this->toString().'` Called ' . str_replace(\Tk\Config::getInstance()->getSitePath(), '', $arr['file']) . ':' . $arr['line']);
+        \Tk\Log::notice($code . ' REDIRECT `'.$this->toString().'` Called ' . str_replace(self::$BASE_URL, '', $arr['file']) . ':' . $arr['line']);
 
         /*CLOSE THE SESSION WITH USER DATA*/
         session_write_close();
@@ -910,31 +777,11 @@ class Uri implements \Serializable, \IteratorAggregate
     }
 
     /**
-     * Return the string representation as a URI reference.
-     *
-     * Depending on which components of the URI are present, the resulting
-     * string is either a full URI or relative reference according to RFC 3986,
-     * Section 4.1. The method concatenates the various components of the URI,
-     * using the appropriate delimiters:
-     *
-     * - If a scheme is present, it MUST be suffixed by ":".
-     * - If an authority is present, it MUST be prefixed by "//".
-     * - The path can be concatenated without delimiters. But there are two
-     *   cases where the path has to be adjusted to make the URI reference
-     *   valid as PHP does not allow to throw an exception in __toString():
-     *     - If the path is rootless and an authority is present, the path MUST
-     *       be prefixed by "/".
-     *     - If the path is starting with more than one "/" and no authority is
-     *       present, the starting slashes MUST be reduced to one.
-     * - If a query is present, it MUST be prefixed by "?".
-     * - If a fragment is present, it MUST be prefixed by "#".
-     *
-     * @see http://tools.ietf.org/html/rfc3986#section-4.1
-     * @return string
+     * return this from your controller to redirect
      */
-    public function __toString()
+    public function getRedirectResponse(): RedirectResponse
     {
-        return $this->toString();
+        return new RedirectResponse($this->toString());
     }
-    
+
 }

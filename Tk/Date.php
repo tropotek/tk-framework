@@ -1,8 +1,6 @@
 <?php
 /**
- * @author Michael Mifsud <http://www.tropotek.com/>
- * @see http://www.tropotek.com/
- * @license Copyright 2007 Michael Mifsud
+ * @author Tropotek <http://www.tropotek.com/>
  */
 namespace Tk;
 
@@ -12,13 +10,6 @@ namespace Tk;
  */
 class Date
 {
-
-    /**
-     * Use this to format form dates, change it in the script bootstrap if required
-     *
-     * @var string
-     */
-    public static $formFormat = 'd/m/Y';
 
     /**
      * EG: 2009-12-31 24:59:59
@@ -100,15 +91,19 @@ class Date
      * A Week in seconds (DAY*7)
      */
     const WEEK = 604800;
-    
+
+
+    /**
+     * Use this to format form dates, change it in the script bootstrap if required
+     */
+    public static string $FORM_FORMAT = 'd/m/Y';
 
     /**
      * Month end days.
-     * @var array
      */
-    private static $monthEnd = array('1' => '31', '2' => '28', '3' => '31',
+    private static array $monthEnd = ['1' => '31', '2' => '28', '3' => '31',
         '4' => '30', '5' => '31', '6' => '30', '7' => '31', '8' => '31',
-        '9' => '30', '10' => '31', '11' => '30', '12' => '31');
+        '9' => '30', '10' => '31', '11' => '30', '12' => '31'];
 
 
     /**
@@ -121,74 +116,66 @@ class Date
     /**
      * Create a DateTime object with system timezone
      *
-     * @param string $time
-     * @param \DateTimeZone $timezone
-     * @return \DateTime
+     * @param null|\DateTimeZone|string $timezone
      */
-    static function create($time = 'now', $timezone = null)
+    public static function create(string $time = 'now', $timezone = null): \DateTime
     {
-        if ($time instanceof \DateTime) return $time;
-        if ($timezone && is_string($timezone)) {
-            $timezone = new \DateTimeZone($timezone);
-        }
-        if (!$timezone) {
-            $timezone = new \DateTimeZone(date_default_timezone_get());
-        }
-        
-        if (preg_match('/^[0-9]{1,11}$/', $time)) {
-            $time = '@'.$time;
-        }
-
         try {
+            if (is_string($timezone)) {
+                $timezone = new \DateTimeZone($timezone);
+            }
+            if (!$timezone) {
+                $timezone = new \DateTimeZone(date_default_timezone_get());
+            }
+
+            if (preg_match('/^[0-9]{1,11}$/', $time)) {
+                $time = '@'.$time;
+            }
+
             $date = new \DateTime($time, $timezone);
             $date->setTimezone($timezone);
-            return $date;
         } catch (\Exception $e) {
-            \Tk\Log::error($e->getMessage());
+            Log::error($e->getMessage());
         }
+        return $date ?? new \DateTime();
     }
 
     /**
-     * Create a date from a string returned from the self::$formFormat string
+     * Create a date from a string returned from a form field
      *
-     * @param string $dateStr
-     * @param null|string $format
-     * @param null $timezone
-     * @return \DateTime
+     * @param null|\DateTimeZone|string $timezone
+     * @throws \Exception
      */
-    static function createFormDate($dateStr, $timezone = null, $format = null)
+    public static function createFormDate(string $dateStr, $timezone = null, string $format = ''): \DateTime
     {
-        if (!$dateStr) return null;
-        if ($timezone && is_string($timezone)) {
-            $timezone = new \DateTimeZone($timezone);
+        try {
+            if ($timezone && is_string($timezone)) {
+                $timezone = new \DateTimeZone($timezone);
+            }
+            if (!$timezone) {
+                $timezone = new \DateTimeZone(date_default_timezone_get());
+            }
+            if (!$format) {
+                $format = self::$FORM_FORMAT;
+            }
+            $date = \DateTime::createFromFormat($format, $dateStr);
+            if (!$date && str_ends_with($dateStr, 'Z')) {   // could be ISO format of: 2020-11-23T01:20:27.164Z
+                $date = new \DateTime($dateStr);
+            }
+            if ($date) {
+                $date->setTimezone($timezone);
+            }
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
         }
-        if (!$timezone) {
-            $timezone = new \DateTimeZone(date_default_timezone_get());
-        }
-        if (!$format) {
-            $format = self::$formFormat;
-        }
-        $date = \DateTime::createFromFormat($format, $dateStr);
-        if (!$date && str_ends_with($dateStr, 'Z')) {   // could be ISO format of: 2020-11-23T01:20:27.164Z
-            $date = new \DateTime($dateStr);
-        }
-        if ($date) {
-            $date->setTimezone($timezone);
-        }
-        return $date;
-
+        return $date ?? new \DateTime();
     }
-
 
 
     /**
      * Get the months ending date 1 = 31-Jan, 12 = 31-Dec
-     *
-     * @param int $m
-     * @param int $y
-     * @return int
      */
-    static function getMonthDays($m, $y = 0)
+    public static function getMonthDays(int $m, int $y = 0): int
     {
         if ($m == 2) { // feb test for leap year
             if (self::isLeapYear($y)) {
@@ -200,11 +187,8 @@ class Date
 
     /**
      * Is the supplied year a leap year
-     *
-     * @param int $y
-     * @return bool
      */
-    static function isLeapYear($y)
+    public static function isLeapYear(int $y): int
     {
         if ($y % 4 != 0) {
             return false;
@@ -219,14 +203,13 @@ class Date
 
     /**
      * Use this function to find the next date
-     *
+     * TODO: Add more description and examples
      *
      * @param string $frequency ['weekly', 'fortnightly', 'monthly']
-     * @param \DateTime $dateStart
-     * @param null|\DateTime $dateEnd
-     * @return array
+     * @throws \Exception
      */
-    static function getPeriodDates($frequency, $dateStart, $dateEnd = null) {
+    public static function getPeriodDates(string $frequency, \DateTime $dateStart, ?\DateTime $dateEnd = null): array
+    {
         //$start_date is string e.g 06-23-2016
         //$frequency is also string e.g weekly, fortnightly, monthly
         //$end_date is optional string: limit to the dates to be generated. Default = today
@@ -246,10 +229,8 @@ class Date
         $modifier = $modifiers[$frequency];
         $dt->modify($modifier);
         while(self::floor($dt) <= self::floor($dtUntil)) {
-            //$dates[] = $dt->format("d-m-Y");
             $dates[] = Date::create($dt->getTimestamp());
             $dt->modify($modifier);
-            //$dt = self::floor($dt->modify($modifier));
         }
         return $dates; //array returned
     }
@@ -258,10 +239,10 @@ class Date
      * Get the financial year of this date
      * list($start, $end) = Tk\Date::getFinancialYear($date);
      *
-     * @param \DateTime $date
-     * @return \DateTime[]
+     * @return \DateTime[]|array
+     * @throws \Exception
      */
-    static function getFinancialYear(\DateTime $date = null)
+    public static function getFinancialYear(\DateTime $date = null): array
     {
         if (!$date) $date = self::create();
         $year = (int)$date->format('Y');
@@ -272,17 +253,15 @@ class Date
         $start = new \DateTime($year.'-07-01 00:00:00', $date->getTimezone());
         $end = new \DateTime(($year+1).'-06-30 23:59:59', $date->getTimezone());
         
-        return array($start, $end);
+        return [$start, $end];
     }
 
 
     /**
      * Set the time of a date object to 23:59:59
-     *
-     * @param \DateTime $date
-     * @return \DateTime
+     * @throws \Exception
      */
-    static function ceil(\DateTime $date = null)
+    public static function ceil(?\DateTime $date = null): \DateTime
     {
         if (!$date) $date = self::create();
         return new \DateTime($date->format('Y-m-d 23:59:59'), $date->getTimezone());
@@ -290,11 +269,9 @@ class Date
 
     /**
      * Set the time of a date object to 00:00:00
-     *
-     * @param \DateTime $date
-     * @return \DateTime
+     * @throws \Exception
      */
-    static function floor(\DateTime $date = null)
+    public static function floor(?\DateTime $date = null): \DateTime
     {
         if (!$date) $date = self::create();
         return new \DateTime($date->format('Y-m-d 00:00:00'), $date->getTimezone());
@@ -302,11 +279,9 @@ class Date
 
     /**
      * Get the first day of this dates month
-     *
-     * @param \DateTime $date
-     * @return \DateTime
+     * @throws \Exception
      */
-    static function getMonthStart(\DateTime $date = null)
+    public static function getMonthStart(?\DateTime $date = null): \DateTime
     {
         if (!$date) $date = self::create();
         return new \DateTime($date->format('Y-m-01 00:00:00'), $date->getTimezone());
@@ -314,11 +289,9 @@ class Date
 
     /**
      * Get the last day of this dates month
-     *
-     * @param \DateTime $date
-     * @return \DateTime
+     * @throws \Exception
      */
-    static function getMonthEnd(\DateTime $date = null)
+    public static function getMonthEnd(?\DateTime $date = null): \DateTime
     {
         if (!$date) $date = self::create();
         $lastDay = self::getMonthDays($date->format('n'), $date->format('Y'));
@@ -328,11 +301,9 @@ class Date
 
     /**
      * Get the first day of this dates month
-     *
-     * @param \DateTime $date
-     * @return \DateTime
+     * @throws \Exception
      */
-    static function getYearStart(\DateTime $date = null)
+    public static function getYearStart(\DateTime $date = null): \DateTime
     {
         if (!$date) $date = self::create();
         return new \DateTime($date->format('Y-01-01 00:00:00'), $date->getTimezone());
@@ -343,49 +314,36 @@ class Date
      *
      * @param \DateTime $date
      * @return \DateTime
+     * @throws \Exception
      */
-    static function getYearEnd(\DateTime $date = null)
+    public static function getYearEnd(\DateTime $date = null)
     {
         if (!$date) $date = self::create();
         return new \DateTime($date->format('Y-12-31 23:59:59'), $date->getTimezone());
     }
     
-    
-    
-    
-    
+
     /**
      * Returns the difference between this date and other in days.
-     *
-     * @param \DateTime $from
-     * @param \DateTime $to
-     * @return int
      */
-    static function dayDiff(\DateTime $from, \DateTime $to)
+    public static function dayDiff(\DateTime $from, \DateTime $to): int
     {
         return ceil(($from->getTimestamp() - $to->getTimestamp()) / self::DAY);
     }
 
     /**
      * Return the difference between this date and other in hours.
-     *
-     * @param \DateTime $from
-     * @param \DateTime $to
-     * @return int
      */
-    static function hourDiff(\DateTime $from, \DateTime $to)
+    public static function hourDiff(\DateTime $from, \DateTime $to): int
     {
         return ceil(($from->getTimestamp() - $to->getTimestamp()) / self::HOUR);
     }
     
     /**
      * Compares the value to another instance of date.
-     *
-     * @param \DateTime $from
-     * @param \DateTime $to
      * @return int Returns -1 if less than , 0 if equal to, 1 if greater than.
      */
-    static function compareTo(\DateTime $from, \DateTime $to)
+    public static function compareTo(\DateTime $from, \DateTime $to): int
     {
         $retVal = 1;
         if ($from->getTimestamp() < $to->getTimestamp()) {
@@ -393,82 +351,61 @@ class Date
         } elseif ($from->getTimestamp() == $to->getTimestamp()) {
             $retVal = 0;
         }
-
         return $retVal;
     }
 
     /**
      * Checks if the $from Date is greater than the $to Date
-     *
-     * @param \DateTime $from
-     * @param \DateTime $to
-     * @return bool
      */
-    static function greaterThan(\DateTime $from, \DateTime $to)
+    public static function greaterThan(\DateTime $from, \DateTime $to): bool
     {
         return (self::compareTo($from, $to) > 0);
     }
     
     /**
      * Checks if the date value is greater than or equal the value of another instance of date.
-     *
-     * @param \DateTime $from
-     * @param \DateTime $to
-     * @return bool
      */
-    static function greaterThanEqual(\DateTime $from, \DateTime $to)
+    public static function greaterThanEqual(\DateTime $from, \DateTime $to): bool
     {
         return (self::compareTo($from, $to) >= 0);
     }
 
     /**
      * Checks if the date value is less than the value of another instance of date.
-     *
-     * @param \DateTime $from
-     * @param \DateTime $to
-     * @return bool
      */
-    static function lessThan(\DateTime $from, \DateTime $to)
+    public static function lessThan(\DateTime $from, \DateTime $to): bool
     {
         return (self::compareTo($from, $to) < 0);
     }
 
     /**
      * Checks if the date value is less than or equal the value of another instance of date.
-     *
-     * @param \DateTime $from
-     * @param \DateTime $to
-     * @return bool
      */
-    static function lessThanEqual(\DateTime $from, \DateTime $to)
+    public static function lessThanEqual(\DateTime $from, \DateTime $to): bool
     {
         return (self::compareTo($from, $to) <= 0);
     }
 
     /**
      * Checks if the date is equal to the value of another instance of date.
-     *
-     * @param \DateTime $from
-     * @param \DateTime $to
-     * @return bool
      */
-    static function equals(\DateTime $from, \DateTime $to)
+    public static function equals(\DateTime $from, \DateTime $to): bool
     {
         return (self::compareTo($from, $to) == 0);
     }
 
-    /*
+    /**
      * convert a date into a string that tells how long
      * ago that date was.... eg: 2 days ago, 3 minutes ago.
      *
      * Note: Only works for dates in the past...
-     *
-     * @param \DateTime $date
-     * @return string
+     * @throws Exception
      */
-    static function toRelativeString(\DateTime $date = null)
+    public static function toRelativeString(\DateTime $date = null): string
     {
-        if (!$date) $date = self::create();
+
+        if ($date > new \DateTime()) throw new Exception('Date must be in the past.');
+
         $c = getdate();
         $p = array('year', 'mon', 'mday', 'hours', 'minutes', 'seconds');
         $display = array('year', 'month', 'day', 'hour', 'minute', 'second');

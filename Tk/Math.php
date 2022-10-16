@@ -3,19 +3,12 @@ namespace Tk;
 
 
 /**
- * @author Michael Mifsud <http://www.tropotek.com/>
- * @see http://www.tropotek.com/
- * @license Copyright 2017 Michael Mifsud
+ * @author Tropotek <http://www.tropotek.com/>
  */
 class Math
 {
 
-    /**
-     *
-     * @param $arr
-     * @return float|int
-     */
-    public static function median($arr)
+    public static function median(array $arr): float
     {
         sort($arr);
         $count = count($arr); //total numbers in array
@@ -32,12 +25,7 @@ class Math
         return $median;
     }
 
-    /**
-     *
-     * @param $arr
-     * @return float|int
-     */
-    public static function average($arr)
+    public static function average(array $arr): float
     {
         if (!count($arr)) return 0;
         return array_sum($arr)/count($arr);

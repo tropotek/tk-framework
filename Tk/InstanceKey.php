@@ -4,22 +4,22 @@ namespace Tk;
 /**
  * InstanceKey
  *
- * @author Michael Mifsud <http://www.tropotek.com/>
- * @see http://www.tropotek.com/
- * @license Copyright 2015 Michael Mifsud
+ * Create a unique key for object that need to be uniquely identified.
+ * Implement this in objects that need a key to identify their instances
+ *  within a session.
+ *
+ * @author Tropotek <http://www.tropotek.com/>
  */
 interface InstanceKey
 {
 
     /**
-     * Create request keys with prepended string
+     * Create a unique object instance key that can be used
+     * to lookup and find it within an array or session, etc
      *
-     * returns: `{_instanceId}_{key}`
-     *
-     * @param $key
-     * @return string
+     * @example `{_instanceId}_{key}`
      */
-    public function makeInstanceKey($key);
+    public function makeInstanceKey(string $key): string;
 
 
 }

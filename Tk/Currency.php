@@ -12,81 +12,53 @@ namespace Tk;
  * a Currency instance using the getInstance methods.
  *
  * @link http://www.iso.org/iso/en/prods-services/popstds/currencycodeslist.html
- *
  * @author Tropotek <http://www.tropotek.com/>
- * @created: 2/08/18
- * @link http://www.tropotek.com/
- * @license Copyright 2018 Tropotek
  */
 class Currency
 {
+    private static array $_INSTANCE = [];
 
-    /**
-     * Default Currency code
-     * @var string
-     */
-    public static $default = 'AUD';
+    public static string $DEFAULT = 'AUD';
 
-    /**
-     * @var array
-     */
-    public static $currencyList = array(
-        'AUD' => array('name' => 'Australian Dollar', 'locale' => 'Australia', 'symbol' => '$', 'altSymbol' => 'AUD$', 'digits' => 2),
-        'NZD' => array('name' => 'New Zealand Dollar', 'locale' => 'New Zealand', 'symbol' => '$', 'altSymbol' => 'NZD$', 'digits' => 2),
-        'USD' => array('name' => 'US Dollar', 'locale' => 'United Stated Of America', 'symbol' => '$', 'altSymbol' => 'USD$', 'digits' => 2),
-        'THB' => array('name' => 'Thai Baht', 'locale' => 'Thailand', 'symbol' => 'THB', 'altSymbol' => 'THB$', 'digits' => 2)
-    );
+    public static array $CURRENCY_LIST = [
+        'AUD' => ['name' => 'Australian Dollar', 'locale' => 'Australia', 'symbol' => '$', 'altSymbol' => 'AUD$', 'digits' => 2],
+        'NZD' => ['name' => 'New Zealand Dollar', 'locale' => 'New Zealand', 'symbol' => '$', 'altSymbol' => 'NZD$', 'digits' => 2],
+        'USD' => ['name' => 'US Dollar', 'locale' => 'United Stated Of America', 'symbol' => '$', 'altSymbol' => 'USD$', 'digits' => 2],
+        'THB' => ['name' => 'Thai Baht', 'locale' => 'Thailand', 'symbol' => 'THB', 'altSymbol' => 'THB$', 'digits' => 2],
+    ];
 
-    /**
-     * @var array
-     */
-    private static $instance = array();
+    private string $code;
 
-    /**
-     * @var string
-     */
-    private $code = '';
 
-    /**
-     * @param string $currencyCode (optional)
-     */
-    private function __construct($currencyCode = 'AUD')
+    private function __construct(string $currencyCode = 'AUD')
     {
         $this->code = $currencyCode;
     }
 
     /**
      * Returns the Currency instance for the given currency code.
-     *
-     * @param string $currencyCode
-     * @return Currency
      */
-    static function getInstance($currencyCode = 'AUD')
+    public static function getInstance(string $currencyCode = 'AUD'): Currency
     {
-        if (!array_key_exists($currencyCode, self::$currencyList)) {
-            \Tk\Log::warning('Invalid Currency code: '.$currencyCode.', using default: ' . self::$default);
-            $currencyCode = self::$default;
+        if (!array_key_exists($currencyCode, self::$CURRENCY_LIST)) {
+            Log::warning('Invalid Currency code: '.$currencyCode.', using default: ' . self::$DEFAULT);
+            $currencyCode = self::$DEFAULT;
         }
-        if (!isset(self::$instance[$currencyCode])) {
-            self::$instance[$currencyCode] = new static($currencyCode);
+        if (!isset(self::$_INSTANCE[$currencyCode])) {
+            self::$_INSTANCE[$currencyCode] = new static($currencyCode);
         }
-        return self::$instance[$currencyCode];
+        return self::$_INSTANCE[$currencyCode];
     }
 
-    /**
-     * @return string
-     */
-    function getName()
+    function getName(): string
     {
-        return self::$currencyList[$this->getCode()]['name'];
+        return self::$CURRENCY_LIST[$this->getCode()]['name'];
     }
 
     /**
      * Gets the ISO 4217 currency code of this currency.
-     *
-     * @return string
      */
-    function getCode()
+    function getCode(): string
     {
         return $this->code;
     }
@@ -99,12 +71,10 @@ class Currency
      * symbol can be determined, the ISO 4217 currency code is returned.
      *
      * If locale is null, then the default locale is used.
-     *
-     * @return string The symbol of this currency for the specified locale.
      */
-    function getSymbol()
+    function getSymbol(): string
     {
-        return self::$currencyList[$this->getCode()]['symbol'];
+        return self::$CURRENCY_LIST[$this->getCode()]['symbol'];
     }
 
     /**
@@ -113,21 +83,15 @@ class Currency
      * For example, the default number of fraction digits for the Euro is 2,
      * while for the Japanese Yen it's 0. In the case of pseudo-currencies,
      * such as IMF Special Drawing Rights, -1 is returned.
-     *
-     * @return integer
      */
-    function getFractionDigits()
+    function getFractionDigits(): int
     {
-        return (int)self::$currencyList[$this->getCode()]['digits'];
+        return (int)self::$CURRENCY_LIST[$this->getCode()]['digits'];
     }
 
-    /**
-     * @return string
-     */
-    function getLocal()
+    function getLocal(): string
     {
-        return self::$currencyList[$this->getCode()]['locale'];
+        return self::$CURRENCY_LIST[$this->getCode()]['locale'];
     }
-
 
 }

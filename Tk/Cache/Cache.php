@@ -1,9 +1,12 @@
 <?php
 namespace Tk\Cache;
 
+use Tk\Cache\Adapter\Iface;
+
 /**
- * A Cache controller
- *
+ * Use an instance of this object to cache any required data.
+ * Create a global instance and a new file will be created for each new key.
+ * NOTE: when calling $cache->clear() you will be clearing all the caches for all the $key's
  *
  * <code>
  * <?php
@@ -32,15 +35,12 @@ namespace Tk\Cache;
  * </code>
  *
  *
- * @author Michael Mifsud <http://www.tropotek.com/>
- * @see http://www.tropotek.com/
- * @license Copyright 2015 Michael Mifsud
+ * @author Tropotek <http://www.tropotek.com/>
  */
 class Cache
 {
-
     /**
-     * @var Adapter\Iface
+     * @var Iface|null
      */
     protected $adapter = null;
 
@@ -49,44 +49,21 @@ class Cache
      */
     protected $enabled = true;
 
-    
-    /**
-     * __construct
-     *
-     * @param Adapter\Iface $adapter
-     */
+
     public function __construct(Adapter\Iface $adapter)
     {
         $this->adapter = $adapter;
     }
 
     /**
-     * @param Adapter\Iface $adapter
-     * @return Cache
-     */
-    public static function create(Adapter\Iface $adapter)
-    {
-        $obj = new static($adapter);
-        return $obj;
-    }
-
-    /**
      * Enable/Disable the cache
-     *
-     * @param bool $b
      */
-    public function setEnabled($b = true)
+    public function setEnabled(bool $b = true)
     {
         $this->enabled = $b;
     }
 
-
-    /**
-     * Get the currently applied cache adapter
-     *
-     * @return \Tk\Cache\Adapter\Iface
-     */
-    public function getAdapter()
+    public function getAdapter(): ?Iface
     {
         return $this->adapter;
     }
@@ -99,7 +76,7 @@ class Cache
      * cache-unique, so storing a second value with the same
      * <i>key</i> will overwrite the original value.
      * </p>
-     * @param $data
+     * @param mixed $data
      * @param int $ttl [optional] <p>
      * Time To Live; store <i>var</i> in the cache for
      * <i>ttl</i> seconds. After the
@@ -116,7 +93,7 @@ class Cache
      * @return bool true on success or false on failure.
      * Store
      */
-    public function store($key, $data, $ttl = 0)
+    public function store(string $key, $data, int $ttl = 0): bool
     {
         return $this->adapter->store($key, $data, $ttl);
     }
@@ -124,7 +101,7 @@ class Cache
     /**
      * Fetch a stored variable from the cache
      *
-     * @param mixed $key <p>
+     * @param string $key <p>
      * The <i>key</i> used to store the value (with
      * <b>apc_store</b>). If an array is passed then each
      * element is fetched and returned.
@@ -134,41 +111,31 @@ class Cache
      * </p>
      * @return mixed The stored variable or array of variables on success; false on failure
      */
-    public function fetch($key)
+    public function fetch(string $key)
     {
-        //if (!$this->enabled) return false;
         return $this->adapter->fetch($key);
     }
 
     /**
      * Deletes files from the opcode cache
      *
-     * @param $key
+     * @param string $key
      * @internal param mixed $keys <p>
      * The files to be deleted. Accepts a string,
      * array of strings, or an <b>APCIterator</b>
      * object.
      * </p>
-     * @return mixed true on success or false on failure.
+     * @return bool true on success or false on failure.
      * Or if <i>keys</i> is an array, then
      * an empty array is returned on success, or an array of failed files
      * is returned.
      */
-    public function delete($key)
+    public function delete(string $key)
     {
         return $this->adapter->delete($key);
     }
 
-    /**
-     *
-     * Clears the cache
-     *
-     * @internal param string $cache_type [optional] <p>
-     * The system cache (cached files) will be cleared.
-     * </p>
-     * @return bool true on success or false on failure.
-     */
-    public function clear()
+    public function clear(): bool
     {
         return $this->adapter->clear();
     }

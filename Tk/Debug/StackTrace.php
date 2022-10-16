@@ -3,41 +3,27 @@ namespace Tk\Debug;
 
 
 /**
- * Class StackTrace
- *
- * @author Michael Mifsud <http://www.tropotek.com/>
- * @see http://www.tropotek.com/
- * @license Copyright 2007 Michael Mifsud
+ * @author Tropotek <http://www.tropotek.com/>
  */
 class StackTrace {
 
-
     /**
      * Get the backtrace dump as a string
-     *
-     * @param int $skip
-     * @param string $sitePath
-     * @return string
      */
-    static function getBacktrace($skip = 1, $sitePath = '')
+    static function getBacktrace(int $skip = 1, string $sitePath = ''): string
     {
         $stackTraceArray = debug_backtrace();
         for ($i = 0; $i < $skip && $i < count($stackTraceArray); $i++) {
             array_shift($stackTraceArray);
         }
-        $str = self::traceToString($stackTraceArray, $sitePath);
-        return $str;
+        return self::traceToString($stackTraceArray, $sitePath);
     }
 
     /**
      * Take a stack trace array from \Exception::getTrace or debug_backtrace()
      * and convert it to a string
-     *
-     * @param array $stackTraceArray
-     * @param string $sitePath
-     * @return string
      */
-    static function traceToString($stackTraceArray, $sitePath = '')
+    static function traceToString(array $stackTraceArray, string $sitePath = ''): string
     {
         $str = '';
         foreach ($stackTraceArray as $i => $t) {
@@ -72,8 +58,6 @@ class StackTrace {
                         $o = get_class($o);
                     }
                     if (is_array($o)) {
-                        // ToDO: We get a recursive error here for some reason????
-                        //$o = print_r($o, true);
                         $o = 'Array['.count($o).']';
                     }
                     if (is_string($o) || $o == '') $o = "'" . str_replace(array("\n", "\r"), ' ', substr($o, 0, 32)) . "'";
@@ -90,12 +74,9 @@ class StackTrace {
     }
 
     /**
-     * @param int $dumpLine
-     * @param bool $showClass
-     * @param bool $showFunction
-     * @return string
+     *
      */
-    public static function dumpLine($dumpLine = 1, $showClass = false, $showFunction = false)
+    public static function dumpLine(int $dumpLine = 1, bool $showClass = false, bool $showFunction = false): string
     {
         $line = debug_backtrace();
         $line = $line[$dumpLine];
@@ -110,7 +91,7 @@ class StackTrace {
 
         }
 
-        $path = str_replace(\Tk\Config::getInstance()->getSitePath(), '', $line['file']);
+        $path = str_replace(\Tk\Config::instance()->getBasePath(), '', $line['file']);
         $str  = sprintf('%s [%s]%s', $path, $line['line'], $class);
         return $str;
     }

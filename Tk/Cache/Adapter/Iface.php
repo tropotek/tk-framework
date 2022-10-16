@@ -4,43 +4,34 @@ namespace Tk\Cache\Adapter;
 /**
  * Cache Adapter Interface
  *
- * @author Michael Mifsud <http://www.tropotek.com/>
- * @see http://www.tropotek.com/
- * @license Copyright 2015 Michael Mifsud
+ * @author <http://www.tropotek.com/>
  */
 interface Iface
 {
     /**
      * Fetch
-     * Returns false if no cache available
      *
-     * @param string $key
-     * @return mixed
+     * @return mixed Returns false if no value available
      */
-    public function fetch($key);
+    public function fetch(string $key);
 
     /**
      * Store
-     *
-     * @param string $key
-     * @param string $data
-     * @param int $ttl Default 24hrs
-     * @return bool
+     * @param mixed $data
+     * @return mixed Returns false if no value available
      */
-    public function store($key, $data, $ttl = 0);
+    public function store(string $key, $data, int $ttl = 0);
 
     /**
      * Delete
-     *
-     * @param string $key
-     * @return bool
+     * @return mixed Returns false if no value available
      */
-    public function delete($key);
+    public function delete(string $key);
 
     /**
-     * Delete all cached files
+     * Delete all cached values
      *
      * @return bool
      */
-    public function clear();
+    public function clear(): bool;
 }

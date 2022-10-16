@@ -3,118 +3,73 @@ namespace Tk\Debug {
 
     use Psr\Log\LoggerInterface;
     use Psr\Log\NullLogger;
+    use Tk\Traits\SingletonTrait;
 
     /**
      * Class VarDum, used by the vd(), vdd() functions.
      *
-     * @author Michael Mifsud <http://www.tropotek.com/>
-     * @see http://www.tropotek.com/
-     * @license Copyright 2015 Michael Mifsud
+     * @author Tropotek <http://www.tropotek.com/>
      */
     class VarDump
     {
-        /**
-         * @var VarDump
-         */
-        public static $instance = null;
+        use SingletonTrait;
 
-        /**
-         * @var string
-         */
-        protected $sitePath = '';
+        protected string $basePath = '';
 
-        /**
-         * @var LoggerInterface|null
-         */
-        protected $logger = null;
+        protected ?LoggerInterface $logger = null;
 
 
-        /**
-         * @param LoggerInterface|null $logger
-         * @param string $sitePath
-         */
-        public function __construct($logger = null, $sitePath = '')
+        public function __construct(?LoggerInterface $logger = null, string $basePath = '')
         {
             $this->logger = $logger;
-            $this->sitePath = $sitePath;
+            $this->basePath = $basePath;
         }
 
-        /**
-         * @param LoggerInterface|null $logger
-         * @param string $sitePath
-         * @return VarDump
-         */
-        public static function getInstance($logger = null, $sitePath = '')
+        public static function instance(?LoggerInterface $logger = null, string $basePath = ''): VarDump
         {
-            if (static::$instance == null) {
-                // TODO: if logger null then create a null logger
+            if (static::$_INSTANCE == null) {
                 if (!$logger)
                     $logger = new NullLogger();
-                if (!$sitePath)
-                    $sitePath = dirname(dirname(dirname(dirname(__FILE__))));
+                if (!$basePath)
+                    $basePath = dirname(dirname(dirname(dirname(__FILE__))));
 
-                static::$instance = new static($logger, $sitePath);
+                static::$_INSTANCE = new static($logger, $basePath);
             }
-            return static::$instance;
+            return static::$_INSTANCE;
         }
 
-        /**
-         * @return string
-         */
-        public function getSitePath()
+        public function getBasePath(): string
         {
-            return $this->sitePath;
+            return $this->basePath;
         }
 
-        /**
-         * @param string $sitePath
-         * @return VarDump
-         */
-        public function setSitePath($sitePath)
+        public function setBasePath(string $basePath): VarDump
         {
-            $this->sitePath = $sitePath;
+            $this->basePath = $basePath;
             return $this;
         }
 
-        /**
-         * @return LoggerInterface|null
-         */
-        public function getLogger()
+        public function getLogger(): ?LoggerInterface
         {
             return $this->logger;
         }
 
-        /**
-         * @param LoggerInterface|null $logger
-         * @return VarDump
-         */
-        public function setLogger($logger)
+        public function setLogger(?LoggerInterface $logger): VarDump
         {
             $this->logger = $logger;
             return $this;
         }
 
-        /**
-         *
-         * @param array $args
-         * @param bool $showTrace
-         * @return string
-         */
-        public function makeDump($args, $showTrace = false)
+        public function makeDump(array $args, bool $showTrace = false): string
         {
             $str = $this->argsToString($args);
             if ($showTrace) {
-                // TODO: make the depth value configurable?????
-                $str .= "\n" . StackTrace::getBacktrace(4, $this->sitePath) . "\n";
+                $str .= "\n" . StackTrace::getBacktrace(4, $this->basePath) . "\n";
             }
             return $str;
         }
 
-        /**
-         * @param array $args
-         * @return string
-         */
-        public function argsToString($args)
+        public function argsToString(array $args): string
         {
             $output = '';
             foreach ($args as $var) {
@@ -125,11 +80,8 @@ namespace Tk\Debug {
 
         /**
          * return the types of the argument array
-         *
-         * @param $args
-         * @return array
          */
-        public function getTypeArray($args)
+        public function getTypeArray(array $args): array
         {
             $arr = array();
             foreach ($args as $a) {
@@ -141,16 +93,10 @@ namespace Tk\Debug {
             return $arr;
         }
 
-
         /**
          * return a var dump string from an array of arguments
-         *
-         * @param mixed $var
-         * @param int $depth
-         * @param int $nest
-         * @return string
          */
-        public static function varToString($var, $depth = 5, $nest = 0)
+        public static function varToString($var, int $depth = 5, int $nest = 0): string
         {
             $pad = '';
             for ($i = 0; $i <= $nest * 2; $i++) $pad .= '  ';
@@ -200,23 +146,20 @@ namespace Tk\Debug {
     }
 }
 namespace { // global code
-    use Tk\Config;
     use Tk\Debug\VarDump;
+    use Tk\Factory;
 
 
     /**
      * logger Helper function
      * Replacement for var_dump();
-     *
-     * @return string
      */
-    function vd() {
-        //$vd = VarDump::getInstance();
-        $vd = VarDump::getInstance(Config::getInstance()->getLog());
+    function vd(): string
+    {
+        $vd = VarDump::instance(Factory::instance()->getLogger());
         $line = current(debug_backtrace());
-        $path = str_replace($vd->getSitePath(), '', $line['file']);
-        $str = '';
-        $str .= "\n";
+        $path = str_replace($vd->getBasePath(), '', $line['file']);
+        $str = "\n";
         $str .= $vd->makeDump(func_get_args());
         $str .= sprintf('vd(%s) %s [%s];', implode(', ', $vd->getTypeArray(func_get_args())), $path, $line['line']) . "\n";
         $vd->getLogger()->debug($str);
@@ -226,16 +169,13 @@ namespace { // global code
     /**
      * logger Helper function with stack trace.
      * Replacement for var_dump();
-     *
-     * @return string
      */
-    function vdd() {
-        //$vd = VarDump::getInstance();
-        $vd = VarDump::getInstance(Config::getInstance()->getLog());
+    function vdd(): string
+    {
+        $vd = VarDump::instance(Factory::instance()->getLogger());
         $line = current(debug_backtrace());
-        $path = str_replace($vd->getSitePath(), '', $line['file']);
-        $str = '';
-        $str .= "\n";
+        $path = str_replace($vd->getBasePath(), '', $line['file']);
+        $str = "\n";
         $str .= $vd->makeDump(func_get_args(), true);
         $str .= sprintf('vdd(%s) %s [%s]', implode(', ', $vd->getTypeArray(func_get_args())), $path, $line['line']) . "\n";
         $vd->getLogger()->debug($str);

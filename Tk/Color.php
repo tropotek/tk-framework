@@ -4,54 +4,43 @@ namespace Tk;
 
 
 /**
- * This class is used to manage an RGB colors for web and CLI
+ * An object to manage and convert RGB colors
+ *  o RGB
+ *  o HSL
+ *  o CYMK
+ *  o ASCII Console codes
  *
- * @author Michael Mifsud <http://www.tropotek.com/>
- * @see http://www.tropotek.com/
- * @license Copyright 2016 Michael Mifsud
+ * @author Tropotek <http://www.tropotek.com/>
  */
 class Color
 {
     /**
      * Red Range [0-255]
-     * @var int
      */
-    private $red = 0;
+    private int $red;
 
     /**
      * Green Range [0-255]
-     * @var int
      */
-    private $green = 0;
+    private int $green;
 
     /**
      * Blue Range [0-255]
-     * @var int
      */
-    private $blue = 0;
+    private int $blue;
 
     /**
      * Alpha or Opacity, Range [0.0-1.0]
-     * @var float
      */
-    private $alpha = 1.0;
+    private float $alpha;
 
 
     /**
      * Create RGB Color object
      *
-     * The first parameter ($red) can be of the types:
-     *  - int: for the decimal red portion of the color
-     *  - Color: A Color object to copy, in which case the other params are ignored
-     *  - hex: a 3-6 digit HEX color value in which case the other params are ignored
-     *  - array: A 3-4 length array of red, green, blue, alpha decimal numbers (For static function calls self:Hsl2RGB())
-     *
-     * @param int $red
-     * @param int $green
-     * @param int $blue
-     * @param float $alpha
+     * Each number has a range of [0-255] Except alpha which has a range of [0.0 - 1.0]
      */
-    public function __construct($red = 0, $green = 0, $blue = 0, $alpha = 1.0)
+    public function __construct(int $red = 0, int $green = 0, int $blue = 0, float $alpha = 1.0)
     {
         $this->red = $red;
         $this->green = $green;
@@ -70,13 +59,13 @@ class Color
      *
      * Each number has a range of [0-255] Except alpha which has a range of [0.0 - 1.0]
      *
-     * @param int|Color|string $red If hex string or color object then the other params are ignored
+     * @param int|array|Color|string $red If hex string or color object then the other params are ignored
      * @param int $green
      * @param int $blue
      * @param float $alpha
      * @return Color
      */
-    public static function create($red = 0, $green = 0, $blue = 0, $alpha = 1.0)
+    public static function create($red = 0, int $green = 0, int $blue = 0, float $alpha = 1.0): Color
     {
         $color = new self();
         $color->setColor($red, $green, $blue, $alpha);
@@ -92,7 +81,7 @@ class Color
      * @param float $alpha
      * @return Color
      */
-    public static function createHsl($hue = 0.0, $saturation = 0.0, $luminosity = 0.0, $alpha = 1.0)
+    public static function createHsl(float $hue = 0.0, float $saturation = 0.0, float $luminosity = 0.0, float $alpha = 1.0): Color
     {
         $color = self::create(self::hsl2Rgb($hue, $saturation, $luminosity));
         $color->alpha = $alpha;
@@ -109,23 +98,19 @@ class Color
      * @param float $alpha
      * @return Color
      */
-    public static function createCymk($cyan = 0, $yellow = 0, $magenta = 0, $key = 0, $alpha = 1.0)
+    public static function createCymk(int $cyan = 0, int $yellow = 0, int $magenta = 0, int $key = 0, float $alpha = 1.0): Color
     {
-        $color = new self(self::cymk2Rgb($cyan, $yellow, $magenta, $key));
+        $color = self::create(self::cymk2Rgb($cyan, $yellow, $magenta, $key));
         $color->alpha = $alpha;
         return $color;
     }
 
     /**
-     * @param null|int $seed
-     * @param float $alpha
-     * @return Color
+     *
      */
-    public static function createRandom($seed = null, $alpha = 1.0)
+    public static function createRandom(?int $seed = null, float $alpha = 1.0): Color
     {
-        if (is_int($seed)) {
-            mt_srand($seed);
-        }
+        if (is_int($seed)) mt_srand($seed);
         $hex =
             str_pad( dechex( mt_rand( 0, 255 ) ), 2, '0', STR_PAD_LEFT) .
             str_pad( dechex( mt_rand( 0, 255 ) ), 2, '0', STR_PAD_LEFT) .
@@ -145,12 +130,8 @@ class Color
      *
      *
      * @param int|Color|string $red If hex string or color object then the other params are ignored
-     * @param int $green (optional)
-     * @param int $blue (optional)
-     * @param int $alpha (optional)
-     * @return Color
      */
-    public function setColor($red, $green = 0, $blue = 0, $alpha = 1)
+    public function setColor($red, int $green = 0, int $blue = 0, float $alpha = 1.0): Color
     {
         if ($red instanceof Color) {
             $alpha = $red->getAlpha();
@@ -170,7 +151,7 @@ class Color
                 $red = 0;
                 $green = 0;
                 $blue = 0;
-                \Tk\Log::warning($e->__toString());
+                //\Tk\Log::warning($e->__toString());
             }
         }
         // Assign color values
@@ -182,9 +163,9 @@ class Color
     }
 
     /**
-     * @return string
+     *
      */
-    public function getHex()
+    public function getHex(): string
     {
         return sprintf('%02s%02s%02s', dechex($this->getRed()), dechex($this->getGreen()), dechex($this->getBlue()));
     }
@@ -192,10 +173,9 @@ class Color
     /**
      * Outputs a pleasant text color assuming this color is used as a background
      *
-     * @return Color
      * @source https://24ways.org/2010/calculating-color-contrast/
      */
-    public function getTextColor()
+    public function getTextColor(): Color
     {
         $yiq = (($this->getRed()*299)+($this->getGreen()*587)+($this->getBlue()*114))/1000;
 	    $hex = ($yiq >= 128) ? '#000000' : '#FFFFFF';
@@ -209,10 +189,8 @@ class Color
      *   Output: Array(Hue, Saturation, Lightness) - Values from 0 to 1
      *
      * Aliases HSV, HSL, HSB
-     *
-     * @return array
      */
-    public function getHsl()
+    public function getHsl(): array
     {
         $r = $this->getRed();
         $g = $this->getGreen();
@@ -249,57 +227,13 @@ class Color
         $h = round($h, 2);
         $s = round($s, 2);
         $l = round($l, 2);
-        //return array(round($h, 2), round($s, 2), round($l, 2));
-        return array('hue' => $h, 'saturation' => $s, 'brightness' => $l);
-    }
-
-
-    public function _getHsl()
-    {
-        // Determine lowest & highest value and chroma
-        $max = (int)max($this->getRed(), $this->getGreen(), $this->getBlue());
-        $min = (int)min($this->getRed(), $this->getGreen(), $this->getBlue());
-        $chroma = $max - $min;
-        // Calculate Luminosity
-        $l = ($max + $min) / 2;
-
-        // If chroma is 0, the given color is grey
-        // therefore hue and saturation are set to 0
-        if ($chroma == 0) {
-            $h = 0;
-            $s = 0;
-        } else {
-            // Else calculate hue and saturation.
-            // Check http://en.wikipedia.org/wiki/HSL_and_HSV for details
-            $h_ = 0;
-            switch ($max) {
-                case $this->getRed():
-                    $h_ = fmod((($this->getGreen() - $this->getBlue()) / $chroma), 6);
-                    if ($h_ < 0) $h_ = (6 - fmod(abs($h_), 6)); // Bugfix: fmod() returns wrong values for negative numbers
-                    break;
-
-                case $this->getGreen():
-                    $h_ = ($this->getBlue() - $this->getRed()) / $chroma + 2;
-                    break;
-
-                case $this->getBlue():
-                    $h_ = ($this->getRed() - $this->getGreen()) / $chroma + 4;
-                    break;
-                default:
-                    break;
-            }
-            $h = $h_ / 6;
-            $s = 1 - abs(2 * $l - 1);
-        }
         return array('hue' => $h, 'saturation' => $s, 'brightness' => $l);
     }
 
     /**
-     * Return an array of cymk values
-     *
-     * @return array
+     * Return an array of CYMK values
      */
-    public function getCymk()
+    public function getCymk(): array
     {
         $cyan = 255 - $this->getRed();
         $magenta = 255 - $this->getGreen();
@@ -312,41 +246,34 @@ class Color
     }
 
     /**
-     * get decimal Red
-     *
-     * @return int
+     * Get decimal Red
      */
-    public function getRed()
+    public function getRed(): int
     {
         return $this->red;
     }
 
     /**
-     * get decimal Green
-     *
-     * @return int
+     * Get decimal Green
      */
-    public function getGreen()
+    public function getGreen(): int
     {
         return $this->green;
     }
 
     /**
-     * get decimal Blue
-     *
-     * @return int
+     * Get decimal Blue
      */
-    public function getBlue()
+    public function getBlue(): int
     {
         return $this->blue;
     }
 
     /**
-     * Get the alpha chanel or opcity value
+     * Get the alpha chanel or opacity value
      * Range [0.0 - 1.0]
-     * @return float
      */
-    public function getAlpha()
+    public function getAlpha(): float
     {
         return $this->alpha;
     }
@@ -354,21 +281,16 @@ class Color
 
     /**
      * Get the inverse color to this color.
-     *
-     * @return Color
-     * @throws Exception
      */
-    public function getInverse()
+    public function getInverse(): Color
     {
         return self::create(255 - $this->getRed(), 255 - $this->getGreen(), 255 - $this->getBlue());
     }
 
     /**
      * Return the Colour name if available
-     *
-     * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         foreach (self::$colorChart as $c => $v) {
             if ($v == $this->getHex()) {
@@ -382,11 +304,9 @@ class Color
     /**
      * Create Tk\Color from a hex string eg: 'CCC', ' #CCC', 'CCCCCC', '#CCCCCC', 'Red', 'green'
      *
-     * @param string $hex
-     * @return array    array('red'=>0, 'green'=>0, 'blue'=>0)
      * @throws Exception
      */
-    public static function hex2Rgb($hex = '')
+    public static function hex2Rgb(string $hex = ''): array
     {
         $regs = null;
         // is the hexColor a color name in the table
@@ -398,7 +318,7 @@ class Color
             $hex = $regs[2][0] . $regs[2][0] . $regs[2][1] . $regs[2][1] . $regs[2][2] . $regs[2][2];
         }
         if (!preg_match('/^(\#)?([A-F0-9]{6})$/i', $hex, $regs)) {   // if not a 6 char HEX string
-            throw new \Tk\Exception('Invalid Hex color.');
+            throw new Exception('Invalid Hex color.');
         }
         $hex = $regs[2];
         $hex = strtoupper($hex);
@@ -412,13 +332,8 @@ class Color
 
     /**
      * hsl2Rgb
-     *
-     * @param float $hue
-     * @param float $saturation
-     * @param float $luminosity
-     * @return array
      */
-    public static function hsl2Rgb($hue = 0.0, $saturation = 0.0, $luminosity = 0.0)
+    public static function hsl2Rgb(float $hue = 0.0, float $saturation = 0.0, float $luminosity = 0.0): array
     {
         $h = $hue;
         $s = $saturation;
@@ -470,122 +385,39 @@ class Color
     }
 
     /**
-     * @param float $hue
-     * @param float $saturation
-     * @param float $luminosity
-     * @return array
-     * @deprecated use hsl2Rgb()
-     */
-    public static function _hsl2Rgb($hue = 0.0, $saturation = 0.0, $luminosity = 0.0)
-    {
-        $hue /= 60;
-        if ($hue < 0) $hue = 6 - fmod(-$hue, 6);
-        $hue = fmod($hue, 6);
-
-        $saturation = max(0, min(1, $saturation / 100));
-        $luminosity = max(0, min(1, $luminosity / 100));
-
-        $c = (1 - abs((2 * $luminosity) - 1)) * $saturation;
-        $x = $c * (1 - abs(fmod($hue, 2) - 1));
-
-        if ($hue < 1) {
-            $r = $c;
-            $g = $x;
-            $b = 0;
-        } elseif ($hue < 2) {
-            $r = $x;
-            $g = $c;
-            $b = 0;
-        } elseif ($hue < 3) {
-            $r = 0;
-            $g = $c;
-            $b = $x;
-        } elseif ($hue < 4) {
-            $r = 0;
-            $g = $x;
-            $b = $c;
-        } elseif ($hue < 5) {
-            $r = $x;
-            $g = 0;
-            $b = $c;
-        } else {
-            $r = $c;
-            $g = 0;
-            $b = $x;
-        }
-
-        $m = $luminosity - $c / 2;
-        $r = round(($r + $m) * 255);
-        $g = round(($g + $m) * 255);
-        $b = round(($b + $m) * 255);
-
-        return array(
-            'red' => $r,
-            'green' => $g,
-            'blue' => $b
-        );
-
-    }
-
-    /**
      * cymk2Rgb
-     *
-     * @param int $cyan
-     * @param int $yellow
-     * @param int $magenta
-     * @param int $key (alias for black)
-     * @return array
+     * @see https://github.com/spatie/color/blob/main/src/Convert.php
      */
-    static function cymk2Rgb($cyan = 0, $yellow = 0, $magenta = 0, $key = 0)
+    static function cymk2Rgb(float $cyan = 0, float $yellow = 0, float $magenta = 0, float $key = 0): array
     {
-        $r = 255 - round(2.55 * ($cyan + $key));
-        $g = 255 - round(2.55 * ($magenta + $key));
-        $b = 255 - round(2.55 * ($yellow + $key));
-        if ($r < 0) $r = 0;
-        if ($g < 0) $g = 0;
-        if ($b < 0) $b = 0;
-
-        return array(
-            'red' => $r,
-            'green' => $g,
-            'blue' => $b
-        );
+        return [
+           'red'   => (int) (255 * (1 - $cyan) * (1 - $key)),
+           'green' => (int) (255 * (1 - $magenta) * (1 - $key)),
+           'blue'  => (int) (255 * (1 - $yellow) * (1 - $key)),
+        ];
     }
 
     /**
      * Return a value of this color object as a HEX value
-     *
-     * @param bool $hash
-     * @return string
      */
-    public function toString($hash = false)
+    public function toString(bool $hash = false): string
     {
-        if ($hash) {
-            return '#' . $this->getHex();
-        }
+        if ($hash)  return '#' . $this->getHex();
         return $this->getHex();
     }
 
     /**
      * Return a value of this color object as a HEX value '000000' - 'FFFFFF'
-     *
-     * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->toString();
     }
 
-
     /**
      * Returns colored string for use in CLI scripts
-     *
-     * @param $string
-     * @param string $foregroundColor
-     * @param string $backgroundColor
-     * @return string
      */
-    public static function getCliString($string, $foregroundColor = null, $backgroundColor = null)
+    public static function getCliString(string $string, string $foregroundColor = null, string $backgroundColor = null): string
     {
         $cString = '';
         if (isset(self::$cliFgColorChart[$foregroundColor])) {  // Check if given foreground color found
@@ -599,47 +431,39 @@ class Color
         return $cString;
     }
 
-    /**
-     * @var array
-     */
-    public static $cliFgColorChart = array(
-        'black' => '0;30',
-        'dark_gray' => '1;30',
-        'blue' => '0;34',
-        'green' => '1;34',
-        'light_green' => '0;32',
-        'cyan' => '1;32',
-        'light_cyan' => '0;36',
-        'red' => '0;31',
-        'light_red' => '1;31',
-        'purple' => '0;35',
-        'light_purple' => '1;35',
-        'brown' => '0;33',
-        'yellow' => '1;33',
-        'light_gray' => '0;37',
-        'white' => '1;37'
-    );
+    public static array $cliFgColorChart = [
+        'Black' => '0;30',
+        'DarkGray' => '1;30',
+        'Blue' => '0;34',
+        'Green' => '1;34',
+        'LightGreen' => '0;32',
+        'Cyan' => '1;32',
+        'LightCyan' => '0;36',
+        'Red' => '0;31',
+        'LightRed' => '1;31',
+        'Purple' => '0;35',
+        'LightPurple' => '1;35',
+        'Brown' => '0;33',
+        'Yellow' => '1;33',
+        'LightGray' => '0;37',
+        'White' => '1;37'
+    ];
 
-    /**
-     * @var array
-     */
-    public static $cliBgColorChart = array(
-        'black' => '40',
-        'red' => '41',
-        'green' => '42',
-        'yellow' => '43',
-        'blue' => '44',
-        'magenta' => '45',
-        'cyan' => '46',
-        'light_gray' => '47'
-    );
+    public static array $cliBgColorChart = [
+        'Black' => '40',
+        'Red' => '41',
+        'Green' => '42',
+        'Yellow' => '43',
+        'Blue' => '44',
+        'Magenta' => '45',
+        'Cyan' => '46',
+        'LightGray' => '47'
+    ];
 
     /**
      * A complete list of the color names supported by all major browsers.
-     *
-     * @var array
      */
-    public static $colorChart = array(
+    public static array $colorChart = [
         'AliceBlue' => 'F0F8FF', 'AntiqueWhite' => 'FAEBD7',
         'Aqua' => '00FFFF', 'Aquamarine' => '7FFFD4',
         'Azure' => 'F0FFFF', 'Beige' => 'F5F5DC',
@@ -709,6 +533,6 @@ class Color
         'Turquoise' => '40E0D0', 'Violet' => 'EE82EE',
         'Wheat' => 'F5DEB3', 'White' => 'FFFFFF',
         'WhiteSmoke' => 'F5F5F5', 'Yellow' => 'FFFF00',
-        'YellowGreen' => '9ACD32');
+        'YellowGreen' => '9ACD32'];
 
 }

@@ -86,56 +86,30 @@ namespace Tk;
  *       'pageTitle' => 'This is the main page title.',
  *       'rowBlock' => true,
  *       'dataBlock' => true,
- *       'dataValue' => 'This is a fricken` test'
+ *       'dataValue' => 'This is a test` test'
  *     )
  *   )
  * </code>
  *
- * @author Michael Mifsud <http://www.tropotek.com/>
- * @see http://www.tropotek.com/
- * @license Copyright 2016 Michael Mifsud
- * @todo Add caching ability
+ * @author Tropotek <http://www.tropotek.com/>
  */
 class CurlyTemplate
 {
-    
-    /**
-     * @var string
-     */
-    protected $ld = '{';
+    protected string $ld = '{';
 
-    /**
-     * @var string
-     */
-    protected $rd = '}';
+    protected string $rd = '}';
 
-    /**
-     * @var string
-     */
-    protected $template = '';
+    protected string $template = '';
 
 
-    /**
-     * CurlyTemplate constructor.
-     * @param string $template
-     */
-    public function __construct($template)
+    public function __construct(string $template)
     {
         $this->template = $template;
     }
 
-
-    /**
-     * Create a CurlyTemplate object
-     *
-     * @param string $template
-     * @return CurlyTemplate
-     */
-    static function create($template)
+    static function create(string $template): CurlyTemplate
     {
-        $tpl = new static($template);
-        
-        return $tpl;
+        return new static($template);
     }
 
     /**
@@ -144,12 +118,9 @@ class CurlyTemplate
      * This is a mutable object and parse() can be called multiple times with
      * different data collections without issue.
      *
-     *
-     * @param array $data
-     * @return string
      * @throws Exception
      */
-    function parse($data)
+    function parse(array $data): string
     {
         $template = $this->template;
         $template = $this->parseRecursive($template, $data);
@@ -160,15 +131,10 @@ class CurlyTemplate
     /**
      * Parse a block and replace all curly variable with their
      * appropriate data value from the data array
-     *
-     * @param string $str
-     * @param array $data
-     * @return string
      * @throws Exception
      */
-    private function parseBlock($str, $data)
+    protected function parseBlock(string $str, array $data): string
     {
-        if (!is_array($data)) return $str;
         foreach($data as $k => $v) {
             if (!is_string($v) && is_callable($v)) {
                 $v = call_user_func_array($v, array($this));
@@ -181,14 +147,9 @@ class CurlyTemplate
     }
 
     /**
-     * @param string $template
-     * @param array $data
-     * @return string
-     *
-     * @todo Add escape delimiters '{{' and '}}
      * @throws Exception
      */
-    private function parseRecursive($template, $data = null)
+    private function parseRecursive(string $template, ?array $data = null): string
     {
         $ld = preg_quote($this->ld);
         $rd = preg_quote($this->rd);
@@ -225,12 +186,8 @@ class CurlyTemplate
 
     /**
      *  Set the left/right variable delimiters
-     *
-     * @param string $ld Left Delimiter
-     * @param string $rd Right Delimiter
-     * @return $this
      */
-    public function setDelimiters($ld = '{', $rd = '}')
+    public function setDelimiters(string $ld = '{', string $rd = '}'): CurlyTemplate
     {
         $this->ld = $ld;
         $this->rd = $rd;

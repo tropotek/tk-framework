@@ -11,8 +11,4 @@
             <directory suffix=".php">Tk/</directory>
         </whitelist>
     </filter>
-
-    <!--php>
-        <ini name="date.timezone" value="UTC"/>
-    </php -->
 </phpunit>

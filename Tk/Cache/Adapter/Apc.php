@@ -4,29 +4,17 @@ namespace Tk\Cache\Adapter;
 /**
  * An Apc cache class
  *
- * @author Michael Mifsud <http://www.tropotek.com/>
- * @see http://www.tropotek.com/
- * @license Copyright 2015 Michael Mifsud
+ * @author Tropotek <http://www.tropotek.com/>
  */
 class Apc implements Iface
 {
 
     /**
-     * @return Apc
-     */
-    public static function create()
-    {
-        $obj = new static();
-        return $obj;
-    }
-
-    /**
      * Fetch
      *
-     * @param string $key
-     * @return mixed Returns false on fail
+     * @return mixed|false Returns false on fail
      */
-    public function fetch($key)
+    public function fetch(string $key)
     {
         return apc_fetch($key);
     }
@@ -34,12 +22,11 @@ class Apc implements Iface
     /**
      * Store
      *
-     * @param string $key
-     * @param string $data
+     * @param mixed $data
      * @param int $ttl
      * @return array|bool
      */
-    public function store($key, $data, $ttl = 0)
+    public function store(string $key, $data, int $ttl = 0)
     {
         return apc_store($key, $data, $ttl);
     }
@@ -47,10 +34,9 @@ class Apc implements Iface
     /**
      * Delete
      *
-     * @param string $key
      * @return bool|\string[]
      */
-    public function delete($key)
+    public function delete(string $key)
     {
         return apc_delete($key);
     }
@@ -60,7 +46,7 @@ class Apc implements Iface
      *
      * @return bool true on success or false on failure.
      */
-    public function clear()
+    public function clear(): bool
     {
         return apc_clear_cache();
     }

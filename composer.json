@@ -7,7 +7,7 @@
     "framework",
     "tropotek"
   ],
-  "time": "2019-04-09",
+  "time": "2022-10-15",
   "license": "MIT",
   "authors": [
     {
@@ -25,9 +25,6 @@
     "psr-0": {
       "Tk\\": ""
     },
-    "files": [
-      "Tk/Exception.php"
-    ],
     "exclude-from-classmap": [
       "/tests/"
     ]
@@ -36,14 +33,27 @@
     "php": "^7.3||^8.0",
     "psr/log": "^1.0",
     "ext-json": "*",
-    "ttek/tk-installers": "~3.2.0",
+    "ext-pdo": "*",
+    "ext-fileinfo": "*",
+    "ext-json": "*",
+    "ext-curl": "*",
+    "ttek/tk-installers": "~7.0",
+
+    "symfony/http-foundation": "^5.4",
+    "symfony/routing": "^5.4",
+    "symfony/http-kernel": "^5.4",
+    "symfony/event-dispatcher": "^5.4",
+    "symfony/console": "^5.4",
     "monolog/monolog": "^2.0",
-    "symfony/http-foundation": "4.2.*",
+    "sensiolabs/ansi-to-html": "~1.0",
     "lasserafn/php-initial-avatar-generator": "4.2.*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "9.5.x-dev"
   },
   "extra": {
     "branch-alias": {
-      "dev-master": "3.2.x-dev"
+      "dev-master": "7.0.x-dev"
     }
   }
 }

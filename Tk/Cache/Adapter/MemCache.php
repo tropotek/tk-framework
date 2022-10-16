@@ -20,44 +20,24 @@ namespace Tk\Cache\Adapter;
  * </code>
  *
  *
- * @author Michael Mifsud <http://www.tropotek.com/>
- * @see http://www.tropotek.com/
- * @license Copyright 2015 Michael Mifsud
+ * @author Tropotek <http://www.tropotek.com/>
  */
 class MemCache implements Iface
 {
 
-    /**
-     * @var \MemCache
-     */
-    public $connection;
+    public \MemCache $connection;
 
-    /**
-     * construct
-     *
-     */
+
+
     public function __construct()
     {
         $this->connection = new \MemCache();
     }
 
     /**
-     * @return MemCache
+     * Adds a memcache search server
      */
-    public static function create()
-    {
-        $obj = new static();
-        return $obj;
-    }
-
-    /**
-     * add memcache search server
-     *
-     * @param string $host
-     * @param int $port
-     * @param int $weight
-     */
-    public function addServer($host, $port = 11211, $weight = 10)
+    public function addServer(string $host, int $port = 11211, int $weight = 10)
     {
         $this->connection->addServer($host, $port, true, $weight);
     }
@@ -65,13 +45,9 @@ class MemCache implements Iface
 
     /**
      * Store
-     *
-     * @param string $key
-     * @param string $data
-     * @param int $ttl
-     * @return bool
+     * @return bool Returns false if no value available
      */
-    public function store($key, $data, $ttl = 0)
+    public function store(string $key, $data, int $ttl = 0)
     {
         return $this->connection->set($key, $data, 0, $ttl);
     }
@@ -79,21 +55,18 @@ class MemCache implements Iface
     /**
      * Fetch
      *
-     * @param string $key
-     * @return mixed Returns false on fail
+     * @return string|array|false Returns false if no value available
      */
-    public function fetch($key)
+    public function fetch(string $key)
     {
         return $this->connection->get($key);
     }
 
     /**
      * Delete
-     *
-     * @param string $key
-     * @return bool
+     * @return bool Returns false if no value available
      */
-    public function delete($key)
+    public function delete(string $key)
     {
         return $this->connection->delete($key);
     }
@@ -101,10 +74,8 @@ class MemCache implements Iface
     /**
      * Clear the cache
      * TODO: Test if thats what flush means...????
-     *
-     * @return bool
      */
-    public function clear()
+    public function clear(): bool
     {
         return $this->connection->flush();
     }

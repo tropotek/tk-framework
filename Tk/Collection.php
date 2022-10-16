@@ -1,28 +1,20 @@
 <?php
-
 namespace Tk;
 
 
 /**
- * Class Collection
  *
- * @author Michael Mifsud <http://www.tropotek.com/>
- * @see http://www.tropotek.com/
- * @license Copyright 2016 Michael Mifsud
+ *
+ * @author Tropotek <http://www.tropotek.com/>
  * @see http://git.snooey.net/Mirrors/php-slim/
  */
 class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
 {
 
-    protected $data = array();
+    private array $data = [];
 
 
-    /**
-     * Collection constructor.
-     *
-     * @param array $items
-     */
-    public function __construct($items = array())
+    public function __construct(array $items = [])
     {
         foreach ($items as $key => $value) {
             $this->set($key, $value);
@@ -30,232 +22,66 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
-     * Add a list of items to the collection
-     *
-     * @param array|Collection $items Key-value array of data to append to this collection
-     * @return $this
+     * Return items in the $src array where the keys match the $regex supplied
      */
-    public function replace($items)
+    public static function findByRegex(array $src, string $regex): array
     {
-        if ($items instanceof Collection) {
-            $items = $items->all();
-        }
-        if (is_array($items)) {
-            foreach ($items as $key => $value) {
-                $this->set($key, $value);
-            }
-        }
-        return $this;
-    }
-
-    /**
-     * Set an item in the collection
-     *
-     * @param string $key
-     * @param mixed $value
-     * @return $this
-     */
-    public function set($key, $value)
-    {
-        $this->data[$key] = $value;
-        return $this;
-    }
-
-    /**
-     * Get collection item for key
-     *
-     * @param string $key
-     * @param mixed $default Return value if the key does not exist
-     * @return mixed
-     */
-    public function get($key, $default = null)
-    {
-        return $this->has($key) ? $this->data[$key] : $default;
-    }
-
-    /**
-     * Get all items in collection
-     *
-     * @param null|string|array $regex
-     * @return array The collection's source data
-     */
-    public function all($regex = null)
-    {
-        if ($regex) {
-            $array = array();
-            foreach ($this->data as $name => $value) {
-                if (is_string($regex) && !preg_match($regex, $name)) {
-                    continue;
-                } else if (is_array($regex) && !in_array($name, $regex)) {
-                    continue;
-                }
-                $array[$name] = $value;
-            }
-            return $array;
-        }
-        return $this->data;
-    }
-
-    /**
-     * Get collection keys
-     *
-     * @return array The collection's source data keys
-     */
-    public function keys()
-    {
-        return array_keys($this->data);
-    }
-
-    /**
-     * Does this collection have a given key?
-     *
-     * @param string $key The data key
-     * @return bool
-     */
-    public function has($key)
-    {
-        return array_key_exists($key, $this->data);
-    }
-
-    /**
-     * Remove item from collection
-     *
-     * @param string $key The data key
-     * @return $this
-     */
-    public function remove($key)
-    {
-        unset($this->data[$key]);
-        return $this;
-    }
-
-    /**
-     * Remove all items from collection
-     *
-     * @return $this
-     */
-    public function clear()
-    {
-        $this->data = array();
-        return $this;
-    }
-
-
-    /**
-     * Does this collection have a given key?
-     *
-     * @param  string $key The data key
-     *
-     * @return bool
-     */
-    public function offsetExists($key)
-    {
-        return $this->has($key);
-    }
-
-    /**
-     * Get collection item for key
-     *
-     * @param string $key The data key
-     *
-     * @return mixed The key's value, or the default value
-     */
-    public function offsetGet($key)
-    {
-        return $this->get($key);
-    }
-
-    /**
-     * Set collection item
-     *
-     * @param string $key The data key
-     * @param mixed $value The data value
-     */
-    public function offsetSet($key, $value)
-    {
-        $this->set($key, $value);
-    }
-
-    /**
-     * Remove item from collection
-     *
-     * @param string $key The data key
-     */
-    public function offsetUnset($key)
-    {
-        $this->remove($key);
-    }
-
-    /**
-     * Get number of items in collection
-     *
-     * @return int
-     */
-    public function count()
-    {
-        return count($this->data);
-    }
-
-    /**
-     * Get collection iterator
-     *
-     * @return \ArrayIterator
-     */
-    public function getIterator()
-    {
-        return new \ArrayIterator($this->data);
-    }
-
-    /**
-     * @return array
-     */
-    public function toArray()
-    {
-        return $this->all();
-    }
-
-    /**
-     * Use this to return the items in an array that match the expression
-     *
-     * @param $array
-     * @param $regex
-     * @return array
-     */
-    public static function arrayKeyRegex($array, $regex)
-    {
-        $a = array();
-        foreach ($array as $name => $value) {
-            if (!preg_match($regex, $name)) continue;
-            $a[$name] = $value;
+        $a = [];
+        foreach ($src as $key => $value) {
+            if (!preg_match($regex, $key)) continue;
+            $a[$key] = $value;
         }
         return $a;
     }
 
     /**
-     * flatten a multi-dimensional array to a single-dimensional array
-     * NOTE: All key values will be lost.
-     *
-     * @param array $array
-     * @return array
+     * Return items from $src where the key is in the array $keys
      */
-    public static function arrayFlatten($array)
+    public static function findIntersects(array $src, array $keys): array
     {
-        $return = array();
+        return array_intersect_key($src, array_fill_keys($keys, null));
+    }
+
+    /**
+     * prefix a string to all array keys
+     *
+     * @todo Delete if not used!!!
+     */
+    public static function prefixArrayKeys(array $array, string $prefix): array
+    {
+        if ($prefix != '' && is_string($prefix)) {
+            foreach ($array as $k => $v) {
+                $array[$prefix . $k] = $v;
+                unset($array[$k]);
+            }
+        }
+        return $array;
+    }
+
+
+    /**
+     * flatten a multidimensional array to a single-dimensional array
+     *
+     * @note All key values will be lost.
+     * @todo Delete if not used!!!
+     */
+    public static function arrayFlatten(array $array): array
+    {
+        $return = [];
         array_walk_recursive($array, function($a) use (&$return) { if ($a !== null) $return[] = $a; });
         return $return;
     }
 
     /**
-     * Return the difference of 2 multidimensinal arrays
+     * Return the difference of 2 multidimensional arrays
      * If no difference null is returned.
      *
-     * @param array $array1
-     * @param array $array2
      * @return null|array   Returns null if there are no differences
      * @site http://php.net/manual/en/function.array-diff-assoc.php
      * @author telefoontoestel at hotmail dot com
+     * @todo Delete if not used!!!
      */
-    public static function arrayDiffRecursive($array1, $array2)
+    public static function arrayDiffRecursive(array $array1, array $array2)
     {
         foreach ($array1 as $key => $value) {
             if (is_array($value)) {
@@ -276,32 +102,10 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
         return !isset($difference) ? null : $difference;
     }
 
-
-    /**
-     * prefix a string to all array keys
-     *
-     * @param array $array
-     * @param string $prefix
-     * @return array
-     */
-    public static function prefixArrayKeys(array $array, string $prefix)
-    {
-        if ($prefix != '' && is_string($prefix)) {
-            foreach ($array as $k => $v) {
-                $array[$prefix . $k] = $v;
-                unset($array[$k]);
-            }
-        }
-        return $array;
-    }
-
     /**
      * Return a readable string representation of this object
-     *
-     * @param $arr
-     * @return string
      */
-    public static function arrayToString($arr)
+    public static function arrayToString(array $arr): string
     {
         $str = "";
         foreach ($arr as $k => $v) {
@@ -314,19 +118,165 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
             }
         }
         return $str;
+    }
 
+
+    /**
+     * Add a list of items to the collection
+     *
+     * @param array $items Key-value array of data to append to this collection
+     * @return $this
+     */
+    public function replace(array $items): Collection
+    {
+        foreach ($items as $key => $value) {
+            $this->set($key, $value);
+        }
+        return $this;
     }
 
     /**
-     * toString
+     * Set an item in the collection
      *
-     * @return string
+     * @param mixed $value
      */
-    public function toString()
+    public function set(string $key, $value): Collection
     {
-        $arr = self::arrayToString($this->data);
-        //ksort($arr);
-        return $arr;
+        $this->data[$key] = $value;
+        return $this;
+    }
+
+    /**
+     * Get collection item for key
+     *
+     * @param mixed $default Return value if the key does not exist
+     * @return mixed
+     */
+    public function get(string $key, $default = null)
+    {
+        return $this->all($key) ?: $default;
+    }
+
+    /**
+     * Get all items in collection
+     *
+     * @param string|null $key The name of the headers to return or null to get them all
+     *
+     * @return mixed
+     */
+    public function all(?string $key = null)
+    {
+        if ($key !== null) {
+            return $this->data[$key] ?? [];
+        }
+        return $this->data;
+    }
+
+    /**
+     * Get collection array keys
+     */
+    public function keys(): array
+    {
+        return array_keys($this->data);
+    }
+
+    /**
+     * Does this collection have a given key?
+     */
+    public function has(string $key): bool
+    {
+        return array_key_exists($key, $this->data);
+    }
+
+    /**
+     * Remove item from collection
+     */
+    public function remove(string $key): Collection
+    {
+        unset($this->data[$key]);
+        return $this;
+    }
+
+    /**
+     * Remove all items from collection
+     */
+    public function clear(): Collection
+    {
+        $this->data = [];
+        return $this;
+    }
+
+
+
+    /**
+     * Does this collection have a given key?
+     *
+     * @param  string $key The data key
+     *
+     * @return bool
+     * @interface \ArrayAccess
+     */
+    public function offsetExists($key)
+    {
+        return $this->has($key);
+    }
+
+    /**
+     * Get collection item for key
+     *
+     * @param string $key The data key
+     *
+     * @return mixed The key's value, or the default value
+     * @interface \ArrayAccess
+     */
+    public function offsetGet($key)
+    {
+        return $this->get($key);
+    }
+
+    /**
+     * Set collection item
+     *
+     * @param string $key The data key
+     * @param mixed $value The data value
+     * @interface \ArrayAccess
+     */
+    public function offsetSet($key, $value)
+    {
+        $this->set($key, $value);
+    }
+
+    /**
+     * Remove item from collection
+     *
+     * @param string $key The data key
+     * @interface \ArrayAccess
+     */
+    public function offsetUnset($key)
+    {
+        $this->remove($key);
+    }
+
+    /**
+     * Get number of items in collection
+     *
+     * @return int
+     * @interface Countable
+     */
+    public function count(): int
+    {
+        return count($this->data);
+    }
+
+    /**
+     * Get collection iterator
+     *
+     * @return \ArrayIterator
+     * @interface IteratorAggregate
+     */
+    public function getIterator(): \ArrayIterator
+    {
+        return new \ArrayIterator($this->data);
     }
 
 }

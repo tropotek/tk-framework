@@ -1,109 +1,81 @@
 <?php
 namespace Tk;
 
-
-use Monolog\Formatter\LineFormatter;
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
 use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
+use Tk\Traits\SingletonTrait;
 
 /**
  * A basic log interface to help with logging through the PSR interface,
- * This must be initiated in the boostrap phase of the session
+ * This should be initiated in the boostrap phase of the request
  *
  * IE:
- *   \Tk\Log::getInstance($config->getLog());
+ *   \Tk\Log::instance($config->getLog());
  *
- * @author Michael Mifsud <http://www.tropotek.com/>
- * @see http://www.tropotek.com/
- * @license Copyright 2017 Michael Mifsud
- *
- * @TODO: We need to implement the \Psr\Log\LoggerInterface correctly,
- *        remove the static from the methods, we can create static aliases
- *        Also implement the LoggerInterface object
+ * @author Tropotek <http://www.tropotek.com/>
  */
-class Log  // implements LoggerInterface
+class Log
 {
-    /**
-     * @var Log
-     */
-    protected static $instance = null;
+    use SingletonTrait;
 
     /**
-     * @var \Psr\Log\LoggerInterface
+     * use this in your query to disable logging for a request
+     * Handy for API calls to reduce clutter in a log
      */
-    private $logger = null;
+    const NO_LOG = 'nolog';
+
+    private LoggerInterface $logger;
 
 
-    /**
-     * Log constructor.
-     * @param \Psr\Log\LoggerInterface $logger
-     */
-    protected function __construct($logger)
+    protected function __construct(LoggerInterface $logger)
     {
         $this->logger = $logger;
     }
 
-    /**
-     * @param string $logPath
-     * @param int $logLevel
-     * @param LineFormatter $formatter
-     * @return Log
-     * @throws \Exception
-     */
-    public static function create($logPath = '', $logLevel = Logger::API, LineFormatter $formatter = null)
+    public static function instance(?LoggerInterface $logger = null): Log
     {
-        if (!self::$instance) {
-            if (!is_file($logPath)) {
-                $logger = new \Psr\Log\NullLogger();
-                return self::$instance = new static($logger);
-            }
-            $logger = new Logger('system');
-            $handler = new StreamHandler($logPath, $logLevel);
-            if (!$formatter) {
-                $formatter = new \Tk\Log\MonologLineFormatter();
-                $formatter->setScriptTime(microtime(true));
-            }
-            $handler->setFormatter($formatter);
-            $logger->pushHandler($handler);
-            self::$instance = new static($logger);
+        if (!self::$_INSTANCE && $logger) {
+            self::$_INSTANCE = new static($logger ?? new \Symfony\Component\HttpKernel\Log\Logger());
         }
-        return self::$instance;
+        return self::$_INSTANCE;
     }
 
     /**
-     * @param \Psr\Log\LoggerInterface|null $logger
-     * @return Log|static
+     * Logs with an arbitrary level.
      */
-    public static function getInstance($logger = null)
+    public static function log(string $level, string $message, array $context = [])
     {
-        if (!self::$instance) {
-            if (!$logger) $logger = new \Psr\Log\NullLogger();
-            self::$instance = new static($logger);
-        }
-        return self::$instance;
+        $l = self::instance()->getLogger();
+        $l->log($level,self::getCallerLine(2) . $message, $context);
     }
 
-    /**
-     * @return \Psr\Log\LoggerInterface
-     */
-    public function getLogger()
+    private static function getCallerLine(int $shift = 2): string
+    {
+        $bt = debug_backtrace();
+        for($i = 0; $i < $shift; $i++) array_shift($bt);
+        $caller = array_shift($bt);
+        $str = '';
+        if ($caller) {
+            $config = Config::instance();
+            $line = $caller['line'];
+            $file = str_replace($config->getBasePath(), '', $caller['file']);
+            $str = sprintf('[%s:%s] ', $file, $line);
+        }
+        return $str;
+    }
+
+    public function getLogger(): LoggerInterface
     {
         return $this->logger;
     }
 
+
     /**
      * System is unusable.
-     *
-     * @param string $message
-     * @param array $context
-     *
-     * @return void
      */
-    public static function emergency($message, array $context = array())
+    public static function emergency(string $message, array $context = [])
     {
-        $l = self::getInstance()->getLogger();
-        $l->emergency(self::getCallerLine() . $message, $context);
+        self::log(LogLevel::EMERGENCY, $message, $context);
     }
 
     /**
@@ -111,48 +83,29 @@ class Log  // implements LoggerInterface
      *
      * Example: Entire website down, database unavailable, etc. This should
      * trigger the SMS alerts and wake you up.
-     *
-     * @param string $message
-     * @param array $context
-     *
-     * @return void
      */
-    public static function alert($message, array $context = array())
+    public static function alert(string $message, array $context = [])
     {
-        $l = self::getInstance()->getLogger();
-        $l->alert(self::getCallerLine() . $message, $context);
+        self::log(LogLevel::ALERT, $message, $context);
     }
 
     /**
      * Critical conditions.
      *
      * Example: Application component unavailable, unexpected exception.
-     *
-     * @param string $message
-     * @param array $context
-     *
-     * @return void
      */
-    public static function critical($message, array $context = array())
+    public static function critical(string $message, array $context = [])
     {
-        $l = self::getInstance()->getLogger();
-        $l->critical(self::getCallerLine() . $message, $context);
+        self::log(LogLevel::CRITICAL, $message, $context);
     }
-
 
     /**
      * Runtime errors that do not require immediate action but should typically
      * be logged and monitored.
-     *
-     * @param string $message
-     * @param array $context
-     *
-     * @return void
      */
-    public static function error($message, array $context = array())
+    public static function error(string $message, array $context = [])
     {
-        $l = self::getInstance()->getLogger();
-        $l->error(self::getCallerLine() . $message, $context);
+        self::log(LogLevel::ERROR, $message, $context);
     }
 
     /**
@@ -160,93 +113,36 @@ class Log  // implements LoggerInterface
      *
      * Example: Use of deprecated APIs, poor use of an API, undesirable things
      * that are not necessarily wrong.
-     *
-     * @param string $message
-     * @param array $context
-     *
-     * @return void
      */
-    public static function warning($message, array $context = array())
+    public static function warning(string $message, array $context = [])
     {
-        $l = self::getInstance()->getLogger();
-        $l->warning(self::getCallerLine() . $message, $context);
+        self::log(LogLevel::WARNING, $message, $context);
     }
 
     /**
      * Normal but significant events.
-     *
-     * @param string $message
-     * @param array $context
-     *
-     * @return void
      */
-    public static function notice($message, array $context = array())
+    public static function notice(string $message, array $context = [])
     {
-        $l = self::getInstance()->getLogger();
-        $l->notice($message, $context);
+        self::log(LogLevel::NOTICE, $message, $context);
     }
 
     /**
      * Interesting events.
      *
      * Example: User logs in, SQL logs.
-     *
-     * @param string $message
-     * @param array $context
-     *
-     * @return void
      */
-    public static function info($message, array $context = array())
+    public static function info(string $message, array $context = [])
     {
-        $l = self::getInstance()->getLogger();
-        $l->info($message, $context);
+        self::log(LogLevel::INFO, $message, $context);
     }
 
     /**
      * Detailed debug information.
-     *
-     * @param string $message
-     * @param array $context
-     *
-     * @return void
      */
-    public static function debug($message, array $context = array())
+    public static function debug(string $message, array $context = [])
     {
-        $l = self::getInstance()->getLogger();
-        $l->debug($message, $context);
-    }
-
-    /**
-     * Logs with an arbitrary level.
-     *
-     * @param mixed $level
-     * @param string $message
-     * @param array $context
-     *
-     * @return void
-     */
-    public static function log($level, $message, array $context = array())
-    {
-        $l = self::getInstance()->getLogger();
-        $l->log($level, $message, $context);
-    }
-
-    /**
-     * @return string
-     */
-    private static function getCallerLine()
-    {
-        $bt = debug_backtrace();
-        array_shift($bt);
-        $caller = array_shift($bt);
-        $str = '';
-        if ($caller) {
-            $config = \Tk\Config::getInstance();
-            $line = $caller['line'];
-            $file = str_replace($config->getSitePath(), '', $caller['file']);
-            $str = sprintf('[%s:%s] ', $file, $line);
-        }
-        return $str;
+        self::log(LogLevel::DEBUG, $message, $context);
     }
 
 }
