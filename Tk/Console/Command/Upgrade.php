@@ -80,6 +80,7 @@ class Upgrade extends Console
                     }
                 }
             }
+            
         } catch (\Exception $e) {
             $this->writeError($e->getMessage());
             return Command::FAILURE;
