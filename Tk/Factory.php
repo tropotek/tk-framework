@@ -5,6 +5,7 @@ use Composer\Autoload\ClassLoader;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Log\LogLevel;
+use Symfony\Component\Console\Application;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -206,11 +207,12 @@ class Factory extends Collection implements FactoryInterface
         return $this->get('eventDispatcher');
     }
 
-    public function initEventDispatcher()
+    public function initEventDispatcher(): ?EventDispatcher
     {
         if ($this->getEventDispatcher()) {
             new Dispatch($this->getEventDispatcher());
         }
+        return $this->getEventDispatcher();
     }
 
     public function getLogger(): ?Logger
@@ -301,4 +303,35 @@ class Factory extends Collection implements FactoryInterface
         return $this->get('authUser');
     }
 
+    /**
+     * @return Application
+     */
+    public function getConsole(): Application
+    {
+        if (!$this->get('system.console')) {
+            $app = new Application($this->getConfig()->get('system.site.name'), $this->getSystem()->getVersion());
+            $app->setDispatcher($this->initEventDispatcher());
+
+            // Setup Global Console Commands
+//            $app->add(new \Bs\Console\Upgrade());
+//            $app->add(new \Bs\Console\Maintenance());
+//            $app->add(new \Bs\Console\DbBackup());
+//            $app->add(new \Bs\Console\UserPass());
+//            $app->add(new \Bs\Console\Migrate());
+//            $app->add(new \Bs\Console\CleanData());
+//            if ($this->isDebug()) {
+//                $app->add(new \Bs\Console\MakeModel());
+//                $app->add(new \Bs\Console\MakeTable());
+//                $app->add(new \Bs\Console\MakeManager());
+//                $app->add(new \Bs\Console\MakeForm());
+//                $app->add(new \Bs\Console\MakeEdit());
+//                $app->add(new \Bs\Console\MakeAll());
+//                $app->add(new \Bs\Console\Debug());
+//                $app->add(new \Bs\Console\Mirror());
+//            }
+
+            $this->set('system.console', $app);
+        }
+        return $this->get('system.console');
+    }
 }

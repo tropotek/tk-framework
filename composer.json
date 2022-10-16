@@ -44,6 +44,7 @@
     "symfony/http-kernel": "^5.4",
     "symfony/event-dispatcher": "^5.4",
     "symfony/console": "^5.4",
+    "symfony/lock": "^5.4",
     "monolog/monolog": "^2.0",
     "sensiolabs/ansi-to-html": "~1.0",
     "lasserafn/php-initial-avatar-generator": "4.2.*"
