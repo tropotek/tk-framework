@@ -13,10 +13,6 @@ use Tk\Console\Exception;
 class Upgrade extends Console
 {
 
-
-    /**
-     *
-     */
     protected function configure()
     {
         $this->setName('upgrade')
@@ -24,17 +20,11 @@ class Upgrade extends Console
             ->setDescription('Call this to upgrade the site from git and update its dependencies');
     }
 
-    /**
-     * @param InputInterface $input
-     * @param OutputInterface $output
-     * @return int|null|void
-     * @throws \Tk\Db\Exception
-     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if ($this->getConfig()->isDebug()) {
             $this->writeError('Error: Only run this command in a live environment.');
-            return;
+            return Command::FAILURE;
         }
         $currentMode = $this->getRegistry()->isMaintenanceMode();
 
