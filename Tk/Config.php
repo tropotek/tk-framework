@@ -99,6 +99,16 @@ class Config extends Collection
         return $this->getSystem()->makeUrl($this->get('path.cache'));
     }
 
+    public function getTemplatePath(): string
+    {
+        return $this->getSystem()->makePath($this->get('path.template'));
+    }
+
+    public function getTemplateUrl(): string
+    {
+        return $this->getSystem()->makeUrl($this->get('path.template'));
+    }
+
 
     public function isDebug(): bool
     {
