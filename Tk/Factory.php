@@ -320,6 +320,7 @@ class Factory extends Collection implements FactoryInterface
             $app->add(new Command\DbBackup());
             $app->add(new Command\Migrate());
             if ($this->getConfig()->isDebug()) {
+                $app->add(new Command\Debug());
                 $app->add(new Command\Mirror());
 //                $app->add(new \Bs\Console\MakeModel());
 //                $app->add(new \Bs\Console\MakeTable());
@@ -327,7 +328,6 @@ class Factory extends Collection implements FactoryInterface
 //                $app->add(new \Bs\Console\MakeForm());
 //                $app->add(new \Bs\Console\MakeEdit());
 //                $app->add(new \Bs\Console\MakeAll());
-//                $app->add(new \Bs\Console\Debug());
             }
 
             $this->set('console', $app);

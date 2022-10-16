@@ -16,14 +16,14 @@ class Mirror
     public function doDefault(Request $request)
     {
 //        if (!$this->getConfig()->isDebug()) {
-//            throw new \Tk\Exception('Only available for live sites.');
+//            throw new \Tk\Exception('Only available for live sites.', 500);
 //        }
 
         if (strtolower($request->getScheme()) != Uri::SCHEME_HTTP_SSL) {
-            throw new \Tk\Exception('Only available over SSL connections.');
+            throw new \Tk\Exception('Only available over SSL connections.', 500);
         }
-        if ($this->getConfig()->get('db.mirror.secret') !== $request->request->get('db.mirror.secret')) {
-            throw new \Tk\Exception('Invalid access key.');
+        if ($this->getConfig()->get('db.mirror.secret') !== $request->request->get('secret')) {
+            throw new \Tk\Exception('Invalid access key.', 500);
         }
 
         if ($request->request->get('action') == 'db') {
@@ -44,7 +44,9 @@ class Mirror
         $path = $this->getConfig()->getTempPath() . '/db_mirror.sql';
         $dbBackup->save($path, ['exclude' => $exclude]);
 
-        @unlink($path . '.gz');
+        if (is_file($path . '.gz'))
+            @unlink($path . '.gz');
+
         $command = sprintf('gzip ' . $path);
         exec($command, $out, $ret);
         if ($ret != 0) {
