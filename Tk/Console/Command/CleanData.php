@@ -8,9 +8,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Tk\Console\Console;
 
 /**
- * @author Michael Mifsud <http://www.tropotek.com/>
- * @see http://www.tropotek.com/
- * @license Copyright 2017 Michael Mifsud
+ * @author Tropotek <http://www.tropotek.com/>
  */
 class CleanData extends Console
 {
@@ -18,7 +16,7 @@ class CleanData extends Console
     protected function configure()
     {
         $this->setName('clean-data')
-            ->setAliases(array('cd'))
+            ->setAliases(['cd'])
             ->setDescription('Clean the data/ folder of empty folders');
     }
 

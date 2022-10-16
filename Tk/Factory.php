@@ -316,8 +316,8 @@ class Factory extends Collection implements FactoryInterface
             // Setup Global Console Commands
             $app->add(new Command\CleanData());
             $app->add(new Command\Upgrade());
-//            $app->add(new \Bs\Console\Maintenance());
-//            $app->add(new \Bs\Console\DbBackup());
+            $app->add(new Command\Maintenance());
+            $app->add(new Command\DbBackup());
 //            $app->add(new \Bs\Console\UserPass());
 //            $app->add(new \Bs\Console\Migrate());
 //            if ($this->isDebug()) {

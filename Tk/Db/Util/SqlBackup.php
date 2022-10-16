@@ -97,7 +97,7 @@ class SqlBackup
             foreach ($exclude ?? [] as $exTable) {
                 $excludeStr .= '--ignore-table=' . $this->getDb()->getDatabaseName() . '.' . $exTable . ' ';
             }
-            $command = sprintf('mysqldump %s --opt -h %s -u %s -p%s %s > %s', $excludeStr, $host, $user, $pass, $name, escapeshellarg($sqlFile));
+            $command = sprintf('mysqldump --max_allowed_packet=1G --single-transaction --quick --lock-tables=false %s --opt -h %s -u %s -p%s %s > %s', $excludeStr, $host, $user, $pass, $name, escapeshellarg($sqlFile));
         } else if ('pgsql' == $this->getDb()->getDriver()) {
             $command = sprintf('export PGPASSWORD=%s && pg_dump --inserts -O -h %s -U %s %s > %s', $pass, $host, $user, $name, escapeshellarg($sqlFile));
         }
@@ -128,7 +128,8 @@ class SqlBackup
             foreach ($exclude ?? [] as $exTable) {
                 $excludeStr .= '--ignore-table=' . $this->getDb()->getDatabaseName() . '.' . $exTable . ' ';
             }
-            $command = sprintf('mysqldump %s --opt -h %s -u %s -p%s %s', $excludeStr, $host, $user, $pass, $name);
+            $command = sprintf('mysqldump --max_allowed_packet=1G --single-transaction --quick --lock-tables=false %s --opt -h %s -u %s -p%s %s', $excludeStr, $host, $user, $pass, $name);
+            vd($command);
         } else if ('pgsql' == $this->getDb()->getDriver()) {
             $command = sprintf('export PGPASSWORD=%s && pg_dump --inserts -O -h %s -U %s %s', $pass, $host, $user, $name);
         }

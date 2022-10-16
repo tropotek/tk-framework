@@ -16,7 +16,7 @@ class Upgrade extends Console
     protected function configure()
     {
         $this->setName('upgrade')
-            ->setAliases(array('ug'))
+            ->setAliases(['ug'])
             ->setDescription('Call this to upgrade the site from git and update its dependencies');
     }
 
@@ -80,7 +80,7 @@ class Upgrade extends Console
                     }
                 }
             }
-            
+
         } catch (\Exception $e) {
             $this->writeError($e->getMessage());
             return Command::FAILURE;
