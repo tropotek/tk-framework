@@ -31,7 +31,7 @@ namespace Tk\Debug {
                 if (!$logger)
                     $logger = new NullLogger();
                 if (!$basePath)
-                    $basePath = dirname(dirname(dirname(dirname(__FILE__))));
+                    $basePath = dirname(dirname(dirname(__DIR__)));
 
                 static::$_INSTANCE = new static($logger, $basePath);
             }

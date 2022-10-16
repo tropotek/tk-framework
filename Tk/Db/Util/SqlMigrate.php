@@ -68,7 +68,7 @@ class SqlMigrate
      */
     public function __construct(Pdo $db, string $tempPath = '/tmp')
     {
-        $this->sitePath = dirname(dirname(dirname(dirname(dirname(dirname(__FILE__))))));
+        $this->sitePath = dirname(dirname(dirname(dirname(dirname(dirname(dirname(__DIR__)))))));
         $this->tempPath = $tempPath;
         $this->setDb($db);
     }

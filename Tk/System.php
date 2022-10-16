@@ -30,7 +30,7 @@ class System
      */
     public function discoverBasePath(): string
     {
-        return rtrim(dirname(dirname(__DIR__)), DIRECTORY_SEPARATOR);
+        return rtrim(dirname(dirname(dirname(dirname(__DIR__)))), DIRECTORY_SEPARATOR);
     }
 
     /**
