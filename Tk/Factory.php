@@ -318,9 +318,9 @@ class Factory extends Collection implements FactoryInterface
             $app->add(new Command\Upgrade());
             $app->add(new Command\Maintenance());
             $app->add(new Command\DbBackup());
-//            $app->add(new \Bs\Console\UserPass());
-//            $app->add(new \Bs\Console\Migrate());
-//            if ($this->isDebug()) {
+            $app->add(new Command\Migrate());
+            if ($this->getConfig()->isDebug()) {
+                $app->add(new Command\Mirror());
 //                $app->add(new \Bs\Console\MakeModel());
 //                $app->add(new \Bs\Console\MakeTable());
 //                $app->add(new \Bs\Console\MakeManager());
@@ -328,8 +328,7 @@ class Factory extends Collection implements FactoryInterface
 //                $app->add(new \Bs\Console\MakeEdit());
 //                $app->add(new \Bs\Console\MakeAll());
 //                $app->add(new \Bs\Console\Debug());
-//                $app->add(new \Bs\Console\Mirror());
-//            }
+            }
 
             $this->set('console', $app);
         }

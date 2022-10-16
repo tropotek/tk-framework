@@ -17,7 +17,7 @@ class CleanData extends Console
     {
         $this->setName('clean-data')
             ->setAliases(['cd'])
-            ->setDescription('Clean the data/ folder of empty folders');
+            ->setDescription('Clean the data folder of empty folders');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int

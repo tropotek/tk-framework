@@ -1,30 +1,45 @@
 <?php
 namespace Tk\Db\Util;
 
-use Bs\Uri;
-use Tk\ConfigTrait;
+
+use Symfony\Component\HttpFoundation\Request;
+use Tk\Traits\SystemTrait;
+use Tk\Uri;
 
 /**
  * @author Tropotek <http://www.tropotek.com/>
  */
 class Mirror
 {
-    use ConfigTrait;
+    use SystemTrait;
 
-    public function doDbBackup(\Tk\Request $request)
+    public function doDefault(Request $request)
     {
 //        if (!$this->getConfig()->isDebug()) {
 //            throw new \Tk\Exception('Only available for live sites.');
 //        }
+
         if (strtolower($request->getScheme()) != Uri::SCHEME_HTTP_SSL) {
             throw new \Tk\Exception('Only available over SSL connections.');
         }
-        if (!$this->getConfig()->get('db.skey') || $this->getConfig()->get('db.skey') != $request->request->get('db_skey')) {
-            throw new \Tk\Exception('Invalid security key.');
+        if ($this->getConfig()->get('db.mirror.secret') !== $request->request->get('db.mirror.secret')) {
+            throw new \Tk\Exception('Invalid access key.');
         }
 
-        $dbBackup = \Tk\Util\SqlBackup::create($this->getConfig()->getDb());
-        $exclude = array(\Tk\Session\Adapter\Database::$DB_TABLE);
+        if ($request->request->get('action') == 'db') {
+            $this->doDbBackup($request);
+        } elseif ($request->request->get('action') == 'data') {
+            return $this->doDataBackup($request);
+        }
+
+        return 'Invalid access request.';
+    }
+
+    public function doDbBackup(Request $request)
+    {
+
+        $dbBackup = new SqlBackup($this->getFactory()->getDb());
+        $exclude = [$this->getConfig()->get('session.db_table')];
 
         $path = $this->getConfig()->getTempPath() . '/db_mirror.sql';
         $dbBackup->save($path, ['exclude' => $exclude]);
@@ -63,26 +78,14 @@ class Mirror
         } else {
             // stream_copy_to_stream behaves() strange when filesize > chunksize.
             // Seems to never hit the EOF.
-            // On the other handside file_get_contents() is not scalable.
+            // On the other hand file_get_contents() is not scalable.
             // Therefore, we only use file_get_contents() on small files.
             echo file_get_contents($filename);
         }
     }
 
-
-
-    public function doDataBackup(\Tk\Request $request)
+    public function doDataBackup(Request $request)
     {
-//        if (!$this->getConfig()->isDebug()) {
-//            throw new \Tk\Exception('Only available for live sites.');
-//        }
-        if (strtolower($request->getScheme()) != Uri::SCHEME_HTTP_SSL) {
-            throw new \Tk\Exception('Only available over SSL connections.');
-        }
-        if (!$this->getConfig()->get('db.skey') || $this->getConfig()->get('db.skey') != $request->request->get('db_skey')) {
-            throw new \Tk\Exception('Invalid security key.');
-        }
-
         return 'Not implemented yet!';
     }
 

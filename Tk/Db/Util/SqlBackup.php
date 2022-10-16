@@ -129,7 +129,6 @@ class SqlBackup
                 $excludeStr .= '--ignore-table=' . $this->getDb()->getDatabaseName() . '.' . $exTable . ' ';
             }
             $command = sprintf('mysqldump --max_allowed_packet=1G --single-transaction --quick --lock-tables=false %s --opt -h %s -u %s -p%s %s', $excludeStr, $host, $user, $pass, $name);
-            vd($command);
         } else if ('pgsql' == $this->getDb()->getDriver()) {
             $command = sprintf('export PGPASSWORD=%s && pg_dump --inserts -O -h %s -U %s %s', $pass, $host, $user, $name);
         }
