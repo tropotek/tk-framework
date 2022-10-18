@@ -22,7 +22,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
  *
  * @author Tropotek <http://www.tropotek.com/>
  */
-class Uri implements \Serializable, \IteratorAggregate
+class Uri implements \IteratorAggregate
 {
     /**
      * Absolute http and https URIs require a host per RFC 7230 Section 2.7
@@ -134,12 +134,12 @@ class Uri implements \Serializable, \IteratorAggregate
     }
 
 
-    public function serialize()
+    public function __serialize()
     {
         return serialize(array('spec' => $this->spec));
     }
 
-    public function unserialize($data)
+    public function __unserialize($data)
     {
         $arr = unserialize($data);
         $this->spec = $arr['spec'];

@@ -25,6 +25,9 @@
     "psr-0": {
       "Tk\\": ""
     },
+    "files": [
+      "Tk/Exception.php"
+    ],
     "exclude-from-classmap": [
       "/tests/"
     ]

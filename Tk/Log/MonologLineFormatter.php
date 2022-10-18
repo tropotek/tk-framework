@@ -15,7 +15,7 @@ class MonologLineFormatter extends LineFormatter
 
     const APP_FORMAT = "[%datetime%]%post% %level_name%: %message% %context% %extra%\n";
 
-    protected int $scriptTime = 0;
+    protected float $scriptTime = 0.0;
 
     protected bool $colorsEnabled = false;
 

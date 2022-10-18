@@ -9,10 +9,7 @@ namespace Tk;
 class Exception extends \Exception
 {
 
-    /**
-     * @var string
-     */
-    protected $dump = '';
+    protected string $dump = '';
 
     /**
      * Construct the exception. Note: The message is NOT binary safe.
