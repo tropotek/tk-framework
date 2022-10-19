@@ -19,9 +19,6 @@ use Symfony\Component\Routing\Matcher\CompiledUrlMatcher;
 use Symfony\Component\Routing\Matcher\Dumper\CompiledUrlMatcherDumper;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\RouteCollection;
-use Tk\Auth\Adapter\AdapterInterface;
-use Tk\Auth\Auth;
-use Tk\Auth\FactoryInterface;
 use Tk\Cache\Adapter\Filesystem;
 use Tk\Cache\Cache;
 use Tk\Db\Pdo;
@@ -31,12 +28,12 @@ use Tk\Mvc\Dispatch;
 use Tk\Mvc\FrontController;
 use Tk\Traits\SingletonTrait;
 use Tk\Traits\SystemTrait;
-use \Tk\Console\Command;
+use Tk\Console\Command;
 
 /**
  * @author Tropotek <http://www.tropotek.com/>
  */
-class Factory extends Collection implements FactoryInterface
+class Factory extends Collection
 {
     use SingletonTrait;
     use SystemTrait;
@@ -265,44 +262,6 @@ class Factory extends Collection implements FactoryInterface
     public function getComposerClassLoader(): ?ClassLoader
     {
         return $this->get('composerClassLoader');
-    }
-
-    public function getAuthController(): Auth
-    {
-        if (!$this->has('authController')) {
-            $auth = new Auth(new \Tk\Auth\Storage\SessionStorage($this->getSession()));
-            $this->set('authController', $auth);
-        }
-        return $this->get('authController');
-    }
-
-    /**
-     * This is the default Authentication adapter
-     * Override this method in your own site's Factory object
-     */
-    public function getAuthAdapter(): AdapterInterface
-    {
-        if (!$this->has('authAdapter')) {
-            $adapter = new \Tk\Auth\Adapter\Config('admin', hash('md5', 'password'));
-            $this->set('authAdapter', $adapter);
-        }
-        return $this->get('authAdapter');
-    }
-
-    /**
-     * Return a User object or record that is located from the Auth's getIdentity() method
-     * Override this method in your own site's Factory object
-     * @return null|mixed Null if no user logged in
-     */
-    public function getAuthUser()
-    {
-        if (!$this->has('authUser')) {
-            if ($this->getAuthController()->hasIdentity()) {
-                $user = $this->getAuthController()->getIdentity();
-                $this->set('authUser', $user);
-            }
-        }
-        return $this->get('authUser');
     }
 
     /**
