@@ -29,7 +29,8 @@ class FrontController extends HttpKernel
         );
     }
 
-    public function handle(Request $request, $type = HttpKernelInterface::MAIN_REQUEST, $catch = true) {
+    public function handle(Request $request, int $type = HttpKernelInterface::MAIN_REQUEST, bool $catch = true): Response
+    {
         $response = parent::handle($request, $type, $catch);
 
         return $response;

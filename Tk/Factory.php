@@ -129,11 +129,13 @@ class Factory extends Collection implements FactoryInterface
     {
         // Setup Routes and cache results.
         // Use `<Ctrl>+<Shift>+R` ro refresh the routing cache
+        vd();
         $systemCache = new Cache(new Filesystem($this->getSystem()->makePath($this->getConfig()->get('path.cache') . '/system')));
         if ((!$compiledRoutes = $systemCache->fetch('compiledRoutes')) || $this->getSystem()->isRefreshCacheRequest()) {
             include($this->getSystem()->makePath($this->getConfig()->get('path.routes')));
             $compiledRoutes = (new CompiledUrlMatcherDumper($this->getRouteCollection()))->getCompiledRoutes();
             // Storing the data in the cache for 60 minutes
+            vd($compiledRoutes);
             $systemCache->store('compiledRoutes', $compiledRoutes, 60*60);
         }
         return $compiledRoutes;

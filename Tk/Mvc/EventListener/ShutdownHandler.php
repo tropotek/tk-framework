@@ -14,13 +14,13 @@ class ShutdownHandler implements EventSubscriberInterface
 
     private LoggerInterface $logger;
 
-    protected int $scriptStartTime = 0;
+    protected float $scriptStartTime = 0;
 
 
     /**
      *
      */
-    function __construct(LoggerInterface $logger, int $scriptStartTime = 0)
+    function __construct(LoggerInterface $logger, float $scriptStartTime = 0)
     {
         $this->logger = $logger;
         $this->scriptStartTime = $scriptStartTime;
