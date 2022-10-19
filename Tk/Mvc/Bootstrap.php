@@ -17,11 +17,6 @@ class Bootstrap
 
     public function init()
     {
-        /**
-         * This makes our life easier when dealing with paths. Everything is relative
-         * to the application root now.
-         */
-        chdir($this->getConfig()->getBasePath());
 
         // Apply all php config settings to php
         foreach ($this->getConfig()->getGroup('php', true) as $k => $v) {
@@ -53,6 +48,12 @@ class Bootstrap
 
     protected function httpInit()
     {
+        /**
+         * This makes our life easier when dealing with paths. Everything is relative
+         * to the application root now.
+         */
+        chdir($this->getConfig()->getBasePath());
+        
         \Tk\Uri::$SITE_HOSTNAME = $this->getFactory()->getRequest()->getHost();
         \Tk\Uri::$BASE_URL = $this->getConfig()->getBaseUrl();
 
