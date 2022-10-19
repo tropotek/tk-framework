@@ -7,13 +7,13 @@ use Tk\Traits\SingletonTrait;
 use Tk\Traits\SystemTrait;
 
 /**
- *
  * @author Tropotek <http://www.tropotek.com/>
  */
 class Bootstrap
 {
     use SingletonTrait;
     use SystemTrait;
+
 
     public function init()
     {
@@ -28,9 +28,6 @@ class Bootstrap
             @ini_set($k, $v);
         }
 
-        \Tk\Uri::$SITE_HOSTNAME = $this->getFactory()->getRequest()->getHost();
-        \Tk\Uri::$BASE_URL = $this->getConfig()->getBaseUrl();
-
         // Init tk error handler
         \Tk\ErrorHandler::instance($this->getFactory()->getLogger());
 
@@ -38,6 +35,26 @@ class Bootstrap
         $vdLog = null;
         if ($this->getConfig()->isDebug()) $vdLog = $this->getFactory()->getLogger();
         \Tk\Debug\VarDump::instance($vdLog);
+
+        if ($this->getConfig()->isDebug()) {
+            // Allow self-signed certs in file_get_contents in debug mode
+            stream_context_set_default(["ssl" => [
+                "verify_peer" => false,
+                "verify_peer_name" => false,
+            ]]);
+        }
+
+        if ($this->getSystem()->isCli()) {
+            $this->cliInit();
+        } else {
+            $this->httpInit();
+        }
+    }
+
+    protected function httpInit()
+    {
+        \Tk\Uri::$SITE_HOSTNAME = $this->getFactory()->getRequest()->getHost();
+        \Tk\Uri::$BASE_URL = $this->getConfig()->getBaseUrl();
 
         $session = $this->getFactory()->getSession();
         $session->start();  // NOTE: stdout before $session->start() will throw error
@@ -57,6 +74,12 @@ class Bootstrap
         // Setup EventDispatcher and subscribe events, loads routes
         $this->getFactory()->initEventDispatcher();
 
+    }
+
+    protected function cliInit()
+    {
+        // Setup EventDispatcher and subscribe events, loads routes
+        $this->getFactory()->initEventDispatcher();
     }
 
 }
