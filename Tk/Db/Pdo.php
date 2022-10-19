@@ -225,14 +225,14 @@ class Pdo extends \PDO
     /**
      * Prepares a statement for execution and returns a statement object
      *
-     * @see \PDO::prepare()
-     * @see http://www.php.net/manual/en/pdo.prepare.php
      * @param string $query
      * @param array $options
      * @return  \PDOStatement
      * @throws \PDOException
+     *@see \PDO::prepare()
+     * @see http://www.php.net/manual/en/pdo.prepare.php
      */
-    public function prepare($query, $options = [])
+    public function prepare(string $query, array $options = []): \PDOStatement|false
     {
         $result = parent::prepare($query, $options);
         return $result;
@@ -246,7 +246,7 @@ class Pdo extends \PDO
      * @throws Exception
      * @see http://www.php.net/manual/en/pdo.exec.php
      */
-    public function exec($query)
+    public function exec(string $query): int|false
     {
         $this->setLastQuery($query);
 
@@ -266,18 +266,13 @@ class Pdo extends \PDO
     }
 
     /**
-     * NOTICE FOR PHP 8.0:
-     *
-     * TODO: We will have to work out a way to use this in the future as the PDO::query override change with versions and is
-     *       bad, alternatively we should stop inheriting the PDO object and make it an instance variable that we call.
-     *
      * @param string $query
      * @param int $mode
      * @param null $arg3
      * @param array $ctorargs
      * @return mixed
      */
-    public function tkQuery($query, $mode = PDO::ATTR_DEFAULT_FETCH_MODE, $arg3 = null, array $ctorargs = array())
+    public function tkQuery($query, $mode = PDO::ATTR_DEFAULT_FETCH_MODE, $arg3 = null, $ctorargs = array())
     {
         return call_user_func_array(array($this, 'query'), func_get_args());
     }
@@ -293,10 +288,9 @@ class Pdo extends \PDO
      * @return PDOStatement \PDO::query() returns a PDOStatement object, or FALSE on failure.
      * @throws Exception
      */
-    public function query(string $query, ?int $mode = PDO::ATTR_DEFAULT_FETCH_MODE, mixed ...$fetchModeArgs)
+    public function query($query, $mode = PDO::ATTR_DEFAULT_FETCH_MODE, ...$fetchModeArgs): \PDOStatement|false
     {
         $this->setLastQuery($query);
-        $start = microtime(true);
         try {
             $result = call_user_func_array(array('parent', 'query'), func_get_args());
             if ($result === false) {
