@@ -33,21 +33,21 @@
     ]
   },
   "require": {
-    "php": "^7.3||^8.0",
+    "php": "^8.0",
     "psr/log": "^1.0",
     "ext-json": "*",
     "ext-pdo": "*",
     "ext-fileinfo": "*",
     "ext-json": "*",
     "ext-curl": "*",
-    "ttek/tk-installers": "~7.0",
+    "ttek/tk-installers": "~8.0",
 
     "symfony/http-foundation": "^5.4",
-    "symfony/routing": "^5.4",
-    "symfony/http-kernel": "^5.4",
-    "symfony/event-dispatcher": "^5.4",
-    "symfony/console": "^5.4",
-    "symfony/lock": "^5.4",
+    "symfony/routing": "^6.1",
+    "symfony/http-kernel": "^6.1",
+    "symfony/event-dispatcher": "^6.1",
+    "symfony/console": "^6.1",
+    "symfony/lock": "^6.1",
     "monolog/monolog": "^2.0",
     "sensiolabs/ansi-to-html": "~1.0",
     "lasserafn/php-initial-avatar-generator": "4.2.*"
@@ -57,7 +57,7 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-master": "7.0.x-dev"
+      "dev-master": "8.0.x-dev"
     }
   }
 }
