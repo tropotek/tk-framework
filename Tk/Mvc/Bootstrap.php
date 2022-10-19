@@ -2,7 +2,6 @@
 
 namespace Tk\Mvc;
 
-use Tk\Exception;
 use Tk\Traits\SingletonTrait;
 use Tk\Traits\SystemTrait;
 
@@ -53,7 +52,7 @@ class Bootstrap
          * to the application root now.
          */
         chdir($this->getConfig()->getBasePath());
-        
+
         \Tk\Uri::$SITE_HOSTNAME = $this->getFactory()->getRequest()->getHost();
         \Tk\Uri::$BASE_URL = $this->getConfig()->getBaseUrl();
 
