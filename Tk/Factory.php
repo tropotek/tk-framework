@@ -137,6 +137,15 @@ class Factory extends Collection
         return $compiledRoutes;
     }
 
+    public function getRouteCollection(): RouteCollection
+    {
+        if (!$this->has('routeCollection')) {
+            $routeCollection = new RouteCollection();
+            $this->set('routeCollection', $routeCollection);
+        }
+        return $this->get('routeCollection');
+    }
+
     public function getRouteMatcher(): CompiledUrlMatcher
     {
         if (!$this->has('routeMatcher')) {
@@ -146,15 +155,6 @@ class Factory extends Collection
             $this->set('routeContext', $context);
         }
         return $this->get('routeMatcher');
-    }
-
-    public function getRouteCollection(): RouteCollection
-    {
-        if (!$this->has('routeCollection')) {
-            $routeCollection = new RouteCollection();
-            $this->set('routeCollection', $routeCollection);
-        }
-        return $this->get('routeCollection');
     }
 
     /**
@@ -259,9 +259,9 @@ class Factory extends Collection
     /**
      * Get the composer Class Loader object returned from the autoloader in the _prepend.php file
      */
-    public function getComposerClassLoader(): ?ClassLoader
+    public function getClassLoader(): ?ClassLoader
     {
-        return $this->get('composerClassLoader');
+        return $this->get('classLoader');
     }
 
     /**

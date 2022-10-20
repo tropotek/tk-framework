@@ -24,7 +24,7 @@ class System
     use RegistryTrait;
 
 
-    protected function __construct() { }
+    protected function __construct() {  }
 
 
     /**

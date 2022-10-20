@@ -5,8 +5,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\HttpKernel;
+use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\HttpKernel\TerminableInterface;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
+use Symfony\Component\Routing\Loader\PhpFileLoader;
 use Tk\Log;
 use Tk\Traits\SystemTrait;
 
@@ -30,18 +32,6 @@ class FrontController extends HttpKernel
         );
     }
 
-    protected function configureRoutes(RoutingConfigurator $routes): void
-    {
-        vd();
-//        $routes->import('../config/{routes}/'.$this->environment.'/*.yaml');
-//        $routes->import('../config/{routes}/*.yaml');
-//
-//        if (is_file(\dirname(__DIR__).'/config/routes.yaml')) {
-//            $routes->import('../config/routes.yaml');
-//        } elseif (is_file($path = \dirname(__DIR__).'/config/routes.php')) {
-//            (require $path)($routes->withPath($path), $this);
-//        }
-    }
 
     public function handle(Request $request, int $type = HttpKernelInterface::MAIN_REQUEST, bool $catch = true): Response
     {
