@@ -8,12 +8,12 @@ namespace Tk\Db\Util;
  */
 class ModelProperty extends \Tk\Collection
 {
-    const TYPE_STRING = 'string';
-    const TYPE_INT = 'int';
-    const TYPE_FLOAT = 'float';
-    const TYPE_DATE = '\DateTime';
-    const TYPE_BOOL = 'bool';
-
+    const TYPE_ARRAY   = 'array';
+    const TYPE_STRING  = 'string';
+    const TYPE_INT     = 'int';
+    const TYPE_FLOAT   = 'float';
+    const TYPE_DATE    = '\DateTime';
+    const TYPE_BOOL    = 'bool';
 
     /**
      * The new class property name
@@ -26,9 +26,6 @@ class ModelProperty extends \Tk\Collection
     protected string $type = '';
 
 
-    /**
-     * @param array $data
-     */
     public function __construct(array $data = [])
     {
         parent::__construct($data);
@@ -36,19 +33,14 @@ class ModelProperty extends \Tk\Collection
         $this->getType();
     }
 
-    /**
-     * @param array $data
-     * @return ModelProperty
-     */
     public static function create(array $data): ModelProperty
     {
-        $obj = new static($data);
-        return $obj;
+        return new static($data);
     }
 
     public function isPrimaryKey(): bool
     {
-        return (strtoupper($this->get('Key')) == 'PRI');
+        return (strtoupper($this->get('Key') ?? '') == 'PRI');
     }
 
     public function getName(): string
@@ -82,110 +74,109 @@ class ModelProperty extends \Tk\Collection
         return $this->type;
     }
 
-    public function getDefaultValue(): float|bool|int|string
+    public function getDefaultValue(): float|bool|int|string|null
     {
         $def = $this->get('Default');
-        switch ($this->getType()) {
-            case self::TYPE_BOOL:
-                $def = boolval($def) ? 'true' : 'false';
-                break;
-            case self::TYPE_INT:
-                $def = intval($def);
-                break;
-            case self::TYPE_FLOAT:
-                $def = floatval($def);
-                break;
-            case self::TYPE_STRING:
-                $def = $this->quote($def);
-                break;
-            default:
-                $def = 'null';
-        }
+        $def = match ($this->getType()) {
+            self::TYPE_BOOL => boolval($def ?? false) ? 'true' : 'false',
+            self::TYPE_INT => intval($def ?? 0),
+            self::TYPE_FLOAT => floatval($def ?? 0.0),
+            self::TYPE_STRING => $this->quote($def ?? ''),
+            self::TYPE_DATE => null,
+            default => 'null',
+        };
         return $def;
     }
 
     public function getDefinition(): string
     {
         $tpl = <<<TPL
-    /**
-     * @var %s
-     */
-    public $%s = %s;
-TPL;
-        return sprintf($tpl, $this->getType(), $this->getName(), $this->getDefaultValue());
+            public %s $%s%s;
+        TPL;
+        $value = $this->getDefaultValue();
+        if (!is_null($value)) $value = ' = ' . $value;
+        return sprintf($tpl,
+            $this->getType(),
+            $this->getName(),
+            $value
+        );
     }
 
     public function getInitaliser(): string
     {
-        $tpl = <<<TPL
-        \$this->%s = %s;
-TPL;
         $val = $this->getDefaultValue();
-        if (substr($this->getType(), 0 ,1) == '\\') {
+        if (str_starts_with($this->getType(), '\\')) {
             $val = sprintf('new %s()', $this->getType());
         }
+
+        $tpl = <<<TPL
+                \$this->%s = %s;
+        TPL;
         return sprintf($tpl, $this->getName(), $val);
     }
 
     public function getAccessor(): string
     {
-        $tpl = <<<TPL
-    /**
-     * @return %s
-     */
-    public function %s%s() : %s
-    {
-        return \$this->%s;
-    }
-TPL;
-        // ...
         $method = 'get';
         if ($this->getType() == 'bool' || $this->getType() == 'boolean')
             $method = 'is';
 
-        return sprintf($tpl, $this->getType(), $method, ucfirst($this->getName()), $this->getType(), $this->getName());
+        $tpl = <<<TPL
+            public function %s%s() : %s
+            {
+                return \$this->%s;
+            }
+        TPL;
+
+        return sprintf($tpl,
+            $method,
+            ucfirst($this->getName()),
+            $this->getType(),
+            $this->getName()
+        );
     }
 
     public function getMutator(string $classname = ''): string
     {
         if (!$classname)
-            $classname = '$this';
-        $param = $this->getName();
+            $classname = 'static';
 
         $tpl = <<<TPL
-    /**
-     * @param %s \$%s
-     * @return %s
-     */
-    public function set%s(\$%s) : %s
-    {
-        \$this->%s = \$%s;
-        return \$this;
-    }
-TPL;
-        // ...
+            public function set%s(%s \$%s) : %s
+            {
+                \$this->%s = \$%s;
+                return \$this;
+            }
+        TPL;
 
-        return sprintf($tpl, $this->getType(), $param, $classname, ucfirst($this->getName()),
-            $param, $classname, $this->getName(), $param
+        return sprintf($tpl,
+            ucfirst($this->getName()),
+            $this->getType(),
+            $this->getName(),
+            $classname,
+            $this->getName(),
+            $this->getName()
         );
     }
 
     public function getValidation(string $errorParam = 'errors'): string
     {
         $tpl = <<<TPL
-        if (!\$this->%s) {
-            \$%s['%s'] = 'Invalid value: %s';
-        }
-TPL;
-        return sprintf($tpl, $this->getName(), $errorParam, $this->getName(), $this->getName());
+                if (!\$this->%s) {
+                    \$%s['%s'] = 'Invalid value: %s';
+                }
+        TPL;
+
+        return sprintf($tpl,
+            $this->getName(),
+            $errorParam,
+            $this->getName(),
+            $this->getName()
+        );
     }
 
     public function getColumnMap(): string
     {
-        $tpl = <<<TPL
-            \$this->dbMap->addPropertyMap(new %s(%s%s)%s);
-TPL;
-
         $mapClass = 'Db\Text';
         switch ($this->getType()) {
             case self::TYPE_INT:
@@ -210,14 +201,20 @@ TPL;
         if ($this->isPrimaryKey())
             $tag = ', ' . $this->quote('key');
 
-        return sprintf($tpl, $mapClass, $propertyName, $columnName, $tag);
+        $tpl = <<<TPL
+                    \$this->dbMap->addDataType(new %s(%s%s)%s);
+        TPL;
+
+        return sprintf($tpl,
+            $mapClass,
+            $propertyName,
+            $columnName,
+            $tag
+        );
     }
 
     public function getFormMap(): string
     {
-        $tpl = <<<TPL
-            \$this->formMap->addPropertyMap(new %s(%s)%s);
-TPL;
 
         $mapClass = 'Form\Text';
         switch ($this->getType()) {
@@ -240,25 +237,19 @@ TPL;
         if ($this->isPrimaryKey())
             $tag = ', ' . $this->quote('key');
 
-        return sprintf($tpl, $mapClass, $propertyName, $tag);
+        $tpl = <<<TPL
+                    \$this->formMap->addDataType(new %s(%s)%s);
+        TPL;
+        return sprintf($tpl,
+            $mapClass,
+            $propertyName,
+            $tag
+        );
     }
 
     public function getFilterQuery(): string
     {
         if ($this->getName() == 'id' ) return '';
-
-        $tpl = <<<TPL
-        if (!empty(\$filter['%s'])) {
-            \$filter->appendWhere('a.%s = %%s AND ', %s);
-        }
-TPL;
-        if (preg_match('/Id$/', $this->getName()) && $this->getType() == self::TYPE_INT) {
-            $tpl = <<<TPL
-        if (!empty(\$filter['%s'])) {
-            \$filter->appendWhere('a.%s = %%s AND ', %s);
-        }
-TPL;
-        }
 
         $filterVal = sprintf("\$this->quote(\$filter['%s'])", $this->getName());
         switch ($this->getType()) {
@@ -269,20 +260,29 @@ TPL;
             case self::TYPE_FLOAT:
                 $filterVal = sprintf("(float)\$filter['%s']", $this->getName());
                 break;
-//            case self::TYPE_BOOL:
-//                $filterVal = sprintf("(int)\$filter['%s']", $this->getName());
-//                break;
         }
 
-        return sprintf($tpl, $this->getName(), $this->get('Field'), $filterVal);
+        $tpl = <<<TPL
+                if (!empty(\$filter['%s'])) {
+                    \$filter->appendWhere('a.%s = %%s AND ', %s);
+                }
+        TPL;
+        if (preg_match('/Id$/', $this->getName()) && $this->getType() == self::TYPE_INT) {
+            $tpl = <<<TPL
+                    if (!empty(\$filter['%s'])) {
+                        \$filter->appendWhere('a.%s = %%s AND ', %s);
+                    }
+            TPL;
+        }
+        return sprintf($tpl,
+            $this->getName(),
+            $this->get('Field'),
+            $filterVal
+        );
     }
 
     public function getTableCell(string $className, string $namespace): string
     {
-        $tpl = <<<TPL
-        \$this->appendCell(new %s(%s))%s;
-TPL;
-
         $mapClass = 'Cell\Text';
         switch ($this->getType()) {
             case self::TYPE_BOOL:
@@ -301,23 +301,21 @@ TPL;
         if ($this->getName() == 'name' || $this->getName() == 'title') {
             $append .= sprintf('->addCss(\'key\')');
             $append .= sprintf('->setUrl($this->getEditUrl())', lcfirst($className));
-            //$append .= sprintf('->setUrl(\Bs\Uri::createHomeUrl(\'/%sEdit.html\'))', lcfirst($className));
         }
 
-        return sprintf($tpl, $mapClass, $propertyName, $append);
+        $tpl = <<<TPL
+                \$this->appendCell(new %s(%s))%s;
+        TPL;
+
+        return sprintf($tpl,
+            $mapClass,
+            $propertyName,
+            $append
+        );
     }
 
     public function getFormField(string $className, string $namespace, bool $isModelForm = false): string
     {
-        $tpl = <<<TPL
-        \$this->appendField(new %s(%s%s))%s;
-TPL;
-        if ($isModelForm) {
-            $tpl = <<<TPL
-        \$this->getForm()->appendField(new %s(%s%s))%s;
-TPL;
-        }
-
         $mapClass = 'Field\Input';
         $argAppend = '';
         $append = '';
@@ -334,7 +332,21 @@ TPL;
         }
         $propertyName = $this->quote($this->getName());
 
-        return sprintf($tpl, $mapClass, $propertyName, $argAppend, $append);
+        $tpl = <<<TPL
+                \$this->appendField(new %s(%s%s))%s;
+        TPL;
+        if ($isModelForm) {
+            $tpl = <<<TPL
+                    \$this->getForm()->appendField(new %s(%s%s))%s;
+            TPL;
+        }
+
+        return sprintf($tpl,
+            $mapClass,
+            $propertyName,
+            $argAppend,
+            $append
+        );
     }
 
     protected function quote(string $str, string $q = "'"): string

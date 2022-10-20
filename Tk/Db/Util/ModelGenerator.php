@@ -66,7 +66,7 @@ class ModelGenerator
     {
         $now = \Tk\Date::create();
         $a = [
-            'author-name' => 'Mick Mifsud',
+            'author-name' => 'Tropotek',
             'author-biz' => 'Tropotek',
             'author-www' => 'http://tropotek.com.au/',
             'date' => $now->format(\Tk\Date::FORMAT_ISO_DATE),
@@ -74,7 +74,6 @@ class ModelGenerator
             'classname' => $this->getClassName(),
             'name' => trim(preg_replace('/[A-Z]/', ' $0', $this->getClassName())) ,
             'table' => $this->getTable(),
-            //'namespace' => '\\' . trim(substr($this->getNamespace(), 0, strpos($this->getNamespace(), '\\', 1)), '\\'),
             'namespace' => $this->getNamespace(),
             'db-namespace' => $this->getDbNamespace(),
             'table-namespace' => $this->getTableNamespace(),
@@ -194,28 +193,23 @@ class ModelGenerator
 <?php
 namespace {db-namespace};
 
+use Tk\Db\Mapper\Model;
+
 /**
- * @author {author-name}
- * @created {date}
- * @link {author-www}
- * @license Copyright {year} {author-biz}
+ * @author {author-biz} <{author-www}>
  */
-class {classname} extends \Tk\Db\Map\Model implements \Tk\ValidInterface
+class {classname} extends Model
 {
 {properties}
 
-    /**
-     * {classname}
-     */
+
     public function __construct()
     {
 {construct}
     }
     {accessors}
-    /**
-     * @return array
-     */
-    public function validate()
+    
+    public function validate(): array
     {
         \$errors = [];
 {validators}
@@ -223,10 +217,8 @@ class {classname} extends \Tk\Db\Map\Model implements \Tk\ValidInterface
     }
 
 }
-
 STR;
-        $tpl = \Tk\CurlyTemplate::create($classTpl);
-        return $tpl;
+        return \Tk\CurlyTemplate::create($classTpl);
     }
 
 
@@ -277,54 +269,48 @@ STR;
 <?php
 namespace {db-namespace};
 
+use Tk\DataMap\DataMap;
+use Tk\Db\Mapper\Filter;
+use Tk\Db\Mapper\Mapper;
+use Tk\Db\Mapper\Result;
 use Tk\Db\Tool;
-use Tk\Db\Map\ArrayObject;
 use Tk\DataMap\Db;
 use Tk\DataMap\Form;
-use Bs\Db\Mapper;
-use Tk\Db\Filter;
 
 /**
- * @author {author-name}
- * @created {date}
+ * @author {author-biz} <{author-www}>
  */
 class {classname}Map extends Mapper
 {
 
-    public function getDbMap(): \Tk\DataMap\DataMap
+    public function getDbMap(): DataMap
     {
         if (!\$this->dbMap) { {set-table}
-            \$this->dbMap = new \Tk\DataMap\DataMap();
+            \$this->dbMap = new DataMap();
 {column-maps}
         }
         return \$this->dbMap;
     }
 
-    public function getFormMap(): \Tk\DataMap\DataMap
+    public function getFormMap(): DataMap
     {
         if (!\$this->formMap) {
-            \$this->formMap = new \Tk\DataMap\DataMap();
+            \$this->formMap = new DataMap();
 {form-maps}
         }
         return \$this->formMap;
     }
 
     /**
-     * @param array|Filter \$filter
-     * @param Tool \$tool
-     * @return ArrayObject|{classname}[]
+     * @return Result|{classname}[]
      * @throws \Exception
      */
-    public function findFiltered(\$filter, \$tool = null)
+    public function findFiltered(array|Filter \$filter, ?Tool \$tool = null): Result
     {
-        return \$this->selectFromFilter(\$this->makeQuery(\Tk\Db\Filter::create(\$filter)), \$tool);
+        return \$this->selectFromFilter(\$this->makeQuery(Filter::create(\$filter)), \$tool);
     }
 
-    /**
-     * @param Filter \$filter
-     * @return Filter
-     */
-    public function makeQuery(Filter \$filter)
+    public function makeQuery(Filter \$filter): Filter
     {
         \$filter->appendFrom('%s a', \$this->quoteParameter(\$this->getTable()));
 
@@ -343,11 +329,12 @@ class {classname}Map extends Mapper
             \$w = \$this->makeMultiQuery(\$filter['id'], 'a.id');
             if (\$w) \$filter->appendWhere('(%s) AND ', \$w);
         }
-{filter-queries}
+        
         if (!empty(\$filter['exclude'])) {
             \$w = \$this->makeMultiQuery(\$filter['exclude'], 'a.id', 'AND', '!=');
             if (\$w) \$filter->appendWhere('(%s) AND ', \$w);
         }
+{filter-queries}
 
         return \$filter;
     }
@@ -404,20 +391,14 @@ use Dom\Template;
 use Tk\Request;
 
 /**
- * TODO: Add Route to routes.php:
- *      \$routes->add('{table-id}-manager', Route::create('/staff/{namespace-url}Manager.html', '{controller-namespace}\{classname}\Manager::doDefault'));
+ * Add Route to routes.php:
+ *     \$routes->add('{table-id}-manager', new Routing\Route('/{namespace-url}Manager.html', ['_controller' => '{controller-namespace}\{classname}\Manager::doDefault']));
  *
- * @author {author-name}
- * @created {date}
- * @link {author-www}
- * @license Copyright {year} {author-biz}
+ * @author {author-biz} <{author-www}>
  */
 class Manager extends AdminManagerIface
 {
 
-    /**
-     * Manager constructor.
-     */
     public function __construct()
     {
         \$this->setPageTitle('{name} Manager');
@@ -496,10 +477,7 @@ use Tk\Table\Cell;
  *   \$template->appendTemplate(\$tableTemplate);
  * </code>
  *
- * @author {author-name}
- * @created {date}
- * @link {author-www}
- * @license Copyright {year} {author-biz}
+ * @author {author-biz} <{author-www}>
  */
 class {classname} extends \Bs\TableIface
 {
@@ -596,10 +574,7 @@ use Tk\Request;
  * TODO: Add Route to routes.php:
  *      \$routes->add('{table-id}-edit', Route::create('/staff/{namespace-url}Edit.html', '{controller-namespace}\{classname}\Edit::doDefault'));
  *
- * @author {author-name}
- * @created {date}
- * @link {author-www}
- * @license Copyright {year} {author-biz}
+ * @author {author-biz} <{author-www}>
  */
 class Edit extends AdminEditIface
 {
@@ -683,10 +658,7 @@ use Tk\Form;
  *   \$template->appendTemplate('form', \$formTemplate);
  * </code>
  *
- * @author {author-name}
- * @created {date}
- * @link {author-www}
- * @license Copyright {year} {author-biz}
+ * @author {author-biz} <{author-www}>
  */
 class {classname} extends \Bs\FormIface
 {
@@ -785,11 +757,7 @@ use Tk\Form;
  *   \$template->appendTemplate('form', \$formTemplate);
  * </code>
  *
- * @author {author-name}
- * @created {date}
- * @link {author-www}
- * @license Copyright {year} {author-biz}
- * @note Use this if you want to pass the form in rather than inherit the form
+ * @author {author-biz} <{author-www}>
  */
 class {classname} extends \Bs\ModelForm
 {

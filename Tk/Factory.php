@@ -129,11 +129,11 @@ class Factory extends Collection
         $systemCache = new Cache(new Filesystem($this->getSystem()->makePath($this->getConfig()->get('path.cache') . '/system')));
         if ((!$compiledRoutes = $systemCache->fetch('compiledRoutes')) || $this->getSystem()->isRefreshCacheRequest()) {
             include($this->getSystem()->makePath($this->getConfig()->get('path.routes')));
+            include($this->getSystem()->makePath($this->getConfig()->get('path.vendor.org').'/tk-framework/config/routes.php'));
             $compiledRoutes = (new CompiledUrlMatcherDumper($this->getRouteCollection()))->getCompiledRoutes();
             // Storing the data in the cache for 60 minutes
             $systemCache->store('compiledRoutes', $compiledRoutes, 60*60);
         }
-        vd($compiledRoutes);
         return $compiledRoutes;
     }
 
@@ -282,12 +282,13 @@ class Factory extends Collection
             if ($this->getConfig()->isDebug()) {
                 $app->add(new Command\Debug());
                 $app->add(new Command\Mirror());
-//                $app->add(new \Bs\Console\MakeModel());
-//                $app->add(new \Bs\Console\MakeTable());
-//                $app->add(new \Bs\Console\MakeManager());
-//                $app->add(new \Bs\Console\MakeForm());
-//                $app->add(new \Bs\Console\MakeEdit());
-//                $app->add(new \Bs\Console\MakeAll());
+                $app->add(new Command\MakeModel());
+                $app->add(new Command\MakeMapper());
+                $app->add(new Command\MakeTable());
+                //$app->add(new Command\MakeForm());
+                //$app->add(new Command\MakeManager());
+                //$app->add(new Command\MakeEdit());
+                $app->add(new Command\MakeAll());
             }
 
             $this->set('console', $app);
