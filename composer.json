@@ -40,6 +40,7 @@
     "ext-fileinfo": "*",
     "ext-json": "*",
     "ext-curl": "*",
+    "ttek/tk-installers": "~8.0",
 
     "symfony/http-foundation": "^5.4",
     "symfony/routing": "^6.1",
