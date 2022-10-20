@@ -37,7 +37,7 @@ class Collection extends \Tk\Collection
 
     public function __sleep()
     {
-        return array('table', 'del');
+        return ['table', 'del'];
     }
 
     public function __wakeup()

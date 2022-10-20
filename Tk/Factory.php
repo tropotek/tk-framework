@@ -235,7 +235,7 @@ class Factory extends Collection
                 };
             }
 
-            $logger = new Logger('system', array(), $processors);
+            $logger = new Logger('system', [], $processors);
 
             if (is_writable(ini_get('error_log'))) {
                 $handler = new StreamHandler(ini_get('error_log'), $this->getConfig()->get('log.logLevel', LogLevel::ERROR));

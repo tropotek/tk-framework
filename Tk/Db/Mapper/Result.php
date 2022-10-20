@@ -220,7 +220,7 @@ class Result implements \Iterator, \Countable
      */
     public function toArray(?string $valueField = null, ?string $keyField = null): array
     {
-        $arr = array();
+        $arr = [];
         foreach($this as $k => $obj) {
             $v = $obj;
             if ($valueField && array_key_exists($valueField, get_object_vars($obj))) {

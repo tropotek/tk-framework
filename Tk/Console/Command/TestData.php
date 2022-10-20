@@ -61,7 +61,7 @@ class TestData extends Console
 
     public function createNumberStr(int $len = 8): string
     {
-        $str = array();
+        $str = [];
         for ($i = 0; $i < $len ;$i++) {
             $str[] = rand(0, 9);
         }

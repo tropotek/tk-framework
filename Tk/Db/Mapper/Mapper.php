@@ -151,7 +151,7 @@ abstract class Mapper
         $bind = [];
         $this->getDbMap()->loadArray($bind, $obj);
 
-        $set = array();
+        $set = [];
         foreach ($bind as $col => $value) {
             unset($bind[$col]);
             $bind[':' . $col] = $value;
@@ -230,7 +230,7 @@ abstract class Mapper
         }
 
         $from = $this->getTable() . ' ' . $this->getAlias();
-        $where = array();
+        $where = [];
         if ($bind) {
             foreach ($bind as $col => $value) {
                 unset($bind[$col]);

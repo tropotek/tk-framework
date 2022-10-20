@@ -407,18 +407,18 @@ class Date
         if ($date > new \DateTime()) throw new Exception('Date must be in the past.');
 
         $c = getdate();
-        $p = array('year', 'mon', 'mday', 'hours', 'minutes', 'seconds');
-        $display = array('year', 'month', 'day', 'hour', 'minute', 'second');
-        $factor = array(0, 12, 30, 24, 60, 60);
+        $p = ['year', 'mon', 'mday', 'hours', 'minutes', 'seconds'];
+        $display = ['year', 'month', 'day', 'hour', 'minute', 'second'];
+        $factor = [0, 12, 30, 24, 60, 60];
         preg_match("/([0-9]{4})(\\-)([0-9]{2})(\\-)([0-9]{2}) ([0-9]{2})(\\:)([0-9]{2})(\\:)([0-9]{2})/", $date->format(self::FORMAT_ISO_DATETIME), $matches);
-        $d = array(
+        $d = [
             'seconds' => $matches[10],
             'minutes' => $matches[8],
             'hours' => $matches[6],
             'mday' => $matches[5],
             'mon' => $matches[3],
             'year' => $matches[1],
-        );
+        ];
 
         for ($w = 0; $w < 6; $w++) {
             if ($w > 0) {

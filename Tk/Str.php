@@ -16,7 +16,7 @@ class Str
     public static function stripAttrs(string $str, ?array $attrs = null): string
     {
         if ($attrs === null)
-            $attrs = array('onabort', 'onactivate', 'onafterprint', 'onafterupdate', 'onbeforeactivate', 'onbeforecopy',
+            $attrs = ['onabort', 'onactivate', 'onafterprint', 'onafterupdate', 'onbeforeactivate', 'onbeforecopy',
                 'onbeforecut', 'onbeforedeactivate', 'onbeforeeditfocus', 'onbeforepaste', 'onbeforeprint', 'onbeforeunload',
                 'onbeforeupdate', 'onblur', 'onbounce', 'oncellchange', 'onchange', 'onclick', 'oncontextmenu',
                 'oncontrolselect', 'oncopy', 'oncut', 'ondataavaible', 'ondatasetchanged', 'ondatasetcomplete', 'ondblclick',
@@ -26,7 +26,7 @@ class Str
                 'onmouseenter', 'onmouseleave', 'onmousemove', 'onmouseout', 'onmouseup', 'onmousedown', 'onmoveout', 'onmouseover', 'onmouseup', 'onmousewheel',
                 'onmove', 'onmoveend', 'onmovestart', 'onpaste', 'onpropertychange', 'onreadystatechange', 'onreset',
                 'onresize', 'onresizeend', 'onresizestart', 'onrowexit', 'onrowsdelete', 'onrowsinserted', 'onscroll',
-                'onselect', 'onselectionchange', 'onselectstart', 'onstart', 'onstop', 'onsubmit', 'onunload');
+                'onselect', 'onselectionchange', 'onselectstart', 'onstart', 'onstop', 'onsubmit', 'onunload'];
 
         if (!is_array($attrs))
             $attrs = explode(",", $attrs);
@@ -235,7 +235,7 @@ class Str
     public static function numericEntities(string $xml): string
     {
         $list = get_html_translation_table(\HTML_ENTITIES, ENT_NOQUOTES);
-        $mapping = array();
+        $mapping = [];
         foreach ($list as $char => $entity) {
             $mapping[strtolower($entity)] = '&#' . self::ord($char) . ';';
         }
@@ -295,7 +295,7 @@ class Str
             return sprintf('Object(%s)', get_class($var));
         }
         if (is_array($var)) {
-            $a = array();
+            $a = [];
             foreach ($var as $k => $v) {
                 $a[] = sprintf('%s => %s', $k, self::varToString($v));
             }

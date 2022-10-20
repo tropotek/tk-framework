@@ -83,7 +83,7 @@ namespace Tk\Debug {
          */
         public function getTypeArray(array $args): array
         {
-            $arr = array();
+            $arr = [];
             foreach ($args as $a) {
                 $type = gettype($a);
                 if ($type == 'object')
@@ -117,7 +117,7 @@ namespace Tk\Debug {
                 $str = get_resource_type($var);
             } else if (is_array($var)) {
                 $type = sprintf('Array[%s]', count($var));
-                $a = array();
+                $a = [];
                 if ($nest >= $depth) {
                     $str = $type;
                 } else {
@@ -131,7 +131,7 @@ namespace Tk\Debug {
                 if ($nest >= $depth) {
                     $str = $type;
                 } else {
-                    $a = array();
+                    $a = [];
                     foreach ((array)$var as $k => $v) {
                         $k = str_replace(get_class($var), '*', $k);
                         $a[] = sprintf("%s[%s] => %s", $pad, $k, self::varToString($v, $depth, $nest + 1));

@@ -55,7 +55,7 @@ class Money implements \Serializable
         }
         $digits = $currency->getFractionDigits();
         //if (!preg_match("/^(\$)?(\-)?[0-9]+((\.)[0-9]{1,{$digits}})?$/", $amount)) {
-        $amt = str_replace(array($thousandthSep, $currency->getSymbol(), $currency->getLocal()), '', $amount);
+        $amt = str_replace([$thousandthSep, $currency->getSymbol(), $currency->getLocal()], '', $amount);
         if (!preg_match("/(\-)?[0-9]+((\.)[0-9]{1,{$digits}})?$/", $amt)) {
             Log::warning('Cannot parse amount string: ' . $amount);
             return static::create();

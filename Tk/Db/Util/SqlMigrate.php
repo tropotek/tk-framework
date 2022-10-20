@@ -107,7 +107,7 @@ class SqlMigrate
 
         if (!empty($migrateList[self::MIGRATE_PREPEND])) {
             $pre = $migrateList[self::MIGRATE_PREPEND];
-            if (!is_array($pre)) $pre = array($pre);
+            if (!is_array($pre)) $pre = [$pre];
             foreach ($pre as $n => $searchPath) {
                 if (!is_dir($searchPath)) continue;
                 $dirItr = new \RecursiveDirectoryIterator($searchPath, \RecursiveIteratorIterator::CHILD_FIRST);
@@ -150,9 +150,9 @@ class SqlMigrate
     public function migrate($path, $onFileMigrate = null)
     {
         $list = $this->getFileList($path);
-        $mlist = array();
-        $sqlFiles = array();
-        $phpFiles = array();
+        $mlist = [];
+        $sqlFiles = [];
+        $phpFiles = [];
 
         try {
             // Find any migration files
@@ -228,7 +228,7 @@ class SqlMigrate
      */
     public function getFileList($path)
     {
-        $list = array();
+        $list = [];
         $list = array_merge($list, $this->search($path));
         $list = array_merge($list, $this->search($path.'/'.$this->db->getDriver()));
         sort($list);
@@ -329,7 +329,7 @@ class SqlMigrate
      */
     public function search($path)
     {
-        $list = array();
+        $list = [];
         if (!is_dir($path)) return $list;
         $iterator = new \DirectoryIterator($path);
         foreach(new \RegexIterator($iterator, '/\.(php|sql)$/') as $file) {

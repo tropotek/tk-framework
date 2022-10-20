@@ -269,8 +269,7 @@ class Tool implements \Tk\InstanceKey
      */
     public function toArray(): array
     {
-        $arr = array();
-
+        $arr = [];
         $arr[$this->makeInstanceKey(self::PARAM_ORDER_BY)] = $this->getOrderBy();
         $arr[$this->makeInstanceKey(self::PARAM_LIMIT)] = $this->getLimit();
         $arr[$this->makeInstanceKey(self::PARAM_OFFSET)] = $this->getOffset();
@@ -298,21 +297,21 @@ class Tool implements \Tk\InstanceKey
         // GROUP BY
         $groupBy = '';
         if ($this->getGroupBy()) {
-            $groupBy = 'GROUP BY ' . str_replace(array(';', '-- ', '/*'), ' ', $this->getGroupBy());
+            $groupBy = 'GROUP BY ' . str_replace([';', '-- ', '/*'], ' ', $this->getGroupBy());
         }
 
         // HAVING
         $having = '';
         if ($this->getHaving()) {
-            $having = 'HAVING ' . str_replace(array(';', '-- ', '/*'), ' ', $this->getHaving());
+            $having = 'HAVING ' . str_replace([';', '-- ', '/*'], ' ', $this->getHaving());
         }
 
         // ORDER BY
         $orderBy = '';
         if ($this->getOrderBy()) {
-            $orFields = trim(str_replace(array(';', '-- ', '/*'), ' ', $this->getOrderBy()));
+            $orFields = trim(str_replace([';', '-- ', '/*'], ' ', $this->getOrderBy()));
             if ($tblAlias && $db) {
-                if (strpos($tblAlias, '.') === false) {
+                if (!str_contains($tblAlias, '.')) {
                     $tblAlias = $tblAlias . '.';
                 }
                 if (!preg_match('/^(ASC|DESC|FIELD\(|\'|RAND|CONCAT|SUBSTRING\(|IF\(|NULL|CASE)/i', $orFields)) {
@@ -320,7 +319,7 @@ class Tool implements \Tk\InstanceKey
                     foreach ($arr as $i => $str) {
                         $str = trim($str);
                         if (preg_match('/^(ASC|DESC|FIELD\(|\'|RAND|CONCAT|SUBSTRING\(|IF\(|NULL|CASE)/i', $str)) continue;
-                        if (strpos($str, '.') === false) {
+                        if (!str_contains($str, '.')) {
                             $a = explode(' ', $str);
                             $str = $tblAlias . $db->quoteParameter($a[0]);
                             if (isset($a[1])) {

@@ -50,7 +50,7 @@ class Upgrade extends Console
             }
 
             $tag = '';
-            $output = array();
+            $output = [];
             foreach ($cmdList as $i => $cmd) {
                 unset($output);
                 if (preg_match('/^git log /', $cmd)) {      // find tag version

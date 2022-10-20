@@ -65,10 +65,10 @@ class Pdo extends \PDO
         $this->options['pass'] = $password;
         $this->driver = $this->options['type'];
 
-        //$this->setAttribute(\PDO::ATTR_STATEMENT_CLASS, array(\Tk\Db\PdoStatement::class, array($this))); // Not compat with PHP 5.3
-        $this->setAttribute(\PDO::ATTR_STATEMENT_CLASS, array('\Tk\Db\PdoStatement', [$this]));
+        //$this->setAttribute(\PDO::ATTR_STATEMENT_CLASS, [\Tk\Db\PdoStatement::class, [$this]]); // Not compat with PHP 5.3
+        $this->setAttribute(\PDO::ATTR_STATEMENT_CLASS, ['\Tk\Db\PdoStatement', [$this]]);
 
-        $regs = array();
+        $regs = [];
         preg_match('/^([a-z]+):(([a-z]+)=([a-z0-9_-]+))+/i', $dsn, $regs);
         $this->dbName = $regs[4];
 
@@ -105,7 +105,7 @@ class Pdo extends \PDO
     /**
      * Call this to create/get a DB instance
      *
-     * $options = array(
+     * $options = [
      *   'type' => 'mysql',
      *   'host' => 'localhost',
      *   'port' => '3306',
@@ -114,7 +114,7 @@ class Pdo extends \PDO
      *   'pass' => 'pass',
      *   'timezone' => '',              // optional
      *   'mysql.ansi.quotes' => true    // optional
-     * );
+     * ];
      *
      * Different database instances are stored in an array by the $name key
      *
@@ -143,7 +143,7 @@ class Pdo extends \PDO
     /**
      * Call this to create a new DB instance
      *
-     * $options = array(
+     * $options = [
      *   'type' => 'mysql',
      *   'host' => 'localhost',
      *   'port' => '3306',
@@ -152,7 +152,7 @@ class Pdo extends \PDO
      *   'pass' => 'pass',
      *   'timezone' => '',              // optional
      *   'mysql.ansi.quotes' => true    // optional
-     * );
+     * ];
      *
      */
     public static function create(array $options): Pdo
@@ -272,7 +272,7 @@ class Pdo extends \PDO
      * @param array $ctorargs
      * @return mixed
      */
-    public function tkQuery($query, $mode = PDO::ATTR_DEFAULT_FETCH_MODE, $arg3 = null, $ctorargs = array())
+    public function tkQuery($query, $mode = PDO::ATTR_DEFAULT_FETCH_MODE, $arg3 = null, $ctorargs = [])
     {
         return call_user_func_array(array($this, 'query'), func_get_args());
     }
@@ -419,7 +419,7 @@ class Pdo extends \PDO
     public function getDatabaseList(): array
     {
         $result = null;
-        $list = array();
+        $list = [];
         if ($this->getDriver() == 'mysql') {
             $sql = 'SHOW DATABASES';
             $result = $this->query($sql);
@@ -442,7 +442,7 @@ class Pdo extends \PDO
     {
         self::$Q_LOG = false;
         $result = null;
-        $list = array();
+        $list = [];
         if ($this->getDriver() == 'mysql') {
             $sql = 'SHOW TABLES';
             $result = $this->query($sql);
@@ -465,7 +465,7 @@ class Pdo extends \PDO
     public function getTableInfo(string $table): array
     {
         self::$Q_LOG = false;
-        $list = array();
+        $list = [];
         $result = null;
         if ($this->getDriver() == 'mysql') {
             $sql = sprintf('DESCRIBE %s ', $this->quoteParameter($table));
@@ -526,7 +526,7 @@ class Pdo extends \PDO
      *
      * @throws Exception
      */
-    public function dropAllTables(bool $confirm = false, array $exclude = array()): bool
+    public function dropAllTables(bool $confirm = false, array $exclude = []): bool
     {
         if (!$confirm) return false;
         $sql = '';

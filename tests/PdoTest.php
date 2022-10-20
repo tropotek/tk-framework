@@ -7,9 +7,7 @@ use \Tk\Db\Pdo;
 /**
  * Class PdoTest
  *
- * @author Michael Mifsud <http://www.tropotek.com/>
- * @see http://www.tropotek.com/
- * @license Copyright 2016 Michael Mifsud
+ * @author Tropotek <http://www.tropotek.com/>
  */
 class PdoTest extends \PHPUnit_Framework_TestCase
 {
@@ -33,7 +31,7 @@ class PdoTest extends \PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
-        $dbcon = array();
+        $dbcon = [];
         //$dbcon = Config::getInstance()->getGroup('db');
         if (!$dbcon || !$dbcon['db.name']) {
             // Stop here and mark this test as incomplete.

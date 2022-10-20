@@ -21,8 +21,8 @@ class Exception extends \Tk\Exception
     {
         //format dump query
         if ($dump) {
-            $dump = explode("\n", str_replace(array(',', ' WHERE', ' FROM', ' LIMIT', ' ORDER', ' LEFT JOIN'),
-                array(', ', "\n  WHERE", "\n  FROM", "\n  LIMIT", "\n  ORDER", "\n  LEFT JOIN"), $dump));
+            $dump = explode("\n", str_replace([',', ' WHERE', ' FROM', ' LIMIT', ' ORDER', ' LEFT JOIN'],
+                [', ', "\n  WHERE", "\n  FROM", "\n  LIMIT", "\n  ORDER", "\n  LEFT JOIN"], $dump));
             foreach ($dump as $i => $s) {
                 $dump[$i] = '  ' . wordwrap($s, 120, "\n  ");
             }

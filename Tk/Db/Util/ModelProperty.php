@@ -17,21 +17,19 @@ class ModelProperty extends \Tk\Collection
 
     /**
      * The new class property name
-     * @var string
      */
-    protected $name = '';
+    protected string $name = '';
 
     /**
      * The new php property type
-     * @var string
      */
-    protected $type = '';
+    protected string $type = '';
 
 
     /**
      * @param array $data
      */
-    public function __construct($data = array())
+    public function __construct(array $data = [])
     {
         parent::__construct($data);
         $this->getName();
@@ -42,33 +40,18 @@ class ModelProperty extends \Tk\Collection
      * @param array $data
      * @return ModelProperty
      */
-    public static function create($data)
+    public static function create(array $data): ModelProperty
     {
         $obj = new static($data);
         return $obj;
     }
 
-    /**
-     * @param string $key
-     * @return bool
-     */
-    public function has($key)
-    {
-        return isset($this->data[$key]);
-    }
-
-    /**
-     * @return bool
-     */
-    public function isPrimaryKey()
+    public function isPrimaryKey(): bool
     {
         return (strtoupper($this->get('Key')) == 'PRI');
     }
 
-    /**
-     * @return string
-     */
-    public function getName()
+    public function getName(): string
     {
         if (!$this->name) {
             $this->name = preg_replace_callback('/_([a-z])/i', function ($matches) {
@@ -78,10 +61,7 @@ class ModelProperty extends \Tk\Collection
         return $this->name;
     }
 
-    /**
-     * @return string
-     */
-    public function getType()
+    public function getType(): string
     {
         if (!$this->type) {
             $this->type = self::TYPE_STRING;
@@ -102,10 +82,7 @@ class ModelProperty extends \Tk\Collection
         return $this->type;
     }
 
-    /**
-     * @return bool|float|int|string
-     */
-    public function getDefaultValue()
+    public function getDefaultValue(): float|bool|int|string
     {
         $def = $this->get('Default');
         switch ($this->getType()) {
@@ -127,10 +104,7 @@ class ModelProperty extends \Tk\Collection
         return $def;
     }
 
-    /**
-     * @return string
-     */
-    public function getDefinition()
+    public function getDefinition(): string
     {
         $tpl = <<<TPL
     /**
@@ -141,10 +115,7 @@ TPL;
         return sprintf($tpl, $this->getType(), $this->getName(), $this->getDefaultValue());
     }
 
-    /**
-     * @return string
-     */
-    public function getInitaliser()
+    public function getInitaliser(): string
     {
         $tpl = <<<TPL
         \$this->%s = %s;
@@ -156,10 +127,7 @@ TPL;
         return sprintf($tpl, $this->getName(), $val);
     }
 
-    /**
-     * @return string
-     */
-    public function getAccessor()
+    public function getAccessor(): string
     {
         $tpl = <<<TPL
     /**
@@ -178,11 +146,7 @@ TPL;
         return sprintf($tpl, $this->getType(), $method, ucfirst($this->getName()), $this->getType(), $this->getName());
     }
 
-    /**
-     * @param string $classname
-     * @return string
-     */
-    public function getMutator($classname = '')
+    public function getMutator(string $classname = ''): string
     {
         if (!$classname)
             $classname = '$this';
@@ -206,11 +170,7 @@ TPL;
         );
     }
 
-    /**
-     * @param string $errorParam
-     * @return string
-     */
-    public function getValidation($errorParam = 'errors')
+    public function getValidation(string $errorParam = 'errors'): string
     {
         $tpl = <<<TPL
         if (!\$this->%s) {
@@ -220,9 +180,7 @@ TPL;
         return sprintf($tpl, $this->getName(), $errorParam, $this->getName(), $this->getName());
     }
 
-
-
-    public function getColumnMap()
+    public function getColumnMap(): string
     {
         $tpl = <<<TPL
             \$this->dbMap->addPropertyMap(new %s(%s%s)%s);
@@ -255,8 +213,7 @@ TPL;
         return sprintf($tpl, $mapClass, $propertyName, $columnName, $tag);
     }
 
-
-    public function getFormMap()
+    public function getFormMap(): string
     {
         $tpl = <<<TPL
             \$this->formMap->addPropertyMap(new %s(%s)%s);
@@ -286,9 +243,7 @@ TPL;
         return sprintf($tpl, $mapClass, $propertyName, $tag);
     }
 
-
-
-    public function getFilterQuery()
+    public function getFilterQuery(): string
     {
         if ($this->getName() == 'id' ) return '';
 
@@ -320,15 +275,9 @@ TPL;
         }
 
         return sprintf($tpl, $this->getName(), $this->get('Field'), $filterVal);
-
     }
 
-    /**
-     * @param string $className
-     * @param string $namespace
-     * @return string
-     */
-    public function getTableCell($className, $namespace)
+    public function getTableCell(string $className, string $namespace): string
     {
         $tpl = <<<TPL
         \$this->appendCell(new %s(%s))%s;
@@ -358,15 +307,8 @@ TPL;
         return sprintf($tpl, $mapClass, $propertyName, $append);
     }
 
-    /**
-     * @param string $className
-     * @param string $namespace
-     * @param bool $isModelForm
-     * @return string
-     */
-    public function getFormField($className, $namespace, $isModelForm = false)
+    public function getFormField(string $className, string $namespace, bool $isModelForm = false): string
     {
-
         $tpl = <<<TPL
         \$this->appendField(new %s(%s%s))%s;
 TPL;
@@ -385,24 +327,17 @@ TPL;
         if ($this->getType() == self::TYPE_BOOL) {
             $mapClass = 'Field\Checkbox';
         }
-        if (preg_match('/Id$/', $this->getName())) {
+        if (str_ends_with($this->getName(), 'Id')) {
             $mapClass = 'Field\Select';
-            $argAppend = sprintf(', array()');
+            $argAppend = sprintf(', []');
             $append = sprintf('->prependOption(\'-- Select --\', \'\')');
         }
-
         $propertyName = $this->quote($this->getName());
 
         return sprintf($tpl, $mapClass, $propertyName, $argAppend, $append);
     }
 
-
-    /**
-     * @param $str
-     * @param string $q
-     * @return string
-     */
-    protected function quote($str, $q = "'")
+    protected function quote(string $str, string $q = "'"): string
     {
         return $q.$str.$q;
     }

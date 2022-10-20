@@ -227,7 +227,7 @@ class Color
         $h = round($h, 2);
         $s = round($s, 2);
         $l = round($l, 2);
-        return array('hue' => $h, 'saturation' => $s, 'brightness' => $l);
+        return ['hue' => $h, 'saturation' => $s, 'brightness' => $l];
     }
 
     /**
@@ -242,7 +242,7 @@ class Color
         $cyan = @(($cyan - $black) / (255 - $black));
         $magenta = @(($magenta - $black) / (255 - $black));
         $yellow = @(($yellow - $black) / (255 - $black));
-        return array('cyan' => $cyan, 'yellow' => $yellow, 'magenta' => $magenta, 'key' => $black);
+        return ['cyan' => $cyan, 'yellow' => $yellow, 'magenta' => $magenta, 'key' => $black];
     }
 
     /**
@@ -322,11 +322,11 @@ class Color
         }
         $hex = $regs[2];
         $hex = strtoupper($hex);
-        $r = array(
+        $r = [
             'red' => intval(substr($hex, 0, 2), 16),
             'green' => intval(substr($hex, 2, 2), 16),
             'blue' => intval(substr($hex, 4, 2), 16)
-        );
+        ];
         return $r;
     }
 
@@ -376,11 +376,11 @@ class Color
         $g = floor( $g );
         $b = floor( $b );
 
-        return array(
+        return [
             'red' => $r,
             'green' => $g,
             'blue' => $b
-        );
+        ];
 
     }
 

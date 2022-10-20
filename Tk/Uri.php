@@ -136,7 +136,7 @@ class Uri implements \IteratorAggregate
 
     public function __serialize()
     {
-        return serialize(array('spec' => $this->spec));
+        return serialize(['spec' => $this->spec]);
     }
 
     public function __unserialize($data)
