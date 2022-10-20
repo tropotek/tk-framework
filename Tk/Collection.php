@@ -216,7 +216,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
      * @return bool
      * @interface \ArrayAccess
      */
-    public function offsetExists($key)
+    public function offsetExists($key): bool
     {
         return $this->has($key);
     }
@@ -229,7 +229,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
      * @return mixed The key's value, or the default value
      * @interface \ArrayAccess
      */
-    public function offsetGet($key)
+    public function offsetGet($key): mixed
     {
         return $this->get($key);
     }
@@ -241,7 +241,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
      * @param mixed $value The data value
      * @interface \ArrayAccess
      */
-    public function offsetSet($key, $value)
+    public function offsetSet($key, $value): void
     {
         $this->set($key, $value);
     }
@@ -252,7 +252,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
      * @param string $key The data key
      * @interface \ArrayAccess
      */
-    public function offsetUnset($key)
+    public function offsetUnset($key): void
     {
         $this->remove($key);
     }

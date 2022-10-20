@@ -127,7 +127,7 @@ class Pdo extends \PDO
      *   Pdo::getInstance($options) is a valid call
      *
      */
-    public static function instance(string $name = '', array $options = []): ?Pdo
+    public static function instance(string $name, array $options = []): ?Pdo
     {
         // return the first available DB connection if no params
         if (!$name && !count($options) && count(self::$_INSTANCE)) {
