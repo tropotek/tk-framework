@@ -128,8 +128,9 @@ class Factory extends Collection
         // Use `<Ctrl>+<Shift>+R` ro refresh the routing cache
         $systemCache = new Cache(new Filesystem($this->getSystem()->makePath($this->getConfig()->get('path.cache') . '/system')));
         if ((!$compiledRoutes = $systemCache->fetch('compiledRoutes')) || $this->getSystem()->isRefreshCacheRequest()) {
+            // TODO: use some sort of loading system to get routes
             include($this->getSystem()->makePath($this->getConfig()->get('path.routes')));
-            include($this->getSystem()->makePath($this->getConfig()->get('path.vendor.org').'/tk-framework/config/routes.php'));
+            include($this->getSystem()->makePath($this->getConfig()->get('path.vendor.org').'/tk-framework/config/50-routes.php'));
             $compiledRoutes = (new CompiledUrlMatcherDumper($this->getRouteCollection()))->getCompiledRoutes();
             // Storing the data in the cache for 60 minutes
             $systemCache->store('compiledRoutes', $compiledRoutes, 60*60);
