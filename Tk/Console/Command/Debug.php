@@ -27,10 +27,10 @@ class Debug extends Console
         }
 
         try {
-            $debugSql = $this->getSystem()->makePath('/src/config/sql/dev.sql');
             $bak = new SqlBackup($this->getFactory()->getDb());
 
-            $this->writeComment('  - Running SQL: `src/config/sql/dev.sql`');
+            $this->writeComment('  - Executing Debug SQL: ' . $this->getConfig()->get('debug.sql'));
+            $debugSql = $this->getSystem()->makePath($this->getConfig()->get('debug.sql'));
             $bak->restore($debugSql);
         } catch (\Exception $e) {
             $this->writeError($e->getMessage());
