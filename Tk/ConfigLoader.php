@@ -27,8 +27,8 @@ class ConfigLoader
 
     protected function __construct()
     {
-        $vendorPath = dirname(dirname(__DIR__));
-        $basePath = dirname(dirname($vendorPath));
+        $vendorPath = dirname(__DIR__, 2);
+        $basePath = dirname($vendorPath, 2);
 
         $libPaths = scandir($vendorPath);
         array_shift($libPaths);

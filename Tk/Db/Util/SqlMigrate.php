@@ -3,6 +3,7 @@ namespace Tk\Db\Util;
 
 
 use Tk\Db\Pdo;
+use Tk\FileUtil;
 
 /**
  * DB migration tool
@@ -68,9 +69,10 @@ class SqlMigrate
      */
     public function __construct(Pdo $db, string $tempPath = '/tmp')
     {
-        $this->sitePath = dirname(dirname(dirname(dirname(dirname(dirname(dirname(__DIR__)))))));
+        $this->sitePath = dirname(__DIR__, 7);
         $this->tempPath = $tempPath;
-        $this->setDb($db);
+        $this->db = $db;
+        $this->install();
     }
 
     /**
@@ -82,11 +84,10 @@ class SqlMigrate
     }
 
     /**
-     * @param array|string[] $migrateList
-     * @param null|callable $onStrWrite function(string $str, SqlMigrate $migrate) {}
+     * @param callable|null $onStrWrite function(string $str, SqlMigrate $migrate) {}
      * @throws \Exception
      */
-    public function migrateList($migrateList, $onStrWrite = null)
+    public function migrateList(array $migrateList, callable $onStrWrite = null): void
     {
         // IF no migration table exists or is empty
         // Run the install.sql and install.php if one is found
@@ -141,13 +142,9 @@ class SqlMigrate
 
     /**
      * Run the migration script and find all non executed sql files
-     *
-     * @param string $path
-     * @param null|callable $onFileMigrate
-     * @return array
      * @throws \Exception
      */
-    public function migrate($path, $onFileMigrate = null)
+    public function migrate(string $path, callable $onFileMigrate = null): array
     {
         $list = $this->getFileList($path);
         $mlist = [];
@@ -188,12 +185,9 @@ class SqlMigrate
 
     /**
      * Check to see if there are any new migration sql files pending execution
-     *
-     * @param $path
-     * @return bool
      * @throws \Tk\Db\Exception
      */
-    public function isPending($path)
+    public function isPending(string $path): bool
     {
         $list = $this->getFileList($path);
         $pending = false;
@@ -209,11 +203,8 @@ class SqlMigrate
     /**
      * Set the temp path for db backup file
      * Default '/tmp'
-     *
-     * @param string $path
-     * @return $this
      */
-    public function setTempPath($path)
+    public function setTempPath(string $path): static
     {
         $this->tempPath = $path;
         return $this;
@@ -226,7 +217,7 @@ class SqlMigrate
      * @param string $path
      * @return array
      */
-    public function getFileList($path)
+    public function getFileList(string $path): array
     {
         $list = [];
         $list = array_merge($list, $this->search($path));
@@ -239,12 +230,9 @@ class SqlMigrate
      * Execute a migration class or sql script...
      * the file is then added to the db and cannot be executed again.
      * Ignore any files starting with an underscore '_'
-     *
-     * @param string $file
-     * @return bool
      * @throws \Exception
      */
-    protected function migrateFile($file)
+    protected function migrateFile(string $file): bool
     {
         try {
             $file = $this->sitePath . $this->toRelative($file);
@@ -295,11 +283,9 @@ class SqlMigrate
     }
 
     /**
-     * @param bool $deleteFile
-     * @throws \Tk\Db\Exception
      * @throws \Tk\Exception
      */
-    protected function restoreBackup($deleteFile = true)
+    protected function restoreBackup(bool $deleteFile = true): void
     {
         if ($this->backupFile) {
             $dump = new SqlBackup($this->db);
@@ -313,7 +299,7 @@ class SqlMigrate
     /**
      * Delete the internally generated backup file if it exists
      */
-    protected function deleteBackup()
+    protected function deleteBackup(): void
     {
         if (is_writable($this->backupFile)) {
             unlink($this->backupFile);
@@ -323,11 +309,9 @@ class SqlMigrate
 
     /**
      * Search a path for sql files
-     *
-     * @param $path
      * @return array
      */
-    public function search($path)
+    public function search(string $path): array
     {
         $list = [];
         if (!is_dir($path)) return $list;
@@ -341,43 +325,34 @@ class SqlMigrate
     }
 
     /**
-     * Get the table name for queries
-     *
-     * @return string
+     * Get the migration table name
      */
-    protected function getTable()
+    protected function getTable(): string
     {
         return self::$DB_TABLE;
     }
 
-    /**
-     * @return Pdo
-     */
-    public function getDb()
+    public function getDb(): Pdo
     {
         return $this->db;
     }
 
-    /**
-     * @param Pdo $db
-     * @return $this
-     * @throws \Tk\Db\Exception
-     */
-    public function setDb($db)
-    {
-        $this->db = $db;
-        $this->install();
-        return $this;
-    }
+//    /**
+//     * @throws \Tk\Db\Exception
+//     */
+//    public function setDb(Pdo $db): static
+//    {
+//        $this->db = $db;
+//        $this->install();
+//        return $this;
+//    }
 
     /**
      * install the migration table to track executed scripts
      *
-     * @todo This must be tested against mysql, pgsql and sqlite....
-     * So far query works with mysql and pgsql drvs sqlite still to test
      * @throws \Tk\Db\Exception
      */
-    protected function install()
+    protected function install(): void
     {
         if($this->db->hasTable($this->getTable())) {
             return;
@@ -386,6 +361,7 @@ class SqlMigrate
         $sql = <<<SQL
 CREATE TABLE IF NOT EXISTS $tbl (
   path VARCHAR(128) NOT NULL DEFAULT '',
+  rev VARCHAR(16) NOT NULL DEFAULT '',
   created TIMESTAMP,
   PRIMARY KEY (path)
 );
@@ -395,11 +371,9 @@ SQL;
 
     /**
      * Return true if the migration table is empty or does not exist
-     *
-     * @return bool
      * @throws \Tk\Db\Exception
      */
-    protected function isInstall()
+    protected function isInstall(): bool
     {
         if(!$this->db->hasTable($this->getTable())) return true;
         $sql = sprintf('SELECT * FROM %s WHERE 1 LIMIT 1', $this->db->quoteParameter($this->getTable()));
@@ -410,12 +384,9 @@ SQL;
 
     /**
      * exists
-     *
-     * @param string $path
-     * @return bool
      * @throws \Tk\Db\Exception
      */
-    protected function hasPath($path)
+    protected function hasPath(string $path): bool
     {
         $path = $this->db->escapeString($this->toRelative($path));
         $sql = sprintf('SELECT * FROM %s WHERE path = %s LIMIT 1', $this->db->quoteParameter($this->getTable()), $this->db->quote($path));
@@ -428,26 +399,21 @@ SQL;
 
     /**
      * insert
-     *
-     * @param string $path
-     * @return \PDOStatement
      * @throws \Tk\Db\Exception
      */
-    protected function insertPath($path)
+    protected function insertPath(string $path): int
     {
         $path = $this->db->escapeString($this->toRelative($path));
-        $sql = sprintf('INSERT INTO %s (path, created) VALUES (%s, NOW())', $this->db->quoteParameter($this->getTable()), $this->db->quote($path));
+        $rev = $this->db->escapeString($this->toRev($path));
+        $sql = sprintf('INSERT INTO %s (path, rev, created) VALUES (%s, %s, NOW())', $this->db->quoteParameter($this->getTable()), $this->db->quote($path), $this->db->quote($rev));
         return $this->db->exec($sql);
     }
 
     /**
      * delete
-     *
-     * @param string $path
-     * @return \PDOStatement
      * @throws \Tk\Db\Exception
      */
-    protected function deletePath($path)
+    protected function deletePath(string $path): int
     {
         $path = $this->db->escapeString($this->toRelative($path));
         $sql = sprintf('DELETE FROM %s WHERE path = %s LIMIT 1', $this->db->quoteParameter($this->getTable()), $this->db->quote($path));
@@ -456,13 +422,19 @@ SQL;
 
     /**
      * Return the relative path
-     *
-     * @param $path
-     * @return string
      */
-    private function toRelative($path)
+    private function toRelative(string $path): string
     {
         return rtrim(str_replace($this->sitePath, '', $path), '/');
+    }
+
+    /**
+     * Return the revision string part of the path
+     */
+    private function toRev(string $path): string
+    {
+        $path = basename($path);
+        return FileUtil::removeExtension($path);
     }
 
 }

@@ -43,7 +43,7 @@ class Mirror extends Console
                 return Command::FAILURE;
             }
 
-            $debugSqlFile = $config->getBasePath() . '/bin/assets/dev.sql';
+            $debugSqlFile = $config->getBasePath() . '/src/config/sql/dev.sql';
             $backupSqlFile = $config->getTempPath() . '/tmpt.sql';
             $mirrorSqlFile = $config->getTempPath() . '/' . \Tk\Date::create()->format(\Tk\Date::FORMAT_ISO_DATE) . '-tmpl.sql.gz';
 

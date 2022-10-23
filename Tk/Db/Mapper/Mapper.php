@@ -309,7 +309,7 @@ abstract class Mapper
         $sql = sprintf('SELECT %s %s %s FROM %s %s %s ',
             $foundRowsKey, $distinct, $select, $from, $where, $toolStr);
         $stmt = $this->getDb()->prepare($sql);
-        
+
         $stmt->execute();
 
         return Result::createFromMapper($this, $stmt, $tool);
@@ -448,6 +448,7 @@ abstract class Mapper
     }
 
     /**
+     * Set the table or view this model gets its data from
      * @throws Exception
      */
     public function setTable(string $table): Mapper

@@ -39,7 +39,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     {
 
         $config = Config::getInstance();
-        $this->assertStringStartsWith($config->getSitePath(), dirname(__FILE__));
+        $this->assertStringStartsWith($config->getSitePath(), __DIR__);
     }
 
     public function testNset()
