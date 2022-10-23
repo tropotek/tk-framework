@@ -43,4 +43,27 @@ trait SystemTrait
     {
         return $this->getSystem()->getRegistry();
     }
+
+    // Helper Functions
+
+    public function loadTemplate(string $xhtml = ''): ?\Dom\Template
+    {
+        return $this->getFactory()->getTemplateLoader()->load($xhtml);
+    }
+
+    public function loadTemplateFile(string $path = ''): ?\Dom\Template
+    {
+        return $this->getFactory()->getTemplateLoader()->loadFile($path);
+    }
+
+    public function getRequest(): \Symfony\Component\HttpFoundation\Request
+    {
+        return $this->getFactory()->getRequest();
+    }
+
+    public function getSession(): ?\Symfony\Component\HttpFoundation\Session\Session
+    {
+        return $this->getFactory()->getSession();
+    }
+
 }
