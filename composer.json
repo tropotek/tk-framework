@@ -44,7 +44,6 @@
 
     "symfony/http-foundation": "^6.1",
     "symfony/routing": "^6.1",
-    "symfony/config": "^6.1",
     "symfony/http-kernel": "^6.1",
     "symfony/event-dispatcher": "^6.1",
     "symfony/console": "^6.1",

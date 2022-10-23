@@ -89,7 +89,11 @@ class StartupHandler implements EventSubscriberInterface
     public function onRequest($event)
     {
         if ($event->getRequest()->attributes->has('_route')) {
-            $this->out('- Controller: ' . $event->getRequest()->attributes->get('_controller'));
+            $controller = $event->getRequest()->attributes->get('_controller');
+            if (is_array($controller)) {
+                $controller = implode('::', $controller);
+            }
+            $this->out('- Controller: ' . $controller);
         }
     }
 
