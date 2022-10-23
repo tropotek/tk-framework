@@ -1,11 +1,13 @@
 <?php
+/**
+ * Setup system configuration parameters
+ *
+ * @author Tropotek <http://www.tropotek.com/>
+ */
+use Tk\Config;
+
 return function (\Tk\Config $config)
 {
-    $config->set('script.start.time', microtime(true));
-
-    // Site paths
-    $config->set('base.path', $config->getSystem()->discoverBasePath());
-    $config->set('base.url', $config->getSystem()->discoverBaseUrl());
 
     $config->set('path.data',         '/data');
     $config->set('path.cache',        '/data/cache');
@@ -15,9 +17,6 @@ return function (\Tk\Config $config)
     $config->set('path.vendor',       '/vendor');
     $config->set('path.vendor.org',   '/vendor/ttek');
     $config->set('path.template',     '/html');
-
-    $config->set('path.routes',       '/src/config/routes.php');
-    $config->set('path.routes.cache', '/data/cache/routes.cache.php');
 
     // Session Defaults
     $config->set('session.db_enable',         false);

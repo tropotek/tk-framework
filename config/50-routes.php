@@ -6,10 +6,14 @@
  */
 use Symfony\Component\Routing;
 
-$routes = \Tk\Factory::instance()->getRouteCollection();
+return function (Routing\RouteCollection $routes) {
 
 
-// Enable the tk mirror controller page if key set in config
-if (\Tk\Config::instance()->get('db.mirror.secret', ''))
-    $routes->add('system-mirror',  new Routing\Route('/util/mirror',     ['_controller' => '\Tk\Db\Util\Mirror::doDefault']));
+    // Enable the tk mirror controller page if key set in config
+    if (\Tk\Config::instance()->get('db.mirror.secret', ''))
+        $routes->add('system-mirror', new Routing\Route(
+            '/util/mirror',
+            ['_controller' => '\Tk\Db\Util\Mirror::doDefault'])
+        );
 
+};
