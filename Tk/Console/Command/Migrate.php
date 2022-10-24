@@ -42,19 +42,19 @@ class Migrate extends Console
                     $exclude = [$this->getConfig()->get('session.db_table')];
                 }
                 $db->dropAllTables(true, $exclude);
-                $this->write('Database Install...');
+                $this->write('Mode: Install');
             } else {
-                $this->write('Database Upgrade...');
+                $this->write('Mode: Upgrade');
             }
 
             // Migrate new SQL files
+            $this->write('Migration Starting.');
             $migrateList = $this->getConfig()->get('db.migrate.paths');
             $outputLogger = new ConsoleOutputLogger($output);
             $migrate = new SqlMigrate($db, $outputLogger);
             $migrate->migrateList($migrateList);
 
-            $this->write('Database Migration Complete.');
-            $this->write('Open the site in a browser to complete the site setup: ' . \Tk\Uri::create('/')->toString());
+            $this->write('Migration Complete.');
         } catch (\Exception $e) {
             $this->writeError($e->getMessage());
             return Command::FAILURE;

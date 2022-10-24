@@ -15,7 +15,7 @@ use Tk\Traits\SystemTrait;
  *
  * <code>
  *   $migrate = new Migrate(Factory::instance()->getDb());
- *   $migrate->migrateList([])
+ *   $migrate->migrateList([]);
  * </code>
  *
  * Migration files can be of type .sql or .php.
@@ -73,7 +73,6 @@ class SqlMigrate
     {
         $this->install();
 
-        $this->logger->info('Initiating migration.');
         foreach ($migrateList as $path) {
             if (is_file($path)) {
                 $this->migrateFile($path);
@@ -95,9 +94,7 @@ class SqlMigrate
             $list = $this->search($path);
             // Find any migration files
             foreach ($list as $file) {
-                if ($this->migrateFile($file)) {
-                    $this->logger->info("Migrating file: {$this->toRelative($file)}");
-                }
+                $this->migrateFile($file);
             }
         } catch (\Exception $e) {
             $this->logger->error($e->__toString());
@@ -121,6 +118,8 @@ class SqlMigrate
             $file = $this->getConfig()->getBasePath() . $this->toRelative($file);
             if (!is_readable($file)) return false;
             if ($this->hasPath($file)) return false;
+
+            $this->logger->info("Migrating file: {$this->toRelative($file)}");
 
             if (!$this->backupFile) {   // only run once per session.
                 $dump = new SqlBackup($this->getDb());
@@ -149,7 +148,6 @@ class SqlMigrate
                 } while ($stm->nextRowset());
 
                 $error = $stm->errorInfo();
-
                 if ($error[0] != "00000") {
                     throw new \Tk\Db\Exception("Query $i failed: " . $error[2], 0, null, $sql);
                 }
@@ -158,7 +156,7 @@ class SqlMigrate
 
         } catch (\Exception $e){
             $this->logger->error($e->__toString());
-            throw new \Tk\Exception('File: ' . $file, $e->getCode(), $e);
+            //throw new \Tk\Exception('File: ' . $file, $e->getCode(), $e);
         }
         return true;
     }
@@ -232,7 +230,6 @@ class SqlMigrate
 
     /**
      * install the migration table to track executed scripts
-     *
      * @throws \Tk\Db\Exception
      */
     protected function install(): void
