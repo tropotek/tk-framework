@@ -4,6 +4,7 @@ namespace Tk\Db\Util;
 
 use Tk\Db\Pdo;
 use Tk\FileUtil;
+use Tk\Traits\SystemTrait;
 
 /**
  * DB migration tool
@@ -44,6 +45,8 @@ use Tk\FileUtil;
  */
 class SqlMigrate
 {
+    use SystemTrait;
+
     const MIGRATE_PREPEND = 'migrate_prepend';
 
 
@@ -61,6 +64,11 @@ class SqlMigrate
      */
     protected string $backupFile = '';
 
+    /**
+     * The site and vendor paths to check for migration files
+     */
+    protected array $searchPaths = [];
+
 
     /**
      * SqlMigrate constructor.
@@ -72,7 +80,17 @@ class SqlMigrate
         $this->sitePath = dirname(__DIR__, 7);
         $this->tempPath = $tempPath;
         $this->db = $db;
-        $this->install();
+
+        // Get all searchable paths
+        $basePath = $this->getConfig()->getBasePath();
+        $vendorPath = $this->getSystem()->makePath($this->getConfig()->get('path.vendor.org'));
+        $libPaths = scandir($vendorPath);
+        array_shift($libPaths);
+        array_shift($libPaths);
+        $this->searchPaths = [
+            $basePath . '/src/config'
+        ] + array_map(fn($path) => $vendorPath . '/' . $path . '/config' , $libPaths);
+
     }
 
     /**
@@ -130,7 +148,7 @@ class SqlMigrate
             $dirItr = new \RecursiveDirectoryIterator($searchPath, \RecursiveIteratorIterator::CHILD_FIRST);
             $itr = new \RecursiveIteratorIterator($dirItr);
             $regItr = new \RegexIterator($itr, '/(\/sql\/\.)$/');
-                /** @var \SplFileInfo $d */
+            /** @var \SplFileInfo $d */
             foreach ($regItr as $d) {
                 if ($onStrWrite) call_user_func_array($onStrWrite, array('' . $d->getPath(), $this));
                 $this->migrate($d->getPath(), function ($f, $m) use ($onStrWrite) {
@@ -146,6 +164,8 @@ class SqlMigrate
      */
     public function migrate(string $path, callable $onFileMigrate = null): array
     {
+        $this->install();
+
         $list = $this->getFileList($path);
         $mlist = [];
         $sqlFiles = [];
@@ -201,16 +221,6 @@ class SqlMigrate
     }
 
     /**
-     * Set the temp path for db backup file
-     * Default '/tmp'
-     */
-    public function setTempPath(string $path): static
-    {
-        $this->tempPath = $path;
-        return $this;
-    }
-
-    /**
      * search the path for *.sql files, also search the $path.'/'.$driver folder
      * for *.sql files.
      *
@@ -227,6 +237,22 @@ class SqlMigrate
     }
 
     /**
+     * Search a path for sql files
+     */
+    public function search(string $path): array
+    {
+        $list = [];
+        if (!is_dir($path)) return $list;
+        $iterator = new \DirectoryIterator($path);
+        foreach(new \RegexIterator($iterator, '/\.(php|sql)$/') as $file) {
+            if (preg_match('/^(_|\.)/', $file->getBasename())) continue;
+            if ($file->getBasename() == 'install.sql' || $file->getBasename() == 'install.php') continue;
+            $list[] = $file->getPathname();
+        }
+        return $list;
+    }
+
+    /**
      * Execute a migration class or sql script...
      * the file is then added to the db and cannot be executed again.
      * Ignore any files starting with an underscore '_'
@@ -235,16 +261,18 @@ class SqlMigrate
     protected function migrateFile(string $file): bool
     {
         try {
+            $this->install();
+
             $file = $this->sitePath . $this->toRelative($file);
             if (!is_readable($file)) return false;
             if ($this->hasPath($file)) return false;
 
             if (!$this->backupFile) {   // only run once per session.
                 $dump = new SqlBackup($this->db);
-                $this->backupFile = $dump->save($this->tempPath);   // Just in case
+                $this->backupFile = $dump->save($this->tempPath);
             }
 
-            if (substr(basename($file), 0, 1) == '_') return false;
+            if (str_starts_with(basename($file), '_')) return false;
 
             if (preg_match('/\.php$/i', basename($file))) {         // Include .php files
                 if (!trim(file_get_contents($file))) return false;
@@ -297,6 +325,16 @@ class SqlMigrate
     }
 
     /**
+     * Set the temp path for db backup file
+     * Default '/tmp'
+     */
+    public function setTempPath(string $path): static
+    {
+        $this->tempPath = $path;
+        return $this;
+    }
+
+    /**
      * Delete the internally generated backup file if it exists
      */
     protected function deleteBackup(): void
@@ -305,23 +343,6 @@ class SqlMigrate
             unlink($this->backupFile);
             $this->backupFile = '';
         }
-    }
-
-    /**
-     * Search a path for sql files
-     * @return array
-     */
-    public function search(string $path): array
-    {
-        $list = [];
-        if (!is_dir($path)) return $list;
-        $iterator = new \DirectoryIterator($path);
-        foreach(new \RegexIterator($iterator, '/\.(php|sql)$/') as $file) {
-            if (preg_match('/^(_|\.)/', $file->getBasename())) continue;
-            if ($file->getBasename() == 'install.sql' || $file->getBasename() == 'install.php') continue;
-            $list[] = $file->getPathname();
-        }
-        return $list;
     }
 
     /**
@@ -336,16 +357,6 @@ class SqlMigrate
     {
         return $this->db;
     }
-
-//    /**
-//     * @throws \Tk\Db\Exception
-//     */
-//    public function setDb(Pdo $db): static
-//    {
-//        $this->db = $db;
-//        $this->install();
-//        return $this;
-//    }
 
     /**
      * install the migration table to track executed scripts

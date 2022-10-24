@@ -30,6 +30,7 @@ class ConfigLoader
         $vendorPath = dirname(__DIR__, 2);
         $basePath = dirname($vendorPath, 2);
 
+        // Get all searchable paths
         $libPaths = scandir($vendorPath);
         array_shift($libPaths);
         array_shift($libPaths);
@@ -45,42 +46,51 @@ class ConfigLoader
     }
 
     /**
-     * This method searches the site /src/config and all ttek lib folders
-     * for config files named {priority}-config.php.
+     * Load all config files in order of priority
      *
      * The site config file can omit the priority value and just be named config.php as it will always
      * be executed last.
      *
-     * The priority values can range from 0-99, 100 is reserved for the site config file that is executed last.
-     * Lower values are executed first.
-     *
      */
     public function loadConfigs(?Config $config = null): void
     {
-        $this->load('/.+\/(([0-9]+)\-)?config\.php$/', $config);
+        $list = $this->findFiles('config.php');
+        foreach ($list as $path) {
+            $this->load($path, $config);
+        }
     }
 
     /**
-     * This method searches the site /src/config and all ttek lib folders
-     * for route files named {priority}-routes.php.
+     * Load all route files in order of priority
      *
-     * The site route file can omit the priority value and just be named config.php as it will always
-     * be executed last. It will be treated as `100-config.php`
-     *
-     * The priority values can range from 0-99, 100 is reserved for the site route file that is executed last.
-     * Lower values are executed first.
+     * The site rout file can omit the priority value and just be named rout.php as it will always
+     * be executed last.
      *
      */
     public function loadRoutes(?CollectionConfigurator $routes = null): void
     {
-        $this->load('/.+\/(([0-9]+)\-)?routes.php$/', $routes);
+        $list = $this->findFiles('routes.php');
+        foreach ($list as $path) {
+            $this->load($path, $routes);
+        }
     }
 
-
     /**
-     * Search the site and ttek lib for config files to load
+     * Find files that match the file basename and return them in priority from lowest to highest
+     *
+     * This method searches the site /src/config and all ttek lib config folders
+     * for route files named `{priority}-{basename.php}`
+     *
+     * The site route file can omit the priority value and just be named config.php as it will always
+     * be executed last. It will be treated as `100-{basename.php}`
+     *
+     * The priority values can range from 0-99, 100 is reserved for the site route file that is executed last.
+     * Lower values are executed first.
+     *
+     * @param string $basename
+     * @return array
      */
-    public function load(string $regStr, mixed $object = null): void
+    public function findFiles(string $basename): array
     {
         // Find all tk config files $list[$priority][] = {path}
         $list = [];
@@ -88,21 +98,28 @@ class ConfigLoader
             if (!is_dir($configPath)) continue;
             $directory = new \RecursiveDirectoryIterator($configPath);
             $it = new \RecursiveIteratorIterator($directory);
-            $regex = new \RegexIterator($it, $regStr, \RegexIterator::GET_MATCH);
+            $reg = sprintf('/.+\/(([0-9]+)\-)?%s$/', preg_quote($basename));
+            $regex = new \RegexIterator($it, $reg, \RegexIterator::GET_MATCH);
             foreach($regex as $v) {
                 $priority = $v[2] ?? '100';
                 $list[$priority][] = $v[0];
             }
         }
         ksort($list);
-        foreach ($list as $priority => $files) {
-            foreach ($files as $path) {
-                $result = include $path;
-                if (is_callable($result) && $object) {
-                    $result($object);
+        // Flatten the array
+        $result = [];
+        array_walk_recursive($list,function($v) use (&$result){ $result[] = $v; });
+        return $result;
+    }
 
-                }
-            }
+    /**
+     * Search the site and ttek lib for config files to load
+     */
+    public function load(string $path, mixed $object = null): void
+    {
+        $callback = include $path;
+        if (is_callable($callback) && $object) {
+            $callback($object);
         }
     }
 

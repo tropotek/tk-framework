@@ -27,7 +27,7 @@ return function (\Tk\Config $config)
     $config->set('session.db_time_col',       'time');
 
     $config->set('debug',     false);
-    $config->set('debug.sql', $this->get('path.config') . '/sql/common/dev.sql');
+    $config->set('debug.sql', $config->get('path.config') . '/sql/common/dev.sql');
 
     $config->set('log.system.request', $config->get('path.temp') . '/requestLog.txt');
     $config->set('log.logLevel', \Psr\Log\LogLevel::ERROR);
