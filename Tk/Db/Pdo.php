@@ -227,9 +227,9 @@ class Pdo extends \PDO
      *
      * @param string $query
      * @param array $options
-     * @return  \PDOStatement
+     * @return  \PDOStatement|false
      * @throws \PDOException
-     *@see \PDO::prepare()
+     * @see \PDO::prepare()
      * @see http://www.php.net/manual/en/pdo.prepare.php
      */
     public function prepare(string $query, array $options = []): \PDOStatement|false
@@ -401,17 +401,6 @@ class Pdo extends \PDO
     }
 
     /**
-     * Check if a table exists in the current database
-     *
-     * @throws Exception
-     */
-    public function hasTable(string $table): bool
-    {
-        $list = $this->getTableList();
-        return in_array($table, $list);
-    }
-
-    /**
      * Get an array containing all the available databases to the user
      *
      * @throws Exception
@@ -431,6 +420,17 @@ class Pdo extends \PDO
             $list = $result->fetchAll(\PDO::FETCH_COLUMN, 0);
         }
         return $list;
+    }
+
+    /**
+     * Check if a table exists in the current database
+     *
+     * @throws Exception
+     */
+    public function hasTable(string $table): bool
+    {
+        $list = $this->getTableList();
+        return in_array($table, $list);
     }
 
     /**
