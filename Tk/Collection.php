@@ -140,7 +140,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
 
     public function prepend(string $key, mixed $value, ?string $refKey = null): mixed
     {
-        if (!$this->has($refKey)) {
+        if (!$refKey || !$this->has($refKey)) {
             $this->_data = array_merge([$key => $value], $this->_data);
         } else {
             $a = [];
@@ -155,7 +155,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
 
     public function append(string $key, mixed $value, ?string $refKey = null): mixed
     {
-        if (!$this->has($refKey)) {
+        if (!$refKey || !$this->has($refKey)) {
             $this->set($key, $value);
         } else {
             $a = [];
