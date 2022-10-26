@@ -44,6 +44,16 @@ trait SystemTrait
         return $this->getSystem()->getRegistry();
     }
 
+    public function makePath(string $path): string
+    {
+        return $this->getSystem()->makePath($path);
+    }
+
+    public function makeUrl(string $path): string
+    {
+        return $this->getSystem()->makeUrl($path);
+    }
+
     // Helper Functions
 
     public function loadTemplate(string $xhtml = ''): ?\Dom\Template
