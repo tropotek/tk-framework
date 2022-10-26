@@ -208,7 +208,7 @@ class {classname} extends Model
 {construct}
     }
     {accessors}
-    
+
     public function validate(): array
     {
         \$errors = [];
@@ -329,7 +329,7 @@ class {classname}Map extends Mapper
             \$w = \$this->makeMultiQuery(\$filter['id'], 'a.id');
             if (\$w) \$filter->appendWhere('(%s) AND ', \$w);
         }
-        
+
         if (!empty(\$filter['exclude'])) {
             \$w = \$this->makeMultiQuery(\$filter['exclude'], 'a.id', 'AND', '!=');
             if (\$w) \$filter->appendWhere('(%s) AND ', \$w);
@@ -688,7 +688,7 @@ class {classname} extends \Bs\FormIface
 
     /**
      * @param Form \$form
-     * @param Event\Iface \$event
+     * @param Event\FieldInterface \$event
      * @throws \Exception
      */
     public function doSubmit(\$form, \$event)
@@ -787,7 +787,7 @@ class {classname} extends \Bs\ModelForm
 
     /**
      * @param Form \$form
-     * @param Event\Iface \$event
+     * @param Event\FieldInterface \$event
      * @throws \Exception
      */
     public function doSubmit(\$form, \$event)

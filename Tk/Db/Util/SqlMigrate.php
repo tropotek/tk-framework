@@ -3,6 +3,7 @@ namespace Tk\Db\Util;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Tk\Collection;
 use Tk\Db\Pdo;
 use Tk\FileUtil;
 use Tk\Traits\SystemTrait;
@@ -193,12 +194,7 @@ class SqlMigrate
                 $list[$file[1] ?? '000000'][] = $file[0];
             }
             ksort($list);
-            // Flatten the array
-            $result = [];
-            array_walk_recursive($list, function ($v) use (&$result) {
-                $result[] = $v;
-            });
-            $this->foundFiles[$path] = $result;
+            $this->foundFiles[$path] = Collection::arrayFlatten($list);
         }
         return $this->foundFiles[$path];
     }
