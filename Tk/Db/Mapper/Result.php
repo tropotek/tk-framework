@@ -13,6 +13,7 @@ use Tk\Db\Tool;
  *
  * TODO: One day PDO may be able to do this serially, this is a big memory hog...
  *        Currently we cannot subclass the PDOStatement::fetch...() methods correctly [php: 5.6.27]
+ *
  * NOTE: For large datasets that could fill the memory, this object should not be used
  *        instead get statement and manually iterate the data.
  *
@@ -45,8 +46,6 @@ class Result implements \Iterator, \Countable
 
     /**
      * Create an array object that uses the DB mappers to load the object
-     *
-     * @throws \Tk\Db\Exception
      */
     static function createFromMapper(Mapper $mapper, PdoStatement $statement, ?Tool $tool = null): Result
     {
@@ -63,8 +62,6 @@ class Result implements \Iterator, \Countable
 
     /**
      * Create an array object from an SQL statement when no mappers and objects area used
-     *
-     * @throws \Tk\Db\Exception
      */
     static function create(PdoStatement $statement, ?Tool $tool = null, ?int $foundRows = null): Result
     {
@@ -124,10 +121,7 @@ class Result implements \Iterator, \Countable
         return $this->rows;
     }
 
-    /**
-     * @return mixed
-     */
-    public function get(int $i)
+    public function get(int $i): mixed
     {
         if (isset($this->rows[$i])) {
             if ($this->getMapper()) {
@@ -165,34 +159,26 @@ class Result implements \Iterator, \Countable
 
     /**
      * rewind
-     *
-     * @return Result
      */
-    public function rewind()
+    public function rewind(): void
     {
         $this->idx = 0;
-        return $this;
     }
 
     /**
      * Return the element at the current index
-     *
-     * @return Model
      */
-    public function current()
+    public function current(): mixed
     {
         return $this->get($this->idx);
     }
 
     /**
      * Increment the counter
-     *
-     * @return Model
      */
-    public function next()
+    public function next(): void
     {
         $this->idx++;
-        return $this->current();
     }
 
     /**

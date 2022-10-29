@@ -31,7 +31,7 @@ abstract class Mapper
     protected static array $_INSTANCE = [];
 
     /**
-     * Set this to false to allow records that have been deleted to be retrieved
+     * Allow records that have been deleted to be retrieved
      */
     public static bool $HIDE_DELETED = true;
 
@@ -108,10 +108,6 @@ abstract class Mapper
     abstract public function getFormMap(): DataMap;
 
 
-
-    /**
-     * @throws Exception
-     */
     public function insert(Model $obj): int
     {
         if (!$this->getPrimaryType()) {
@@ -139,9 +135,6 @@ abstract class Mapper
         return $id;
     }
 
-    /**
-     * @throws Exception
-     */
     public function update(Model $obj): int
     {
         if (!$this->getPrimaryType()) {
@@ -165,9 +158,6 @@ abstract class Mapper
         return $stmt->rowCount();
     }
 
-    /**
-     * @throws Exception
-     */
     public function delete(Model $obj): int
     {
         if (!$this->getPrimaryType()) {
@@ -195,10 +185,8 @@ abstract class Mapper
     /**
      * A Utility method that checks the id and does and insert
      * or an update  based on the objects current state
-     *
-     * @throws \Exception
      */
-    public function save(Model $obj)
+    public function save(Model $obj): void
     {
         if (!$this->getPrimaryType()) {
             throw new Exception('Invalid operation, no primary key found');
@@ -214,7 +202,6 @@ abstract class Mapper
     /**
      * A select query using a prepared statement. Less control
      *
-     * @throws \Exception
      * @see http://www.sitepoint.com/integrating-the-data-mappers/
      * @deprecated TODO: See if we need this ?
      */
@@ -263,8 +250,6 @@ abstract class Mapper
 
     /**
      * Select a number of elements from a database
-     *
-     * @throws \Exception
      */
     public function selectFrom(string $from = '', string $where = '', ?Tool $tool = null, string $select = ''): Result
     {
@@ -280,7 +265,7 @@ abstract class Mapper
         if (
             self::$HIDE_DELETED &&
             $this->getDeleteType() &&
-            strstr($where, $this->quoteParameter($this->getDeleteType()->getKey())) === false
+            !str_contains($where, $this->quoteParameter($this->getDeleteType()->getKey()))
         ) {
             if ($where) {
                 $where = sprintf('%s%s = 0 AND %s ', $alias, $this->quoteParameter($this->getDeleteType()->getKey()), $where);
@@ -294,8 +279,7 @@ abstract class Mapper
         if ($tool->isDistinct()) $distinct = 'DISTINCT';
 
         // OrderBy, GroupBy, Limit, etc
-        $toolStr = '';
-        if ($tool) $toolStr = $tool->toSql($alias, $this->getDb());
+        $toolStr = $tool->toSql($alias, $this->getDb());
 
         $foundRowsKey = '';
         if ($this->getDb()->getDriver() == 'mysql') {
@@ -315,9 +299,6 @@ abstract class Mapper
         return Result::createFromMapper($this, $stmt, $tool);
     }
 
-    /**
-     * @throws \Exception
-     */
     public function selectFromFilter(Filter $filter, $tool = null): Result
     {
         return $this->selectFrom($filter->getFrom(), $filter->getWhere(), $tool, $filter->getSelect());
@@ -326,19 +307,14 @@ abstract class Mapper
     /**
      * Select a number of elements from a database
      *
-     * @param string $where EG: "`column1`=4 AND `column2`='string'"
-     * @throws \Exception
+     * EG: "`column1`=4 AND `column2`='string'"
      */
     public function select(string $where = '', ?Tool $tool = null): Result
     {
         return $this->selectFrom('', $where, $tool);
     }
 
-    /**
-     * @param mixed $id
-     * @throws \Exception
-     */
-    public function find($id): Model
+    public function find(mixed $id): ?Model
     {
         if (!$this->getPrimaryType()) {
             throw new Exception('Invalid operation, no primary key found');
@@ -350,8 +326,6 @@ abstract class Mapper
 
     /**
      * Find all objects in DB
-     *
-     * @throws \Exception
      */
     public function findAll(?Tool $tool = null): Result
     {
@@ -377,8 +351,6 @@ abstract class Mapper
         return $w;
     }
 
-
-
     public function getModelClass(): string
     {
         return $this->modelClass;
@@ -403,7 +375,6 @@ abstract class Mapper
 
     /**
      * Set the table alias
-     * @throws \Exception
      */
     public function setAlias(string $alias): Mapper
     {
@@ -449,7 +420,6 @@ abstract class Mapper
 
     /**
      * Set the table or view this model gets its data from
-     * @throws Exception
      */
     public function setTable(string $table): Mapper
     {
@@ -492,7 +462,6 @@ abstract class Mapper
         $this->db = $db;
         return $this;
     }
-
 
 
     /**
