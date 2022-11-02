@@ -64,8 +64,7 @@ class Pdo extends \PDO
         $this->options['pass'] = $password;
         $this->driver = $this->options['type'];
 
-        //$this->setAttribute(\PDO::ATTR_STATEMENT_CLASS, [\Tk\Db\PdoStatement::class, [$this]]); // Not compat with PHP 5.3
-        $this->setAttribute(\PDO::ATTR_STATEMENT_CLASS, ['\Tk\Db\PdoStatement', [$this]]);
+        $this->setAttribute(\PDO::ATTR_STATEMENT_CLASS, [\Tk\Db\PdoStatement::class, [$this]]); // Not compat with PHP 5.3
 
         $regs = [];
         preg_match('/^([a-z]+):(([a-z]+)=([a-z0-9_-]+))+/i', $dsn, $regs);
