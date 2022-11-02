@@ -5,6 +5,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Tk\Console\Console;
+use Tk\Db\Util\SqlBackup;
 use Tk\Db\Util\SqlMigrate;
 use Tk\Log\ConsoleOutputLogger;
 
@@ -53,6 +54,23 @@ class Migrate extends Console
             $outputLogger = new ConsoleOutputLogger($output);
             $migrate = new SqlMigrate($db, $outputLogger);
             $migrate->migrateList($migrateList);
+
+            // Execute static files
+            $config = $this->getConfig();
+            $dbBackup = new SqlBackup($db);
+            foreach ($config->get('db.migrate.static') as $file) {
+                $path = "{$config->getBasePath()}/src/config/sql/{$file}";
+                if (is_file($path)) {
+                    $this->writeGreen('Applying ' . $file);
+                    $dbBackup->restore($path);
+                }
+            }
+
+            $debugSqlFile = $config->getBasePath() . $config->get('debug.sql');
+            if ($config->isDebug() && is_file($debugSqlFile)) {
+                $this->writeBlue('Apply dev sql updates');
+                $dbBackup->restore($debugSqlFile);
+            }
 
             $this->write('Migration Complete.');
         } catch (\Exception $e) {

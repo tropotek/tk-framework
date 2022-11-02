@@ -43,7 +43,6 @@ class Mirror extends Console
                 return Command::FAILURE;
             }
 
-            $debugSqlFile = $this->getSystem()->makePath($this->getConfig()->get('debug.sql'));
             $backupSqlFile = $config->getTempPath() . '/tmpt.sql';
             $mirrorSqlFile = $config->getTempPath() . '/' . \Tk\Date::create()->format(\Tk\Date::FORMAT_ISO_DATE) . '-tmpl.sql.gz';
 
@@ -100,8 +99,18 @@ class Mirror extends Console
                 $this->write('Import mirror file to this DB');
                 $dbBackup->restore($mirrorSqlFile);
 
-                if (is_file($debugSqlFile)) {
-                    $this->write('Apply dev sql updates');
+                // Execute static files
+                foreach ($config->get('db.migrate.static') as $file) {
+                    $path = "{$config->getBasePath()}/src/config/sql/{$file}";
+                    if (is_file($path)) {
+                        $this->writeGreen('Applying ' . $file);
+                        $dbBackup->restore($path);
+                    }
+                }
+
+                $debugSqlFile = $config->getBasePath() . $config->get('debug.sql');
+                if ($config->isDebug() && is_file($debugSqlFile)) {
+                    $this->writeBlue('Apply dev sql updates');
                     $dbBackup->restore($debugSqlFile);
                 }
 

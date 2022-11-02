@@ -44,4 +44,7 @@ return function (Config $config)
         array_map(fn($path) => $vendorPath . '/' . $path . '/config/sql' , $libPaths);
     $config->set('db.migrate.paths', $migratePaths);
 
+    // These files are always executed in the /src/config/sql path
+    $config->set('db.migrate.static', ['views.sql', 'triggers.sql', 'procedures.sql', 'functions.sql']);
+
 };

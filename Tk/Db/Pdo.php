@@ -58,7 +58,6 @@ class Pdo extends \PDO
      */
     public function __construct(string $dsn, string $username, string $password, array $options = [])
     {
-        $options[\PDO::ATTR_ERRMODE] = \PDO::ERRMODE_EXCEPTION;
         parent::__construct($dsn, $username, $password, $options);
         $this->options = $options;
         $this->options['user'] = $username;
