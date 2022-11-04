@@ -230,7 +230,7 @@ class Pdo extends \PDO
      * @see \PDO::prepare()
      * @see http://www.php.net/manual/en/pdo.prepare.php
      */
-    public function prepare(string $query, array $options = []): \PDOStatement|false
+    public function prepare(string $query, array $options = []): \PDOStatement|PdoStatement|false
     {
         $result = parent::prepare($query, $options);
         return $result;

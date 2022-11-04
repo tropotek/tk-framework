@@ -1,8 +1,9 @@
 <?php
 namespace Tk\Db\Mapper;
 
+use Tk\Collection;
 use Tk\DataMap\DataMap;
-use Tk\DataMap\DataTypeIface;
+use Tk\DataMap\DataTypeInterface;
 use Tk\Db\Pdo;
 use Tk\Db\Exception;
 use Tk\Db\Tool;
@@ -25,6 +26,11 @@ abstract class Mapper
 {
     use SystemTrait;
 
+    const DATA_MAP_DB    = 'dbMap';
+    const DATA_MAP_FORM  = 'dbForm';
+    const DATA_MAP_TABLE = 'dbTable';
+
+
     /**
      * @var Mapper[]|array
      */
@@ -45,6 +51,8 @@ abstract class Mapper
 
     protected ?array $tableInfo = null;
 
+    protected Collection $dataMappers;
+
     protected ?DataMap $dbMap = null;
 
     protected ?DataMap $formMap = null;
@@ -54,18 +62,20 @@ abstract class Mapper
      * If there are more than one primary key then
      *   the first one found is used
      */
-    protected ?DataTypeIface $primaryType = null;
+    protected ?DataTypeInterface $primaryType = null;
 
     /**
      * This will hold the deleteType DataMap field
      * if one exists
      */
-    protected ?DataTypeIface $deleteType = null;
+    protected ?DataTypeInterface $deleteType = null;
 
 
     public function __construct(?Pdo $db = null)
     {
+        $this->dataMappers = new Collection();
         $this->setDb($db);
+        $this->makeDataMaps();
     }
 
     /**
@@ -96,16 +106,53 @@ abstract class Mapper
         return self::$_INSTANCE[$mapperClass];
     }
 
+    public function getDataMappers(): Collection
+    {
+        return $this->dataMappers;
+    }
+
+    public function getDataMap(string $name): ?DataMap
+    {
+        return $this->getDataMappers()->get($name);
+    }
+
+    public function addDataMap(string $name, DataMap $map): static
+    {
+        if (!$this->getDataMappers()->has($name)) {
+            $this->getDataMappers()->set($name, $map);
+        }
+        return $this;
+    }
+
+    abstract protected function makeDataMaps(): void;
+
+    // TODO: These are helper functions, should we remove them or are they worth having.
 
     /**
      * Returns a valid DB DataMap
      */
-    abstract public function getDbMap(): DataMap;
+    public function getDbMap(): DataMap
+    {
+        return $this->getDataMappers()->get(self::DATA_MAP_DB, new DataMap());
+    }
 
     /**
      * Returns a valid form DataMap
      */
-    abstract public function getFormMap(): DataMap;
+    public function getFormMap(): DataMap
+    {
+        return $this->getDataMappers()->get(self::DATA_MAP_FORM, new DataMap());
+    }
+
+    /**
+     * Returns a valid table DataMap
+     */
+    public function getTableMap(): DataMap
+    {
+        return $this->getDataMappers()->get(self::DATA_MAP_TABLE, new DataMap());
+    }
+
+
 
 
     public function insert(Model $obj): int
@@ -389,12 +436,12 @@ abstract class Mapper
         return $this->table;
     }
 
-    public function getPrimaryType(): ?DataTypeIface
+    public function getPrimaryType(): ?DataTypeInterface
     {
         return $this->primaryType;
     }
 
-    protected function setPrimaryType(DataTypeIface $primaryType): Mapper
+    protected function setPrimaryType(DataTypeInterface $primaryType): Mapper
     {
         $this->primaryType = $primaryType;
         return $this;
@@ -403,7 +450,7 @@ abstract class Mapper
     /**
      * If set then records will be marked deleted instead of physically deleted
      */
-    public function setDeleteType(DataTypeIface $type): Mapper
+    public function setDeleteType(DataTypeInterface $type): Mapper
     {
         $this->deleteType = $type;
         return $this;
@@ -413,7 +460,7 @@ abstract class Mapper
      * Returns the name of the column to mark deleted. (update col to 1)
      * returns null if we are to physically delete the record
      */
-    public function getDeleteType(): DataTypeIface
+    public function getDeleteType(): DataTypeInterface
     {
         return $this->deleteType;
     }

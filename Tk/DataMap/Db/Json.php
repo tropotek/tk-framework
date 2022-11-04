@@ -1,14 +1,14 @@
 <?php
 namespace Tk\DataMap\Db;
 
-use Tk\DataMap\DataTypeIface;
+use Tk\DataMap\DataTypeInterface;
 
 /**
  * map a JSON string type from a DB field to an object property
  *
  * @author Tropotek <http://www.tropotek.com/>
  */
-class Json extends DataTypeIface
+class Json extends DataTypeInterface
 {
     /**
      * if true then the returned value from json_decode will ba an array
@@ -21,7 +21,7 @@ class Json extends DataTypeIface
         return $this;
     }
 
-    public function getKeyValue(array $array)
+    public function getKeyValue(array $array): mixed
     {
         $value = parent::getKeyValue($array);
         if ($value) {
@@ -30,7 +30,7 @@ class Json extends DataTypeIface
         return $value;
     }
 
-    public function getPropertyValue(object $object)
+    public function getPropertyValue(object $object): mixed
     {
         $value = parent::getPropertyValue($object);
         // Fixes bug where json_encode returns an array object instead of a string for empty arrays
@@ -40,6 +40,6 @@ class Json extends DataTypeIface
         }
         return $value;
     }
-    
+
 }
 

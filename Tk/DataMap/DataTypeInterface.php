@@ -7,7 +7,7 @@ use Tk\ObjectUtil;
 /**
  * @author Tropotek <http://www.tropotek.com/>
  */
-abstract class DataTypeIface
+abstract class DataTypeInterface
 {
 
     /**
@@ -39,10 +39,9 @@ abstract class DataTypeIface
     /**
      * Map an object property value to an array column value
      * Returns null if property not found or value is null
-     *
-     * @return mixed|null
+     * This should generally return a native PHP type or a string for forms and tables.
      */
-    public function getPropertyValue(object $object)
+    public function getPropertyValue(object $object): mixed
     {
         $v = null;
         if ($this->hasProperty($object)) {
@@ -53,12 +52,10 @@ abstract class DataTypeIface
 
     /**
      * Return the key value from the array supplied
-     *
-     * @return mixed|null
      */
-    public function getKeyValue(array $array)
+    public function getKeyValue(array $array): mixed
     {
-        if (isset($array[$this->getKey()])) {
+        if (array_key_exists($this->getKey(), $array)) {
             return $array[$this->getKey()];
         }
         return null;
@@ -67,9 +64,9 @@ abstract class DataTypeIface
     /**
      * Set the objects property from the supplied array values
      */
-    public function loadObject(object $object, array $srcArray): DataTypeIface
+    public function loadObject(object $object, array $srcArray): DataTypeInterface
     {
-        $value = $this->getKeyValue($srcArray, $this->getKey());
+        $value = $this->getKeyValue($srcArray);
         ObjectUtil::setPropertyValue($object, $this->getProperty(), $value);
         return $this;
     }
@@ -77,9 +74,9 @@ abstract class DataTypeIface
     /**
      * Set the array key/value from the object`s property
      */
-    public function loadArray(array &$array, object $srcObject): DataTypeIface
+    public function loadArray(array &$array, object $srcObject): DataTypeInterface
     {
-        $value = $this->getPropertyValue($srcObject, $this->getProperty());
+        $value = $this->getPropertyValue($srcObject);
         $array[$this->getKey()] = $value;
         return $this;
     }
@@ -113,9 +110,7 @@ abstract class DataTypeIface
      */
     public function hasKey(array $array): bool
     {
-        if (is_array($array))
-            return array_key_exists($this->getKey(), $array);
-        return false;
+        return array_key_exists($this->getKey(), $array);
     }
 
     /**
@@ -129,9 +124,10 @@ abstract class DataTypeIface
     /**
      * A tag to identify misc property settings. (IE: For db set 'key' to identify the primary key property(s))
      */
-    public function setAttributes(array $attributes)
+    public function setAttributes(array $attributes): static
     {
         $this->attributes = $attributes;
+        return $this;
     }
 
     public function getAttribute(string $name): string
@@ -144,7 +140,7 @@ abstract class DataTypeIface
         return array_key_exists($name, $this->attributes);
     }
 
-    public function setAttribute(string $name, ?string $value = null): DataTypeIface
+    public function setAttribute(string $name, ?string $value = null): DataTypeInterface
     {
         if ($value === null && isset($this->attributes[$name])) {
             unset($this->attributes[$name]);

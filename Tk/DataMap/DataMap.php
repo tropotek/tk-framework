@@ -17,13 +17,13 @@ class DataMap
 
     /**
      * A list of types sorted by property name
-     * @var DataTypeIface[]|array
+     * @var DataTypeInterface[]|array
      */
     private array $propertyTypes = [];
 
     /**
      * A list of types sorted by key name
-     * @var DataTypeIface[]|array
+     * @var DataTypeInterface[]|array
      */
     private array $keyTypes = [];
 
@@ -82,9 +82,9 @@ class DataMap
     /**
      * Add a DataType to this data map
      *
-     * @return DataTypeIface|null
+     * @return DataTypeInterface|null
      */
-    public function addDataType(DataTypeIface $type): DataTypeIface
+    public function addDataType(DataTypeInterface $type): DataTypeInterface
     {
         $this->propertyTypes[$type->getProperty()] = $type;
         $this->keyTypes[$type->getKey()] = $type;
@@ -94,7 +94,7 @@ class DataMap
     /**
      * Gets the list of property types.
      *
-     * @return array|DataTypeIface[]
+     * @return array|DataTypeInterface[]
      */
     public function getPropertyTypes(): array
     {
@@ -104,7 +104,7 @@ class DataMap
     /**
      * Gets a type by its property name
      */
-    public function getPropertyType(string $property): ?DataTypeIface
+    public function getPropertyType(string $property): ?DataTypeInterface
     {
         return $this->propertyTypes[$property] ?? null;
     }
@@ -112,7 +112,7 @@ class DataMap
     /**
      * Gets the list of key types.
      *
-     * @return array|DataTypeIface[]
+     * @return array|DataTypeInterface[]
      */
     public function getKeyTypes(): array
     {
@@ -122,7 +122,7 @@ class DataMap
     /**
      * Gets a type by its key name
      */
-    public function getKeyType(string $key): ?DataTypeIface
+    public function getKeyType(string $key): ?DataTypeInterface
     {
         return $this->keyTypes[$key] ?? null;
     }

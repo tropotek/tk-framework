@@ -1,5 +1,5 @@
 <?php
-namespace Tk\DataMap\Form;
+namespace Tk\DataMap\Table;
 
 use Tk\DataMap\DataTypeInterface;
 
@@ -27,10 +27,8 @@ class Boolean extends DataTypeInterface
     public function getPropertyValue(object $object): mixed
     {
         $value = parent::getPropertyValue($object);
-        if ($value !== null) {
-            $value = ((int)$value != 0) ? $this->getProperty() : '';
-        }
-        return $value;
+        if ($value) return 'Yes';
+        return 'No';
     }
 
 }
