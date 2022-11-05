@@ -31,7 +31,18 @@ class Config extends Collection
         $this->set('base.path', $this->getSystem()->discoverBasePath());
         $this->set('base.url', $this->getSystem()->discoverBaseUrl());
 
-        ConfigLoader::create()->loadConfigs($this);
+    }
+
+    /**
+     * Gets an instance of this object, if none exists one is created
+     */
+    public static function instance(): static
+    {
+        if (self::$_INSTANCE == null) {
+            self::$_INSTANCE = new static();
+            ConfigLoader::create()->loadConfigs(self::$_INSTANCE);
+        }
+        return self::$_INSTANCE;
     }
 
     public function getBasePath(): string

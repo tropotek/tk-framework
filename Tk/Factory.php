@@ -99,7 +99,7 @@ class Factory extends Collection
                 $session->setName('sn_' . md5($this->getConfig()->getBaseUrl()) ?? 'PHPSESSID');
                 $this->set('session', $session);
             } catch (\PDOException $e) {
-                error_log($e->getMessage());
+                die($e->getMessage());
             }
         }
         return $this->get('session');

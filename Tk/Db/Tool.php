@@ -22,7 +22,7 @@ class Tool implements \Tk\InstanceKey
      * Instance base id
      */
     protected string $instanceId = '';
-    
+
     /**
      * Limit the number of records retrieved.
      * If > 0 then mapper should query for the total number of records
@@ -102,6 +102,7 @@ class Tool implements \Tk\InstanceKey
     public function updateFromArray(array $array): bool
     {
         $updated = false;
+
         if (isset($array[$this->makeInstanceKey(self::PARAM_ORDER_BY)])) {
             if ($array[$this->makeInstanceKey(self::PARAM_ORDER_BY)] != $this->getOrderBy()) {
                 $this->setOrderBy($array[$this->makeInstanceKey(self::PARAM_ORDER_BY)]);
