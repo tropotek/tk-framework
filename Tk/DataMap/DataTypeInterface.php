@@ -45,7 +45,7 @@ abstract class DataTypeInterface
     {
         $v = null;
         if ($this->hasProperty($object)) {
-            $v = ObjectUtil::getObjectPropertyValue($object, $this->getProperty());
+            $v = ObjectUtil::getPropertyValue($object, $this->getProperty());
         }
         return $v;
     }

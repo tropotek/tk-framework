@@ -98,7 +98,7 @@ abstract class Model implements ModelIface
         $type = $this->getMapper()->getPrimaryType();
         if ($type) {
             // get the value from the object
-            return ObjectUtil::getObjectPropertyValue($this, $type->getProperty());
+            return ObjectUtil::getPropertyValue($this, $type->getProperty());
         }
         return null;
     }

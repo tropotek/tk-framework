@@ -2,7 +2,7 @@
 namespace Tk;
 
 /**
- * This object is a utility object to perform actions 
+ * This object is a utility object to perform actions
  * with class names and name-spacing issues.
  *
  *
@@ -42,18 +42,14 @@ class ObjectUtil
      * Instead, you can loop over getParentClass until it returns false to
      * look for the private property, at which point you can access and/or
      * modify its value as needed. (modify this method if needed)
-     *
-     * @return mixed|null
      */
-    public static function getObjectPropertyValue(object $object, string $name)
+    public static function getPropertyValue(object $object, string $name): mixed
     {
         try {
             $reflect = new \ReflectionClass($object);
             $property = $reflect->getProperty($name);
-            if ($property) {
-                $property->setAccessible(true);
-                return $property->getValue($object);
-            }
+            $property->setAccessible(true);
+            return $property->getValue($object);
         } catch (\ReflectionException $e) {
             Log::warning($e->__toString());
         }
@@ -62,23 +58,14 @@ class ObjectUtil
 
     /**
      * This is useful for loading an object with data from data sources such as DB or JSON etc...
-     *
-     * @param mixed|null $value
-     * @return mixed
      */
-    public static function setPropertyValue(object $object, string $name, $value = null)
+    public static function setPropertyValue(object $object, string $name, mixed $value = null): mixed
     {
         try {
             $reflect = new \ReflectionClass($object);
             $property = $reflect->getProperty($name);
-
-            if ($property) {
-                if (!$property->isPublic())
-                    $property->setAccessible(true);
-                $property->setValue($object, $value);
-            } else {
-                Log::warning('TODO: Do we want to set a dynamic object property here???');
-            }
+            $property->setAccessible(true);
+            $property->setValue($object, $value);
         } catch (\ReflectionException $e) {
             Log::warning($e->__toString());
         }
@@ -88,11 +75,8 @@ class ObjectUtil
     /**
      * Get the base classname of an object without the namespace
      * The supplied parameter can be an object or a classname string
-     *
-     * @param object|string $class Can be an object or a classname string
-     * @return bool|string The base classname or false on failure.
      */
-    public static function basename($class)
+    public static function basename(object|string $class): bool|string
     {
         if (is_object($class)) $class = get_class($class);
         if ($pos = strrpos($class, '\\')) return substr($class, $pos + 1);
@@ -101,10 +85,8 @@ class ObjectUtil
 
     /**
      * Return the namespace for this object
-     *
-     * @param string|object $class
      */
-    public static function getBaseNamespace($class): string
+    public static function getBaseNamespace(object|string $class): string
     {
         if (is_object($class)) $class = get_class($class);
         $list = explode('\\', $class);
@@ -113,10 +95,8 @@ class ObjectUtil
 
     /**
      * Get the file path of a class
-     *
-     * @param string|object $class
      */
-    public static function classPath($class): string
+    public static function classPath(object|string $class): string
     {
         if (is_object($class)) $class = get_class($class);
 
@@ -132,12 +112,8 @@ class ObjectUtil
 
     /**
      * Return true if a class uses the given trait
-     *
-     * @param object|string $obj An object (class instance) or a string (class name).
-     * @param string $trait A trait class name
-     * @return bool
      */
-    public static function classUses($obj, string $trait): bool
+    public static function classUses(object|string $obj, string $trait): bool
     {
         $arr = class_uses($obj);
         foreach ($arr as $v) {
@@ -148,13 +124,8 @@ class ObjectUtil
 
     /**
      * Get a list of constant name value pairs for a passed class name
-     *
-     * @param string|object $class
-     * @param string $prefix If set will only return const values whose name starts with this prefix
-     * @param bool $autoName Not be sure that there are no duplicate constant values if this option is true
-     * @return array
      */
-    public static function getClassConstants($class, string $prefix = '', bool $autoName = false)
+    public static function getClassConstants(object|string $class, string $prefix = '', bool $autoName = false): array
     {
         if (is_object($class)) {
             $class = get_class($class);
@@ -169,7 +140,7 @@ class ObjectUtil
                 return $constList;
             }
             foreach ($constList as $k => $v) {
-                if (substr($k, 0, strlen($prefix)) == $prefix) {
+                if (str_starts_with($k, $prefix)) {
                     if ($autoName) {
                         $k = ucwords(preg_replace('/[A-Z]/', ' $0', $v));
                     }
@@ -184,16 +155,11 @@ class ObjectUtil
 
     /**
      * Convert a map array to a stdClass object
-     *
-     * @param array $array
      */
     public static function arrayToObject(array $array): ?\stdClass
     {
-        if (!is_array($array)) {
-            return null;
-        }
         $object = new \stdClass();
-        if (is_array($array) && count($array) > 0) {
+        if (count($array) > 0) {
             foreach ($array as $name => $value) {
                 $name = strtolower(trim($name));
                 if (!empty($name)) {
