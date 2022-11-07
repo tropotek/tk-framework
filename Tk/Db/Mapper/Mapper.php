@@ -81,7 +81,7 @@ abstract class Mapper
     /**
      * Get/Create an instance of a data mapper.
      */
-    static function create(?Pdo $db = null): Mapper
+    static function create(?Pdo $db = null): static
     {
         $mapperClass = static::class;
         if (!preg_match('/(.+)(Map)$/', $mapperClass, $regs)) {
