@@ -3,16 +3,15 @@ namespace Tk\Ui;
 
 
 use Dom\Template;
-use Tk\Uri;
 
 /**
  * <code>
- *   \Tk\Ui\Link::create('Edit', \Tk\Uri::create('/dunno.html'))->addCss('btn-xs btn-success')->getHtml();
+ *   \Tk\Ui\Button::create('Edit', \Tk\Uri::create('/dunno.html'), 'fa fa-edit)->addCss('btn-xs btn-success')->show();
  * </code>
  *
  * @author Tropotek <http://www.tropotek.com/>
  */
-class Link extends DomElement
+class Button extends DomElement
 {
 
     const ICON_LEFT = 'left';
@@ -20,40 +19,25 @@ class Link extends DomElement
 
     protected string $text = '';
 
-    protected string $iconPosition = self::ICON_LEFT;
-
     /**
      * The css value for the icon eg `fa fa-check`
      */
     protected string $icon = '';
 
-    public function __construct(string $text = '', string|Uri $url = null)
+    protected string $iconPosition = self::ICON_LEFT;
+
+
+    public function __construct(string $text)
     {
         $this->setText($text);
         $this->setAttr('title', $text);
-        if ($url) $this->setUrl($url);
+        $this->addCss('btn btn-secondary');
     }
 
-    public function getText(): string
+    public static function createButton(string $text): static
     {
-        return $this->text;
-    }
-
-    public function setText(string $text): static
-    {
-        $this->text = $text;
-        return $this;
-    }
-
-    public function getUrl(): string|Uri
-    {
-        return $this->getAttr('href', '');
-    }
-
-    public function setUrl(string|Uri $url): static
-    {
-        $this->setAttr('href', $url);
-        return $this;
+        $obj = new static($text);
+        return $obj;
     }
 
     public function getIcon(): string
@@ -76,6 +60,17 @@ class Link extends DomElement
     public function setIconPosition(string $iconPosition): static
     {
         $this->iconPosition = $iconPosition;
+        return $this;
+    }
+
+    public function getText(): string
+    {
+        return $this->text;
+    }
+
+    public function setText(string $text): static
+    {
+        $this->text = $text;
         return $this;
     }
 
@@ -107,9 +102,8 @@ class Link extends DomElement
     public function __makeTemplate(): ?Template
     {
         $html = <<<HTML
-<a var="element"><i choice="icon-l"></i><span var="text"></span><i choice="iconR"></i></a>
+<button type="button" var="element"><i choice="icon-l"></i><span var="text"></span><i choice="iconR"></i></button>
 HTML;
         return $this->getFactory()->loadTemplate($html);
     }
-
 }

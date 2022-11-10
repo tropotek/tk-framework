@@ -17,10 +17,10 @@ abstract class Element
     use SystemTrait;
 
     /**
-     * Return any html representing this element.
+     * Return any html string representing this element.
      * Override this method in extended objects
      */
-    public function getHtml(): string
+    public function __toString(): string
     {
         return '';
     }
