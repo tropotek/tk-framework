@@ -107,7 +107,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
             if (is_object($v)) {
                 $str .= "[$k] => {" . get_class($v) . "}\n";
             } elseif (is_array($v)) {
-                $str .= "[$k] =>  array[" . count($v) . "]\n";
+                $str .= "[$k] =>  array[\n" . self::arrayToString($v) . "\n]\n";
             } else {
                 $str .= "[$k] => $v\n";
             }
