@@ -1,8 +1,8 @@
 <?php
 namespace Tk\Ui;
 
-
 use Dom\Template;
+use Tk\Uri;
 
 /**
  * <code>
@@ -11,92 +11,29 @@ use Dom\Template;
  *
  * @author Tropotek <http://www.tropotek.com/>
  */
-class Button extends DomElement
+class Button extends Link
 {
 
-    const ICON_LEFT = 'left';
-    const ICON_RIGHT = 'right';
-
-    protected string $text = '';
-
-    /**
-     * The css value for the icon eg `fa fa-check`
-     */
-    protected string $icon = '';
-
-    protected string $iconPosition = self::ICON_LEFT;
+    protected ?Uri $url = null;
 
 
-    public function __construct(string $text)
+    public function getUrl(): ?Uri
     {
-        $this->setText($text);
-        $this->setAttr('title', $text);
-        $this->addCss('btn btn-secondary');
+        return $this->url;
     }
 
-    public static function createButton(string $text): static
+    public function setUrl(string|Uri $url): static
     {
-        $obj = new static($text);
-        return $obj;
-    }
-
-    public function getIcon(): string
-    {
-        return $this->icon;
-    }
-
-    public function setIcon(string $icon, string $iconPosition = null): static
-    {
-        $this->icon = $icon;
-        if ($iconPosition) $this->setIconPosition($iconPosition);
-        return $this;
-    }
-
-    public function getIconPosition(): string
-    {
-        return $this->iconPosition;
-    }
-
-    public function setIconPosition(string $iconPosition): static
-    {
-        $this->iconPosition = $iconPosition;
-        return $this;
-    }
-
-    public function getText(): string
-    {
-        return $this->text;
-    }
-
-    public function setText(string $text): static
-    {
-        $this->text = $text;
+        $this->url = Uri::create($url);
         return $this;
     }
 
     public function show(): ?Template
     {
-        $template = $this->getTemplate();
-
-        $template->setText('text', $this->getText());
-
-        if ($this->getIcon()) {
-            if ($this->getIconPosition() == self::ICON_LEFT) {
-                $template->setVisible('icon-l');
-                $template->addCss('icon-l', $this->getIcon());
-            } else {
-                $template->setVisible('icon-r');
-                $template->addCss('icon-r', $this->getIcon());
-            }
-        } else {
-            // this removed HTMX bug with tags in the button???
-            $template->setText('element', $this->getText());
+        if ($this->getUrl()) {
+            $this->setAttr('onclick', 'location.href =\''.$this->getUrl().'\'');
         }
-
-        $template->addCss('element', $this->getCssList());
-        $template->setAttr('element', $this->getAttrList());
-
-        return $template;
+        return parent::show();
     }
 
     public function __makeTemplate(): ?Template

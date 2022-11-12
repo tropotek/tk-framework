@@ -1,7 +1,6 @@
 <?php
 namespace Tk\Ui;
 
-
 use Dom\Template;
 use Tk\Uri;
 
@@ -45,9 +44,9 @@ class Link extends DomElement
         return $this;
     }
 
-    public function getUrl(): string|Uri
+    public function getUrl(): ?Uri
     {
-        return $this->getAttr('href', '');
+        return Uri::create($this->getAttr('href', ''));
     }
 
     public function setUrl(string|Uri $url): static
