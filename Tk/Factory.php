@@ -24,6 +24,7 @@ use Tk\Cache\Adapter\Filesystem;
 use Tk\Cache\Cache;
 use Tk\Db\Pdo;
 use Tk\Log\MonologLineFormatter;
+use Tk\Mail\Gateway;
 use Tk\Mvc\Bootstrap;
 use Tk\Mvc\Dispatch;
 use Tk\Mvc\FrontController;
@@ -262,6 +263,25 @@ class Factory extends Collection
     public function getClassLoader(): ?ClassLoader
     {
         return $this->get('classLoader');
+    }
+
+    /**
+     * get the mail gateway to send emails
+     */
+    public function getMailGateway(): ?Gateway
+    {
+        if (!$this->has('mailGateway')) {
+            $params = $this->getConfig()->all();
+            if (!$this->getSystem()->isCli()) {
+                $params['clientIp'] = $this->getRequest()->getClientIp();
+                $params['hostname'] = $this->getRequest()->getHost();
+                $params['referer'] = $this->getRequest()->server->get('HTTP_REFERER', '');
+            }
+            $gateway = new \Tk\Mail\Gateway($params);
+            $gateway->setDispatcher($this->getEventDispatcher());
+            $this->set('mailGateway', $gateway);
+        }
+        return $this->get('mailGateway');
     }
 
     /**
