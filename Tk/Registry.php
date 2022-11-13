@@ -23,7 +23,12 @@ class Registry extends Db\Collection
     {
         parent::__construct(self::$TABLE_REGISTRY);
         $this->setDb($this->getFactory()->getDb());
-        $this->installTable();
+        if ($this->installTable()) {
+            $this->set('system.site.name', 'Tropotek Lib');
+            $this->set('system.site.shortName', 'TkLib');
+            $this->set('system.email', 'webmaster@'.$this->getRequest()->getHost());
+            $this->set('site.maintenance.enabled', false);
+        }
         $this->load();
     }
 

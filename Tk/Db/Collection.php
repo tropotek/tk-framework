@@ -217,51 +217,38 @@ class Collection extends \Tk\Collection
     /**
      * This sql should be DB generic (tested on: mysql, pgsql)
      *
-     * @return string|int|bool
+     * @return bool Return true if the table was installed
      */
-    public function installTable(bool $sqlOnly = false)
+    public function installTable(bool $sqlOnly = false): bool
     {
         try {
-            if (!$sqlOnly && $this->getDb()->hasTable($this->getTable())) return true;
-            $tbl = $this->getDb()->quoteParameter($this->getTable());
+            if (!$sqlOnly && $this->getDb()->hasTable($this->getTable())) return false;
+            $this->getDb()->exec($this->getTable($this->getDb()->getDriver()));
 
-            $sql = '';
-            if ($this->getDb()->getDriver() == 'mysql') {
-                $sql = <<<SQL
+        } catch (\Exception $e) { \Tk\Log::error($e->__toString());}
+        return true;
+    }
+
+    public function getTableSql(string $type = 'mysql'): string
+    {
+        $tbl = $this->getDb()->quoteParameter($this->getTable());
+        return match ($type) {
+            'mysql' => <<<SQL
     CREATE TABLE IF NOT EXISTS $tbl (
       `key` VARCHAR(128) NOT NULL PRIMARY KEY,
       `value` TEXT
     ) ENGINE=InnoDB;
-SQL;
-            } else if ($this->getDb()->getDriver() == 'pgsql') {
-                $sql = <<<SQL
+SQL,
+            default => <<<SQL
     CREATE TABLE IF NOT EXISTS $tbl (
       "key" VARCHAR(128) NOT NULL PRIMARY KEY,
       "value" TEXT
     );
-SQL;
-            } else if ($this->getDb()->getDriver() == 'sqlite') {
-                $sql = <<<SQL
-    CREATE TABLE IF NOT EXISTS $tbl (
-      "key" VARCHAR(128) NOT NULL PRIMARY KEY,
-      "value" TEXT
-    );
-SQL;
-            }
-
-            if (!$sqlOnly) {
-                return $this->getDb()->exec($sql);
-            }
-        } catch (\Exception $e) { \Tk\Log::error($e->__toString());}
-
-        return $sql;
+SQL,
+        };
     }
 
-    /**
-     * @param string $value
-     * @return mixed
-     */
-    protected function decodeValue($value)
+    protected function decodeValue(string $value): mixed
     {
         if (preg_match('/^(___JSON:)/', $value)) {
             $value = json_decode(substr($value, 8));
@@ -269,11 +256,7 @@ SQL;
         return $value;
     }
 
-    /**
-     * @param mixed $value
-     * @return string
-     */
-    protected function encodeValue($value): string
+    protected function encodeValue(mixed $value): string
     {
         if (is_array($value) || is_object($value)) {
             $value = '___JSON:' . json_encode($value);
