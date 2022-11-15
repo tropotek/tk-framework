@@ -173,6 +173,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
      * @param string $key The data key
      * @param mixed $value The data value
      */
+    #[\ReturnTypeWillChange]
     public function offsetSet($key, $value)
     {
         $this->set($key, $value);
@@ -194,6 +195,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @return int
      */
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return count($this->data);
