@@ -4,7 +4,9 @@ namespace Tk;
 use Composer\Autoload\ClassLoader;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
+use Psr\Log\NullLogger;
 use Symfony\Component\Console\Application;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
@@ -215,7 +217,7 @@ class Factory extends Collection
         return $this->getEventDispatcher();
     }
 
-    public function getLogger(): ?Logger
+    public function getLogger(): ?LoggerInterface
     {
         if (!$this->has('logger')) {
             $processors = [];
@@ -226,7 +228,7 @@ class Factory extends Collection
                     file_put_contents($requestLog, ''); // Refresh log for this session
                 }
                 $processors[] = function ($record) use ($requestLog) {
-                    if (isset($record['message']) && !$this->getRequest()->query->has(Log::NO_LOG)) {
+                    if (isset($record['message'])) {
                         $str = $record['message'] . "\n";
                         if (is_writable($requestLog)) {
                             file_put_contents($requestLog, $str, FILE_APPEND | LOCK_EX);
@@ -236,17 +238,22 @@ class Factory extends Collection
                 };
             }
 
-            $logger = new Logger('system', [], $processors);
-
-            if (is_writable(ini_get('error_log'))) {
-                $handler = new StreamHandler(ini_get('error_log'), $this->getConfig()->get('log.logLevel', LogLevel::ERROR));
-                $formatter = new MonologLineFormatter();
-                $formatter->setColorsEnabled(true);
-                $formatter->setScriptTime($this->getConfig()->get('script.time'));
-                $handler->setFormatter($formatter);
-                $logger->pushHandler($handler);
-            } else {
-                error_log('Error accessing log file: ' . ini_get('error_log'));
+            $logger = new NullLogger();
+            if (
+                !$this->getRequest()->query->has(Log::NO_LOG) &&             // No log when using nolog in query param
+                !str_contains($this->getRequest()->getRequestUri(), '/api/')     // No logs for api calls (comment out when testing API`s)
+            ) {
+                $logger = new Logger('system', [], $processors);
+                if (is_writable(ini_get('error_log'))) {
+                    $handler = new StreamHandler(ini_get('error_log'), $this->getConfig()->get('log.logLevel', LogLevel::ERROR));
+                    $formatter = new MonologLineFormatter();
+                    $formatter->setColorsEnabled(true);
+                    $formatter->setScriptTime($this->getConfig()->get('script.time'));
+                    $handler->setFormatter($formatter);
+                    $logger->pushHandler($handler);
+                } else {
+                    error_log('Error accessing log file: ' . ini_get('error_log'));
+                }
             }
 
             // Init \Tk\Log

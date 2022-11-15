@@ -32,7 +32,7 @@ class MonologLineFormatter extends LineFormatter
      */
     public function format(array $record) :string
     {
-        if ($this->getFactory()->getRequest()->query->has(Log::NO_LOG)) return '';
+
         $colors = array(
             'emergency'     => 'Brown',
             'alert'         => 'Yellow',
@@ -56,7 +56,7 @@ class MonologLineFormatter extends LineFormatter
 
         $levelName = $record['level_name'];
         $record['level_name'] = $abbrev[strtolower($levelName)];
-        
+
         if ($this->isColorsEnabled())
             $record['message'] = \Tk\Color::getCliString($record['message'], $colors[strtolower($levelName)]);
 
