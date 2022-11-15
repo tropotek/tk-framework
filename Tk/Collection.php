@@ -161,6 +161,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @return mixed The key's value, or the default value
      */
+    #[\ReturnTypeWillChange]
     public function offsetGet($key)
     {
         return $this->get($key);
@@ -182,6 +183,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @param string $key The data key
      */
+    #[\ReturnTypeWillChange]
     public function offsetUnset($key)
     {
         $this->remove($key);
@@ -202,6 +204,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @return \ArrayIterator
      */
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         return new \ArrayIterator($this->data);
