@@ -429,6 +429,7 @@ class Uri implements \Serializable, \IteratorAggregate
      *
      * @return \ArrayIterator
      */
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         return new \ArrayIterator($this->query);
