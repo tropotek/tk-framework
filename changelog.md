@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 3.2.24 [2022-11-16]:
+-------------------------------
+  - Merge branch '3.2' of https://github.com/tropotek/tk-framework into 3.2
+
+
 Ver 3.2.22 [2022-08-11]:
 -------------------------------
 
