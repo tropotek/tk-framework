@@ -121,7 +121,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @param array $items Key-value array of data to append to this collection
      */
-    public function replace(array $items): Collection
+    public function replace(array $items): static
     {
         foreach ($items as $key => $value) {
             $this->set($key, $value);
@@ -132,7 +132,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * Set an item in the collection
      */
-    public function set(string $key, mixed $value): Collection
+    public function set(string $key, mixed $value): static
     {
         $this->_data[$key] = $value;
         return $this;
@@ -210,7 +210,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * Remove item from collection
      */
-    public function remove(string $key): Collection
+    public function remove(string $key): static
     {
         unset($this->_data[$key]);
         return $this;

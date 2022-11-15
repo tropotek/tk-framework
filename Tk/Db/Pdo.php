@@ -311,8 +311,9 @@ class Pdo extends \PDO
      */
     public function beginTransaction(): bool
     {
-        if (!$this->transactionCounter++)
+        if (!$this->transactionCounter++) {
             return parent::beginTransaction();
+        }
         return $this->transactionCounter >= 0;
     }
 
@@ -324,8 +325,9 @@ class Pdo extends \PDO
      */
     public function commit(): bool
     {
-        if (!--$this->transactionCounter)
+        if (!--$this->transactionCounter) {
             return parent::commit();
+        }
         return $this->transactionCounter >= 0;
     }
 
@@ -345,11 +347,8 @@ class Pdo extends \PDO
         return false;
     }
 
-
     /**
      * Count a query and return the total possible results
-     *
-     * @param string $sql
      */
     public function countFoundRows(string $sql = ''): int
     {
