@@ -148,6 +148,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @return bool
      */
+    #[\ReturnTypeWillChange]
     public function offsetExists($key)
     {
         return $this->has($key);
