@@ -9,7 +9,7 @@ namespace Tk\Db\Mapper;
  *
  * @author Tropotek <http://www.tropotek.com/>
  */
-interface ModelIface
+interface ModelInterface
 {
 
     /**
@@ -30,7 +30,7 @@ interface ModelIface
      */
     public function getVolatileId();
 
-    
+
     /**
      * Insert the object into storage.
      *

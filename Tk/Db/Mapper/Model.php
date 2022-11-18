@@ -9,7 +9,7 @@ use Tk\Traits\SystemTrait;
 /**
  * @author Tropotek <http://www.tropotek.com/>
  */
-abstract class Model implements ModelIface
+abstract class Model implements ModelInterface
 {
     use SystemTrait;
 
