@@ -161,12 +161,11 @@ class Cookie implements \ArrayAccess
             if (PHP_VERSION_ID >= 70300) {
                 $cfg = [
                     'expires' => $expire,
-                    //'path' => $this->path . '; samesite=strict',
                     'path' => $this->path,
                     'domain' => $this->domain,
                     'secure' => $this->secure,
                     'httponly' => $this->httponly,
-                    'samesite' => 'strict'
+                    'samesite' => 'Lax'
                 ];
                 $r = @setcookie($key, $value, $cfg);
             } else {
