@@ -28,8 +28,8 @@ class Mirror
 
         if ($request->request->get('action') == 'db') {
             $this->doDbBackup($request);
-        } elseif ($request->request->get('action') == 'data') {
-            return $this->doDataBackup($request);
+        } elseif ($request->request->get('action') == 'file') {
+            $this->doDataBackup($request);
         }
 
         return 'Invalid access request.';
@@ -88,7 +88,29 @@ class Mirror
 
     public function doDataBackup(Request $request)
     {
-        return 'Not implemented yet!';
+//        if (!$this->getConfig()->isDebug()) {
+//            throw new \Tk\Exception('Only available for live sites.');
+//        }
+
+        $srcFile = $this->getConfig()->getBasePath() . '/src-'.\Tk\Date::create()->format(\Tk\Date::FORMAT_ISO_DATE).'-data.tgz';
+        if (is_file($srcFile)) unlink($srcFile);
+        $cmd = sprintf('cd %s && tar zcf %s %s',
+            $this->getConfig()->getBasePath(),
+            escapeshellarg(basename($srcFile)),
+            basename($this->getConfig()->getDataPath())
+        );
+        //Log::info($cmd);
+        system($cmd);
+
+        $public_name = basename($srcFile);
+        $filesize = filesize($srcFile);
+        header("Content-Disposition: attachment; filename=$public_name;");
+        header("Content-Type: application/octet-stream");
+        header('Content-Length: '.$filesize);
+        $this->_fileOutput($srcFile);
+        if (is_file($srcFile)) unlink($srcFile);
+
+        exit;
     }
 
 }
