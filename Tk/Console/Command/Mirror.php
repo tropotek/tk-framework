@@ -148,7 +148,7 @@ class Mirror extends Console
         $srcUrl = Uri::create($srcUrl)->setScheme(Uri::SCHEME_HTTP_SSL);
         $srcUrl->set('secret', $this->getConfig()->get('db.mirror.secret'));
         $query = $srcUrl->getQuery();
-        
+
         $fp = fopen($destPath, 'w');
         $curl = curl_init($srcUrl->reset()->toString());
         curl_setopt($curl, CURLOPT_POST, true);
