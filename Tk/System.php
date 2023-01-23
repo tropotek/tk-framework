@@ -24,7 +24,7 @@ class System
     use RegistryTrait;
 
 
-    protected function __construct() { }
+    protected function __construct() {  }
 
 
     /**
@@ -32,7 +32,7 @@ class System
      */
     public function discoverBasePath(): string
     {
-        return rtrim(dirname(dirname(dirname(dirname(__DIR__)))), DIRECTORY_SEPARATOR);
+        return rtrim(dirname(__DIR__, 4), DIRECTORY_SEPARATOR);
     }
 
     /**

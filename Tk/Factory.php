@@ -4,7 +4,9 @@ namespace Tk;
 use Composer\Autoload\ClassLoader;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
+use Psr\Log\NullLogger;
 use Symfony\Component\Console\Application;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,14 +17,17 @@ use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 use Symfony\Component\HttpKernel\Controller\ArgumentResolver;
 use Symfony\Component\HttpKernel\Controller\ControllerResolver;
 use Symfony\Component\Routing\Generator\CompiledUrlGenerator;
+use Symfony\Component\Routing\Loader\Configurator\CollectionConfigurator;
 use Symfony\Component\Routing\Matcher\CompiledUrlMatcher;
 use Symfony\Component\Routing\Matcher\Dumper\CompiledUrlMatcherDumper;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\RouteCollection;
 use Tk\Cache\Adapter\Filesystem;
 use Tk\Cache\Cache;
+use Tk\Db\Db;
 use Tk\Db\Pdo;
 use Tk\Log\MonologLineFormatter;
+use Tk\Mail\Gateway;
 use Tk\Mvc\Bootstrap;
 use Tk\Mvc\Dispatch;
 use Tk\Mvc\FrontController;
@@ -87,7 +92,7 @@ class Factory extends Collection
                 $sessionDbHandler = null;
                 if ($this->getDb() && $this->getConfig()->get('session.db_enable')) { //
                     $sessionDbHandler = new PdoSessionHandler(
-                        $this->getDb(), $this->getConfig()->getGroup('session', true)
+                        $this->getDb()->getPdo(), $this->getConfig()->getGroup('session', true)
                     );
                     try {
                         $sessionDbHandler->createTable();
@@ -98,7 +103,7 @@ class Factory extends Collection
                 $session->setName('sn_' . md5($this->getConfig()->getBaseUrl()) ?? 'PHPSESSID');
                 $this->set('session', $session);
             } catch (\PDOException $e) {
-                error_log($e->getMessage());
+                die($e->getMessage());
             }
         }
         return $this->get('session');
@@ -126,15 +131,23 @@ class Factory extends Collection
     {
         // Setup Routes and cache results.
         // Use `<Ctrl>+<Shift>+R` ro refresh the routing cache
-        $systemCache = new Cache(new Filesystem($this->getSystem()->makePath($this->getConfig()->get('path.cache') . '/system')));
+        $systemCache = new Cache(new Filesystem($this->getSystem()->makePath($this->getConfig()->get('path.cache'))));
         if ((!$compiledRoutes = $systemCache->fetch('compiledRoutes')) || $this->getSystem()->isRefreshCacheRequest()) {
-            include($this->getSystem()->makePath($this->getConfig()->get('path.routes')));
+            ConfigLoader::create()->loadRoutes(new CollectionConfigurator($this->getRouteCollection(), 'routes'));
             $compiledRoutes = (new CompiledUrlMatcherDumper($this->getRouteCollection()))->getCompiledRoutes();
             // Storing the data in the cache for 60 minutes
             $systemCache->store('compiledRoutes', $compiledRoutes, 60*60);
         }
-        vd($compiledRoutes);
         return $compiledRoutes;
+    }
+
+    public function getRouteCollection(): RouteCollection
+    {
+        if (!$this->has('routeCollection')) {
+            $routeCollection = new RouteCollection();
+            $this->set('routeCollection', $routeCollection);
+        }
+        return $this->get('routeCollection');
     }
 
     public function getRouteMatcher(): CompiledUrlMatcher
@@ -146,15 +159,6 @@ class Factory extends Collection
             $this->set('routeContext', $context);
         }
         return $this->get('routeMatcher');
-    }
-
-    public function getRouteCollection(): RouteCollection
-    {
-        if (!$this->has('routeCollection')) {
-            $routeCollection = new RouteCollection();
-            $this->set('routeCollection', $routeCollection);
-        }
-        return $this->get('routeCollection');
     }
 
     /**
@@ -214,7 +218,7 @@ class Factory extends Collection
         return $this->getEventDispatcher();
     }
 
-    public function getLogger(): ?Logger
+    public function getLogger(): ?LoggerInterface
     {
         if (!$this->has('logger')) {
             $processors = [];
@@ -225,7 +229,7 @@ class Factory extends Collection
                     file_put_contents($requestLog, ''); // Refresh log for this session
                 }
                 $processors[] = function ($record) use ($requestLog) {
-                    if (isset($record['message']) && !$this->getRequest()->query->has(Log::NO_LOG)) {
+                    if (isset($record['message'])) {
                         $str = $record['message'] . "\n";
                         if (is_writable($requestLog)) {
                             file_put_contents($requestLog, $str, FILE_APPEND | LOCK_EX);
@@ -235,17 +239,22 @@ class Factory extends Collection
                 };
             }
 
-            $logger = new Logger('system', array(), $processors);
-
-            if (is_writable(ini_get('error_log'))) {
-                $handler = new StreamHandler(ini_get('error_log'), $this->getConfig()->get('log.logLevel', LogLevel::ERROR));
-                $formatter = new MonologLineFormatter();
-                $formatter->setColorsEnabled(true);
-                $formatter->setScriptTime($this->getConfig()->get('script.time'));
-                $handler->setFormatter($formatter);
-                $logger->pushHandler($handler);
-            } else {
-                error_log('Error accessing log file: ' . ini_get('error_log'));
+            $logger = new NullLogger();
+            if (
+                !$this->getRequest()->query->has(Log::NO_LOG) &&             // No log when using nolog in query param
+                !str_contains($this->getRequest()->getRequestUri(), '/api/')     // No logs for api calls (comment out when testing API`s)
+            ) {
+                $logger = new Logger('system', [], $processors);
+                if (is_writable(ini_get('error_log'))) {
+                    $handler = new StreamHandler(ini_get('error_log'), $this->getConfig()->get('log.logLevel', LogLevel::ERROR));
+                    $formatter = new MonologLineFormatter();
+                    $formatter->setColorsEnabled(true);
+                    $formatter->setScriptTime($this->getConfig()->get('script.time'));
+                    $handler->setFormatter($formatter);
+                    $logger->pushHandler($handler);
+                } else {
+                    error_log('Error accessing log file: ' . ini_get('error_log'));
+                }
             }
 
             // Init \Tk\Log
@@ -259,9 +268,28 @@ class Factory extends Collection
     /**
      * Get the composer Class Loader object returned from the autoloader in the _prepend.php file
      */
-    public function getComposerClassLoader(): ?ClassLoader
+    public function getClassLoader(): ?ClassLoader
     {
-        return $this->get('composerClassLoader');
+        return $this->get('classLoader');
+    }
+
+    /**
+     * get the mail gateway to send emails
+     */
+    public function getMailGateway(): ?Gateway
+    {
+        if (!$this->has('mailGateway')) {
+            $params = $this->getConfig()->all();
+            if (!$this->getSystem()->isCli()) {
+                $params['clientIp'] = $this->getRequest()->getClientIp();
+                $params['hostname'] = $this->getRequest()->getHost();
+                $params['referer'] = $this->getRequest()->server->get('HTTP_REFERER', '');
+            }
+            $gateway = new \Tk\Mail\Gateway($params);
+            $gateway->setDispatcher($this->getEventDispatcher());
+            $this->set('mailGateway', $gateway);
+        }
+        return $this->get('mailGateway');
     }
 
     /**
@@ -282,12 +310,13 @@ class Factory extends Collection
             if ($this->getConfig()->isDebug()) {
                 $app->add(new Command\Debug());
                 $app->add(new Command\Mirror());
-//                $app->add(new \Bs\Console\MakeModel());
-//                $app->add(new \Bs\Console\MakeTable());
-//                $app->add(new \Bs\Console\MakeManager());
-//                $app->add(new \Bs\Console\MakeForm());
-//                $app->add(new \Bs\Console\MakeEdit());
-//                $app->add(new \Bs\Console\MakeAll());
+                $app->add(new Command\MakeModel());
+                $app->add(new Command\MakeMapper());
+                $app->add(new Command\MakeTable());
+                //$app->add(new Command\MakeForm());
+                //$app->add(new Command\MakeManager());
+                //$app->add(new Command\MakeEdit());
+                $app->add(new Command\MakeAll());
             }
 
             $this->set('console', $app);

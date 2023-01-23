@@ -88,7 +88,7 @@ class FileUtil
      */
     public static function bytes2String(int $bytes, int $round = 2): string
     {
-        $tags = array('b', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
+        $tags = ['b', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
         $index = 0;
         while ($bytes > 999 && isset($tags[$index + 1])) {
             $bytes /= 1024;
@@ -260,7 +260,7 @@ class FileUtil
         if(substr($path,-1)!= DIRECTORY_SEPARATOR){
             $path .= DIRECTORY_SEPARATOR;
         }
-        $d2 = array('.','..');
+        $d2 = ['.','..'];
         $dirs = array_diff(glob($path.'*', GLOB_ONLYDIR),$d2);
         foreach($dirs as $d){
             self::removeEmptyFolders($d);
@@ -326,7 +326,7 @@ class FileUtil
             }
         }
 
-        $s = array();
+        $s = [];
         foreach(@explode("\n", $mimeFileContents) as $x) {
             if (isset($x[0]) && $x[0] !== '#' && preg_match_all('#([^\s]+)#', $x, $out) && isset($out[1]) && ($c = count($out[1])) > 1)
                 for ($i = 1; $i < $c; $i++) {

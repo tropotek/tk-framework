@@ -4,6 +4,7 @@ namespace Tk\Db\Util;
 use Tk\Db\Pdo;
 use Tk\Db\Exception;
 use Tk\FileUtil;
+use Tk\Traits\SystemTrait;
 
 /**
  * A utility to backup and restore a DB in PHP.
@@ -14,6 +15,7 @@ use Tk\FileUtil;
  */
 class SqlBackup
 {
+    use SystemTrait;
 
     /**
      * @var Pdo
@@ -58,10 +60,8 @@ class SqlBackup
         $command = '';
         if ('mysql' == $this->db->getDriver()) {
             $command = sprintf('mysql %s -h %s -u %s -p%s < %s', $name, $host, $user, $pass, escapeshellarg($sqlFile));
-        } else if ('pgsql' == $this->db->getDriver()) {
-            //$command = sprintf('export PGPASSWORD=%s && pg_dump -h %s -U %s %s', $pass, $host, $user, $name);
-            //$command = sprintf('export PGPASSWORD=%s && pg_dump --inserts -O -h %s -U %s %s > %s', $pass, $host, $user, $name, $filepath);
-            throw new \Tk\Exception('Postgress Not implemented yet!!!!');
+        } else {
+            throw new \Tk\Exception('Only mysql driver supported');
         }
         exec($command, $out, $ret);
         if ($ret != 0) throw new Exception(implode("\n", $out));
@@ -93,13 +93,25 @@ class SqlBackup
 
         $command = '';
         if ('mysql' == $this->getDb()->getDriver()) {
-            $excludeStr = '';
-            foreach ($exclude ?? [] as $exTable) {
-                $excludeStr .= '--ignore-table=' . $this->getDb()->getDatabaseName() . '.' . $exTable . ' ';
+            $exclude = $exclude ?? [];
+            if (!in_array($this->getConfig()->get('session.db_table', ''), $exclude)) {
+                $exclude[] = $this->getConfig()->get('session.db_table');
             }
-            $command = sprintf('mysqldump --max_allowed_packet=1G --single-transaction --quick --lock-tables=false %s --opt -h %s -u %s -p%s %s > %s', $excludeStr, $host, $user, $pass, $name, escapeshellarg($sqlFile));
-        } else if ('pgsql' == $this->getDb()->getDriver()) {
-            $command = sprintf('export PGPASSWORD=%s && pg_dump --inserts -O -h %s -U %s %s > %s', $pass, $host, $user, $name, escapeshellarg($sqlFile));
+            // Exclude all views
+            $sql = "SHOW FULL TABLES IN `{$name}` WHERE TABLE_TYPE LIKE 'VIEW';";
+            $result = $this->getDb()->query($sql);
+            while ($row = $result->fetch(\PDO::FETCH_ASSOC)) {
+                $v = array_shift($row);
+                $exclude[] = $v;
+            }
+
+            $excludeParams = [];
+            foreach ($exclude as $tbl) {
+                $excludeParams[] = "--ignore-table={$name}.$tbl";
+            }
+            $command = sprintf('mysqldump --skip-triggers --max_allowed_packet=1G --single-transaction --quick --lock-tables=false %s --opt -h %s -u %s -p%s %s > %s', implode(' ', $excludeParams), $host, $user, $pass, $name, escapeshellarg($sqlFile));
+        } else {
+            throw new \Tk\Exception('Only mysql driver supported');
         }
 
         if(!$command) throw new Exception('Database driver not supported:  ' . $this->getDb()->getDriver());
@@ -124,13 +136,25 @@ class SqlBackup
 
         $command = '';
         if ('mysql' == $this->getDb()->getDriver()) {
-            $excludeStr = '';
-            foreach ($exclude ?? [] as $exTable) {
-                $excludeStr .= '--ignore-table=' . $this->getDb()->getDatabaseName() . '.' . $exTable . ' ';
+            $exclude = $exclude ?? [];
+            if (!in_array($this->getConfig()->get('session.db_table', ''), $exclude)) {
+                $exclude[] = $this->getConfig()->get('session.db_table');
             }
-            $command = sprintf('mysqldump --max_allowed_packet=1G --single-transaction --quick --lock-tables=false %s --opt -h %s -u %s -p%s %s', $excludeStr, $host, $user, $pass, $name);
-        } else if ('pgsql' == $this->getDb()->getDriver()) {
-            $command = sprintf('export PGPASSWORD=%s && pg_dump --inserts -O -h %s -U %s %s', $pass, $host, $user, $name);
+            // Exclude all views
+            $sql = "SHOW FULL TABLES IN `{$name}` WHERE TABLE_TYPE LIKE 'VIEW';";
+            $result = $this->getDb()->query($sql);
+            while ($row = $result->fetch(\PDO::FETCH_ASSOC)) {
+                $v = array_shift($row);
+                $exclude[] = $v;
+            }
+
+            $excludeParams = [];
+            foreach ($exclude as $tbl) {
+                $excludeParams[] = "--ignore-table={$name}.$tbl";
+            }
+            $command = sprintf('mysqldump --max_allowed_packet=1G --single-transaction --quick --lock-tables=false %s --opt -h %s -u %s -p%s %s', implode(' ', $excludeParams), $host, $user, $pass, $name);
+        } else {
+            throw new \Tk\Exception('Only mysql driver supported');
         }
 
         if(!$command) throw new Exception('Database driver not supported: ' . $this->getDb()->getDriver());

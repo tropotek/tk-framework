@@ -1,7 +1,6 @@
 <?php
 namespace Tk;
 
-
 use Tk\Traits\SingletonTrait;
 
 /**
@@ -23,10 +22,25 @@ class Registry extends Db\Collection
     {
         parent::__construct(self::$TABLE_REGISTRY);
         $this->setDb($this->getFactory()->getDb());
-        $this->installTable();
         $this->load();
     }
 
+    /**
+     * Save modified Data to the DB
+     */
+    public function save(): static
+    {
+        try {
+            if ($this->installTable()) {
+                $this->set('system.site.name', 'Tropotek Lib');
+                $this->set('system.site.shortName', 'TkLib');
+                $this->set('system.email', 'webmaster@'.$this->getRequest()->getHost());
+                $this->set('site.maintenance.enabled', false);
+                $this->save();
+            }
+        } catch (\Exception $e) { \Tk\Log::error($e->__toString());}
+        return parent::save();
+    }
 
     public function getSiteName(): string
     {
@@ -48,7 +62,7 @@ class Registry extends Db\Collection
         return (bool)$this->get('site.maintenance.enabled', false);
     }
 
-    public function setMaintenanceMode(bool $b = true): Registry
+    public function setMaintenanceMode(bool $b = true): static
     {
         $this->set('site.maintenance.enabled', $b);
         $this->save();

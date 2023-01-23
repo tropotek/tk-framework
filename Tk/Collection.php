@@ -11,7 +11,7 @@ namespace Tk;
 class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
 {
 
-    private array $data = [];
+    private array $_data = [];
 
 
     public function __construct(array $items = [])
@@ -20,6 +20,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
             $this->set($key, $value);
         }
     }
+
 
     /**
      * Return items in the $src array where the keys match the $regex supplied
@@ -49,7 +50,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public static function prefixArrayKeys(array $array, string $prefix): array
     {
-        if ($prefix != '' && is_string($prefix)) {
+        if ($prefix != '') {
             foreach ($array as $k => $v) {
                 $array[$prefix . $k] = $v;
                 unset($array[$k]);
@@ -58,30 +59,26 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
         return $array;
     }
 
-
     /**
      * flatten a multidimensional array to a single-dimensional array
-     *
      * @note All key values will be lost.
-     * @todo Delete if not used!!!
      */
     public static function arrayFlatten(array $array): array
     {
         $return = [];
-        array_walk_recursive($array, function($a) use (&$return) { if ($a !== null) $return[] = $a; });
+        //array_walk_recursive($array, function($a) use (&$return) { if ($a !== null) $return[] = $a; });
+        array_walk_recursive($array, function($a) use (&$return) { $return[] = $a;});
         return $return;
     }
 
     /**
      * Return the difference of 2 multidimensional arrays
-     * If no difference null is returned.
+     * If no difference an empty array is returned.
      *
-     * @return null|array   Returns null if there are no differences
      * @site http://php.net/manual/en/function.array-diff-assoc.php
      * @author telefoontoestel at hotmail dot com
-     * @todo Delete if not used!!!
      */
-    public static function arrayDiffRecursive(array $array1, array $array2)
+    public static function arrayDiffRecursive(array $array1, array $array2): array
     {
         foreach ($array1 as $key => $value) {
             if (is_array($value)) {
@@ -91,15 +88,13 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
                     $difference[$key] = $value;
                 } else {
                     $new_diff = self::arrayDiffRecursive($value, $array2[$key]);
-                    if ($new_diff != false) {
-                        $difference[$key] = $new_diff;
-                    }
+                    if ($new_diff) $difference[$key] = $new_diff;
                 }
             } elseif (!array_key_exists($key, $array2) || $array2[$key] != $value) {
                 $difference[$key] = $value;
             }
         }
-        return !isset($difference) ? null : $difference;
+        return !isset($difference) ? [] : $difference;
     }
 
     /**
@@ -112,7 +107,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
             if (is_object($v)) {
                 $str .= "[$k] => {" . get_class($v) . "}\n";
             } elseif (is_array($v)) {
-                $str .= "[$k] =>  array[" . count($v) . "]\n";
+                $str .= "[$k] =>  array[\n" . self::arrayToString($v) . "\n]\n";
             } else {
                 $str .= "[$k] => $v\n";
             }
@@ -125,9 +120,8 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
      * Add a list of items to the collection
      *
      * @param array $items Key-value array of data to append to this collection
-     * @return $this
      */
-    public function replace(array $items): Collection
+    public function replace(array $items): static
     {
         foreach ($items as $key => $value) {
             $this->set($key, $value);
@@ -137,22 +131,49 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
 
     /**
      * Set an item in the collection
-     *
-     * @param mixed $value
      */
-    public function set(string $key, $value): Collection
+    public function set(string $key, mixed $value): static
     {
-        $this->data[$key] = $value;
+        $this->_data[$key] = $value;
         return $this;
+    }
+
+    public function prepend(string $key, mixed $value, ?string $refKey = null): mixed
+    {
+        if (!$refKey || !$this->has($refKey)) {
+            $this->_data = array_merge([$key => $value], $this->_data);
+        } else {
+            $a = [];
+            foreach ($this->_data as $k => $v) {
+                if ($k === $refKey) $a[$key] = $value;
+                $a[$k] = $v;
+            }
+            $this->_data = $a;
+        }
+        return $value;
+    }
+
+    public function append(string $key, mixed $value, ?string $refKey = null): mixed
+    {
+        if (!$refKey || !$this->has($refKey)) {
+            $this->set($key, $value);
+        } else {
+            $a = [];
+            foreach ($this->_data as $k => $v) {
+                $a[$k] = $v;
+                if ($k === $refKey) $a[$key] = $value;
+            }
+            $this->_data = $a;
+        }
+        return $value;
     }
 
     /**
      * Get collection item for key
      *
-     * @param mixed $default Return value if the key does not exist
-     * @return mixed
+     * @param mixed|null $default Return value if the key does not exist
      */
-    public function get(string $key, $default = null)
+    public function get(string $key, mixed $default = null): mixed
     {
         return $this->all($key) ?: $default;
     }
@@ -161,15 +182,13 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
      * Get all items in collection
      *
      * @param string|null $key The name of the headers to return or null to get them all
-     *
-     * @return mixed
      */
-    public function all(?string $key = null)
+    public function all(?string $key = null): mixed
     {
         if ($key !== null) {
-            return $this->data[$key] ?? [];
+            return $this->_data[$key] ?? [];
         }
-        return $this->data;
+        return $this->_data;
     }
 
     /**
@@ -177,7 +196,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public function keys(): array
     {
-        return array_keys($this->data);
+        return array_keys($this->_data);
     }
 
     /**
@@ -185,27 +204,17 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public function has(string $key): bool
     {
-        return array_key_exists($key, $this->data);
+        return array_key_exists($key, $this->_data);
     }
 
     /**
      * Remove item from collection
      */
-    public function remove(string $key): Collection
+    public function remove(string $key): static
     {
-        unset($this->data[$key]);
+        unset($this->_data[$key]);
         return $this;
     }
-
-    /**
-     * Remove all items from collection
-     */
-    public function clear(): Collection
-    {
-        $this->data = [];
-        return $this;
-    }
-
 
 
     /**
@@ -213,10 +222,9 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @param  string $key The data key
      *
-     * @return bool
      * @interface \ArrayAccess
      */
-    public function offsetExists($key)
+    public function offsetExists($key): bool
     {
         return $this->has($key);
     }
@@ -229,7 +237,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
      * @return mixed The key's value, or the default value
      * @interface \ArrayAccess
      */
-    public function offsetGet($key)
+    public function offsetGet($key): mixed
     {
         return $this->get($key);
     }
@@ -241,7 +249,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
      * @param mixed $value The data value
      * @interface \ArrayAccess
      */
-    public function offsetSet($key, $value)
+    public function offsetSet($key, $value): void
     {
         $this->set($key, $value);
     }
@@ -252,7 +260,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
      * @param string $key The data key
      * @interface \ArrayAccess
      */
-    public function offsetUnset($key)
+    public function offsetUnset($key): void
     {
         $this->remove($key);
     }
@@ -265,7 +273,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public function count(): int
     {
-        return count($this->data);
+        return count($this->_data);
     }
 
     /**
@@ -276,7 +284,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public function getIterator(): \ArrayIterator
     {
-        return new \ArrayIterator($this->data);
+        return new \ArrayIterator($this->_data);
     }
 
 }

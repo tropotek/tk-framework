@@ -1,17 +1,17 @@
 <?php
 namespace Tk\DataMap\Form;
 
-use Tk\DataMap\DataTypeIface;
+use Tk\DataMap\DataTypeInterface;
 
 /**
  * map a JSON string type from a form to an object property
  *
  * @author Tropotek <http://www.tropotek.com/>
  */
-class Json extends DataTypeIface
+class Json extends DataTypeInterface
 {
 
-    public function getKeyValue(array $array)
+    public function getKeyValue(array $array): mixed
     {
         $value = parent::getKeyValue($array);
         if ($value) {
@@ -20,7 +20,7 @@ class Json extends DataTypeIface
         return $value;
     }
 
-    public function getPropertyValue(object $object)
+    public function getPropertyValue(object $object): mixed
     {
         $value = parent::getPropertyValue($object);
         if ($value) {

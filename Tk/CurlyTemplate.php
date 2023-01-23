@@ -81,13 +81,13 @@ namespace Tk;
  * Data Example 2: Use boolean values to show/hide blocks 
  * 
  * <code>
- *   $tpl->parse(array(
+ *   $tpl->parse([
  *       'headTitle' => 'This is the Head Title.',
  *       'pageTitle' => 'This is the main page title.',
  *       'rowBlock' => true,
  *       'dataBlock' => true,
  *       'dataValue' => 'This is a test` test'
- *     )
+ *     ]
  *   )
  * </code>
  *
@@ -137,7 +137,7 @@ class CurlyTemplate
     {
         foreach($data as $k => $v) {
             if (!is_string($v) && is_callable($v)) {
-                $v = call_user_func_array($v, array($this));
+                $v = call_user_func_array($v, [$this]);
                 if (!is_string($v)) throw new \Tk\Exception('Invalid return type. Function must return a string.');
             }
             if (!is_string($v) && !is_numeric($v)) continue;

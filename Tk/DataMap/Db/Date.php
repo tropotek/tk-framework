@@ -1,14 +1,14 @@
 <?php
 namespace Tk\DataMap\Db;
 
-use Tk\DataMap\DataTypeIface;
+use Tk\DataMap\DataTypeInterface;
 
 /**
  * map a Date type from a DB field to an object property
  *
  * @author Tropotek <http://www.tropotek.com/>
  */
-class Date extends DataTypeIface
+class Date extends DataTypeInterface
 {
 
     protected string $format = 'Y-m-d H:i:s';
@@ -25,7 +25,7 @@ class Date extends DataTypeIface
         return $this;
     }
 
-    public function getKeyValue(array $array)
+    public function getKeyValue(array $array): mixed
     {
         $value = parent::getKeyValue($array);
         // This date is assumed as null
@@ -36,7 +36,7 @@ class Date extends DataTypeIface
         return $value;
     }
 
-    public function getPropertyValue(object $object)
+    public function getPropertyValue(object $object): mixed
     {
         $value = parent::getPropertyValue($object);
         if ($value instanceof \DateTime) {
@@ -44,6 +44,6 @@ class Date extends DataTypeIface
         }
         return $value;
     }
-    
+
 }
 

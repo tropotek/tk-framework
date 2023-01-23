@@ -16,7 +16,7 @@ class Str
     public static function stripAttrs(string $str, ?array $attrs = null): string
     {
         if ($attrs === null)
-            $attrs = array('onabort', 'onactivate', 'onafterprint', 'onafterupdate', 'onbeforeactivate', 'onbeforecopy',
+            $attrs = ['onabort', 'onactivate', 'onafterprint', 'onafterupdate', 'onbeforeactivate', 'onbeforecopy',
                 'onbeforecut', 'onbeforedeactivate', 'onbeforeeditfocus', 'onbeforepaste', 'onbeforeprint', 'onbeforeunload',
                 'onbeforeupdate', 'onblur', 'onbounce', 'oncellchange', 'onchange', 'onclick', 'oncontextmenu',
                 'oncontrolselect', 'oncopy', 'oncut', 'ondataavaible', 'ondatasetchanged', 'ondatasetcomplete', 'ondblclick',
@@ -26,7 +26,7 @@ class Str
                 'onmouseenter', 'onmouseleave', 'onmousemove', 'onmouseout', 'onmouseup', 'onmousedown', 'onmoveout', 'onmouseover', 'onmouseup', 'onmousewheel',
                 'onmove', 'onmoveend', 'onmovestart', 'onpaste', 'onpropertychange', 'onreadystatechange', 'onreset',
                 'onresize', 'onresizeend', 'onresizestart', 'onrowexit', 'onrowsdelete', 'onrowsinserted', 'onscroll',
-                'onselect', 'onselectionchange', 'onselectstart', 'onstart', 'onstop', 'onsubmit', 'onunload');
+                'onselect', 'onselectionchange', 'onselectstart', 'onstart', 'onstop', 'onsubmit', 'onunload'];
 
         if (!is_array($attrs))
             $attrs = explode(",", $attrs);
@@ -220,44 +220,16 @@ class Str
     }
 
     /**
-     * @param string $str
-     * @param string $replacement
-     * @return string|string[]|null
+     * returns $s cleaned for use as an HTML attribute value
      */
-    public static function stripEntities(string $str, string $replacement = '')
+    public static function eattr(?string $s): string
     {
-        return preg_replace('/&#?[a-z0-9]+;/i',$replacement, $str);
-    }
-
-    /**
-     * Convert html special characters to numeric entities (eg: &nbsp; to &#160;)
-     */
-    public static function numericEntities(string $xml): string
-    {
-        $list = get_html_translation_table(\HTML_ENTITIES, ENT_NOQUOTES);
-        $mapping = array();
-        foreach ($list as $char => $entity) {
-            $mapping[strtolower($entity)] = '&#' . self::ord($char) . ';';
-        }
-        $xml = str_replace(array_keys($mapping), $mapping, $xml);
-        return $xml;
-    }
-
-    /**
-     * Since PHP's ord() function is not compatible with UTF-8
-     * Here is a workaround.... GGRRR!!!!
-     */
-    public static function ord(string $ch): int
-    {
-        $k = mb_convert_encoding($ch, 'UCS-2LE', 'UTF-8');
-        $k1 = ord(substr($k, 0, 1));
-        $k2 = ord(substr($k, 1, 1));
-        return $k2 * 256 + $k1;
+        //return htmlspecialchars($s, ENT_COMPAT | ENT_HTML401, "UTF-8", false);
+        return htmlspecialchars($s, ENT_HTML5, "UTF-8", false);
     }
 
     /**
      * Test if a string is UTF-8 encoded
-     * @todo: Test this is working correctly
      */
     public static function isUtf8(string $string): bool
     {
@@ -285,17 +257,21 @@ class Str
     }
 
     /**
-     * varToString
-     *
-     * @param mixed $var
+     * Return a string representation of the supplied variable
      */
-    public static function varToString($var): string
+    public static function varToString(mixed $var): string
     {
         if (is_object($var)) {
+            if (method_exists($var, '__toString')) {
+                return $var->__toString();
+            }
+            if (method_exists($var, 'toString')) {
+                return $var->toString();
+            }
             return sprintf('Object(%s)', get_class($var));
         }
         if (is_array($var)) {
-            $a = array();
+            $a = [];
             foreach ($var as $k => $v) {
                 $a[] = sprintf('%s => %s', $k, self::varToString($v));
             }
@@ -318,6 +294,8 @@ class Str
 
     /**
      * Is the string an HTML/XML string
+     *
+     * Returns true if the supplied string has any HTML tags
      */
     public static function isHtml(string $str): bool
     {

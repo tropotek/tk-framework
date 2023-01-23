@@ -1,8 +1,9 @@
 <?php
 namespace Tk\Db\Mapper;
 
+use Tk\Collection;
 use Tk\DataMap\DataMap;
-use Tk\DataMap\DataTypeIface;
+use Tk\DataMap\DataTypeInterface;
 use Tk\Db\Pdo;
 use Tk\Db\Exception;
 use Tk\Db\Tool;
@@ -25,13 +26,18 @@ abstract class Mapper
 {
     use SystemTrait;
 
+    const DATA_MAP_DB    = 'dbMap';
+    const DATA_MAP_FORM  = 'dbForm';
+    const DATA_MAP_TABLE = 'dbTable';
+
+
     /**
      * @var Mapper[]|array
      */
     protected static array $_INSTANCE = [];
 
     /**
-     * Set this to false to allow records that have been deleted to be retrieved
+     * Allow records that have been deleted to be retrieved
      */
     public static bool $HIDE_DELETED = true;
 
@@ -45,6 +51,8 @@ abstract class Mapper
 
     protected ?array $tableInfo = null;
 
+    protected Collection $dataMappers;
+
     protected ?DataMap $dbMap = null;
 
     protected ?DataMap $formMap = null;
@@ -54,24 +62,26 @@ abstract class Mapper
      * If there are more than one primary key then
      *   the first one found is used
      */
-    protected ?DataTypeIface $primaryType = null;
+    protected ?DataTypeInterface $primaryType = null;
 
     /**
      * This will hold the deleteType DataMap field
      * if one exists
      */
-    protected ?DataTypeIface $deleteType = null;
+    protected ?DataTypeInterface $deleteType = null;
 
 
     public function __construct(?Pdo $db = null)
     {
+        $this->dataMappers = new Collection();
         $this->setDb($db);
+        $this->makeDataMaps();
     }
 
     /**
      * Get/Create an instance of a data mapper.
      */
-    static function create(?Pdo $db = null): Mapper
+    static function create(?Pdo $db = null): static
     {
         $mapperClass = static::class;
         if (!preg_match('/(.+)(Map)$/', $mapperClass, $regs)) {
@@ -96,22 +106,55 @@ abstract class Mapper
         return self::$_INSTANCE[$mapperClass];
     }
 
+    public function getDataMappers(): Collection
+    {
+        return $this->dataMappers;
+    }
+
+    public function getDataMap(string $name): ?DataMap
+    {
+        return $this->getDataMappers()->get($name);
+    }
+
+    public function addDataMap(string $name, DataMap $map): static
+    {
+        if (!$this->getDataMappers()->has($name)) {
+            $this->getDataMappers()->set($name, $map);
+        }
+        return $this;
+    }
+
+    abstract protected function makeDataMaps(): void;
+
+    // TODO: These are helper functions, should we remove them or are they worth having.
 
     /**
      * Returns a valid DB DataMap
      */
-    abstract public function getDbMap(): DataMap;
+    public function getDbMap(): DataMap
+    {
+        return $this->getDataMappers()->get(self::DATA_MAP_DB, new DataMap());
+    }
 
     /**
      * Returns a valid form DataMap
      */
-    abstract public function getFormMap(): DataMap;
-
-
+    public function getFormMap(): DataMap
+    {
+        return $this->getDataMappers()->get(self::DATA_MAP_FORM, new DataMap());
+    }
 
     /**
-     * @throws Exception
+     * Returns a valid table DataMap
      */
+    public function getTableMap(): DataMap
+    {
+        return $this->getDataMappers()->get(self::DATA_MAP_TABLE, new DataMap());
+    }
+
+
+
+
     public function insert(Model $obj): int
     {
         if (!$this->getPrimaryType()) {
@@ -139,9 +182,6 @@ abstract class Mapper
         return $id;
     }
 
-    /**
-     * @throws Exception
-     */
     public function update(Model $obj): int
     {
         if (!$this->getPrimaryType()) {
@@ -151,7 +191,7 @@ abstract class Mapper
         $bind = [];
         $this->getDbMap()->loadArray($bind, $obj);
 
-        $set = array();
+        $set = [];
         foreach ($bind as $col => $value) {
             unset($bind[$col]);
             $bind[':' . $col] = $value;
@@ -165,9 +205,6 @@ abstract class Mapper
         return $stmt->rowCount();
     }
 
-    /**
-     * @throws Exception
-     */
     public function delete(Model $obj): int
     {
         if (!$this->getPrimaryType()) {
@@ -195,10 +232,8 @@ abstract class Mapper
     /**
      * A Utility method that checks the id and does and insert
      * or an update  based on the objects current state
-     *
-     * @throws \Exception
      */
-    public function save(Model $obj)
+    public function save(Model $obj): void
     {
         if (!$this->getPrimaryType()) {
             throw new Exception('Invalid operation, no primary key found');
@@ -214,7 +249,6 @@ abstract class Mapper
     /**
      * A select query using a prepared statement. Less control
      *
-     * @throws \Exception
      * @see http://www.sitepoint.com/integrating-the-data-mappers/
      * @deprecated TODO: See if we need this ?
      */
@@ -230,7 +264,7 @@ abstract class Mapper
         }
 
         $from = $this->getTable() . ' ' . $this->getAlias();
-        $where = array();
+        $where = [];
         if ($bind) {
             foreach ($bind as $col => $value) {
                 unset($bind[$col]);
@@ -263,8 +297,6 @@ abstract class Mapper
 
     /**
      * Select a number of elements from a database
-     *
-     * @throws \Exception
      */
     public function selectFrom(string $from = '', string $where = '', ?Tool $tool = null, string $select = ''): Result
     {
@@ -280,7 +312,7 @@ abstract class Mapper
         if (
             self::$HIDE_DELETED &&
             $this->getDeleteType() &&
-            strstr($where, $this->quoteParameter($this->getDeleteType()->getKey())) === false
+            !str_contains($where, $this->quoteParameter($this->getDeleteType()->getKey()))
         ) {
             if ($where) {
                 $where = sprintf('%s%s = 0 AND %s ', $alias, $this->quoteParameter($this->getDeleteType()->getKey()), $where);
@@ -294,8 +326,7 @@ abstract class Mapper
         if ($tool->isDistinct()) $distinct = 'DISTINCT';
 
         // OrderBy, GroupBy, Limit, etc
-        $toolStr = '';
-        if ($tool) $toolStr = $tool->toSql($alias, $this->getDb());
+        $toolStr = $tool->toSql($alias, $this->getDb());
 
         $foundRowsKey = '';
         if ($this->getDb()->getDriver() == 'mysql') {
@@ -309,15 +340,12 @@ abstract class Mapper
         $sql = sprintf('SELECT %s %s %s FROM %s %s %s ',
             $foundRowsKey, $distinct, $select, $from, $where, $toolStr);
         $stmt = $this->getDb()->prepare($sql);
-        
+
         $stmt->execute();
 
         return Result::createFromMapper($this, $stmt, $tool);
     }
 
-    /**
-     * @throws \Exception
-     */
     public function selectFromFilter(Filter $filter, $tool = null): Result
     {
         return $this->selectFrom($filter->getFrom(), $filter->getWhere(), $tool, $filter->getSelect());
@@ -326,19 +354,14 @@ abstract class Mapper
     /**
      * Select a number of elements from a database
      *
-     * @param string $where EG: "`column1`=4 AND `column2`='string'"
-     * @throws \Exception
+     * EG: "`column1`=4 AND `column2`='string'"
      */
     public function select(string $where = '', ?Tool $tool = null): Result
     {
         return $this->selectFrom('', $where, $tool);
     }
 
-    /**
-     * @param mixed $id
-     * @throws \Exception
-     */
-    public function find($id): Model
+    public function find(mixed $id): ?Model
     {
         if (!$this->getPrimaryType()) {
             throw new Exception('Invalid operation, no primary key found');
@@ -350,8 +373,6 @@ abstract class Mapper
 
     /**
      * Find all objects in DB
-     *
-     * @throws \Exception
      */
     public function findAll(?Tool $tool = null): Result
     {
@@ -377,8 +398,6 @@ abstract class Mapper
         return $w;
     }
 
-
-
     public function getModelClass(): string
     {
         return $this->modelClass;
@@ -403,7 +422,6 @@ abstract class Mapper
 
     /**
      * Set the table alias
-     * @throws \Exception
      */
     public function setAlias(string $alias): Mapper
     {
@@ -418,12 +436,12 @@ abstract class Mapper
         return $this->table;
     }
 
-    public function getPrimaryType(): ?DataTypeIface
+    public function getPrimaryType(): ?DataTypeInterface
     {
         return $this->primaryType;
     }
 
-    protected function setPrimaryType(DataTypeIface $primaryType): Mapper
+    protected function setPrimaryType(DataTypeInterface $primaryType): Mapper
     {
         $this->primaryType = $primaryType;
         return $this;
@@ -432,7 +450,7 @@ abstract class Mapper
     /**
      * If set then records will be marked deleted instead of physically deleted
      */
-    public function setDeleteType(DataTypeIface $type): Mapper
+    public function setDeleteType(DataTypeInterface $type): Mapper
     {
         $this->deleteType = $type;
         return $this;
@@ -442,13 +460,13 @@ abstract class Mapper
      * Returns the name of the column to mark deleted. (update col to 1)
      * returns null if we are to physically delete the record
      */
-    public function getDeleteType(): DataTypeIface
+    public function getDeleteType(): DataTypeInterface
     {
         return $this->deleteType;
     }
 
     /**
-     * @throws Exception
+     * Set the table or view this model gets its data from
      */
     public function setTable(string $table): Mapper
     {
@@ -491,7 +509,6 @@ abstract class Mapper
         $this->db = $db;
         return $this;
     }
-
 
 
     /**

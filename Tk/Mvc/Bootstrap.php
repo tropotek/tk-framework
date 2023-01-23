@@ -2,6 +2,7 @@
 
 namespace Tk\Mvc;
 
+use Dom\Template;
 use Tk\Traits\SingletonTrait;
 use Tk\Traits\SystemTrait;
 
@@ -69,6 +70,7 @@ class Bootstrap
                 "verify_peer" => false,
                 "verify_peer_name" => false,
             ]]);
+            Template::$ENABLE_TRACER = true;
         }
 
         // Setup EventDispatcher and subscribe events, loads routes

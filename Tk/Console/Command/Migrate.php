@@ -5,7 +5,9 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Tk\Console\Console;
+use Tk\Db\Util\SqlBackup;
 use Tk\Db\Util\SqlMigrate;
+use Tk\Log\ConsoleOutputLogger;
 
 /**
  * @author Tropotek <http://www.tropotek.com/>
@@ -23,11 +25,9 @@ class Migrate extends Console
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->writeComment('TODO: We need to refactor the migration system');
-        return Command::SUCCESS;
-        // TODO: We need to refactor the migration system
-
         try {
+            $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
+
             $db = $this->getFactory()->getDb();
 
             $drop = false;
@@ -37,33 +37,42 @@ class Migrate extends Console
                 $drop = $this->askConfirmation('Replace the existing database. WARNING: Existing data tables will be deleted! [N]: ', false);
             }
 
-//            if ($drop) {
-//                $exclude = [];
-//                if ($this->getConfig()->isDebug()) {
-//                    $exclude = [$this->getConfig()->get('session.db_table')];
-//                }
-//                $db->dropAllTables(true, $exclude);
-//                $this->write('Database Install...');
-//            } else {
-//                $this->write('Database Upgrade...');
-//            }
-
+            if ($drop) {
+                $exclude = [];
+                if ($this->getConfig()->isDebug()) {
+                    $exclude = [$this->getConfig()->get('session.db_table')];
+                }
+                $db->dropAllTables(true, $exclude);
+                $this->write('Mode: Install');
+            } else {
+                $this->write('Mode: Upgrade');
+            }
 
             // Migrate new SQL files
-//            $migrate = new SqlMigrate($db);
-//            $migrate->setTempPath($this->getConfig()->getTempPath());
-//            $migrateList = array('App Sql' => $this->getConfig()->getSrcPath() . '/config');
-//            if ($this->getConfig()->get('sql.migrate.list')) {
-//                $migrateList = $this->getConfig()->get('sql.migrate.list');
-//            }
-//
-//            $mm = $this;
-//            $migrate->migrateList($migrateList, function (string $str, SqlMigrate $m) use ($output, $mm) {
-//                $mm->write($str);
-//            });
+            $this->write('Migration Starting.');
+            $migrateList = $this->getConfig()->get('db.migrate.paths');
+            $outputLogger = new ConsoleOutputLogger($output);
+            $migrate = new SqlMigrate($db, $outputLogger);
+            $migrate->migrateList($migrateList);
 
-            $this->write('Database Migration Complete.');
-            $this->write('Open the site in a browser to complete the site setup: ' . \Tk\Uri::create('/')->toString());
+            // Execute static files
+            $config = $this->getConfig();
+            $dbBackup = new SqlBackup($db);
+            foreach ($config->get('db.migrate.static') as $file) {
+                $path = "{$config->getBasePath()}/src/config/sql/{$file}";
+                if (is_file($path)) {
+                    $this->writeGreen('Applying ' . $file);
+                    $dbBackup->restore($path);
+                }
+            }
+
+            $debugSqlFile = $config->getBasePath() . $config->get('debug.sql');
+            if ($config->isDebug() && is_file($debugSqlFile)) {
+                $this->writeBlue('Apply dev sql updates');
+                $dbBackup->restore($debugSqlFile);
+            }
+
+            $this->write('Migration Complete.');
         } catch (\Exception $e) {
             $this->writeError($e->getMessage());
             return Command::FAILURE;

@@ -61,10 +61,6 @@ class Dispatch
             $this->getFactory()->getRequestStack()
         ));
 
-        $this->getDispatcher()->addSubscriber(new \Tk\Mvc\EventListener\ExceptionListener(
-            'App\Controller\Error::doDefault',
-            $this->getConfig()->isDebug()
-        ));
         $this->getDispatcher()->addSubscriber(new \Tk\Mvc\EventListener\LogExceptionListener(
             $this->getFactory()->getLogger(),
             $this->getConfig()->isDebug()

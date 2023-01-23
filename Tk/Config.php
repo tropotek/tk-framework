@@ -25,41 +25,24 @@ class Config extends Collection
 
     protected function __construct()
     {
+        $this->set('script.start.time', microtime(true));
         parent::__construct();
 
-        $this->set('script.start.time', microtime(true));
-
-        // Site paths
         $this->set('base.path', $this->getSystem()->discoverBasePath());
         $this->set('base.url', $this->getSystem()->discoverBaseUrl());
 
-        $this->set('path.data',         '/data');
-        $this->set('path.cache',        '/data/cache');
-        $this->set('path.temp',         '/data/temp');
-        $this->set('path.src',          '/src');
-        $this->set('path.config',       '/src/config');
-        $this->set('path.vendor',       '/vendor');
-        $this->set('path.vendor.org',   '/vendor/ttek');
-        $this->set('path.template',     '/html');
+    }
 
-        $this->set('path.routes',       '/src/config/routes.php');
-        $this->set('path.routes.cache', '/data/cache/routes.cache.php');
-
-        // Session Defaults
-        $this->set('session.db_enable',         false);
-        $this->set('session.db_table',          '_session');
-        $this->set('session.db_id_col',         'session_id');
-        $this->set('session.db_data_col',       'data');
-        $this->set('session.db_lifetime_col',   'lifetime');
-        $this->set('session.db_time_col',       'time');
-
-        $this->set('debug', false);
-        $this->set('log.system.request', $this->get('path.temp') . '/requestLog.txt');
-        $this->set('log.logLevel', LogLevel::ERROR);
-
-        // Set the timezone in the config.ini
-        //$this->set('php.date.timezone', 'Australia/Melbourne');
-
+    /**
+     * Gets an instance of this object, if none exists one is created
+     */
+    public static function instance(): static
+    {
+        if (self::$_INSTANCE == null) {
+            self::$_INSTANCE = new static();
+            ConfigLoader::create()->loadConfigs(self::$_INSTANCE);
+        }
+        return self::$_INSTANCE;
     }
 
     public function getBasePath(): string

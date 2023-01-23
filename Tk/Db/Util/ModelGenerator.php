@@ -3,46 +3,28 @@ namespace Tk\Db\Util;
 
 
 
+use Tk\Exception;
+
 /**
  * @author Tropotek <http://www.tropotek.com/>
  */
 class ModelGenerator
 {
+    protected ?\Tk\Db\Pdo $db = null;
 
-    /**
-     * @var \Tk\Db\Pdo
-     */
-    protected $db = null;
+    protected string $table = '';
 
-    /**
-     * @var string
-     */
-    protected $table = '';
+    protected string $className = '';
 
-    /**
-     * @var string
-     */
-    protected $className = '';
+    protected string $namespace = '';
 
-    /**
-     * @var string
-     */
-    protected $namespace = '';
-
-    /**
-     * @var array
-     */
-    protected $tableInfo = null;
+    protected array $tableInfo = [];
 
 
     /**
-     * @param \Tk\Db\Pdo $db
-     * @param string $table
-     * @param string $namespace
-     * @param string $className
-     * @throws \Tk\Db\Exception
+     * @throws \Exception
      */
-    protected function __construct($db, $table, $namespace = 'App', $className = '')
+    protected function __construct(\Tk\Db\Pdo $db, string $table, string $namespace = 'App', string $className = '')
     {
         $this->db = $db;
         $this->table = $table;
@@ -65,24 +47,14 @@ class ModelGenerator
     }
 
     /**
-     * @param \Tk\Db\Pdo $db
-     * @param string $table
-     * @param string $namespace
-     * @param string $className
-     * @return ModelGenerator
      * @throws \Exception
      */
-    public static function create($db, $table, $namespace = 'App', $className = '')
+    public static function create(\Tk\Db\Pdo $db, string $table, string $namespace = 'App', string $className = ''): ModelGenerator
     {
-        $obj = new static($db, $table, $namespace, $className);
-        return $obj;
+        return new static($db, $table, $namespace, $className);
     }
 
-    /**
-     * @param string $table
-     * @return string
-     */
-    protected function makeClassname($table)
+    protected function makeClassname(string $table): string
     {
         $classname = preg_replace_callback('/_([a-z])/i', function ($matches) {
             return strtoupper($matches[1]);
@@ -90,14 +62,11 @@ class ModelGenerator
         return ucfirst($classname);
     }
 
-    /**
-     * @return array
-     */
-    protected function getDefaultData()
+    protected function getDefaultData(): array
     {
         $now = \Tk\Date::create();
-        $a = array(
-            'author-name' => 'Mick Mifsud',
+        $a = [
+            'author-name' => 'Tropotek',
             'author-biz' => 'Tropotek',
             'author-www' => 'http://tropotek.com.au/',
             'date' => $now->format(\Tk\Date::FORMAT_ISO_DATE),
@@ -105,7 +74,6 @@ class ModelGenerator
             'classname' => $this->getClassName(),
             'name' => trim(preg_replace('/[A-Z]/', ' $0', $this->getClassName())) ,
             'table' => $this->getTable(),
-            //'namespace' => '\\' . trim(substr($this->getNamespace(), 0, strpos($this->getNamespace(), '\\', 1)), '\\'),
             'namespace' => $this->getNamespace(),
             'db-namespace' => $this->getDbNamespace(),
             'table-namespace' => $this->getTableNamespace(),
@@ -114,102 +82,63 @@ class ModelGenerator
             'property-name' => lcfirst($this->getClassName()),
             'namespace-url' => str_replace('_', '/', $this->getTable()),
             'table-id' => str_replace('_', '-', $this->getTable())
-        );
+        ];
         return $a;
     }
 
-    /**
-     * @param string $namespace
-     * @return static
-     */
-    public function setNamespace($namespace)
+    public function setNamespace(string $namespace): static
     {
         $this->namespace = trim($namespace, '\\');
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getNamespace()
+    public function getNamespace(): string
     {
         return $this->namespace;
     }
 
-
-    /**
-     * @return string
-     */
-    public function getDbNamespace()
+    public function getDbNamespace(): string
     {
         return $this->namespace . '\Db';
     }
 
-    /**
-     * @return string
-     */
-    public function getTableNamespace()
+    public function getTableNamespace(): string
     {
         return $this->namespace . '\Table';
     }
 
-    /**
-     * @return string
-     */
-    public function getFormNamespace()
+    public function getFormNamespace(): string
     {
         return $this->namespace . '\Form';
     }
 
-    /**
-     * @return string
-     */
-    public function getControllerNamespace()
+    public function getControllerNamespace(): string
     {
         return $this->namespace . '\Controller';
     }
 
-    /**
-     * @return string
-     */
-    public function getClassName()
+    public function getClassName(): string
     {
         return $this->className;
     }
 
-    /**
-     * @return string
-     */
-    public function getTable()
+    public function getTable(): string
     {
         return $this->table;
     }
 
-    /**
-     * @param string $className
-     * @return static
-     */
-    public function setClassName($className)
+    public function setClassName(string $className): static
     {
         $this->className = trim($className, '\\');
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    protected function tableFromClass()
+    protected function tableFromClass(): string
     {
         return ltrim(strtolower(preg_replace('/[A-Z]/', '_$0', $this->getClassName())), '_');
     }
 
-    /**
-     * @param array $data
-     * @param array|null $classData
-     * @param array|null $params
-     * @return array
-     */
-    protected function arrayMerge(array $data, array $classData = null, array $params = null)
+    protected function arrayMerge(array $data, array $classData = [], array $params = []): array
     {
         unset($params['namespace']);
         unset($params['classname']);
@@ -218,28 +147,23 @@ class ModelGenerator
     }
 
     /**
-     * @param array $params any overrides for the curly template
-     * @return string
-     * @throws \Exception
+     * @throws Exception
      */
-    public function makeModel($params = array())
+    public function makeModel(array $params = []): string
     {
         $tpl = $this->createModelTemplate();
         $data = $this->arrayMerge($this->getDefaultData(), $this->processModel(), $params);
         return $tpl->parse($data);
     }
 
-    /**
-     * @return array
-     */
-    protected function processModel()
+    protected function processModel(): array
     {
-        $data = array(
+        $data = [
             'properties' => '',
             'construct' => '',
             'validators' => '',
             'accessors' => '',
-        );
+        ];
         foreach ($this->tableInfo as $col) {
             $mp = ModelProperty::create($col);
             if ($mp->getName() == 'del') continue;
@@ -263,83 +187,68 @@ class ModelGenerator
         return $data;
     }
 
-    /**
-     * @return \Tk\CurlyTemplate
-     */
-    protected function createModelTemplate()
+    protected function createModelTemplate(): \Tk\CurlyTemplate
     {
         $classTpl = <<<STR
 <?php
 namespace {db-namespace};
 
+use Tk\Db\Mapper\Model;
+
 /**
- * @author {author-name}
- * @created {date}
- * @link {author-www}
- * @license Copyright {year} {author-biz}
+ * @author {author-biz} <{author-www}>
  */
-class {classname} extends \Tk\Db\Map\Model implements \Tk\ValidInterface
+class {classname} extends Model
 {
 {properties}
 
-    /**
-     * {classname}
-     */
+
     public function __construct()
     {
 {construct}
     }
     {accessors}
-    /**
-     * @return array
-     */
-    public function validate()
+
+    public function validate(): array
     {
-        \$errors = array();
+        \$errors = [];
 {validators}
         return \$errors;
     }
 
 }
-
 STR;
-        $tpl = \Tk\CurlyTemplate::create($classTpl);
-        return $tpl;
+        return \Tk\CurlyTemplate::create($classTpl);
     }
 
 
     /**
-     * @param array $params any overrides for the curly template
-     * @return string
      * @throws \Exception
      */
-    public function makeMapper($params = array())
+    public function makeMapper(array $params = []): string
     {
         $tpl = $this->createMapperTemplate();
         $data = $this->arrayMerge($this->getDefaultData(), $this->processMapper(), $params);
         return $tpl->parse($data);
     }
 
-    /**
-     * @return array
-     */
-    protected function processMapper()
+    protected function processMapper(): array
     {
-        $data = array(
+        $data = [
             'column-maps' => '',
             'form-maps' => '',
             'filter-queries' => '',
             'set-table' => ''
-        );
+        ];
         foreach ($this->tableInfo as $col) {
             $mp = ModelProperty::create($col);
 
-            $exclude = array('del');
+            $exclude = ['del'];
             if (!in_array($mp->getName(), $exclude)) {
                 $data['column-maps'] .= $mp->getColumnMap() . "\n";
             }
 
-            $exclude = array('del', 'orderBy', 'modified', 'created');
+            $exclude = ['del', 'orderBy', 'modified', 'created'];
             if (!in_array($mp->getName(), $exclude)) {
                 $data['form-maps'] .= $mp->getFormMap() . "\n";
             }
@@ -354,72 +263,54 @@ STR;
         return $data;
     }
 
-
-    /**
-     * @return \Tk\CurlyTemplate
-     */
-    protected function createMapperTemplate()
+    protected function createMapperTemplate(): \Tk\CurlyTemplate
     {
         $classTpl = <<<STR
 <?php
 namespace {db-namespace};
 
+use Tk\DataMap\DataMap;
+use Tk\Db\Mapper\Filter;
+use Tk\Db\Mapper\Mapper;
+use Tk\Db\Mapper\Result;
 use Tk\Db\Tool;
-use Tk\Db\Map\ArrayObject;
 use Tk\DataMap\Db;
 use Tk\DataMap\Form;
-use Bs\Db\Mapper;
-use Tk\Db\Filter;
 
 /**
- * @author {author-name}
- * @created {date}
- * @link {author-www}
- * @license Copyright {year} {author-biz}
+ * @author {author-biz} <{author-www}>
  */
 class {classname}Map extends Mapper
 {
 
-    /**
-     * @return \Tk\DataMap\DataMap
-     */
-    public function getDbMap()
+    public function getDbMap(): DataMap
     {
         if (!\$this->dbMap) { {set-table}
-            \$this->dbMap = new \Tk\DataMap\DataMap();
+            \$this->dbMap = new DataMap();
 {column-maps}
         }
         return \$this->dbMap;
     }
 
-    /**
-     * @return \Tk\DataMap\DataMap
-     */
-    public function getFormMap()
+    public function getFormMap(): DataMap
     {
         if (!\$this->formMap) {
-            \$this->formMap = new \Tk\DataMap\DataMap();
+            \$this->formMap = new DataMap();
 {form-maps}
         }
         return \$this->formMap;
     }
 
     /**
-     * @param array|Filter \$filter
-     * @param Tool \$tool
-     * @return ArrayObject|{classname}[]
+     * @return Result|{classname}[]
      * @throws \Exception
      */
-    public function findFiltered(\$filter, \$tool = null)
+    public function findFiltered(array|Filter \$filter, ?Tool \$tool = null): Result
     {
-        return \$this->selectFromFilter(\$this->makeQuery(\Tk\Db\Filter::create(\$filter)), \$tool);
+        return \$this->selectFromFilter(\$this->makeQuery(Filter::create(\$filter)), \$tool);
     }
 
-    /**
-     * @param Filter \$filter
-     * @return Filter
-     */
-    public function makeQuery(Filter \$filter)
+    public function makeQuery(Filter \$filter): Filter
     {
         \$filter->appendFrom('%s a', \$this->quoteParameter(\$this->getTable()));
 
@@ -438,11 +329,12 @@ class {classname}Map extends Mapper
             \$w = \$this->makeMultiQuery(\$filter['id'], 'a.id');
             if (\$w) \$filter->appendWhere('(%s) AND ', \$w);
         }
-{filter-queries}
+
         if (!empty(\$filter['exclude'])) {
             \$w = \$this->makeMultiQuery(\$filter['exclude'], 'a.id', 'AND', '!=');
             if (\$w) \$filter->appendWhere('(%s) AND ', \$w);
         }
+{filter-queries}
 
         return \$filter;
     }
@@ -455,11 +347,9 @@ STR;
 
 
     /**
-     * @param array $params any overrides for the curly template
-     * @return string
      * @throws \Exception
      */
-    public function makeTable($params = array())
+    public function makeTable(array $params = []): string
     {
         $tpl = $this->createTableTemplate();
         $data = $this->arrayMerge($this->getDefaultData(), $this->processTable(), $params);
@@ -467,27 +357,20 @@ STR;
     }
 
     /**
-     * @param array $params any overrides for the curly template
-     * @return string
      * @throws \Exception
      */
-    public function makeManager($params = array())
+    public function makeManager(array $params = []): string
     {
         $tpl = $this->createTableManagerTemplate();
         $data = $this->getDefaultData();
-//        $classData = $this->processTable();
-//        $data = array_merge($data, $classData, $params);
         return $tpl->parse($data);
     }
 
-    /**
-     * @return array
-     */
-    protected function processTable()
+    protected function processTable(): array
     {
-        $data = array(
+        $data = [
             'cell-list' => ''
-        );
+        ];
         foreach ($this->tableInfo as $col) {
             $mp = ModelProperty::create($col);
             if ($mp->getName() == 'del') continue;
@@ -497,10 +380,7 @@ STR;
         return $data;
     }
 
-    /**
-     * @return \Tk\CurlyTemplate
-     */
-    protected function createTableManagerTemplate()
+    protected function createTableManagerTemplate(): \Tk\CurlyTemplate
     {
         $classTpl = <<<STR
 <?php
@@ -511,20 +391,14 @@ use Dom\Template;
 use Tk\Request;
 
 /**
- * TODO: Add Route to routes.php:
- *      \$routes->add('{table-id}-manager', Route::create('/staff/{namespace-url}Manager.html', '{controller-namespace}\{classname}\Manager::doDefault'));
+ * Add Route to routes.php:
+ *     \$routes->add('{table-id}-manager', new Routing\Route('/{namespace-url}Manager.html', ['_controller' => '{controller-namespace}\{classname}\Manager::doDefault']));
  *
- * @author {author-name}
- * @created {date}
- * @link {author-www}
- * @license Copyright {year} {author-biz}
+ * @author {author-biz} <{author-www}>
  */
 class Manager extends AdminManagerIface
 {
 
-    /**
-     * Manager constructor.
-     */
     public function __construct()
     {
         \$this->setPageTitle('{name} Manager');
@@ -540,7 +414,7 @@ class Manager extends AdminManagerIface
         \$this->getTable()->setEditUrl(\Bs\Uri::createHomeUrl('/{namespace-url}Edit.html'));
         \$this->getTable()->init();
 
-        \$filter = array();
+        \$filter = [];
         \$this->getTable()->setList(\$this->getTable()->findList(\$filter));
     }
 
@@ -583,10 +457,7 @@ STR;
         return $tpl;
     }
 
-    /**
-     * @return \Tk\CurlyTemplate
-     */
-    protected function createTableTemplate()
+    protected function createTableTemplate(): \Tk\CurlyTemplate
     {
         $classTpl = <<<STR
 <?php
@@ -606,10 +477,7 @@ use Tk\Table\Cell;
  *   \$template->appendTemplate(\$tableTemplate);
  * </code>
  *
- * @author {author-name}
- * @created {date}
- * @link {author-www}
- * @license Copyright {year} {author-biz}
+ * @author {author-biz} <{author-www}>
  */
 class {classname} extends \Bs\TableIface
 {
@@ -627,7 +495,7 @@ class {classname} extends \Bs\TableIface
 
         // Actions
         //\$this->appendAction(\Tk\Table\Action\Link::createLink('New {name}', \Bs\Uri::createHomeUrl('/{namespace-url}Edit.html'), 'fa fa-plus'));
-        //\$this->appendAction(\Tk\Table\Action\ColumnSelect::create()->setUnselected(array('modified', 'created')));
+        //\$this->appendAction(\Tk\Table\Action\ColumnSelect::create()->setUnselected(['modified', 'created']));
         \$this->appendAction(\Tk\Table\Action\Delete::create());
         \$this->appendAction(\Tk\Table\Action\Csv::create());
 
@@ -643,7 +511,7 @@ class {classname} extends \Bs\TableIface
      * @return \Tk\Db\Map\ArrayObject|\{db-namespace}\{classname}[]
      * @throws \Exception
      */
-    public function findList(\$filter = array(), \$tool = null)
+    public function findList(\$filter = [], \$tool = null)
     {
         if (!\$tool) \$tool = \$this->getTool();
         \$filter = array_merge(\$this->getFilterValues(), \$filter);
@@ -658,11 +526,9 @@ STR;
     }
 
     /**
-     * @param array $params any overrides for the curly template
-     * @return string
      * @throws \Exception
      */
-    public function makeForm($params = array())
+    public function makeForm(array $params = []): string
     {
         $tpl = $this->createFormIfaceTemplate();
         if (!empty($params['modelForm']))
@@ -671,28 +537,21 @@ STR;
         return $tpl->parse($data);
     }
 
-
     /**
-     * @param array $params any overrides for the curly template
-     * @return string
      * @throws \Exception
      */
-    public function makeEdit($params = array())
+    public function makeEdit(array $params = []): string
     {
         $tpl = $this->createFormEditTemplate();
         $data = $this->getDefaultData();
         return $tpl->parse($data);
     }
 
-    /**
-     * @param bool $isModelForm
-     * @return array
-     */
-    protected function processForm($isModelForm = false)
+    protected function processForm(bool $isModelForm = false): array
     {
-        $data = array(
+        $data = [
             'field-list' => ''
-        );
+        ];
         foreach ($this->tableInfo as $col) {
             $mp = ModelProperty::create($col);
             if ($mp->getName() == 'del' || $mp->getName() == 'modified' || $mp->getName() == 'created' || $mp->getName() == 'id') continue;
@@ -701,11 +560,7 @@ STR;
         return $data;
     }
 
-
-    /**
-     * @return \Tk\CurlyTemplate
-     */
-    protected function createFormEditTemplate()
+    protected function createFormEditTemplate(): \Tk\CurlyTemplate
     {
         $classTpl = <<<STR
 <?php
@@ -719,10 +574,7 @@ use Tk\Request;
  * TODO: Add Route to routes.php:
  *      \$routes->add('{table-id}-edit', Route::create('/staff/{namespace-url}Edit.html', '{controller-namespace}\{classname}\Edit::doDefault'));
  *
- * @author {author-name}
- * @created {date}
- * @link {author-www}
- * @license Copyright {year} {author-biz}
+ * @author {author-biz} <{author-www}>
  */
 class Edit extends AdminEditIface
 {
@@ -787,10 +639,7 @@ STR;
         return $tpl;
     }
 
-    /**
-     * @return \Tk\CurlyTemplate
-     */
-    protected function createFormIfaceTemplate()
+    protected function createFormIfaceTemplate(): \Tk\CurlyTemplate
     {
         $classTpl = <<<PHP
 <?php
@@ -809,10 +658,7 @@ use Tk\Form;
  *   \$template->appendTemplate('form', \$formTemplate);
  * </code>
  *
- * @author {author-name}
- * @created {date}
- * @link {author-www}
- * @license Copyright {year} {author-biz}
+ * @author {author-biz} <{author-www}>
  */
 class {classname} extends \Bs\FormIface
 {
@@ -824,8 +670,8 @@ class {classname} extends \Bs\FormIface
     {
 
 {field-list}
-        \$this->appendField(new Event\Submit('update', array(\$this, 'doSubmit')));
-        \$this->appendField(new Event\Submit('save', array(\$this, 'doSubmit')));
+        \$this->appendField(new Event\Submit('update', [\$this, 'doSubmit']));
+        \$this->appendField(new Event\Submit('save', [\$this, 'doSubmit']));
         \$this->appendField(new Event\Link('cancel', \$this->getBackUrl()));
 
     }
@@ -842,7 +688,7 @@ class {classname} extends \Bs\FormIface
 
     /**
      * @param Form \$form
-     * @param Event\Iface \$event
+     * @param Event\FieldInterface \$event
      * @throws \Exception
      */
     public function doSubmit(\$form, \$event)
@@ -892,10 +738,7 @@ PHP;
         return $tpl;
     }
 
-    /**
-     * @return \Tk\CurlyTemplate
-     */
-    protected function createModelFormTemplate()
+    protected function createModelFormTemplate(): \Tk\CurlyTemplate
     {
         $classTpl = <<<STR
 <?php
@@ -914,11 +757,7 @@ use Tk\Form;
  *   \$template->appendTemplate('form', \$formTemplate);
  * </code>
  *
- * @author {author-name}
- * @created {date}
- * @link {author-www}
- * @license Copyright {year} {author-biz}
- * @note Use this if you want to pass the form in rather than inherit the form
+ * @author {author-biz} <{author-www}>
  */
 class {classname} extends \Bs\ModelForm
 {
@@ -930,8 +769,8 @@ class {classname} extends \Bs\ModelForm
     {
 
 {field-list}
-        \$this->getForm()->appendField(new Event\Submit('update', array(\$this, 'doSubmit')));
-        \$this->getForm()->appendField(new Event\Submit('save', array(\$this, 'doSubmit')));
+        \$this->getForm()->appendField(new Event\Submit('update', [\$this, 'doSubmit']));
+        \$this->getForm()->appendField(new Event\Submit('save', [\$this, 'doSubmit']));
         \$this->getForm()->appendField(new Event\Link('cancel', \$this->getBackUrl()));
 
     }
@@ -948,7 +787,7 @@ class {classname} extends \Bs\ModelForm
 
     /**
      * @param Form \$form
-     * @param Event\Iface \$event
+     * @param Event\FieldInterface \$event
      * @throws \Exception
      */
     public function doSubmit(\$form, \$event)

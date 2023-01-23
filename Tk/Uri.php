@@ -127,7 +127,7 @@ class Uri implements \IteratorAggregate
      *
      * @param string|Uri|null $spec
      */
-    public static function create($spec = null): Uri
+    public static function create(string|Uri|null $spec = null): Uri
     {
         if ($spec instanceof Uri) return clone $spec;
         return new static($spec);
@@ -136,7 +136,7 @@ class Uri implements \IteratorAggregate
 
     public function __serialize()
     {
-        return serialize(array('spec' => $this->spec));
+        return serialize(['spec' => $this->spec]);
     }
 
     public function __unserialize($data)

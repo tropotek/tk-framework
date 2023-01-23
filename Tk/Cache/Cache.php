@@ -22,7 +22,7 @@ use Tk\Cache\Adapter\Iface;
  *       // there was no cache version, we are fetching fresh data
  *       // assuming there is a database connection
  *       $result = mysql_query("SELECT * FROM users");
- *       $data = array();
+ *       $data = [];
  *       // fetching all the data and putting it in an array
  *       while($row = mysql_fetch_assoc($result)) { $data[] = $row; }
  *       // Storing the data in the cache for 10 minutes

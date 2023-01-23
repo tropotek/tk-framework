@@ -7,9 +7,7 @@ use \Tk\Db\Pdo;
 /**
  * Class PdoTest
  *
- * @author Michael Mifsud <http://www.tropotek.com/>
- * @see http://www.tropotek.com/
- * @license Copyright 2016 Michael Mifsud
+ * @author Tropotek <http://www.tropotek.com/>
  */
 class PdoTest extends \PHPUnit_Framework_TestCase
 {
@@ -33,7 +31,7 @@ class PdoTest extends \PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
-        $dbcon = array();
+        $dbcon = [];
         //$dbcon = Config::getInstance()->getGroup('db');
         if (!$dbcon || !$dbcon['db.name']) {
             // Stop here and mark this test as incomplete.
@@ -45,7 +43,7 @@ class PdoTest extends \PHPUnit_Framework_TestCase
         Config::getInstance()->set('db', $dbcon);
 
         // Create a table add some data
-        $sql = file_get_contents(dirname(__FILE__) . '/data/ztest.sql');
+        $sql = file_get_contents(__DIR__ . '/data/ztest.sql');
         if ($this->db->hasTable(self::TBL)) {
             $sql = sprintf('DROP TABLE `%s`', self::TBL);
             $this->db->query($sql);
@@ -60,7 +58,7 @@ class PdoTest extends \PHPUnit_Framework_TestCase
     {
         // Delete table and data....
         if (!$this->db) return;
-        
+
         $sql = sprintf('DROP TABLE `%s`', self::TBL);
         $this->db->query($sql);
     }

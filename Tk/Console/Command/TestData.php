@@ -12,9 +12,12 @@ class TestData extends Console
 
     // ******************************************* //
 
-    public function createUniqueEmail(): string
+    public function createUniqueEmail(string $username = ''): string
     {
-        return hash('crc32', microtime()) . '@' . $this->createDomain();
+        if (!$username) {
+            $username = hash('crc32', microtime());
+        }
+        return $username . '@' . $this->createDomain();
     }
 
     public function createEmail(): string
@@ -52,7 +55,7 @@ class TestData extends Console
     {
         return $this->createName() . ' ' . $this->createName();
     }
-    
+
     public function createName(): string
     {
         $names = array('Andy','Bart','Charles','Denny','Eveline','Femke','Gismo','Harold','Imke','Jan','Kees','Lissane','Mark','Norris','Opa','Pieter','Quebec','Ralf','Stephen','Tamara','Ursula','Verdinant','Willem','Xanté','Yankee','Zuly');
@@ -61,7 +64,7 @@ class TestData extends Console
 
     public function createNumberStr(int $len = 8): string
     {
-        $str = array();
+        $str = [];
         for ($i = 0; $i < $len ;$i++) {
             $str[] = rand(0, 9);
         }

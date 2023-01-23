@@ -22,7 +22,7 @@ class ErrorHandler
     public function __construct(LoggerInterface $log = null)
     {
         $this->log = $log;
-        set_error_handler(array($this, 'errorHandler'));
+        set_error_handler([$this, 'errorHandler']);
     }
 
     public static function instance(LoggerInterface $log = null): ErrorHandler
@@ -38,7 +38,7 @@ class ErrorHandler
      *
      * @throws Exception
      */
-    public function errorHandler(string $errno, string $errstr, string $errfile, string $errline, array $errcontext = array()): bool
+    public function errorHandler(string $errno, string $errstr, string $errfile, string $errline, array $errcontext = []): bool
     {
         $e = null;
         switch($errno)

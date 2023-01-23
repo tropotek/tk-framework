@@ -6,9 +6,7 @@ use \Tk\Config as Config;
 /**
  * Class ConfigTest
  *
- * @author Michael Mifsud <http://www.tropotek.com/>
- * @see http://www.tropotek.com/
- * @license Copyright 2016 Michael Mifsud
+ * @author Tropotek <http://www.tropotek.com/>
  */
 class ConfigTest extends \PHPUnit_Framework_TestCase
 {
@@ -41,7 +39,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     {
 
         $config = Config::getInstance();
-        $this->assertStringStartsWith($config->getSitePath(), dirname(__FILE__));
+        $this->assertStringStartsWith($config->getSitePath(), __DIR__);
     }
 
     public function testNset()

@@ -37,7 +37,7 @@ class Collection extends \Tk\Collection
 
     public function __sleep()
     {
-        return array('table', 'del');
+        return ['table', 'del'];
     }
 
     public function __wakeup()
@@ -49,7 +49,7 @@ class Collection extends \Tk\Collection
      * Creates an instance of the Data object and loads that data from the DB
      * By Default this method uses the Config::getDb() to get the database.
      */
-    public static function create(string $table): Collection
+    public static function create(string $table): static
     {
         $obj = new static($table);
         $obj->setDb($obj->getFactory()->getDb());
@@ -62,7 +62,7 @@ class Collection extends \Tk\Collection
         return $this->db;
     }
 
-    public function setDb($db): Collection
+    public function setDb($db): static
     {
         $this->db = $db;
         return $this;
@@ -79,7 +79,7 @@ class Collection extends \Tk\Collection
     /**
      * Load this object with all available data from the DB
      */
-    public function load(): Collection
+    public function load(): static
     {
         try {
             if (!$this->getDb()->hasTable($this->getTable())) return $this;
@@ -99,7 +99,7 @@ class Collection extends \Tk\Collection
     /**
      * Save modified Data to the DB
      */
-    public function save(): Collection
+    public function save(): static
     {
         try {
             foreach($this as $k => $v) {
@@ -115,7 +115,7 @@ class Collection extends \Tk\Collection
     /**
      * Remove item from collection
      */
-    public function remove(string $key): Collection
+    public function remove(string $key): static
     {
         if ($this->has($key)) {
             $this->del[$key] = $this->get($key);
@@ -138,7 +138,7 @@ class Collection extends \Tk\Collection
     /**
      * Set a single data value in the Database
      */
-    protected function dbSet(string $key, $value): Collection
+    protected function dbSet(string $key, $value): static
     {
         $this->installTable();
         $value = $this->encodeValue($value);
@@ -202,7 +202,7 @@ class Collection extends \Tk\Collection
      * Remove a value from the DB
      * @throws Exception
      */
-    protected function dbDelete(string $key): Collection
+    protected function dbDelete(string $key): static
     {
         if (!$this->getDb()->hasTable($this->getTable())) return $this;
         $sql = sprintf('DELETE FROM %s WHERE %s = %s',
@@ -217,51 +217,38 @@ class Collection extends \Tk\Collection
     /**
      * This sql should be DB generic (tested on: mysql, pgsql)
      *
-     * @return string|int|bool
+     * @return bool Return true if the table was created
      */
-    public function installTable(bool $sqlOnly = false)
+    public function installTable(): bool
     {
         try {
-            if (!$sqlOnly && $this->getDb()->hasTable($this->getTable())) return true;
-            $tbl = $this->getDb()->quoteParameter($this->getTable());
+            if ($this->getDb()->hasTable($this->getTable())) return false;
+            $this->getDb()->exec($this->getTableSql($this->getDb()->getDriver()));
 
-            $sql = '';
-            if ($this->getDb()->getDriver() == 'mysql') {
-                $sql = <<<SQL
+        } catch (\Exception $e) { \Tk\Log::error($e->__toString());}
+        return true;
+    }
+
+    public function getTableSql(string $type = 'mysql'): string
+    {
+        $tbl = $this->getDb()->quoteParameter($this->getTable());
+        return match ($type) {
+            'mysql' => <<<SQL
     CREATE TABLE IF NOT EXISTS $tbl (
       `key` VARCHAR(128) NOT NULL PRIMARY KEY,
       `value` TEXT
     ) ENGINE=InnoDB;
-SQL;
-            } else if ($this->getDb()->getDriver() == 'pgsql') {
-                $sql = <<<SQL
+SQL,
+            default => <<<SQL
     CREATE TABLE IF NOT EXISTS $tbl (
       "key" VARCHAR(128) NOT NULL PRIMARY KEY,
       "value" TEXT
     );
-SQL;
-            } else if ($this->getDb()->getDriver() == 'sqlite') {
-                $sql = <<<SQL
-    CREATE TABLE IF NOT EXISTS $tbl (
-      "key" VARCHAR(128) NOT NULL PRIMARY KEY,
-      "value" TEXT
-    );
-SQL;
-            }
-
-            if (!$sqlOnly) {
-                return $this->getDb()->exec($sql);
-            }
-        } catch (\Exception $e) { \Tk\Log::error($e->__toString());}
-
-        return $sql;
+SQL,
+        };
     }
 
-    /**
-     * @param string $value
-     * @return mixed
-     */
-    protected function decodeValue($value)
+    protected function decodeValue(string $value): mixed
     {
         if (preg_match('/^(___JSON:)/', $value)) {
             $value = json_decode(substr($value, 8));
@@ -269,11 +256,7 @@ SQL;
         return $value;
     }
 
-    /**
-     * @param mixed $value
-     * @return string
-     */
-    protected function encodeValue($value): string
+    protected function encodeValue(mixed $value): string
     {
         if (is_array($value) || is_object($value)) {
             $value = '___JSON:' . json_encode($value);

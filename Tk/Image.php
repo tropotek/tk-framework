@@ -63,13 +63,13 @@ class Image
             imagefill($obj->image, 0, 0, $c);
         }
 
-        $obj->originalInfo = array(
+        $obj->originalInfo = [
             'width' => $width,
             'height' => $height,
             'orientation' => $obj->getOrientation(),
             'format' => 'png',
             'mime' => 'image/png'
-        );
+        ];
         return $obj;
     }
 
@@ -105,13 +105,13 @@ class Image
                 break;
         }
 
-        $this->originalInfo = array(
+        $this->originalInfo = [
             'width' => $info[0],
             'height' => $info[1],
             'orientation' => $this->getOrientation(),
             'format' => preg_replace('/^image\//', '', $info['mime']),
             'mime' => $info['mime']
-        );
+        ];
 
         $this->width = $info[0];
         $this->height = $info[1];
@@ -203,14 +203,14 @@ class Image
 
     /**
      * Get info about the original image:
-     *    array(
+     *    [
      *        width => 320,
      *        height => 200,
      *        orientation => ['portrait', 'landscape', 'square'],
-     *        exif => array(...),
+     *        exif => [...],
      *        mime => ['image/jpeg', 'image/gif', 'image/png'],
      *        format => ['jpeg', 'gif', 'png']
-     *    )
+     *    ]
      */
     public function getOriginalInfo(): array
     {
@@ -304,9 +304,9 @@ class Image
         }
         // see http://php.net/manual/en/function.exif-read-data.php
         if (preg_match('@\x12\x01\x03\x00\x01\x00\x00\x00(.)\x00\x00\x00@', file_get_contents($filename), $matches)) {
-            return array('Orientation' => ord($matches[1]));
+            return ['Orientation' => ord($matches[1])];
         }
-        return array();
+        return [];
     }
 
     /**
@@ -438,9 +438,9 @@ class Image
     {
         // Determine crop size
         if ($x2 < $x1)
-            list($x1, $x2) = array($x2, $x1);
+            list($x1, $x2) = [$x2, $x1];
         if ($y2 < $y1)
-            list($y1, $y2) = array($y2, $y1);
+            list($y1, $y2) = [$y2, $y1];
         $cropWidth = $x2 - $x1;
         $cropHeight = $y2 - $y1;
 

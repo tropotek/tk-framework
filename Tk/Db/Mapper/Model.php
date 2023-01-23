@@ -9,7 +9,7 @@ use Tk\Traits\SystemTrait;
 /**
  * @author Tropotek <http://www.tropotek.com/>
  */
-abstract class Model implements ModelIface
+abstract class Model implements ModelInterface
 {
     use SystemTrait;
 
@@ -98,7 +98,7 @@ abstract class Model implements ModelIface
         $type = $this->getMapper()->getPrimaryType();
         if ($type) {
             // get the value from the object
-            return ObjectUtil::getObjectPropertyValue($this, $type->getProperty());
+            return ObjectUtil::getPropertyValue($this, $type->getProperty());
         }
         return null;
     }
@@ -134,13 +134,10 @@ abstract class Model implements ModelIface
     }
 
 
-    protected function dispatchDbEvent(string $evevntName, ?DbEvent $e = null): DbEvent
+    protected function dispatchEvent(DbEvent $e, string $eventName): DbEvent
     {
         if (!$e) $e = new DbEvent($this);
-        $dispatcher = $this->getSystem()->getFactory()->getEventDispatcher();
-        if ($dispatcher) {
-            $dispatcher->dispatch($e, $evevntName);
-        }
+        $this->getSystem()->getFactory()->getEventDispatcher()?->dispatch($e, $eventName);
         return $e;
     }
 
@@ -150,13 +147,13 @@ abstract class Model implements ModelIface
      */
     public function insert(): int
     {
-        $e = $this->dispatchDbEvent(DbEvents::MODEL_INSERT);
+        $e = $this->dispatchEvent(new DbEvent($this), DbEvents::MODEL_INSERT);
         $id = 0;
         if (!$e->isQueryStopped()) {
             $id = $this->getMapper()->insert($this);
             $this->setId($id);
         }
-        $this->dispatchDbEvent(DbEvents::MODEL_POST_INSERT, $e);
+        $this->dispatchEvent($e, DbEvents::MODEL_POST_INSERT);
         return $id;
     }
 
@@ -166,12 +163,12 @@ abstract class Model implements ModelIface
      */
     public function update(): int
     {
-        $e = $this->dispatchDbEvent(DbEvents::MODEL_UPDATE);
+        $e = $this->dispatchEvent(new DbEvent($this), DbEvents::MODEL_UPDATE);
         $r = 0;
         if (!$e->isQueryStopped()) {
             $r = $this->getMapper()->update($this);
         }
-        $this->dispatchDbEvent(DbEvents::MODEL_POST_UPDATE, $e);
+        $this->dispatchEvent($e, DbEvents::MODEL_POST_UPDATE);
         return $r;
     }
 
@@ -183,11 +180,11 @@ abstract class Model implements ModelIface
      */
     public function save()
     {
-        $e = $this->dispatchDbEvent(DbEvents::MODEL_SAVE);
+        $e = $this->dispatchEvent(new DbEvent($this), DbEvents::MODEL_SAVE);
         if (!$e->isQueryStopped()) {
             $this->getMapper()->save($this);
         }
-        $this->dispatchDbEvent(DbEvents::MODEL_POST_SAVE, $e);
+        $this->dispatchEvent($e,DbEvents::MODEL_POST_SAVE);
     }
 
     /**
@@ -196,12 +193,12 @@ abstract class Model implements ModelIface
      */
     public function delete(): int
     {
-        $e = $this->dispatchDbEvent(DbEvents::MODEL_DELETE);
+        $e = $this->dispatchEvent(new DbEvent($this),DbEvents::MODEL_DELETE);
         $r = 0;
         if (!$e->isQueryStopped()) {
             $r = self::getMapperInstance()->delete($this);
         }
-        $this->dispatchDbEvent(DbEvents::MODEL_POST_DELETE, $e);
+        $this->dispatchEvent($e,DbEvents::MODEL_POST_DELETE);
         return $r;
     }
 

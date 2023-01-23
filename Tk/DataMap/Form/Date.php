@@ -1,7 +1,7 @@
 <?php
 namespace Tk\DataMap\Form;
 
-use Tk\DataMap\DataTypeIface;
+use Tk\DataMap\DataTypeInterface;
 
 
 /**
@@ -9,7 +9,7 @@ use Tk\DataMap\DataTypeIface;
  *
  * @author Tropotek <http://www.tropotek.com/>
  */
-class Date extends DataTypeIface
+class Date extends DataTypeInterface
 {
 
     /**
@@ -31,7 +31,7 @@ class Date extends DataTypeIface
         return $this;
     }
 
-    public function getKeyValue(array $array)
+    public function getKeyValue(array $array): mixed
     {
         $value = parent::getKeyValue($array);
         if (!$value) $value = null;
@@ -42,7 +42,7 @@ class Date extends DataTypeIface
         return $value;
     }
 
-    public function getPropertyValue(object $object)
+    public function getPropertyValue(object $object): mixed
     {
         $value = parent::getPropertyValue($object);
         if (!$value) $value = null;
