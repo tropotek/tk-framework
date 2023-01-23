@@ -131,9 +131,11 @@ class System
     {
         static $version = null;
         if (!$version) {
-            $version = '1.0';
+            $version = '1.0.0';
             if (is_file($this->getConfig()->getBasePath() . '/version')) {
                 $version = file_get_contents($this->getConfig()->getBasePath() . '/version');
+            } else if (is_file($this->getConfig()->getBasePath() . '/version.md')) {
+                $version = file_get_contents($this->getConfig()->getBasePath() . '/version.md');
             }
         }
         return $version;
