@@ -28,7 +28,7 @@ namespace Tk;
  * @see http://www.php-fig.org/psr/psr-7/#3-5-psr-http-message-uriinterface
  * @license Copyright 2007 Michael Mifsud
  */
-class Uri implements \Serializable, \IteratorAggregate
+class Uri implements \IteratorAggregate
 {
     /**
      * @var string
@@ -141,15 +141,14 @@ class Uri implements \Serializable, \IteratorAggregate
     }
 
 
-    public function serialize()
+    public function __serialize()
     {
-        return serialize(array('spec' => $this->spec));
+        return ['spec' => $this->spec];
     }
     
-    public function unserialize($data)
+    public function __unserialize($data)
     {
-        $arr = unserialize($data);
-        $this->spec = $arr['spec'];
+        $this->spec = $data['spec'];
         $this->init();
     }
 
