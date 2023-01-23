@@ -2,21 +2,27 @@
 namespace Tk\Db;
 
 
-use Tk\Traits\SingletonTrait;
-
 /**
- * The Tk PDO Database driver
+ * PDO Database driver
+ *
+ * TODO:
+ *     We should stop inheriting the PDO object and make it an instance variable.
+ *     Trying to keep this class compatible with PHP versions is becoming combersom.
+ *     By not extending PDO we can more easly refactor this object and maintain backwards compatability for
+ *     different PHP versions
  *
  * @author Tropotek <http://www.tropotek.com/>
  */
-class Pdo
+class Pdo extends \PDO
 {
-    use SingletonTrait;
 
     /**
      * The key for the option to enable ANSI mode for MySQL
      */
     const ANSI_QUOTES = 'mysql.ansi.quotes';
+
+
+    private static array $_INSTANCE = [];
 
     /**
      * Default timeout value in seconds for communications with the database.
@@ -28,7 +34,6 @@ class Pdo
      */
     public static bool $Q_LOG = true;
 
-    protected \PDO $pdo;
 
     protected string $parameterQuote = '';
 
@@ -59,20 +64,20 @@ class Pdo
      */
     public function __construct(string $dsn, string $username, string $password, array $options = [])
     {
-        $this->pdo = new \Pdo($dsn, $username, $password, $options);
+        parent::__construct($dsn, $username, $password, $options);
         $this->options = $options;
         $this->options['user'] = $username;
         $this->options['pass'] = $password;
         $this->driver = $this->options['type'];
 
-        $this->getPdo()->setAttribute(\PDO::ATTR_STATEMENT_CLASS, [\Tk\Db\PdoStatement::class, [$this]]); // Not compat with PHP 5.3
+        $this->setAttribute(\PDO::ATTR_STATEMENT_CLASS, [\Tk\Db\PdoStatement::class, [$this]]); // Not compat with PHP 5.3
 
         $regs = [];
         preg_match('/^([a-z]+):(([a-z]+)=([a-z0-9_-]+))+/i', $dsn, $regs);
         $this->dbName = $regs[4];
 
-        $this->getPdo()->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-        $this->getPdo()->setAttribute(\PDO::ATTR_TIMEOUT, self::$PDO_TIMEOUT);
+        $this->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        $this->setAttribute(\PDO::ATTR_TIMEOUT, self::$PDO_TIMEOUT);
 
         // Get mysql to emulate standard DB's
         if ($this->getDriver() == 'mysql') {
@@ -163,15 +168,6 @@ class Pdo
         return $db;
     }
 
-    /**
-     * Get the PHP PDO db connection
-     *
-     * @return \PDO
-     */
-    public function getPdo(): \PDO
-    {
-        return $this->pdo;
-    }
 
     /**
      * Method to return an array of connection attributes.
@@ -184,7 +180,7 @@ class Pdo
         $return = [];
         foreach ($attributes as $val) {
             try {
-                $return["PDO::ATTR_$val"] = $this->getPdo()->getAttribute(constant("PDO::ATTR_$val")) . "\n";
+                $return["PDO::ATTR_$val"] = $this->getAttribute(constant("PDO::ATTR_$val")) . "\n";
             } catch (\Exception $e) { }
         }
         return $return;
@@ -242,7 +238,8 @@ class Pdo
      */
     public function prepare(string $query, array $options = []): \PDOStatement|PdoStatement|false
     {
-        return $this->getPdo()->prepare($query, $options);
+        $result = parent::prepare($query, $options);
+        return $result;
     }
 
     /**
@@ -258,40 +255,56 @@ class Pdo
         $this->setLastQuery($query);
 
         try {
-            $result = $this->getPdo()->exec($query);
+            $result = parent::exec($query);
         } catch (\Exception $e) {
-            $info = $this->getPdo()->errorInfo();
+            $info = $this->errorInfo();
             throw new Exception(end($info), $e->getCode(), $e, $query);
         }
 
         if ($result === false) {
-            $info = $this->getPdo()->errorInfo();
-            throw new Exception(end($info), $this->getPdo()->errorCode(), null, $query);
+            $info = $this->errorInfo();
+            throw new Exception(end($info), $this->errorCode(), null, $query);
         }
 
         return $result;
     }
 
     /**
+     * @param string $query
+     * @param int $mode
+     * @param null $arg3
+     * @param array $ctorargs
+     * @return mixed
+     * @deprecated
+     */
+    public function tkQuery($query, $mode = PDO::ATTR_DEFAULT_FETCH_MODE, ...$fetchModeArgs)
+    {
+        return call_user_func_array(array($this, 'query'), func_get_args());
+    }
+
+
+    /**
      * Executes an SQL statement, returning a result set as a PDOStatement object
      *
      * @param string $query
      * @param int $mode The fetch mode must be one of the PDO::FETCH_* constants.
-     * @param mixed $fetchModeArgs The second and following parameters are the same as the parameters for PDOStatement::setFetchMode.
-     * @return PDOStatement|false \PDO::query() returns a PDOStatement object, or FALSE on failure.
+     * @param mixed $arg3 The second and following parameters are the same as the parameters for PDOStatement::setFetchMode.
+     * @param array $ctorargs
+     * @return PDOStatement \PDO::query() returns a PDOStatement object, or FALSE on failure.
      * @throws Exception
      */
-    public function query($query, $mode = \PDO::ATTR_DEFAULT_FETCH_MODE, ...$fetchModeArgs): \PDOStatement|false
+    public function query($query, $mode = PDO::ATTR_DEFAULT_FETCH_MODE, ...$fetchModeArgs): \PDOStatement|false
     {
         $this->setLastQuery($query);
         try {
-            $result = call_user_func_array([$this->getPdo(), 'query'], func_get_args());
+            // Use of "parent" in callables is deprecated
+            $result = call_user_func_array(array('parent', 'query'), func_get_args());
             if ($result === false) {
-                $info = $this->getPdo()->errorInfo();
-                throw new Exception(end($info), $this->getPdo()->errorCode(), null, $query);
+                $info = $this->errorInfo();
+                throw new Exception(end($info), $this->errorCode(), null, $query);
             }
         } catch (\Exception $e) {
-            $info = $this->getPdo()->errorInfo();
+            $info = $this->errorInfo();
             throw new Exception(end($info), $e->getCode(), $e, $query);
         }
         return $result;
@@ -307,7 +320,7 @@ class Pdo
     public function beginTransaction(): bool
     {
         if (!$this->transactionCounter++) {
-            return $this->getPdo()->beginTransaction();
+            return parent::beginTransaction();
         }
         return $this->transactionCounter >= 0;
     }
@@ -321,7 +334,7 @@ class Pdo
     public function commit(): bool
     {
         if (!--$this->transactionCounter) {
-            return $this->getPdo()->commit();
+            return parent::commit();
         }
         return $this->transactionCounter >= 0;
     }
@@ -336,7 +349,7 @@ class Pdo
     {
         if ($this->transactionCounter >= 0) {
             $this->transactionCounter = 0;
-            return $this->getPdo()->rollBack();
+            return parent::rollBack();
         }
         $this->transactionCounter = 0;
         return false;
@@ -356,7 +369,7 @@ class Pdo
             $countSql = 'SELECT FOUND_ROWS()';
             $result = $this->query($countSql);
             if ($result === false) {
-                $info = $this->getPdo()->errorInfo();
+                $info = $this->errorInfo();
                 throw new Exception(end($info));
             }
             $result->setFetchMode(\PDO::FETCH_ASSOC);
@@ -369,7 +382,7 @@ class Pdo
             $countSql = "SELECT COUNT(*) as i FROM ($cSql) as t";
             $result = $this->query($countSql);
             if ($result === false) {
-                $info = $this->getPdo()->errorInfo();
+                $info = $this->errorInfo();
                 throw new Exception(end($info));
             }
             $result->setFetchMode(\PDO::FETCH_ASSOC);
@@ -560,12 +573,12 @@ class Pdo
             $row = $result->fetch();
             return ((int)$row['lastId']) + 1;
         } if ($this->getDriver() == 'pgsql') {
-        $sql = sprintf('SELECT * FROM %s_%s_seq', $table, $pKey);
-        $result = $this->prepare($sql);
-        $result->execute();
-        $row = $result->fetch(\PDO::FETCH_ASSOC);
-        return ((int)$row['last_value']) + 1;
-    }
+            $sql = sprintf('SELECT * FROM %s_%s_seq', $table, $pKey);
+            $result = $this->prepare($sql);
+            $result->execute();
+            $row = $result->fetch(\PDO::FETCH_ASSOC);
+            return ((int)$row['last_value']) + 1;
+        }
 
         // Not as accurate as I would like and should not be relied upon.
         $sql = sprintf('SELECT %s FROM %s ORDER BY %s DESC LIMIT 1;', self::quoteParameter($pKey), self::quoteParameter($table), self::quoteParameter($pKey));
@@ -574,17 +587,6 @@ class Pdo
         $row = $result->fetch();
         self::$Q_LOG = true;
         return $row[$pKey]+1;
-    }
-
-    /**
-     *
-     * @param string $str
-     * @param int $type
-     * @return string
-     */
-    public function quote(string $str, int $type = \Pdo::PARAM_STR): string
-    {
-        return $this->getPdo()->quote($str, $type);
     }
 
     /**

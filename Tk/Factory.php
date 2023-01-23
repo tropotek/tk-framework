@@ -24,6 +24,7 @@ use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\RouteCollection;
 use Tk\Cache\Adapter\Filesystem;
 use Tk\Cache\Cache;
+use Tk\Db\Db;
 use Tk\Db\Pdo;
 use Tk\Log\MonologLineFormatter;
 use Tk\Mail\Gateway;
@@ -91,7 +92,7 @@ class Factory extends Collection
                 $sessionDbHandler = null;
                 if ($this->getDb() && $this->getConfig()->get('session.db_enable')) { //
                     $sessionDbHandler = new PdoSessionHandler(
-                        $this->getDb(), $this->getConfig()->getGroup('session', true)
+                        $this->getDb()->getPdo(), $this->getConfig()->getGroup('session', true)
                     );
                     try {
                         $sessionDbHandler->createTable();
