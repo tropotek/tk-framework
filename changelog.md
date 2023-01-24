@@ -1,5 +1,12 @@
 #CHANGELOG#
 
+Ver 3.2.28 [2023-01-24]:
+-------------------------------
+  - Tagging and releasing branch `3.2` with version `3.2.26`.
+  - Tagging and releasing branch `3.2` with version `3.2.24`.
+  - Merge branch '3.2' of https://github.com/tropotek/tk-framework into 3.2
+
+
 Ver 3.2.26 [2022-12-08]:
 -------------------------------
   - Tagging and releasing branch `3.2` with version `3.2.24`.
