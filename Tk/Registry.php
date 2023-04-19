@@ -6,7 +6,7 @@ use Tk\Traits\SingletonTrait;
 /**
  * This will hold any persistent system configuration values.
  *
- * After changing any Registry values remember to call save() st store the updated registry.
+ * After changing any Registry values remember to call save() to store the updated registry.
  *
  * NOTE: Objects should not be saved in the Registry storage, only primitive types.
  *
@@ -68,6 +68,5 @@ class Registry extends Db\Collection
         $this->save();
         return $this;
     }
-
 
 }

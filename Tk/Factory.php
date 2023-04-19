@@ -24,7 +24,6 @@ use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\RouteCollection;
 use Tk\Cache\Adapter\Filesystem;
 use Tk\Cache\Cache;
-use Tk\Db\Db;
 use Tk\Db\Pdo;
 use Tk\Log\MonologLineFormatter;
 use Tk\Mail\Gateway;
