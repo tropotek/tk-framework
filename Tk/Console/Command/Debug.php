@@ -27,11 +27,11 @@ class Debug extends Console
         }
 
         try {
-            $bak = new SqlBackup($this->getFactory()->getDb());
-
-            $this->writeComment('  - Executing Debug SQL: ' . $this->getConfig()->get('debug.sql'));
-            $debugSql = $this->getSystem()->makePath($this->getConfig()->get('debug.sql'));
-            $bak->restore($debugSql);
+            $devFile = $this->getSystem()->makePath($this->getConfig()->get('debug.script'));
+            if (is_file($devFile)) {
+                $this->writeComment('  - Setup dev environment: ' . $this->getConfig()->get('debug.script'));
+                include($devFile);
+            }
         } catch (\Exception $e) {
             $this->writeError($e->getMessage());
             return Command::FAILURE;

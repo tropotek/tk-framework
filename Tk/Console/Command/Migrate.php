@@ -66,10 +66,10 @@ class Migrate extends Console
                 }
             }
 
-            $debugSqlFile = $config->getBasePath() . $config->get('debug.sql');
-            if ($config->isDebug() && is_file($debugSqlFile)) {
-                $this->writeBlue('Apply dev sql updates');
-                $dbBackup->restore($debugSqlFile);
+            $devFile = $this->getSystem()->makePath($config->get('debug.script'));
+            if ($config->isDebug() && is_file($devFile)) {
+                $this->writeBlue('  - Setup dev environment: ' . $config->get('debug.script'));
+                include($devFile);
             }
 
             $this->write('Migration Complete.');

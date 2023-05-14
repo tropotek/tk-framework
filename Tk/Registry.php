@@ -35,7 +35,7 @@ class Registry extends Db\Collection
                 $this->set('system.site.name', 'Tropotek Lib');
                 $this->set('system.site.shortName', 'TkLib');
                 $this->set('system.email', 'webmaster@'.$this->getRequest()->getHost());
-                $this->set('site.maintenance.enabled', false);
+                $this->set('system.maintenance.enabled', false);
                 $this->save();
             }
         } catch (\Exception $e) { \Tk\Log::error($e->__toString());}
@@ -59,12 +59,12 @@ class Registry extends Db\Collection
 
     public function isMaintenanceMode(): bool
     {
-        return (bool)$this->get('site.maintenance.enabled', false);
+        return (bool)$this->get('system.maintenance.enabled', false);
     }
 
     public function setMaintenanceMode(bool $b = true): static
     {
-        $this->set('site.maintenance.enabled', $b);
+        $this->set('system.maintenance.enabled', $b);
         $this->save();
         return $this;
     }

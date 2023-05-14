@@ -297,6 +297,11 @@ class Pdo
         return $result;
     }
 
+    public function lastInsertId(?string $name = null): false|string
+    {
+        return $this->getPdo()->lastInsertId($name);
+    }
+
     /**
      *  Initiates a transaction
      *

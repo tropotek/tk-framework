@@ -748,7 +748,7 @@ class Uri implements \IteratorAggregate
                 header('302: Found HTTP/1.1', true, $code);
                 break;
             case 303:
-                // dont cache, always use GET
+                // don't cache, always use GET
                 header('303: See Other HTTP/1.1', true, $code);
                 break;
             case 304:
@@ -768,7 +768,13 @@ class Uri implements \IteratorAggregate
 
         $arr = debug_backtrace();
         $arr = $arr[0];
-        \Tk\Log::notice($code . ' REDIRECT `'.$this->toString().'` Called ' . str_replace(self::$BASE_URL, '', $arr['file']) . ':' . $arr['line']);
+        $msg = sprintf('%s REDIRECT `%s` called from %s:%s',
+            $code,
+            $this->toString(),
+            str_replace(Config::instance()->getBasePath(), '', $arr['file']),
+            $arr['line']
+        );
+        \Tk\Log::notice($msg);
 
         /*CLOSE THE SESSION WITH USER DATA*/
         session_write_close();

@@ -46,7 +46,7 @@ class Log
     public static function log(string $level, string $message, array $context = [])
     {
         $l = self::instance()->getLogger();
-        $l->log($level,self::getCallerLine(2) . $message, $context);
+        $l->log($level, self::getCallerLine(2) . $message, $context);
     }
 
     private static function getCallerLine(int $shift = 2): string
