@@ -79,6 +79,13 @@ class DataMap
         return $this;
     }
 
+    public function getArray(object $srcObject, array $ignoreKeyTypes = []): array
+    {
+        $array = [];
+        $this->loadArray($array, $srcObject, $ignoreKeyTypes);
+        return $array;
+    }
+
     /**
      * Add a DataType to this data map
      *

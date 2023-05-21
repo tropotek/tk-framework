@@ -460,7 +460,7 @@ abstract class Mapper
      * Returns the name of the column to mark deleted. (update col to 1)
      * returns null if we are to physically delete the record
      */
-    public function getDeleteType(): DataTypeInterface
+    public function getDeleteType(): ?DataTypeInterface
     {
         return $this->deleteType;
     }

@@ -34,9 +34,6 @@ use Tk\Traits\SingletonTrait;
 use Tk\Traits\SystemTrait;
 use Tk\Console\Command;
 
-/**
- * @author Tropotek <http://www.tropotek.com/>
- */
 class Factory extends Collection
 {
     use SingletonTrait;
@@ -291,9 +288,6 @@ class Factory extends Collection
         return $this->get('mailGateway');
     }
 
-    /**
-     * @return Application
-     */
     public function getConsole(): Application
     {
         if (!$this->has('console')) {
