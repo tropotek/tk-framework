@@ -237,8 +237,8 @@ class Factory extends Collection
 
             $logger = new NullLogger();
             if (
-                !$this->getRequest()->query->has(Log::NO_LOG) &&             // No log when using nolog in query param
-                !str_contains($this->getRequest()->getRequestUri(), '/api/')     // No logs for api calls (comment out when testing API`s)
+                !$this->getRequest()->query->has(Log::NO_LOG)             // No log when using nolog in query param
+                 && !str_contains($this->getRequest()->getRequestUri(), '/api/')     // No logs for api calls (comment out when testing API`s)
             ) {
                 $logger = new Logger('system', [], $processors);
                 if (is_writable(ini_get('error_log'))) {
