@@ -14,16 +14,16 @@ class File extends DataTypeInterface
     public function getKeyValue(array $array): mixed
     {
         $value = parent::getKeyValue($array);
-        vd($value);
-
+        $value .= '';
+        vd($array);
         return $value;
     }
 
     public function getPropertyValue(object $object): mixed
     {
         $value = parent::getPropertyValue($object);
+        $value .= '';
         vd($value);
-
         return $value;
     }
 
