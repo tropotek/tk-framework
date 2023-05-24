@@ -1,6 +1,7 @@
 <?php
 namespace Tk\Traits;
 
+use App\Db\User;
 use Tk\Config;
 use Tk\Factory;
 use Tk\Registry;
