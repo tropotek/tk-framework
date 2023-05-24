@@ -7,6 +7,7 @@ use Tk\Traits\SystemTrait;
 
 /**
  * A collection object that can store its values in a DB table.
+ * This replaces the old Data store object
  *
  * The main difference to the Collection object is that you will need
  * to supply a table name and PDO object to create an instance.

@@ -152,9 +152,6 @@ abstract class Mapper
         return $this->getDataMappers()->get(self::DATA_MAP_TABLE, new DataMap());
     }
 
-
-
-
     public function insert(Model $obj): int
     {
         if (!$this->getPrimaryType()) {
