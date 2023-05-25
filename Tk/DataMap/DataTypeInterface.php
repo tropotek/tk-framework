@@ -1,12 +1,8 @@
 <?php
 namespace Tk\DataMap;
 
-
 use Tk\ObjectUtil;
 
-/**
- * @author Tropotek <http://www.tropotek.com/>
- */
 abstract class DataTypeInterface
 {
 
@@ -24,6 +20,11 @@ abstract class DataTypeInterface
      * Store any attributes related to this data type for the mapper
      */
     protected array $attributes = [];
+
+    /**
+     * Can this value can be null
+     */
+    protected bool $nullable = false;
 
 
     /**
@@ -95,6 +96,20 @@ abstract class DataTypeInterface
     public function getKey(): string
     {
         return $this->key;
+    }
+
+    /**
+     * If true then the data type can be null
+     */
+    public function isNullable(): bool
+    {
+        return $this->nullable;
+    }
+
+    public function setNullable(bool $nullable): DataTypeInterface
+    {
+        $this->nullable = $nullable;
+        return $this;
     }
 
     /**

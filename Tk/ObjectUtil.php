@@ -43,13 +43,13 @@ class ObjectUtil
      * look for the private property, at which point you can access and/or
      * modify its value as needed. (modify this method if needed)
      */
-    public static function getPropertyValue(object $object, string $name): mixed
+    public static function getPropertyValue(object $object, string $property): mixed
     {
         try {
-            $reflect = new \ReflectionClass($object);
-            $property = $reflect->getProperty($name);
-            $property->setAccessible(true);
-            return $property->getValue($object);
+            $rClass = new \ReflectionClass($object);
+            $rProperty = $rClass->getProperty($property);
+            $rProperty->setAccessible(true);
+            return $rProperty->getValue($object);
         } catch (\ReflectionException $e) {
             Log::warning($e->__toString());
         }
@@ -59,13 +59,13 @@ class ObjectUtil
     /**
      * This is useful for loading an object with data from data sources such as DB or JSON etc...
      */
-    public static function setPropertyValue(object $object, string $name, mixed $value = null): mixed
+    public static function setPropertyValue(object $object, string $property, mixed $value = null): mixed
     {
         try {
-            $reflect = new \ReflectionClass($object);
-            $property = $reflect->getProperty($name);
-            $property->setAccessible(true);
-            $property->setValue($object, $value);
+            $rClass = new \ReflectionClass($object);
+            $rProperty = $rClass->getProperty($property);
+            $rProperty->setAccessible(true);
+            $rProperty->setValue($object, $value);
         } catch (\ReflectionException $e) {
             Log::warning($e->__toString());
         }

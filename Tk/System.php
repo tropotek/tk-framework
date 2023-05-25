@@ -59,7 +59,7 @@ class System
      * If no DIRECTORY_SEPARATOR is at the beginning of the $path one will be prepended
      *
      */
-    public function makePath(string $path): string
+    public function makePath(string $path, string $prependPath = ''): string
     {
         $path = rtrim($path, DIRECTORY_SEPARATOR);
         $path = str_replace($this->getConfig()->getBasePath(), '', $path); // Prevent recurring
