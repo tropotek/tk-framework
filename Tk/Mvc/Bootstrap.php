@@ -10,10 +10,8 @@ class Bootstrap
     use SingletonTrait;
     use SystemTrait;
 
-
     public function init()
     {
-
         // Apply all php config settings to php
         foreach ($this->getConfig()->getGroup('php', true) as $k => $v) {
             @ini_set($k, $v);
