@@ -1,6 +1,7 @@
 <?php
 namespace Tk\Db\Mapper;
 
+use Tk\CollectionTrait;
 use Tk\Db\Event\DbEvent;
 use Tk\Db\Pdo;
 use Tk\ObjectUtil;
@@ -9,6 +10,7 @@ use Tk\Traits\SystemTrait;
 abstract class Model implements ModelInterface
 {
     use SystemTrait;
+    use CollectionTrait;
 
     /**
      * Object models should have a related mapper class

@@ -5,8 +5,6 @@ use Tk\DataMap\DataTypeInterface;
 
 /**
  * map a boolean type from a DB field to an object property
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class Boolean extends DataTypeInterface
 {

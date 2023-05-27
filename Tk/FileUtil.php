@@ -3,8 +3,6 @@ namespace Tk;
 
 /**
  * Tools for dealing with filesystem data
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class FileUtil
 {
@@ -12,19 +10,15 @@ class FileUtil
 
     /**
      * Default location of the mime.types remote file
-     * @var string
      */
-    public static $MIME_TYPES_URL      = 'http://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types';
+    public static string $MIME_TYPES_URL      = 'http://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types';
 
     /**
-     * @var string
+     * location to store the MIME cache file
      */
-    public static $CACHE_MIME_FILE     = ''; // TODO '/data/cache/mime.types';
+    public static string $CACHE_MIME_FILE     = '';
 
-    /**
-     * @var int
-     */
-    public static $CACHE_MIME_SEC      = 60 * 60 * 24 * 28;     // 28 day cache
+    public static int $CACHE_MIME_SEC      = 60 * 60 * 24 * 28;     // 28 day cache
 
 
     /**
@@ -307,7 +301,7 @@ class FileUtil
      */
     public static function getMimeArray(): array
     {
-        $mimeFile = self::$CACHE_MIME_FILE;
+        $mimeFile = self::$CACHE_MIME_FILE ?: Config::instance()->getCachePath() . '/mime.types';
         $mimeFileContents = null;
 
         // Update Cache

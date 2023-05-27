@@ -20,7 +20,6 @@ use Tk\Traits\SystemTrait;
  *
  * If your columns conflict, then you should modify the mapper or DB accordingly
  *
- * @author Tropotek <http://www.tropotek.com/>
  */
 abstract class Mapper
 {
@@ -167,6 +166,8 @@ abstract class Mapper
         foreach ($bind as $col => $value) {
             unset($bind[$col]);
             $bind[':' . $col] = $value;
+            $inf = $this->getTableInfo($col);
+            if ($inf['Extra']?? '' == 'current_timestamp()') continue;
         }
         $sql = 'INSERT INTO ' . $this->quoteParameter($this->table) . ' (' . $cols . ')  VALUES (:' . $values . ')';
         $this->getDb()->prepare($sql)->execute($bind);
@@ -191,9 +192,12 @@ abstract class Mapper
         $set = [];
         foreach ($bind as $col => $value) {
             unset($bind[$col]);
+            $inf = $this->getTableInfo($col);
+            if (str_contains($inf['Extra'] ?? '', 'on update')) continue;
             $bind[':' . $col] = $value;
             $set[] = $this->quoteParameter($col) . ' = :' . $col;
         }
+
         $where = $this->quoteParameter($this->getPrimaryType()->getKey()) . ' = ' . $bind[':' . $this->getPrimaryType()->getKey()];
         $sql = sprintf('UPDATE %s SET %s WHERE %s', $this->quoteParameter($this->table), implode(', ', $set), $where);
         $stmt = $this->getDb()->prepare($sql);

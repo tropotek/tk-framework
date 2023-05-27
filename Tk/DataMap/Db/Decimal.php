@@ -5,8 +5,6 @@ use Tk\DataMap\DataTypeInterface;
 
 /**
  * map a decimal/float type from a DB field to an object property
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class Decimal extends DataTypeInterface
 {

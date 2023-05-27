@@ -5,8 +5,6 @@ use Tk\DataMap\DataTypeInterface;
 
 /**
  * map a JSON string type from a DB field to an object property
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class Json extends DataTypeInterface
 {

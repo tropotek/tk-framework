@@ -27,9 +27,6 @@ class DataMap
 
     /**
      * If this is true objects without the defined property will be added dynamically
-     * @todo object dynamic properties are deprecated in php8.2
-     *       may need to put these values in some sort of param array that could
-     *       exist in all models?
      */
     protected bool $enableDynamic = true;
 
@@ -57,7 +54,8 @@ class DataMap
                     if ($this->isEnableDynamic()) {
                         $reflect = new \ReflectionClass($object);
                         if (!$reflect->hasProperty($key)) {
-                            $object->$key = $value;
+                            //$object->$key = $value;
+                            $object->set($key, $value);
                         }
                     }
                 } catch (\ReflectionException $e) { }

@@ -5,8 +5,6 @@ use Tk\DataMap\DataTypeInterface;
 
 /**
  * map a Money type from a DB field to an object property
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class Money extends DataTypeInterface
 {
