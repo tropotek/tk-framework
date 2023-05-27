@@ -7,11 +7,6 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Tk\Traits\SystemTrait;
 
-
-/**
- *
- * @author Tropotek <http://www.tropotek.com/>
- */
 class StartupHandler implements EventSubscriberInterface
 {
     use SystemTrait;

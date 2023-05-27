@@ -8,9 +8,6 @@ namespace Tk\Db;
  * method calls to fetch, fetchObject, etc will not be called
  * in this object, it has something to do with the way the PDOStatement
  * object uses it Traversable methods internally
- *
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class PdoStatement extends \PDOStatement
 {

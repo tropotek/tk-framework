@@ -1,13 +1,6 @@
 <?php
-/**
- * @author Tropotek <http://www.tropotek.com/>
- */
 namespace Tk;
 
-/**
- * The DateRime utilities
- *
- */
 class Date
 {
 
@@ -252,7 +245,7 @@ class Date
         }
         $start = new \DateTime($year.'-07-01 00:00:00', $date->getTimezone());
         $end = new \DateTime(($year+1).'-06-30 23:59:59', $date->getTimezone());
-        
+
         return [$start, $end];
     }
 
@@ -321,7 +314,7 @@ class Date
         if (!$date) $date = self::create();
         return new \DateTime($date->format('Y-12-31 23:59:59'), $date->getTimezone());
     }
-    
+
 
     /**
      * Returns the difference between this date and other in days.
@@ -338,7 +331,7 @@ class Date
     {
         return ceil(($from->getTimestamp() - $to->getTimestamp()) / self::HOUR);
     }
-    
+
     /**
      * Compares the value to another instance of date.
      * @return int Returns -1 if less than , 0 if equal to, 1 if greater than.
@@ -361,7 +354,7 @@ class Date
     {
         return (self::compareTo($from, $to) > 0);
     }
-    
+
     /**
      * Checks if the date value is greater than or equal the value of another instance of date.
      */

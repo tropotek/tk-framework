@@ -6,9 +6,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ViewEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
-/**
- * @author Tropotek <http://www.tropotek.com/>
- */
 class StringResponse implements EventSubscriberInterface
 {
     public function onView(ViewEvent $event)

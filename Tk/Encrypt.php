@@ -1,11 +1,8 @@
 <?php
 namespace Tk;
 
-
 /**
  * An object to handle basic string encryption based on a secret key
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class Encrypt
 {

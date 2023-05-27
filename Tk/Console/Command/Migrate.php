@@ -9,9 +9,6 @@ use Tk\Db\Util\SqlBackup;
 use Tk\Db\Util\SqlMigrate;
 use Tk\Log\ConsoleOutputLogger;
 
-/**
- * @author Tropotek <http://www.tropotek.com/>
- */
 class Migrate extends Console
 {
 

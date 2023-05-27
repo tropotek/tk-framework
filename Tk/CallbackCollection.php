@@ -3,8 +3,6 @@ namespace Tk;
 
 /**
  * Use this to store and execute an array of callback events for objects
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class CallbackCollection
 {
@@ -148,6 +146,5 @@ class CallbackCollection
     {
         return ksort($this->callbackList, \SORT_REGULAR);
     }
-
 
 }

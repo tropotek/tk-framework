@@ -1,10 +1,6 @@
 <?php
 namespace Tk\Debug;
 
-
-/**
- * @author Tropotek <http://www.tropotek.com/>
- */
 class StackTrace {
 
     /**

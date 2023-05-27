@@ -1,11 +1,6 @@
 <?php
 namespace Tk\Db\Util;
 
-
-
-/**
- * @author Tropotek <http://www.tropotek.com/>
- */
 class ModelProperty extends \Tk\Collection
 {
     const TYPE_ARRAY   = 'array';

@@ -2,7 +2,6 @@
 namespace Tk\Cache\Adapter;
 
 /**
- *
  * <code>
  * <?php
  *   $ad = new Tk\Cache\Adapter\MemCache();
@@ -18,16 +17,11 @@ namespace Tk\Cache\Adapter;
  *   echo($cache->fetch('my_key'));
  * ?>
  * </code>
- *
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class MemCache implements Iface
 {
 
     public \MemCache $connection;
-
-
 
     public function __construct()
     {
@@ -42,37 +36,22 @@ class MemCache implements Iface
         $this->connection->addServer($host, $port, true, $weight);
     }
 
-
-    /**
-     * Store
-     * @return bool Returns false if no value available
-     */
-    public function store(string $key, $data, int $ttl = 0)
+    public function store(string $key, mixed $data, int $ttl = 0): mixed
     {
         return $this->connection->set($key, $data, 0, $ttl);
     }
 
-    /**
-     * Fetch
-     *
-     * @return string|array|false Returns false if no value available
-     */
-    public function fetch(string $key)
+    public function fetch(string $key): mixed
     {
         return $this->connection->get($key);
     }
 
-    /**
-     * Delete
-     * @return bool Returns false if no value available
-     */
-    public function delete(string $key)
+    public function delete(string $key): mixed
     {
         return $this->connection->delete($key);
     }
 
     /**
-     * Clear the cache
      * TODO: Test if thats what flush means...????
      */
     public function clear(): bool

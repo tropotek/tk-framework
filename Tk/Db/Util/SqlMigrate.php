@@ -27,8 +27,6 @@ use Tk\Traits\SystemTrait;
  *      ...
  *  };
  * </code>
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class SqlMigrate
 {

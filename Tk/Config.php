@@ -12,10 +12,6 @@ use Tk\Traits\SystemTrait;
  * Query this when looking for a system configuration value.
  *
  * NOTE: No objects should be saved in the Config storage, only primitive types.
- *
- *
- * @author Tropotek <http://www.tropotek.com/>
- *
  */
 class Config extends Collection
 {
@@ -30,7 +26,6 @@ class Config extends Collection
 
         $this->set('base.path', $this->getSystem()->discoverBasePath());
         $this->set('base.url', $this->getSystem()->discoverBaseUrl());
-
     }
 
     /**

@@ -8,8 +8,6 @@ use Tk\Uri;
  * <code>
  *   \Tk\Ui\Link::create('Edit', \Tk\Uri::create('/dunno.html'))->addCss('btn-xs btn-success')->getHtml();
  * </code>
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class Link extends DomElement
 {

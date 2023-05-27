@@ -1,9 +1,6 @@
 <?php
 namespace Tk\Db\Mapper;
 
-/**
- * @author Tropotek <http://www.tropotek.com/>
- */
 class DbEvents
 {
 

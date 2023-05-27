@@ -1,10 +1,6 @@
 <?php
 namespace Tk;
 
-
-/**
- * @author Tropotek <http://www.tropotek.com/>
- */
 class Math
 {
 

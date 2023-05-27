@@ -10,9 +10,6 @@ use Tk\Db\Util\SqlBackup;
 use Tk\Exception;
 use Tk\Uri;
 
-/**
- * @author Tropotek <http://www.tropotek.com/>
- */
 class Mirror extends Console
 {
 

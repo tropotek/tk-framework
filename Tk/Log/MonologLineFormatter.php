@@ -5,10 +5,6 @@ use Monolog\Formatter\LineFormatter;
 use Tk\Log;
 use Tk\Traits\FactoryTrait;
 
-/**
- *
- * @author Tropotek <http://www.tropotek.com/>
- */
 class MonologLineFormatter extends LineFormatter
 {
     use FactoryTrait;
@@ -27,9 +23,6 @@ class MonologLineFormatter extends LineFormatter
         parent::__construct($format, $dateFormat, $allowInlineLineBreaks, $ignoreEmptyContextAndExtra);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function format(array $record) :string
     {
 
@@ -70,7 +63,7 @@ class MonologLineFormatter extends LineFormatter
      * @param $t
      * @return $this
      */
-    public function setScriptTime($t)
+    public function setScriptTime($t): static
     {
         if ($t)
             $this->scriptTime = $t;

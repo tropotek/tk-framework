@@ -17,8 +17,6 @@ use Symfony\Component\Routing\Loader\Configurator\CollectionConfigurator;
  *  o 100-config.php (same as the project root /src/config/config.php file)
  *
  * The route files are named with the same structure 50-routes.php and the site project is executed last.
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class ConfigLoader
 {
@@ -38,7 +36,6 @@ class ConfigLoader
             $basePath . '/src/config'
         ] + array_map(fn($path) => $vendorPath . '/' . $path . '/config' , $libPaths);
     }
-
 
     public static function create(): ConfigLoader
     {

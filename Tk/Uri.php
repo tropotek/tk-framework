@@ -4,7 +4,6 @@ namespace Tk;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
- *
  * Where:
  *
  * - __scheme__ defaults to http
@@ -19,8 +18,6 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
  *
  * If the static $BASE_URL is set this will be prepended to all relative paths
  * when creating a URI
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class Uri implements \IteratorAggregate
 {
@@ -84,7 +81,6 @@ class Uri implements \IteratorAggregate
     protected array $query = [];
 
 
-
     /**
      * Paths that do not start with a scheme section to the uri are prepended with the  self::$BASE_URL . '/' string
      */
@@ -124,10 +120,8 @@ class Uri implements \IteratorAggregate
      * <code>
      *   \Tk\Uri::create('http://example.com/test');
      * </code>
-     *
-     * @param string|Uri|null $spec
      */
-    public static function create(string|Uri|null $spec = null): Uri
+    public static function create(string|Uri|null $spec = null): null|Uri
     {
         if ($spec instanceof Uri) return clone $spec;
         return new static($spec);
@@ -279,7 +273,7 @@ class Uri implements \IteratorAggregate
     public function dirname(): Uri
     {
         $uri = clone $this;
-        if ($this->isApplicationScheme()) $uri;
+        if ($this->isApplicationScheme()) return $uri;
         $uri->spec = dirname($uri->getPath());
         $uri->setPath(dirname($uri->getPath()));
         return $uri;

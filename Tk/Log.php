@@ -11,8 +11,6 @@ use Tk\Traits\SingletonTrait;
  *
  * IE:
  *   \Tk\Log::instance($config->getLog());
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class Log
 {
@@ -43,7 +41,7 @@ class Log
     /**
      * Logs with an arbitrary level.
      */
-    public static function log(string $level, string $message, array $context = [])
+    public static function log(string $level, string $message, array $context = []): void
     {
         $l = self::instance()->getLogger();
         $l->log($level, self::getCallerLine(2) . $message, $context);
@@ -69,11 +67,10 @@ class Log
         return $this->logger;
     }
 
-
     /**
      * System is unusable.
      */
-    public static function emergency(string $message, array $context = [])
+    public static function emergency(string $message, array $context = []): void
     {
         self::log(LogLevel::EMERGENCY, $message, $context);
     }
@@ -84,7 +81,7 @@ class Log
      * Example: Entire website down, database unavailable, etc. This should
      * trigger the SMS alerts and wake you up.
      */
-    public static function alert(string $message, array $context = [])
+    public static function alert(string $message, array $context = []): void
     {
         self::log(LogLevel::ALERT, $message, $context);
     }
@@ -94,7 +91,7 @@ class Log
      *
      * Example: Application component unavailable, unexpected exception.
      */
-    public static function critical(string $message, array $context = [])
+    public static function critical(string $message, array $context = []): void
     {
         self::log(LogLevel::CRITICAL, $message, $context);
     }
@@ -103,7 +100,7 @@ class Log
      * Runtime errors that do not require immediate action but should typically
      * be logged and monitored.
      */
-    public static function error(string $message, array $context = [])
+    public static function error(string $message, array $context = []): void
     {
         self::log(LogLevel::ERROR, $message, $context);
     }
@@ -114,7 +111,7 @@ class Log
      * Example: Use of deprecated APIs, poor use of an API, undesirable things
      * that are not necessarily wrong.
      */
-    public static function warning(string $message, array $context = [])
+    public static function warning(string $message, array $context = []): void
     {
         self::log(LogLevel::WARNING, $message, $context);
     }
@@ -122,7 +119,7 @@ class Log
     /**
      * Normal but significant events.
      */
-    public static function notice(string $message, array $context = [])
+    public static function notice(string $message, array $context = []): void
     {
         self::log(LogLevel::NOTICE, $message, $context);
     }
@@ -132,7 +129,7 @@ class Log
      *
      * Example: User logs in, SQL logs.
      */
-    public static function info(string $message, array $context = [])
+    public static function info(string $message, array $context = []): void
     {
         self::log(LogLevel::INFO, $message, $context);
     }
@@ -140,7 +137,7 @@ class Log
     /**
      * Detailed debug information.
      */
-    public static function debug(string $message, array $context = [])
+    public static function debug(string $message, array $context = []): void
     {
         self::log(LogLevel::DEBUG, $message, $context);
     }

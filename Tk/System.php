@@ -12,9 +12,6 @@ use Tk\Traits\SingletonTrait;
  *
  * Extend this class in your application to add methods relating
  * to your local App system
- *
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class System
 {
@@ -25,7 +22,6 @@ class System
 
 
     protected function __construct() {  }
-
 
     /**
      * Return the root path to the site.

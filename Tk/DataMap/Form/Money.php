@@ -5,8 +5,6 @@ use Tk\DataMap\DataTypeInterface;
 
 /**
  * map a integer type from a form to an object property
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class Money extends DataTypeInterface
 {

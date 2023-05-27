@@ -1,7 +1,5 @@
 <?php
-
 namespace Tk;
-
 
 /**
  * An object to manage and convert RGB colors
@@ -9,8 +7,6 @@ namespace Tk;
  *  o HSL
  *  o CYMK
  *  o ASCII Console codes
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class Color
 {

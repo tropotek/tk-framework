@@ -3,8 +3,6 @@ namespace Tk;
 
 /**
  * An object filled with string utility methods.
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class Str
 {
@@ -107,10 +105,8 @@ class Str
 
     /**
      * Explode using multiple delimiters
-     *
-     * @return false|string[]|array
      */
-    public static function explode(array $delimiters, string $string)
+    public static function explode(array $delimiters, string $string): false|array
     {
         return explode( chr( 1 ), str_replace( $delimiters, chr( 1 ), $string ) );
     }
@@ -124,11 +120,10 @@ class Str
     }
 
     /**
-     * Substring without cutting a word boundry
+     * Substring without cutting a word boundary
      * tiny words (length 3 by default) are included on the result.
      * "..." is added if result do not reach original string length
      *
-     * @return string
      * @todo Lookup a more refined way of doing this
      */
     public static function wordcat(string $str, int $length, string $endStr = '', int $minword = 3): string

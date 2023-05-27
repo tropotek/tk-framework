@@ -4,9 +4,6 @@ namespace Tk;
 /**
  * This object is a utility object to perform actions
  * with class names and name-spacing issues.
- *
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class ObjectUtil
 {

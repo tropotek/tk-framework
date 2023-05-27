@@ -5,21 +5,13 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 
-/**
- *
- * @author Tropotek <http://www.tropotek.com/>
- */
 class ShutdownHandler implements EventSubscriberInterface
 {
-
     private LoggerInterface $logger;
 
     protected float $scriptStartTime = 0;
 
 
-    /**
-     *
-     */
     function __construct(LoggerInterface $logger, float $scriptStartTime = 0)
     {
         $this->logger = $logger;

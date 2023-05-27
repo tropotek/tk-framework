@@ -1,11 +1,7 @@
 <?php
 namespace Tk;
 
-
 /**
- *
- *
- * @author Tropotek <http://www.tropotek.com/>
  * @see http://git.snooey.net/Mirrors/php-slim/
  */
 class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
@@ -20,7 +16,6 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
             $this->set($key, $value);
         }
     }
-
 
     /**
      * Return items in the $src array where the keys match the $regex supplied
@@ -114,7 +109,6 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
         }
         return $str;
     }
-
 
     /**
      * Add a list of items to the collection

@@ -7,10 +7,6 @@ use Tk\Factory;
 use Tk\Registry;
 use Tk\System;
 
-/**
- *
- * @author Tropotek <http://www.tropotek.com/>
- */
 trait SystemTrait
 {
     /**

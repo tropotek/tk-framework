@@ -1,10 +1,6 @@
 <?php
 namespace Tk;
 
-
-/**
- * @author Tropotek <http://www.tropotek.com/>
- */
 class Image
 {
 
@@ -317,11 +313,11 @@ class Image
     {
         $angle = 0;
         $flip = false;
-        
+
         $exif = $this->getExif($this->filename);
         $orientation = 0;
         if (!empty($exif['Orientation'])) $orientation = $exif['Orientation'];
-        
+
         // Adjust orientation
         switch ($orientation) {
             case 2:
@@ -355,7 +351,7 @@ class Image
             default:
                 $angle = 0;
         }
-        
+
         if ($angle > 0)
             $this->rotate($angle);
         if ($flip)

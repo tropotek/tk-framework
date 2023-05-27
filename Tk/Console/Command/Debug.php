@@ -7,9 +7,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Tk\Console\Console;
 use Tk\Db\Util\SqlBackup;
 
-/**
- * @author Tropotek <http://www.tropotek.com/>
- */
 class Debug extends Console
 {
 

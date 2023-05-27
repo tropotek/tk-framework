@@ -5,8 +5,6 @@ use Tk\DataMap\DataTypeInterface;
 
 /**
  * map an array type from a form field to an object property
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class ArrayType extends DataTypeInterface
 {

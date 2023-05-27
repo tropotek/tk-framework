@@ -12,11 +12,6 @@ use Symfony\Component\Routing\Loader\PhpFileLoader;
 use Tk\Log;
 use Tk\Traits\SystemTrait;
 
-/**
- *
- *
- * @author Tropotek <http://www.tropotek.com/>
- */
 class FrontController extends HttpKernel
 {
     use SystemTrait;
@@ -31,7 +26,6 @@ class FrontController extends HttpKernel
             $factory->getArgumentResolver()
         );
     }
-
 
     public function handle(Request $request, int $type = HttpKernelInterface::MAIN_REQUEST, bool $catch = true): Response
     {

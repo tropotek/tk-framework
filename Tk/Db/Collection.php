@@ -14,8 +14,6 @@ use Tk\Traits\SystemTrait;
  *
  * After you have made your modifications you must call the Collection->save();
  * method so the data is saved from memory to the DB table.
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class Collection extends \Tk\Collection
 {

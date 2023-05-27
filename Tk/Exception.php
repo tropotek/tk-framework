@@ -1,38 +1,18 @@
 <?php
 namespace Tk;
 
-/**
- * Class Exception
- *
- * @author Tropotek <http://www.tropotek.com/>
- */
 class Exception extends \Exception
 {
 
     protected string $dump = '';
 
-    /**
-     * Construct the exception. Note: The message is NOT binary safe.
-     * @see http://php.net/manual/en/exception.construct.php
-     * @param string $message [optional] The Exception message to throw.
-     * @param int $code [optional] The Exception code.
-     * @param \Throwable $previous [optional] The previous throwable used for the exception chaining.
-     * @param string $dump
-     * @since 5.1.0
-     */
-    public function __construct($message = "", $code = 0, $previous = null, $dump = '')
+    public function __construct(string $message = '', int $code = 0, ?\Throwable $previous = null, string $dump = '')
     {
         parent::__construct($message, (int)$code, $previous);
         $this->dump = $dump;
     }
 
-    /**
-     * (PHP 5 &gt;= 5.1.0)<br/>
-     * String representation of the exception
-     * @see http://php.net/manual/en/exception.tostring.php
-     * @return string the string representation of the exception.
-     */
-    public function __toString()
+    public function __toString(): string
     {
         $str = parent::__toString();
         if ($this->dump != null) {

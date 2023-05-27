@@ -2,9 +2,9 @@
 namespace Tk;
 
 /**
- * 
+ *
  * This is a curly braces style template parser.
- * 
+ *
  * Note: Strings will replace all '{paramName}' curly params in the template
  *       However blocks can be use for repeating or choice elements '{blockName}...{/blockName}'
  *
@@ -33,16 +33,16 @@ namespace Tk;
  *
  * </code>
  *
- * 
- * 
+ *
+ *
  * Data Example 1: Using nested arrays for repeating blocks
- * 
+ *
  * <code>
- * 
+ *
  *   $tpl->parse(array(
  *     'headTitle' => 'This is the Head Title.',
  *     'pageTitle' => 'This is the main page title.',
- *     
+ *
  *     'rowBlock' => array(
  *       array(
  *         'dataBlock' => array(
@@ -75,11 +75,11 @@ namespace Tk;
  *     ),
  *     'dynamicData' => function ($curlyTemplate) use ($message) { return 'Some String...'; }   // <---- must return a string...
  *   );
- * 
+ *
  * </code>
- * 
- * Data Example 2: Use boolean values to show/hide blocks 
- * 
+ *
+ * Data Example 2: Use boolean values to show/hide blocks
+ *
  * <code>
  *   $tpl->parse([
  *       'headTitle' => 'This is the Head Title.',
@@ -90,8 +90,6 @@ namespace Tk;
  *     ]
  *   )
  * </code>
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class CurlyTemplate
 {

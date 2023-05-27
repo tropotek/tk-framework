@@ -7,10 +7,6 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 
-
-/**
- * @author Tropotek <http://www.tropotek.com/>
- */
 class LogExceptionListener implements EventSubscriberInterface
 {
 
@@ -85,5 +81,5 @@ class LogExceptionListener implements EventSubscriberInterface
             KernelEvents::EXCEPTION => 'onException'
         );
     }
-    
+
 }

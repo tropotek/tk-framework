@@ -1,5 +1,4 @@
 <?php
-
 namespace Tk\Mvc\EventListener;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -9,8 +8,6 @@ use Symfony\Component\HttpKernel\KernelEvents;
 /**
  * Let's say that we want to set the Content-Length of the Response if it is not already set
  * Must be run last
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class ContentLength implements EventSubscriberInterface
 {

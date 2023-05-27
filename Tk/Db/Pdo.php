@@ -1,13 +1,10 @@
 <?php
 namespace Tk\Db;
 
-
 use Tk\Traits\SingletonTrait;
 
 /**
  * The Tk PDO Database driver
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class Pdo
 {

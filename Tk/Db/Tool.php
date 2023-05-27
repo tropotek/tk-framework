@@ -1,14 +1,8 @@
 <?php
 namespace Tk\Db;
 
-
-/**
- *
- * @author Tropotek <http://www.tropotek.com/>
- */
 class Tool implements \Tk\InstanceKey
 {
-
     const PARAM_GROUP_BY = 'groupBy';
     const PARAM_HAVING = 'having';
     const PARAM_ORDER_BY = 'orderBy';
@@ -16,7 +10,6 @@ class Tool implements \Tk\InstanceKey
     const PARAM_OFFSET = 'offset';
     const PARAM_DISTINCT = 'distinct';
     const PARAM_FOUND_ROWS = 'foundRows';
-
 
     /**
      * Instance base id

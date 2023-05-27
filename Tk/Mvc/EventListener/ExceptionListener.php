@@ -10,15 +10,11 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Tk\Traits\SystemTrait;
 
-
-/**
- * @author tropotek <http://www.tropotek.com/>
- */
 class ExceptionListener implements EventSubscriberInterface
 {
     use SystemTrait;
 
-    protected $controller;
+    protected mixed $controller;
     protected bool $debug;
     /**
      * @var array<class-string, array{log_level: string|null, status_code: int<100,599>|null}>
@@ -28,7 +24,7 @@ class ExceptionListener implements EventSubscriberInterface
     /**
      * @param array<class-string, array{log_level: string|null, status_code: int<100,599>|null}> $exceptionsMapping
      */
-    public function __construct($controller, bool $debug = false, array $exceptionsMapping = [])
+    public function __construct(mixed $controller, bool $debug = false, array $exceptionsMapping = [])
     {
         $this->controller = $controller;
         $this->debug = $debug;
@@ -113,5 +109,5 @@ class ExceptionListener implements EventSubscriberInterface
             KernelEvents::RESPONSE => ['removeCspHeader', -128],
         ];
     }
-    
+
 }

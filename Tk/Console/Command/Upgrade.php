@@ -7,9 +7,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Tk\Console\Console;
 use Tk\Console\Exception;
 
-/**
- * @author Tropotek <http://www.tropotek.com/>
- */
 class Upgrade extends Console
 {
 

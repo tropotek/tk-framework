@@ -2,11 +2,8 @@
 
 namespace Tk\Db\Mapper;
 
-
 /**
  * Use this object to enhance your Mapper filtered queries
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class Filter extends \Tk\Collection
 {

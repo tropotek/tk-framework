@@ -1,14 +1,11 @@
 <?php
 namespace Tk\Debug {
-
     use Psr\Log\LoggerInterface;
     use Psr\Log\NullLogger;
     use Tk\Traits\SingletonTrait;
 
     /**
      * Class VarDum, used by the vd(), vdd() functions.
-     *
-     * @author Tropotek <http://www.tropotek.com/>
      */
     class VarDump
     {
@@ -148,7 +145,6 @@ namespace Tk\Debug {
 namespace { // global code
     use Tk\Debug\VarDump;
     use Tk\Factory;
-
 
     /**
      * logger Helper function

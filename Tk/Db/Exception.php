@@ -1,16 +1,10 @@
 <?php
 namespace Tk\Db;
 
-/**
- * Class Exception
- *
- * @author Tropotek <http://www.tropotek.com/>
- */
 class Exception extends \Tk\Exception
 {
 
     /**
-     * Exception constructor.
      * @param string $message
      * @param int $code
      * @param \Throwable|null $previous

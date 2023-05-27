@@ -1,14 +1,10 @@
 <?php
-
 namespace Tk\Mvc;
 
 use Dom\Template;
 use Tk\Traits\SingletonTrait;
 use Tk\Traits\SystemTrait;
 
-/**
- * @author Tropotek <http://www.tropotek.com/>
- */
 class Bootstrap
 {
     use SingletonTrait;

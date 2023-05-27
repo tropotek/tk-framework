@@ -3,11 +3,8 @@ namespace Tk\DataMap\Form;
 
 use Tk\DataMap\DataTypeInterface;
 
-
 /**
  * map a Date type from a form to an object property
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class Date extends DataTypeInterface
 {

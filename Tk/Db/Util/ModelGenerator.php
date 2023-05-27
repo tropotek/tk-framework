@@ -1,13 +1,8 @@
 <?php
 namespace Tk\Db\Util;
 
-
-
 use Tk\Exception;
 
-/**
- * @author Tropotek <http://www.tropotek.com/>
- */
 class ModelGenerator
 {
     protected ?\Tk\Db\Pdo $db = null;

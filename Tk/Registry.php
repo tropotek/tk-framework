@@ -9,8 +9,6 @@ use Tk\Traits\SingletonTrait;
  * After changing any Registry values remember to call save() to store the updated registry.
  *
  * NOTE: Objects should not be saved in the Registry storage, only primitive types.
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class Registry extends Db\Collection
 {

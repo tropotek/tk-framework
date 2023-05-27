@@ -6,9 +6,7 @@ use Tk\Ui\Traits\AttributesTrait;
 use Tk\Ui\Traits\CssTrait;
 
 /**
- * Use this object as a base class for renderable UI elements
- *
- * @author Tropotek <http://www.tropotek.com/>
+ * Use this object as a base class to render UI elements
  */
 abstract class Element
 {

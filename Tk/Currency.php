@@ -12,7 +12,6 @@ namespace Tk;
  * a Currency instance using the getInstance methods.
  *
  * @link http://www.iso.org/iso/en/prods-services/popstds/currencycodeslist.html
- * @author Tropotek <http://www.tropotek.com/>
  */
 class Currency
 {

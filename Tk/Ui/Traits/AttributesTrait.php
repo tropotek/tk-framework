@@ -10,9 +10,6 @@ namespace Tk\Ui\Traits;
  *
  * Rendered Result:
  *   <div id="test-id" style="color: #000;"></div>
- *
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 trait AttributesTrait
 {
