@@ -22,14 +22,11 @@
     }
   ],
   "autoload": {
-    "psr-0": {
+    "psr-4": {
       "Tk\\": ""
     },
     "files": [
       "Tk/Exception.php"
-    ],
-    "exclude-from-classmap": [
-      "/tests/"
     ]
   },
   "require": {
