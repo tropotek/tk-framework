@@ -23,7 +23,7 @@
   ],
   "autoload": {
     "psr-4": {
-      "Tk\\": ""
+      "Tk\\": "./"
     },
     "files": [
       "Tk/Exception.php"
