@@ -90,7 +90,6 @@ class Config extends Collection
         return $this->getSystem()->makeUrl($this->get('path.template'));
     }
 
-
     public function isDebug(): bool
     {
         return $this->get('debug', false);

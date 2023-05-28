@@ -76,7 +76,8 @@ class ExceptionListener implements EventSubscriberInterface
             return;
         }
 
-        $r = new \ReflectionFunction(\Closure::fromCallable($event->getController()));
+        //$r = new \ReflectionFunction(\Closure::fromCallable($event->getController()));
+        $r = new \ReflectionFunction($event->getController()(...));
         $r = $r->getParameters()[$k] ?? null;
 
         if ($r && (!($r = $r->getType()) instanceof \ReflectionNamedType)) {

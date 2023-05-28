@@ -2,7 +2,10 @@
 namespace Tk\Mvc\EventListener;
 
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Console\ConsoleEvents;
+use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Tk\Traits\SystemTrait;
@@ -11,35 +14,26 @@ class StartupHandler implements EventSubscriberInterface
 {
     use SystemTrait;
 
-    public static $SCRIPT_START  =  '---------------------- Start ----------------------';
-    public static $SCRIPT_END    =  '--------------------- Shutdown --------------------';
-    public static $SCRIPT_LINE   =  '---------------------------------------------------';
+    public static string $SCRIPT_START  =  '---------------------- Start ----------------------';
+    public static string $SCRIPT_END    =  '--------------------- Shutdown --------------------';
+    public static string $SCRIPT_LINE   =  '---------------------------------------------------';
 
-    public static $SCRIPT_CALLED = false;
+    public static bool $SCRIPT_CALLED = false;
 
     private LoggerInterface $logger;
 
 
-    /**
-     * @param LoggerInterface $logger
-     */
     function __construct(LoggerInterface $logger)
     {
         $this->logger = $logger;
     }
 
-    /**
-     * @param \Symfony\Component\HttpKernel\Event\RequestEvent $event
-     */
-    public function onInit($event)
+    public function onInit(RequestEvent $event)
     {
         $this->init($event->getRequest());
     }
 
-    /**
-     * @param \Symfony\Component\Console\Event\ConsoleCommandEvent $event
-     */
-    public function onCommand($event)
+    public function onCommand(ConsoleCommandEvent $event)
     {
         $this->init();
     }
@@ -78,10 +72,7 @@ class StartupHandler implements EventSubscriberInterface
         $this->out(self::$SCRIPT_LINE);
     }
 
-    /**
-     * @param \Symfony\Component\HttpKernel\Event\RequestEvent $event
-     */
-    public function onRequest($event)
+    public function onRequest(RequestEvent $event)
     {
         if ($event->getRequest()->attributes->has('_route')) {
             $controller = $event->getRequest()->attributes->get('_controller');
@@ -97,14 +88,11 @@ class StartupHandler implements EventSubscriberInterface
         $this->logger->info($str);
     }
 
-    /**
-     * @return array
-     */
     public static function getSubscribedEvents()
     {
         return [
             KernelEvents::REQUEST => [['onInit', 255], ['onRequest']],
-            \Symfony\Component\Console\ConsoleEvents::COMMAND  => 'onCommand'
+            ConsoleEvents::COMMAND  => 'onCommand'
         ];
     }
 

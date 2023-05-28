@@ -3,6 +3,7 @@ namespace Tk\Mvc\EventListener;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpKernel\Event\TerminateEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 class ShutdownHandler implements EventSubscriberInterface
@@ -26,10 +27,7 @@ class ShutdownHandler implements EventSubscriberInterface
         $this->out(StartupHandler::$SCRIPT_END . \PHP_EOL);
     }
 
-    /**
-     * @param \Symfony\Component\HttpKernel\Event\TerminateEvent $event
-     */
-    public function onTerminate($event)
+    public function onTerminate(TerminateEvent $event)
     {
         if (!StartupHandler::$SCRIPT_CALLED) return;
         $this->out(StartupHandler::$SCRIPT_LINE);
@@ -54,9 +52,6 @@ class ShutdownHandler implements EventSubscriberInterface
         return (string)(microtime(true) - $this->scriptStartTime);
     }
 
-    /**
-     * @return array
-     */
     public static function getSubscribedEvents()
     {
         return array(KernelEvents::TERMINATE => 'onTerminate');
