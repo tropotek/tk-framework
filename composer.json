@@ -22,8 +22,8 @@
     }
   ],
   "autoload": {
-    "psr-4": {
-      "Tk\\": "./"
+    "psr-0": {
+      "Tk\\": ""
     },
     "files": [
       "Tk/Exception.php"
