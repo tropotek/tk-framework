@@ -271,7 +271,6 @@ class FileUtil
 
     /**
      * Get the mime-type of a file based on its extension
-     *
      */
     public static function getMimeType(string $filename): string
     {
@@ -296,9 +295,6 @@ class FileUtil
         return 'application/octet-stream';
     }
 
-    /**
-     *
-     */
     public static function getMimeArray(): array
     {
         $mimeFile = self::$CACHE_MIME_FILE ?: Config::instance()->getCachePath() . '/mime.types';
