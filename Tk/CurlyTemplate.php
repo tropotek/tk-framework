@@ -122,8 +122,7 @@ class CurlyTemplate
     {
         $template = $this->template;
         $template = $this->parseRecursive($template, $data);
-        $template = $this->parseBlock($template, $data);
-        return $template;
+        return $this->parseBlock($template, $data);
     }
 
     /**
