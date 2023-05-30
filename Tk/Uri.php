@@ -130,13 +130,12 @@ class Uri implements \IteratorAggregate
 
     public function __serialize()
     {
-        return serialize(['spec' => $this->spec]);
+        return ['spec' => $this->spec];
     }
 
     public function __unserialize($data)
     {
-        $arr = unserialize($data);
-        $this->spec = $arr['spec'];
+        $this->spec = $data['spec'];
         $this->init();
     }
 
