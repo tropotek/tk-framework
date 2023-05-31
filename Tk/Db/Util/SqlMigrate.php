@@ -68,29 +68,34 @@ class SqlMigrate
      * in order they are supplied in the array
      * @throws \Exception
      */
-    public function migrateList(array $migrateList): void
+    public function migrateList(array $migrateList): array
     {
+        $list = [];
         $this->install();
 
         foreach ($migrateList as $path) {
             if (is_file($path)) {
                 $this->migrateFile($path);
+                $list[] = $path;
             } else {
-                $this->migratePath($path);
+                $list += $this->migratePath($path);
             }
         }
+
+        return $list;
     }
 
     /**
      * Run the migration script and find all non executed sql files within the path
      * @throws \Exception
      */
-    public function migratePath(string $path): void
+    public function migratePath(string $path): array
     {
         try {
             $this->install();
 
             $list = $this->search($path);
+
             // Find any migration files
             foreach ($list as $file) {
                 $this->migrateFile($file);
@@ -101,6 +106,8 @@ class SqlMigrate
             throw new \Tk\Exception('Path: ' . $path, $e->getCode(), $e);
         }
         $this->deleteBackup();
+
+        return $list;
     }
 
     /**
