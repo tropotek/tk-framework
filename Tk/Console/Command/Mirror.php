@@ -79,7 +79,7 @@ class Mirror extends Console
                 $this->write('Import mirror file to this DB');
                 $dbBackup->restore($mirrorSqlFile);
 
-                // Run all static scripts views.sql, triggers.sql, procedures.sql, functions.sql
+                // Run all static scripts views.sql, triggers.sql, procedures.sql, events.sql
                 foreach ($config->get('db.migrate.static') as $file) {
                     $path = "{$config->getBasePath()}/src/config/sql/{$file}";
                     if (is_file($path)) {
