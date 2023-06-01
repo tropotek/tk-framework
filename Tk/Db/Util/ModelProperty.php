@@ -85,9 +85,9 @@ class ModelProperty extends \Tk\Collection
 
     public function getDefinition(): string
     {
-        $tpl = <<<TPL
+        $tpl = <<<PHP
             public %s $%s%s;
-        TPL;
+        PHP;
         $value = $this->getDefaultValue();
         if (!is_null($value)) $value = ' = ' . $value;
         return sprintf($tpl,
@@ -117,7 +117,7 @@ class ModelProperty extends \Tk\Collection
             $method = 'is';
 
         $tpl = <<<TPL
-            public function %s%s() : %s
+            public function %s%s(): %s
             {
                 return \$this->%s;
             }
@@ -137,7 +137,7 @@ class ModelProperty extends \Tk\Collection
             $classname = 'static';
 
         $tpl = <<<TPL
-            public function set%s(%s \$%s) : %s
+            public function set%s(%s \$%s): %s
             {
                 \$this->%s = \$%s;
                 return \$this;
@@ -197,7 +197,7 @@ class ModelProperty extends \Tk\Collection
             $tag = ', ' . $this->quote('key');
 
         $tpl = <<<TPL
-                    \$this->dbMap->addDataType(new %s(%s%s)%s);
+                    \$map->addDataType(new %s(%s%s)%s);
         TPL;
 
         return sprintf($tpl,
@@ -233,8 +233,46 @@ class ModelProperty extends \Tk\Collection
             $tag = ', ' . $this->quote('key');
 
         $tpl = <<<TPL
-                    \$this->formMap->addDataType(new %s(%s)%s);
+                    \$map->addDataType(new %s(%s)%s);
         TPL;
+        return sprintf($tpl,
+            $mapClass,
+            $propertyName,
+            $tag
+        );
+    }
+
+
+    public function getTableMap(): string
+    {
+
+        $mapClass = 'Form\Text';
+        switch ($this->getType()) {
+            case self::TYPE_INT:
+                $mapClass = 'Form\Integer';
+                break;
+            case self::TYPE_FLOAT:
+                $mapClass = 'Form\Decimal';
+                break;
+            case self::TYPE_BOOL:
+                $mapClass = 'Table\Boolean';
+                break;
+            case self::TYPE_DATE:
+                $mapClass = 'Form\Date';
+                break;
+        }
+
+        $propertyName = $this->quote($this->getName());
+        $tag = '';
+        if ($this->isPrimaryKey())
+            $tag = ', ' . $this->quote('key');
+
+        $tpl = <<<TPL
+                    \$map->addDataType(new %s(%s)%s);
+        TPL;
+        if ($this->getType() == self::TYPE_DATE) {
+            $tpl .= "->setDateFormat('d/m/Y h:i:s')";
+        }
         return sprintf($tpl,
             $mapClass,
             $propertyName,
@@ -262,7 +300,7 @@ class ModelProperty extends \Tk\Collection
                     \$filter->appendWhere('a.%s = %%s AND ', %s);
                 }
         TPL;
-        if (preg_match('/Id$/', $this->getName()) && $this->getType() == self::TYPE_INT) {
+        if (str_ends_with($this->getName(), 'Id') && $this->getType() == self::TYPE_INT) {
             $tpl = <<<TPL
                     if (!empty(\$filter['%s'])) {
                         \$filter->appendWhere('a.%s = %%s AND ', %s);
@@ -294,8 +332,8 @@ class ModelProperty extends \Tk\Collection
         $propertyName = $this->quote($this->getName());
         $append = '';
         if ($this->getName() == 'name' || $this->getName() == 'title') {
-            $append .= sprintf('->addCss(\'key\')');
-            $append .= sprintf('->setUrl($this->getEditUrl())', lcfirst($className));
+            $append .= '->addCss(\'key\')';
+            $append .= '->setUrl($this->getEditUrl())';
         }
 
         $tpl = <<<TPL

@@ -190,9 +190,6 @@ namespace {db-namespace};
 
 use Tk\Db\Mapper\Model;
 
-/**
- * @author {author-biz} <{author-www}>
- */
 class {classname} extends Model
 {
 {properties}
@@ -230,8 +227,9 @@ STR;
     protected function processMapper(): array
     {
         $data = [
-            'column-maps' => '',
+            'db-maps' => '',
             'form-maps' => '',
+            'table-maps' => '',
             'filter-queries' => '',
             'set-table' => ''
         ];
@@ -240,12 +238,17 @@ STR;
 
             $exclude = ['del'];
             if (!in_array($mp->getName(), $exclude)) {
-                $data['column-maps'] .= $mp->getColumnMap() . "\n";
+                $data['db-maps'] .= $mp->getColumnMap() . "\n";
             }
 
             $exclude = ['del', 'orderBy', 'modified', 'created'];
             if (!in_array($mp->getName(), $exclude)) {
                 $data['form-maps'] .= $mp->getFormMap() . "\n";
+            }
+
+            $exclude = ['del', 'modified', 'created'];
+            if (!in_array($mp->getName(), $exclude)) {
+                $data['table-maps'] .= $mp->getTableMap() . "\n";
             }
 
             if ($mp->getType() != ModelProperty::TYPE_DATE && $mp->get('Type') != 'text') {
@@ -271,34 +274,34 @@ use Tk\Db\Mapper\Result;
 use Tk\Db\Tool;
 use Tk\DataMap\Db;
 use Tk\DataMap\Form;
+use Tk\DataMap\Table;
 
-/**
- * @author {author-biz} <{author-www}>
- */
 class {classname}Map extends Mapper
 {
 
-    public function getDbMap(): DataMap
-    {
-        if (!\$this->dbMap) { {set-table}
-            \$this->dbMap = new DataMap();
-{column-maps}
+    public function makeDataMaps(): void
+    { {set-table}
+        if (!\$this->getDataMappers()->has(self::DATA_MAP_DB)) {
+            \$map = new DataMap();
+{db-maps}
+            \$this->addDataMap(self::DATA_MAP_DB, \$map);
         }
-        return \$this->dbMap;
-    }
-
-    public function getFormMap(): DataMap
-    {
-        if (!\$this->formMap) {
-            \$this->formMap = new DataMap();
+        
+        if (!\$this->getDataMappers()->has(self::DATA_MAP_FORM)) {
+            \$map = new DataMap();
 {form-maps}
+            \$this->addDataMap(self::DATA_MAP_FORM, \$map);
         }
-        return \$this->formMap;
+        
+        if (!\$this->getDataMappers()->has(self::DATA_MAP_TABLE)) {
+            \$map = new DataMap();
+{table-maps}
+            \$this->addDataMap(self::DATA_MAP_TABLE, \$map);
+        }
     }
 
     /**
      * @return Result|{classname}[]
-     * @throws \Exception
      */
     public function findFiltered(array|Filter \$filter, ?Tool \$tool = null): Result
     {
@@ -336,8 +339,7 @@ class {classname}Map extends Mapper
 
 }
 STR;
-        $tpl = \Tk\CurlyTemplate::create($classTpl);
-        return $tpl;
+        return \Tk\CurlyTemplate::create($classTpl);
     }
 
 
@@ -377,147 +379,175 @@ STR;
 
     protected function createTableManagerTemplate(): \Tk\CurlyTemplate
     {
-        $classTpl = <<<STR
+        $classTpl = <<<PHP
 <?php
 namespace {controller-namespace}\{classname};
 
-use Bs\Controller\AdminManagerIface;
+use Symfony\Component\HttpFoundation\Request;
+use Bs\PageController;
 use Dom\Template;
-use Tk\Request;
+use App\Db\User;
 
 /**
- * Add Route to routes.php:
- *     \$routes->add('{table-id}-manager', new Routing\Route('/{namespace-url}Manager.html', ['_controller' => '{controller-namespace}\{classname}\Manager::doDefault']));
- *
- * @author {author-biz} <{author-www}>
+ * Add Route to /src/config/routes.php:
+ * ```php
+ *   \$routes->add('{table-id}-manager', '/{namespace-url}Manager.html')
+ *       ->controller([{controller-namespace}\{classname}\Manager::class, 'doDefault']);
+ * ```
  */
-class Manager extends AdminManagerIface
+class Manager extends PageController
 {
+    protected \{table-namespace}\{classname} \$table;
 
     public function __construct()
     {
-        \$this->setPageTitle('{name} Manager');
+        parent::__construct(\$this->getFactory()->getAdminPage());
+        \$this->getPage()->setTitle('{name} Manager');
     }
 
-    /**
-     * @param Request \$request
-     * @throws \Exception
-     */
     public function doDefault(Request \$request)
     {
-        \$this->setTable(\{table-namespace}\{classname}::create());
-        \$this->getTable()->setEditUrl(\Bs\Uri::createHomeUrl('/{namespace-url}Edit.html'));
-        \$this->getTable()->init();
+        \$this->setAccess(User::PERM_MANAGE_STAFF);
+            
+        // Get the form template
+        \$this->table = new \{table-namespace}\{classname}();
+        \$this->table->doDefault(\$request);
 
-        \$filter = [];
-        \$this->getTable()->setList(\$this->getTable()->findList(\$filter));
+        return \$this->getPage();
     }
 
-    /**
-     * Add actions here
-     */
-    public function initActionPanel()
+    public function show(): ?Template
     {
-        \$this->getActionPanel()->append(\Tk\Ui\Link::createBtn('New {name}',
-            \$this->getTable()->getEditUrl(), 'fa fa-book fa-add-action'));
-    }
+        \$template = \$this->getTemplate();
+        \$template->setText('title', \$this->getPage()->getTitle());
 
-    /**
-     * @return \Dom\Template
-     */
-    public function show()
-    {
-        \$this->initActionPanel();
-        \$template = parent::show();
-
-        \$template->appendTemplate('panel', \$this->getTable()->show());
+        \$template->appendTemplate('content', \$this->table->show());
 
         return \$template;
     }
 
-    /**
-     * @return Template
-     */
-    public function __makeTemplate()
+    public function __makeTemplate(): ?Template
     {
-        \$xhtml = <<<HTML
-<div class="tk-panel" data-panel-title="{name}s" data-panel-icon="fa fa-book" var="panel"></div>
+        \$html = <<<HTML
+<div>
+  <h2 var="title"></h2>
+  <div var="content"></div>
+</div>
 HTML;
-        return \Dom\Loader::load(\$xhtml);
+        return \$this->loadTemplate(\$html);
     }
 
 }
-STR;
-        $tpl = \Tk\CurlyTemplate::create($classTpl);
-        return $tpl;
+PHP;
+        return \Tk\CurlyTemplate::create($classTpl);
     }
 
     protected function createTableTemplate(): \Tk\CurlyTemplate
     {
-        $classTpl = <<<STR
+        $classTpl = <<<PHP
 <?php
 namespace {table-namespace};
 
+use Dom\Template;
+use Symfony\Component\HttpFoundation\Request;
+use Tk\Alert;
+use Tk\Traits\SystemTrait;
+use Tk\Uri;
+use Tk\Form;
 use Tk\Form\Field;
+use Tk\FormRenderer;
+use Tk\Table;
 use Tk\Table\Cell;
+use Tk\Table\Action;
+use Tk\TableRenderer;
 
-/**
- * Example:
- * <code>
- *   \$table = new {classname}::create();
- *   \$table->init();
- *   \$list = ObjectMap::getObjectListing();
- *   \$table->setList(\$list);
- *   \$tableTemplate = \$table->show();
- *   \$template->appendTemplate(\$tableTemplate);
- * </code>
- *
- * @author {author-biz} <{author-www}>
- */
-class {classname} extends \Bs\TableIface
+class {classname}
 {
+    use SystemTrait;
 
-    /**
-     * @return \$this
-     * @throws \Exception
-     */
-    public function init()
+    protected Table \$table;
+
+    protected ?Form \$filter = null;
+
+
+    public function __construct()
+    {
+        \$this->table  = new Table();
+        \$this->filter = new Form(\$this->table->getId() . '-filters');
+    }
+    
+    public function doDefault(Request \$request)
     {
 
 {cell-list}
+
         // Filters
-        \$this->appendFilter(new Field\Input('keywords'))->setAttr('placeholder', 'Search');
+        \$this->getFilter()->appendField(new Field\Input('search'))->setAttr('placeholder', 'Search');
+        
+        // load filter values
+        \$this->getFilter()->setFieldValues(\$this->getTable()->getTableSession()->get(\$this->getFilter()->getId(), []));
+        \$this->getFilter()->appendField(new Form\Action\Submit('Search', function (Form \$form, Form\Action\ActionInterface \$action) {
+            \$this->getTable()->getTableSession()->set(\$this->getFilter()->getId(), \$form->getFieldValues());
+            Uri::create()->redirect();
+        }))->setGroup('');
+        \$this->getFilter()->appendField(new Form\Action\Submit('Clear', function (Form \$form, Form\Action\ActionInterface \$action) {
+            \$this->getTable()->getTableSession()->set(\$this->getFilter()->getId(), []);
+            Uri::create()->redirect();
+        }))->setGroup('')->addCss('btn-outline-secondary');
+        // execute filter form
+        \$this->getFilter()->execute(\$request->request->all());
+
 
         // Actions
-        //\$this->appendAction(\Tk\Table\Action\Link::createLink('New {name}', \Bs\Uri::createHomeUrl('/{namespace-url}Edit.html'), 'fa fa-plus'));
-        //\$this->appendAction(\Tk\Table\Action\ColumnSelect::create()->setUnselected(['modified', 'created']));
-        \$this->appendAction(\Tk\Table\Action\Delete::create());
-        \$this->appendAction(\Tk\Table\Action\Csv::create());
+        if (\$this->getConfig()->isDebug()) {
+            \$this->getTable()->appendAction(new Action\Link('reset', Uri::create()->set(Table::RESET_TABLE, \$this->getTable()->getId()), 'fa fa-retweet'))
+                ->setLabel('')
+                ->setAttr('data-confirm', 'Are you sure you want to reset the Table`s session?')
+                ->setAttr('title', 'Reset table filters and order to default.');
+        }
+        \$this->getTable()->appendAction(new Action\Button('Create'))->setUrl(Uri::create(('/{namespace-url}Edit.html'));
+        \$this->getTable()->appendAction(new Action\Delete());
+        \$this->getTable()->appendAction(new Action\Csv())->addExcluded('actions');
 
-        // load table
-        //\$this->setList(\$this->findList());
 
-        return \$this;
+        // Query
+        \$tool = \$this->getTable()->getTool();
+        \$filter = \$this->getFilter()->getFieldValues();
+        \$list = \{db-namespace}\{classname}::create()->findFiltered(\$filter, \$tool);
+        \$this->getTable()->setList(\$list, \$tool->getFoundRows());
+
+        \$this->getTable()->execute(\$request);
     }
 
-    /**
-     * @param array \$filter
-     * @param null|\Tk\Db\Tool \$tool
-     * @return \Tk\Db\Map\ArrayObject|\{db-namespace}\{classname}[]
-     * @throws \Exception
-     */
-    public function findList(\$filter = [], \$tool = null)
+    public function show(): ?Template
     {
-        if (!\$tool) \$tool = \$this->getTool();
-        \$filter = array_merge(\$this->getFilterValues(), \$filter);
-        \$list = \{db-namespace}\{classname}Map::create()->findFiltered(\$filter, \$tool);
-        return \$list;
+        \$renderer = new TableRenderer(\$this->getTable());
+        \$this->getTable()->getRow()->addCss('text-nowrap');
+        \$this->getTable()->addCss('table-hover');
+
+        if (\$this->getFilter()) {
+            \$this->getFilter()->addCss('row gy-2 gx-3 align-items-center');
+            \$filterRenderer = FormRenderer::createInlineRenderer(\$this->getFilter());
+            \$renderer->getTemplate()->appendTemplate('filters', \$filterRenderer->show());
+            \$renderer->getTemplate()->setVisible('filters');
+        }
+
+        return \$renderer->show();
     }
 
+
+    public function getTable(): Table
+    {
+        return \$this->table;
+    }
+
+    public function getFilter(): ?Form
+    {
+        return \$this->filter;
+    }
 }
-STR;
-        $tpl = \Tk\CurlyTemplate::create($classTpl);
-        return $tpl;
+PHP;
+        return \Tk\CurlyTemplate::create($classTpl);
     }
 
     /**
@@ -525,9 +555,9 @@ STR;
      */
     public function makeForm(array $params = []): string
     {
-        $tpl = $this->createFormIfaceTemplate();
-        if (!empty($params['modelForm']))
-            $tpl = $this->createModelFormTemplate();
+        $tpl = $this->createFormTemplate();
+//        if (!empty($params['modelForm']))
+//            $tpl = $this->createModelFormTemplate();
         $data = $this->arrayMerge($this->getDefaultData(), $this->processForm(!empty($params['modelForm'])), $params);
         return $tpl->parse($data);
     }
@@ -561,275 +591,171 @@ STR;
 <?php
 namespace {controller-namespace}\{classname};
 
-use Bs\Controller\AdminEditIface;
+use Bs\PageController;
 use Dom\Template;
-use Tk\Request;
+use Symfony\Component\HttpFoundation\Request;
+use App\Db\User;
 
 /**
- * TODO: Add Route to routes.php:
- *      \$routes->add('{table-id}-edit', Route::create('/staff/{namespace-url}Edit.html', '{controller-namespace}\{classname}\Edit::doDefault'));
- *
- * @author {author-biz} <{author-www}>
+ * Add Route to /src/config/routes.php:
+ * ```php
+ *   \$routes->add('{table-id}-manager', '/{namespace-url}Edit.html')
+ *       ->controller([{controller-namespace}\{classname}\Edit::class, 'doDefault']);
+ * ```
  */
-class Edit extends AdminEditIface
+class Edit extends PageController
 {
 
-    /**
-     * @var \{db-namespace}\{classname}
-     */
-    protected \${property-name} = null;
+    protected \{db-namespace}\{classname} \${property-name} = null;
+
+    protected \{form-namespace}\{classname} \$form;
 
 
-    /**
-     * Iface constructor.
-     */
     public function __construct()
     {
-        \$this->setPageTitle('{name} Edit');
+        parent::__construct(\$this->getFactory()->getAdminPage());
+        \$this->getPage()->setTitle('Edit {name}');
+        \$this->setAccess(User::PERM_ADMIN);
     }
 
-    /**
-     * @param Request \$request
-     * @throws \Exception
-     */
     public function doDefault(Request \$request)
     {
         \$this->{property-name} = new \{db-namespace}\{classname}();
         if (\$request->get('{property-name}Id')) {
             \$this->{property-name} = \{db-namespace}\{classname}Map::create()->find(\$request->get('{property-name}Id'));
         }
+        
+        // Get the form template
+        \$this->form = new \{form-namespace}\{classname}();
+        \$this->form->doDefault(\$request, \$request->query->get('id'));
 
-        \$this->setForm(\{form-namespace}\{classname}::create()->setModel(\$this->{property-name}));
-        \$this->initForm(\$request);
-        \$this->getForm()->execute();
+        return \$this->getPage();
     }
 
-    /**
-     * @return \Dom\Template
-     */
-    public function show()
+    public function show(): ?Template
     {
-        \$template = parent::show();
+        \$template = \$this->getTemplate();
+        \$template->setText('title', \$this->getPage()->getTitle());
 
-        // Render the form
-        \$template->appendTemplate('panel', \$this->getForm()->show());
+        \$template->appendTemplate('content', \$this->form->show());
 
         return \$template;
     }
 
-    /**
-     * @return Template
-     */
-    public function __makeTemplate()
+    public function __makeTemplate(): ?Template
     {
-        \$xhtml = <<<HTML
-<div class="tk-panel" data-panel-title="{name} Edit" data-panel-icon="fa fa-book" var="panel"></div>
+        \$html = <<<HTML
+<div>
+  <h2 var="title"></h2>
+  <div var="content" class="tk-form-content"></div>
+</div>
 HTML;
-        return \Dom\Loader::load(\$xhtml);
+        return \$this->loadTemplate(\$html);
     }
 
 }
 STR;
-        $tpl = \Tk\CurlyTemplate::create($classTpl);
-        return $tpl;
+        return \Tk\CurlyTemplate::create($classTpl);
     }
 
-    protected function createFormIfaceTemplate(): \Tk\CurlyTemplate
+    protected function createFormTemplate(): \Tk\CurlyTemplate
     {
         $classTpl = <<<PHP
 <?php
 namespace {form-namespace};
 
-use Tk\Form\Field;
-use Tk\Form\Event;
+use Dom\Template;
+use Symfony\Component\HttpFoundation\Request;
+use Tk\Alert;
+use Tk\Exception;
 use Tk\Form;
+use Tk\Form\Field;
+use Tk\Form\Action;
+use Tk\FormRenderer;
+use Tk\Traits\SystemTrait;
+use Tk\Uri;
 
-/**
- * Example:
- * <code>
- *   \$form = new {classname}::create();
- *   \$form->setModel(\$obj);
- *   \$formTemplate = \$form->getRenderer()->show();
- *   \$template->appendTemplate('form', \$formTemplate);
- * </code>
- *
- * @author {author-biz} <{author-www}>
- */
-class {classname} extends \Bs\FormIface
+class {classname}
 {
+    use SystemTrait;
+    use Form\FormTrait;
 
-    /**
-     * @throws \Exception
-     */
-    public function init()
+    protected ?\{db-namespace}\{classname} \${property-name} = null;
+
+
+    public function __construct()
     {
+        \$this->setForm(Form::create('{property-name}'));
+    }
+
+    public function doDefault(Request \$request, \$id)
+    {
+        if (\$id) {
+            \$this->{property-name} = \{db-namespace}\{classname}Map::create()->find(\$id);
+            if (!\$this->{property-name}) {
+                throw new Exception('Invalid ID: ' . \$id);
+            }
+        }
 
 {field-list}
-        \$this->appendField(new Event\Submit('update', [\$this, 'doSubmit']));
-        \$this->appendField(new Event\Submit('save', [\$this, 'doSubmit']));
-        \$this->appendField(new Event\Link('cancel', \$this->getBackUrl()));
+
+        \$this->getForm()->appendField(new Action\SubmitExit('save', [\$this, 'onSubmit']));
+        \$this->getForm()->appendField(new Action\Link('cancel', Uri::create('/{property-name}Manager')));
+
+        \$load = \$this->{property-name}->getMapper()->getFormMap()->getArray(\$this->{property-name});
+        \$load['id'] = \$this->{property-name}->getId();
+        \$this->getForm()->setFieldValues(\$load); // Use form data mapper if loading objects
+
+        \$this->getForm()->execute(\$request->request->all());
+
+        \$this->setFormRenderer(new FormRenderer(\$this->getForm()));
 
     }
 
-    /**
-     * @param \Tk\Request \$request
-     * @throws \Exception
-     */
-    public function execute(\$request = null)
+    public function onSubmit(Form \$form, Action\ActionInterface \$action)
     {
-        \$this->load(\{db-namespace}\{classname}Map::create()->unmapForm(\$this->get{classname}()));
-        parent::execute(\$request);
-    }
-
-    /**
-     * @param Form \$form
-     * @param Event\FieldInterface \$event
-     * @throws \Exception
-     */
-    public function doSubmit(\$form, \$event)
-    {
-        // Load the object with form data
-        \{db-namespace}\{classname}Map::create()->mapForm(\$form->getValues(), \$this->get{classname}());
-
-        // Do Custom Validations
-
-        \$form->addFieldErrors(\$this->get{classname}()->validate());
+        \$this->{property-name}->getMapper()->getFormMap()->loadObject(\$this->{property-name}, \$form->getFieldValues());
+        
+        \$form->addFieldErrors(\$this->{property-name}->validate());
         if (\$form->hasErrors()) {
             return;
         }
+        
+        \$this->{property-name}->save();
 
-        \$isNew = (bool)\$this->get{classname}()->getId();
-        \$this->get{classname}()->save();
-
-        // Do Custom data saving
-
-        \Tk\Alert::addSuccess('Record saved!');
-        \$event->setRedirect(\$this->getBackUrl());
-        if (\$form->getTriggeredEvent()->getName() == 'save') {
-            \$event->setRedirect(\Tk\Uri::create()->set('{property-name}Id', \$this->get{classname}()->getId()));
+        Alert::addSuccess('Form save successfully.');
+        \$action->setRedirect(Uri::create());
+        if (\$form->getTriggeredAction()->isExit()) {
+            \$action->setRedirect(Uri::create('/{property-name}Manager'));
         }
     }
 
-    /**
-     * @return \Tk\Db\ModelInterface|\{db-namespace}\{classname}
-     */
-    public function get{classname}()
+    public function show(): ?Template
     {
-        return \$this->getModel();
+        // Setup field group widths with bootstrap classes
+        //\$this->getForm()->getField('username')->addFieldCss('col-6');
+        //\$this->getForm()->getField('email')->addFieldCss('col-6');
+
+        \$renderer = \$this->getFormRenderer();
+        \$renderer->addFieldCss('mb-3');
+
+        return \$renderer->show();
+    }
+    
+
+    public function get{classname}(): ?\{db-namespace}\{classname}
+    {
+        return \$this->{property-name};
     }
 
-    /**
-     * @param \{db-namespace}\{classname} \${property-name}
-     * @return \$this
-     */
     public function set{classname}(\${property-name})
     {
-        return \$this->setModel(\${property-name});
+        return \$this->{property-name} = \${property-name};
     }
 
 }
 PHP;
-        $tpl = \Tk\CurlyTemplate::create($classTpl);
-        return $tpl;
-    }
-
-    protected function createModelFormTemplate(): \Tk\CurlyTemplate
-    {
-        $classTpl = <<<STR
-<?php
-namespace {form-namespace};
-
-use Tk\Form\Field;
-use Tk\Form\Event;
-use Tk\Form;
-
-/**
- * Example:
- * <code>
- *   \$form = new {classname}::create();
- *   \$form->setModel(\$obj);
- *   \$formTemplate = \$form->getRenderer()->show();
- *   \$template->appendTemplate('form', \$formTemplate);
- * </code>
- *
- * @author {author-biz} <{author-www}>
- */
-class {classname} extends \Bs\ModelForm
-{
-
-    /**
-     * @throws \Exception
-     */
-    public function init()
-    {
-
-{field-list}
-        \$this->getForm()->appendField(new Event\Submit('update', [\$this, 'doSubmit']));
-        \$this->getForm()->appendField(new Event\Submit('save', [\$this, 'doSubmit']));
-        \$this->getForm()->appendField(new Event\Link('cancel', \$this->getBackUrl()));
-
-    }
-
-    /**
-     * @param \Tk\Request \$request
-     * @throws \Exception
-     */
-    public function execute(\$request = null)
-    {
-        \$this->getForm()->load(\{db-namespace}\{classname}Map::create()->unmapForm(\$this->get{classname}()));
-        parent::execute(\$request);
-    }
-
-    /**
-     * @param Form \$form
-     * @param Event\FieldInterface \$event
-     * @throws \Exception
-     */
-    public function doSubmit(\$form, \$event)
-    {
-        // Load the object with form data
-        \{db-namespace}\{classname}Map::create()->mapForm(\$form->getValues(), \$this->get{classname}());
-
-        // Do Custom Validations
-
-        \$form->addFieldErrors(\$this->get{classname}()->validate());
-        if (\$form->hasErrors()) {
-            return;
-        }
-
-        \$isNew = !(bool)\$this->get{classname}()->getId();
-        \$this->get{classname}()->save();
-
-        // Do Custom data saving
-
-        \Tk\Alert::addSuccess('Record saved!');
-        \$event->setRedirect(\$this->getBackUrl());
-        if (\$form->getTriggeredEvent()->getName() == 'save') {
-            \$event->setRedirect(\Tk\Uri::create()->set('{property-name}Id', \$this->get{classname}()->getId()));
-        }
-    }
-
-    /**
-     * @return \Tk\Db\ModelInterface|\{db-namespace}\{classname}
-     */
-    public function get{classname}()
-    {
-        return \$this->getModel();
-    }
-
-    /**
-     * @param \{db-namespace}\{classname} \${property-name}
-     * @return \$this
-     */
-    public function set{classname}(\${property-name})
-    {
-        return \$this->setModel(\${property-name});
-    }
-
-}
-STR;
-        $tpl = \Tk\CurlyTemplate::create($classTpl);
-        return $tpl;
+        return \Tk\CurlyTemplate::create($classTpl);
     }
 
 
