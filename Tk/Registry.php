@@ -30,10 +30,6 @@ class Registry extends Db\Collection
     {
         try {
             if ($this->installTable()) {
-                $this->set('site.name', 'Tropotek Lib');
-                $this->set('site.name.short', 'TkLib');
-                $this->set('site.email', 'webmaster@'.$this->getRequest()->getHost());
-                $this->set('system.maintenance.enabled', false);
                 $this->save();
             }
         } catch (\Exception $e) { \Tk\Log::error($e->__toString());}
