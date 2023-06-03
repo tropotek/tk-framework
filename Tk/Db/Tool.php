@@ -353,9 +353,10 @@ class Tool implements \Tk\InstanceKey
         return $key;
     }
 
-    public function setInstanceId(string $str)
+    public function setInstanceId(string $str): static
     {
         $this->instanceId = $str;
+        return $this;
     }
 
 }
