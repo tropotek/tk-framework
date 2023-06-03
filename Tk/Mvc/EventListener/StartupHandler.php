@@ -43,7 +43,7 @@ class StartupHandler implements EventSubscriberInterface
         self::$SCRIPT_CALLED = true;
         $this->out(self::$SCRIPT_START);
 
-        $siteName = $this->getSystem()->getConfig()->get('system.site.name', '');
+        $siteName = $this->getSystem()->getRegistry()->getSiteName();
         if ($this->getSystem()->getComposerJson()) {
             $siteName .= sprintf(' [%s]', $this->getSystem()->getComposerJson()['name']);
         }
