@@ -286,13 +286,13 @@ class {classname}Map extends Mapper
 {db-maps}
             \$this->addDataMap(self::DATA_MAP_DB, \$map);
         }
-        
+
         if (!\$this->getDataMappers()->has(self::DATA_MAP_FORM)) {
             \$map = new DataMap();
 {form-maps}
             \$this->addDataMap(self::DATA_MAP_FORM, \$map);
         }
-        
+
         if (!\$this->getDataMappers()->has(self::DATA_MAP_TABLE)) {
             \$map = new DataMap();
 {table-maps}
@@ -312,12 +312,12 @@ class {classname}Map extends Mapper
     {
         \$filter->appendFrom('%s a', \$this->quoteParameter(\$this->getTable()));
 
-        if (!empty(\$filter['keywords'])) {
-            \$kw = '%' . \$this->escapeString(\$filter['keywords']) . '%';
+        if (!empty(\$filter['search'])) {
+            \$kw = '%' . \$this->escapeString(\$filter['search']) . '%';
             \$w = '';
             //\$w .= sprintf('a.name LIKE %s OR ', \$this->quote(\$kw));
-            if (is_numeric(\$filter['keywords'])) {
-                \$id = (int)\$filter['keywords'];
+            if (is_numeric(\$filter['search'])) {
+                \$id = (int)\$filter['search'];
                 \$w .= sprintf('a.id = %d OR ', \$id);
             }
             if (\$w) \$filter->appendWhere('(%s) AND ', substr(\$w, 0, -3));
@@ -408,7 +408,7 @@ class Manager extends PageController
     public function doDefault(Request \$request)
     {
         \$this->setAccess(User::PERM_MANAGE_STAFF);
-            
+
         // Get the form template
         \$this->table = new \{table-namespace}\{classname}();
         \$this->table->doDefault(\$request);
@@ -475,7 +475,7 @@ class {classname}
         \$this->table  = new Table();
         \$this->filter = new Form(\$this->table->getId() . '-filters');
     }
-    
+
     public function doDefault(Request \$request)
     {
 
@@ -483,7 +483,7 @@ class {classname}
 
         // Filters
         \$this->getFilter()->appendField(new Field\Input('search'))->setAttr('placeholder', 'Search');
-        
+
         // load filter values
         \$this->getFilter()->setFieldValues(\$this->getTable()->getTableSession()->get(\$this->getFilter()->getId(), []));
         \$this->getFilter()->appendField(new Form\Action\Submit('Search', function (Form \$form, Form\Action\ActionInterface \$action) {
@@ -624,7 +624,7 @@ class Edit extends PageController
         if (\$request->get('{property-name}Id')) {
             \$this->{property-name} = \{db-namespace}\{classname}Map::create()->find(\$request->get('{property-name}Id'));
         }
-        
+
         // Get the form template
         \$this->form = new \{form-namespace}\{classname}();
         \$this->form->doDefault(\$request, \$request->query->get('id'));
@@ -715,12 +715,12 @@ class {classname}
     public function onSubmit(Form \$form, Action\ActionInterface \$action)
     {
         \$this->{property-name}->getMapper()->getFormMap()->loadObject(\$this->{property-name}, \$form->getFieldValues());
-        
+
         \$form->addFieldErrors(\$this->{property-name}->validate());
         if (\$form->hasErrors()) {
             return;
         }
-        
+
         \$this->{property-name}->save();
 
         Alert::addSuccess('Form save successfully.');
@@ -741,7 +741,7 @@ class {classname}
 
         return \$renderer->show();
     }
-    
+
 
     public function get{classname}(): ?\{db-namespace}\{classname}
     {
