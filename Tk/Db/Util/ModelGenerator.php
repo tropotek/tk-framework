@@ -165,7 +165,7 @@ class ModelGenerator
             $data['properties'] .= "\n" . $mp->getDefinition() . "\n";
 
             if ($mp->getName() != 'id')
-                $data['accessors'] .= "\n" . $mp->getMutator($this->getClassName()) . "\n\n" . $mp->getAccessor() . "\n";
+                $data['accessors'] .= "\n" . $mp->getAccessor() . "\n\n" . $mp->getMutator($this->getClassName()) . "\n";
 
             if ($mp->getType() == '\DateTime' && $mp->get('Null') == 'NO')
                 $data['construct'] .= $mp->getInitaliser() . "\n";

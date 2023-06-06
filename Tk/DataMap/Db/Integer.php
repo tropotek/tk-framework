@@ -19,9 +19,11 @@ class Integer extends DataTypeInterface
     public function getPropertyValue(object $object): mixed
     {
         $value = parent::getPropertyValue($object);
-        if ($value !== null) $value .= '';
+        if ($this->isNullable()) {
+            if (!$value) $value = null;
+        } else {
+            if (!$value) $value = '0';
+        }
         return $value;
     }
-
 }
-

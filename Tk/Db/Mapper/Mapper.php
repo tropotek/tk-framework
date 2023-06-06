@@ -364,6 +364,7 @@ abstract class Mapper
 
     public function find(mixed $id): ?Model
     {
+        if (empty($id)) return null;
         if (!$this->getPrimaryType()) {
             throw new Exception('Invalid operation, no primary key found');
         }
