@@ -24,6 +24,7 @@ class Config extends Collection
         $this->set('script.start.time', microtime(true));
         parent::__construct();
 
+        $this->set('hostname', $_SERVER['HTTP_HOST'] ?? $_SERVER['HTTP_X_FORWARDED_HOST'] ?? 'localhost');
         $this->set('base.path', $this->getSystem()->discoverBasePath());
         $this->set('base.url', $this->getSystem()->discoverBaseUrl());
     }
@@ -38,6 +39,11 @@ class Config extends Collection
             ConfigLoader::create()->loadConfigs(self::$_INSTANCE);
         }
         return self::$_INSTANCE;
+    }
+
+    public function getHostname(): string
+    {
+        return $this->get('hostname');
     }
 
     public function getBasePath(): string

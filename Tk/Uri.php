@@ -21,13 +21,6 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
  */
 class Uri implements \IteratorAggregate
 {
-    /**
-     * Absolute http and https URIs require a host per RFC 7230 Section 2.7
-     * but in generic URIs the host can be empty. So for http(s) URIs
-     * we apply this default host when no host is given yet to form a
-     * valid URI.
-     */
-    private const HTTP_DEFAULT_HOST = 'localhost';
 
     const SCHEME_HTTP = 'http';
     const SCHEME_HTTP_SSL = 'https';
@@ -56,7 +49,7 @@ class Uri implements \IteratorAggregate
      * The site hostname.
      * NOTE: Be sure to set this in your boostrap code for CLI scripts
      */
-    public static string $SITE_HOSTNAME = '';
+    public static string $SITE_HOSTNAME = 'localhost';
 
     /**
      * This is the supplied uri string
@@ -151,21 +144,7 @@ class Uri implements \IteratorAggregate
         }
 
         $this->scheme = $_SERVER['REQUEST_SCHEME'] ?? self::SCHEME_HTTP_SSL;
-//        if ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ||
-//            (isset($_SERVER['REQUEST_SCHEME']) && $_SERVER['REQUEST_SCHEME'] == self::SCHEME_HTTP_SSL) ||
-//            (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT']))
-//        {
-//            $this->scheme = self::SCHEME_HTTP_SSL;
-//        }
-
-        $host = self::HTTP_DEFAULT_HOST;
-        if (!empty(self::$SITE_HOSTNAME)) {
-            $host = self::$SITE_HOSTNAME;
-        } else if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
-            $host = $_SERVER['HTTP_X_FORWARDED_HOST'];
-        } else if (isset($_SERVER['HTTP_HOST'])) {
-            $host = $_SERVER['HTTP_HOST'];
-        }
+        $host = self::$SITE_HOSTNAME;
 
         // build spec into URL format
         if (preg_match('/^\/\//', $spec)) {

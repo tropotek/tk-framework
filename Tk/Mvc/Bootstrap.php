@@ -48,7 +48,7 @@ class Bootstrap
          */
         chdir($this->getConfig()->getBasePath());
 
-        \Tk\Uri::$SITE_HOSTNAME = $this->getFactory()->getRequest()->getHost();
+        \Tk\Uri::$SITE_HOSTNAME = $this->getConfig()->getHostname();
         \Tk\Uri::$BASE_URL = $this->getConfig()->getBaseUrl();
 
         $session = $this->getFactory()->getSession();
