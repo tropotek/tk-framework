@@ -751,7 +751,7 @@ class {classname}
         \$this->{property-name}->save();
 
         Alert::addSuccess('Form save successfully.');
-        \$action->setRedirect(Uri::create());
+        \$action->setRedirect(Uri::create()->set('id', \$this->{property-name}->getId()));
         if (\$form->getTriggeredAction()->isExit()) {
             \$action->setRedirect(Uri::create('/{property-name}Manager'));
         }

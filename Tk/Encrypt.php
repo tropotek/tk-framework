@@ -14,6 +14,9 @@ class Encrypt
 
     public function __construct(string $secret)
     {
+        if (empty($secret)) {
+            throw new Exception('Invalid secret key');
+        }
         $this->secret = $secret;
     }
 

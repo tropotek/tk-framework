@@ -193,8 +193,8 @@ class ModelProperty extends \Tk\Collection
         if ($this->getName() != $this->get('Field'))
             $columnName = ', '.$this->quote($this->get('Field'));
         $tag = '';
-        if ($this->isPrimaryKey())
-            $tag = ', ' . $this->quote('key');
+//        if ($this->isPrimaryKey())
+//            $tag = ', ' . $this->quote('key');
 
         $tpl = <<<TPL
                     \$map->addDataType(new %s(%s%s)%s);
@@ -228,8 +228,8 @@ class ModelProperty extends \Tk\Collection
 
         $propertyName = $this->quote($this->getName());
         $tag = '';
-        if ($this->isPrimaryKey())
-            $tag = ', ' . $this->quote('key');
+//        if ($this->isPrimaryKey())
+//            $tag = ', ' . $this->quote('key');
 
         $tpl = <<<TPL
                     \$map->addDataType(new %s(%s)%s);

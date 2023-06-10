@@ -2,6 +2,7 @@
 namespace Tk\Mvc;
 
 use Dom\Template;
+use Tk\DataMap\Db\TextEncrypt;
 use Tk\Traits\SingletonTrait;
 use Tk\Traits\SystemTrait;
 
@@ -32,6 +33,9 @@ class Bootstrap
                 "verify_peer_name" => false,
             ]]);
         }
+
+
+        TextEncrypt::$encryptKey = $this->getConfig()->get('system.encrypt', md5(__FILE__));
 
         if ($this->getSystem()->isCli()) {
             $this->cliInit();
