@@ -246,7 +246,7 @@ STR;
                 $data['form-maps'] .= $mp->getFormMap() . "\n";
             }
 
-            $exclude = ['del', 'modified', 'created'];
+            $exclude = ['del'];
             if (!in_array($mp->getName(), $exclude)) {
                 $data['table-maps'] .= $mp->getTableMap() . "\n";
             }
@@ -387,11 +387,12 @@ use Symfony\Component\HttpFoundation\Request;
 use Bs\PageController;
 use Dom\Template;
 use App\Db\User;
+use Tk\Uri;
 
 /**
  * Add Route to /src/config/routes.php:
  * ```php
- *   \$routes->add('{table-id}-manager', '/{namespace-url}Manager.html')
+ *   \$routes->add('{table-id}-manager', '/{namespace-url}Manager')
  *       ->controller([{controller-namespace}\{classname}\Manager::class, 'doDefault']);
  * ```
  */
@@ -412,6 +413,7 @@ class Manager extends PageController
         // Get the form template
         \$this->table = new \{table-namespace}\{classname}();
         \$this->table->doDefault(\$request);
+        \$this->table->execute(\$request);
 
         return \$this->getPage();
     }
@@ -420,6 +422,7 @@ class Manager extends PageController
     {
         \$template = \$this->getTemplate();
         \$template->setText('title', \$this->getPage()->getTitle());
+        \$template->setAttr('create', 'href', Uri::create('/{namespace-url}Edit'));
 
         \$template->appendTemplate('content', \$this->table->show());
 
@@ -430,8 +433,17 @@ class Manager extends PageController
     {
         \$html = <<<HTML
 <div>
-  <h2 var="title"></h2>
-  <div var="content"></div>
+  <div class="card mb-3">
+    <div class="card-header"><i class="fa fa-cogs"></i> Actions</div>
+    <div class="card-body" var="actions">
+      <a href="/" title="Back" class="btn btn-outline-secondary" var="back"><i class="fa fa-arrow-left"></i> Back</a>
+      <a href="#" title="Create {name}" class="btn btn-outline-secondary" var="create"><i class="fa fa-plus"></i> Create {name}</a>
+    </div>
+  </div>
+  <div class="card mb-3">
+    <div class="card-header" var="title"><i class="fa fa-users"></i> </div>
+    <div class="card-body" var="content"></div>
+  </div>
 </div>
 HTML;
         return \$this->loadTemplate(\$html);
@@ -478,6 +490,7 @@ class {classname}
 
     public function doDefault(Request \$request)
     {
+        \$editUrl = Uri::create('/{namespace-url}Edit');
 
 {cell-list}
 
@@ -505,16 +518,21 @@ class {classname}
                 ->setAttr('data-confirm', 'Are you sure you want to reset the Table`s session?')
                 ->setAttr('title', 'Reset table filters and order to default.');
         }
-        \$this->getTable()->appendAction(new Action\Button('Create'))->setUrl(Uri::create(('/{namespace-url}Edit.html'));
+        \$this->getTable()->appendAction(new Action\Button('Create'))->setUrl(\$editUrl);
         \$this->getTable()->appendAction(new Action\Delete());
         \$this->getTable()->appendAction(new Action\Csv())->addExcluded('actions');
 
+    }
 
+    public function execute(Request \$request, ?Result \$list = null): void
+    {
         // Query
-        \$tool = \$this->getTable()->getTool();
-        \$filter = \$this->getFilter()->getFieldValues();
-        \$list = \{db-namespace}\{classname}::create()->findFiltered(\$filter, \$tool);
-        \$this->getTable()->setList(\$list, \$tool->getFoundRows());
+        if (!\$list) {
+            \$tool = \$this->getTable()->getTool();
+            \$filter = \$this->getFilter()->getFieldValues();
+            \$list = \{db-namespace}\{classname}Map::create()->findFiltered(\$filter, \$tool);
+        }
+        \$this->getTable()->setList(\$list);
 
         \$this->getTable()->execute(\$request);
     }
@@ -599,14 +617,14 @@ use App\Db\User;
 /**
  * Add Route to /src/config/routes.php:
  * ```php
- *   \$routes->add('{table-id}-manager', '/{namespace-url}Edit.html')
+ *   \$routes->add('{table-id}-manager', '/{namespace-url}Edit')
  *       ->controller([{controller-namespace}\{classname}\Edit::class, 'doDefault']);
  * ```
  */
 class Edit extends PageController
 {
 
-    protected \{db-namespace}\{classname} \${property-name} = null;
+    protected ?\{db-namespace}\{classname} \${property-name} = null;
 
     protected \{form-namespace}\{classname} \$form;
 
@@ -620,14 +638,13 @@ class Edit extends PageController
 
     public function doDefault(Request \$request)
     {
-        \$this->{property-name} = new \{db-namespace}\{classname}();
         if (\$request->get('{property-name}Id')) {
-            \$this->{property-name} = \{db-namespace}\{classname}Map::create()->find(\$request->get('{property-name}Id'));
+            \$this->{property-name} = \{db-namespace}\{classname}Map::create()->find(\$request->get('id', 0));
         }
 
         // Get the form template
         \$this->form = new \{form-namespace}\{classname}();
-        \$this->form->doDefault(\$request, \$request->query->get('id'));
+        \$this->form->doDefault(\$request, \$request->query->get('id', 0));
 
         return \$this->getPage();
     }
@@ -646,8 +663,16 @@ class Edit extends PageController
     {
         \$html = <<<HTML
 <div>
-  <h2 var="title"></h2>
-  <div var="content" class="tk-form-content"></div>
+  <div class="card mb-3">
+    <div class="card-header"><i class="fa fa-cogs"></i> Actions</div>
+    <div class="card-body" var="actions">
+      <a href="/" title="Back" class="btn btn-outline-secondary" var="back"><i class="fa fa-arrow-left"></i> Back</a>
+    </div>
+  </div>
+  <div class="card mb-3">
+    <div class="card-header" var="title"><i class="fa fa-users"></i> </div>
+    <div class="card-body" var="content"></div>
+  </div>
 </div>
 HTML;
         return \$this->loadTemplate(\$html);
@@ -688,8 +713,10 @@ class {classname}
         \$this->setForm(Form::create('{property-name}'));
     }
 
-    public function doDefault(Request \$request, \$id)
+    public function doDefault(Request \$request, int \$id)
     {
+        \$this->{property-name} = new \{db-namespace}\{classname}();
+
         if (\$id) {
             \$this->{property-name} = \{db-namespace}\{classname}Map::create()->find(\$id);
             if (!\$this->{property-name}) {

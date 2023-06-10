@@ -309,9 +309,9 @@ class Factory extends Collection
                 $app->add(new Command\MakeModel());
                 $app->add(new Command\MakeMapper());
                 $app->add(new Command\MakeTable());
-                //$app->add(new Command\MakeForm());
-                //$app->add(new Command\MakeManager());
-                //$app->add(new Command\MakeEdit());
+                $app->add(new Command\MakeForm());
+                $app->add(new Command\MakeManager());
+                $app->add(new Command\MakeEdit());
                 $app->add(new Command\MakeAll());
             }
 

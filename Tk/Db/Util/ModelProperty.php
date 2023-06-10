@@ -210,7 +210,6 @@ class ModelProperty extends \Tk\Collection
 
     public function getFormMap(): string
     {
-
         $mapClass = 'Form\Text';
         switch ($this->getType()) {
             case self::TYPE_INT:
@@ -245,7 +244,6 @@ class ModelProperty extends \Tk\Collection
 
     public function getTableMap(): string
     {
-
         $mapClass = 'Form\Text';
         switch ($this->getType()) {
             case self::TYPE_INT:
@@ -321,9 +319,9 @@ class ModelProperty extends \Tk\Collection
             case self::TYPE_BOOL:
                 $mapClass = 'Cell\Boolean';
                 break;
-            case self::TYPE_DATE:
-                $mapClass = 'Cell\Date';
-                break;
+//            case self::TYPE_DATE:
+//                $mapClass = 'Cell\Date';
+//                break;
         }
         if ($this->getName() == 'id') {
             $mapClass = 'Cell\Checkbox';
@@ -333,11 +331,11 @@ class ModelProperty extends \Tk\Collection
         $append = '';
         if ($this->getName() == 'name' || $this->getName() == 'title') {
             $append .= '->addCss(\'key\')';
-            $append .= '->setUrl($this->getEditUrl())';
+            $append .= '->setUrl($editUrl)';
         }
 
         $tpl = <<<TPL
-                \$this->appendCell(new %s(%s))%s;
+                \$this->getTable()->appendCell(new %s(%s))%s;
         TPL;
 
         return sprintf($tpl,
@@ -366,7 +364,7 @@ class ModelProperty extends \Tk\Collection
         $propertyName = $this->quote($this->getName());
 
         $tpl = <<<TPL
-                \$this->appendField(new %s(%s%s))%s;
+                \$this->getForm()->appendField(new %s(%s%s))%s;
         TPL;
         if ($isModelForm) {
             $tpl = <<<TPL
