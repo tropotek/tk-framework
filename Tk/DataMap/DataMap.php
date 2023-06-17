@@ -54,7 +54,6 @@ class DataMap
                     if ($this->isEnableDynamic()) {
                         $reflect = new \ReflectionClass($object);
                         if (!$reflect->hasProperty($key)) {
-                            //$object->$key = $value;
                             $object->set($key, $value);
                         }
                     }
