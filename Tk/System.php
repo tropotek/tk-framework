@@ -41,7 +41,7 @@ class System
         if (is_file($htaccessFile)) {
             $htaccess = file_get_contents($htaccessFile);
             if ($htaccess && preg_match('/\s+RewriteBase (\/.*)\s+/i', $htaccess, $regs)) {
-                $path = $regs[1];
+                $path = $regs[1] ?? '';
             }
         }
         return rtrim($path, '/');
