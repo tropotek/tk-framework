@@ -43,17 +43,17 @@ class Config extends Collection
 
     public function getHostname(): string
     {
-        return $this->get('hostname');
+        return $this->get('hostname', '');
     }
 
     public function getBasePath(): string
     {
-        return $this->get('base.path');
+        return $this->get('base.path', '');
     }
 
     public function getBaseUrl(): string
     {
-        return $this->get('base.url');
+        return $this->get('base.url', '');
     }
 
     public function getDataPath(): string
