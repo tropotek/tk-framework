@@ -25,8 +25,8 @@ class Config extends Collection
         parent::__construct();
 
         $this->set('hostname', $_SERVER['HTTP_HOST'] ?? $_SERVER['HTTP_X_FORWARDED_HOST'] ?? 'localhost');
-        $this->set('base.path', $this->getSystem()->discoverBasePath());
-        $this->set('base.url', $this->getSystem()->discoverBaseUrl());
+        $this->set('base.path', $this->getSystem()->discoverBasePath() ?? '');
+        $this->set('base.url', $this->getSystem()->discoverBaseUrl() ?? '');
     }
 
     /**
