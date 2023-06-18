@@ -32,6 +32,8 @@ return function (Config $config)
     $config->set('log.system.request', $config->get('path.cache') . '/requestLog.txt');
     $config->set('log.logLevel', \Psr\Log\LogLevel::ERROR);
 
+    $config->set('log.ignore.noLog', false);
+
     // Set the timezone in the config.ini
     $config->set('php.date.timezone', 'Australia/Melbourne');
 
@@ -49,5 +51,6 @@ return function (Config $config)
 
     // These files are always executed in the /src/config/sql path
     $config->set('db.migrate.static', ['views.sql', 'procedures.sql', 'events.sql', 'triggers.sql']);
+
 
 };

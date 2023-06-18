@@ -236,13 +236,15 @@ class Factory extends Collection
             }
 
             $logger = new NullLogger();
-            // TODO: would be good to have these conditions configurable
-            //       Some errors are hard to see with no logs, have a think if adding config options for these
-            //       are a good idea (Gotcha count: 2)
-            if (
-                !$this->getRequest()->query->has(Log::NO_LOG)             // No log when using nolog in query param
-                 && !str_contains($this->getRequest()->getRequestUri(), '/api/')     // No logs for api calls (comment out when testing API`s)
-            ) {
+            $enabled = true;
+            if (!$this->getConfig()->get('log.ignore.noLog', false)) {
+                // No log when using nolog in query param
+                if ($this->getRequest()->query->has(Log::NO_LOG)) $enabled = false;
+                // No logs for api calls (comment out when testing API`s)
+                if (str_contains($this->getRequest()->getRequestUri(), '/api/')) $enabled = false;
+            }
+
+            if ($enabled) {
                 $logger = new Logger('system', [], $processors);
                 if (is_writable(ini_get('error_log'))) {
                     $handler = new StreamHandler(ini_get('error_log'), $this->getConfig()->get('log.logLevel', LogLevel::ERROR));
