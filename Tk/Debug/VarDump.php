@@ -158,7 +158,7 @@ namespace { // global code
         $str = "\n";
         $str .= $vd->makeDump(func_get_args());
         $str .= sprintf('vd(%s) %s [%s];', implode(', ', $vd->getTypeArray(func_get_args())), $path, $line['line']) . "\n";
-        $vd->getLogger()->debug($str);
+        $vd->getLogger()->info($str);
         return $str;
     }
 
@@ -174,7 +174,7 @@ namespace { // global code
         $str = "\n";
         $str .= $vd->makeDump(func_get_args(), true);
         $str .= sprintf('vdd(%s) %s [%s]', implode(', ', $vd->getTypeArray(func_get_args())), $path, $line['line']) . "\n";
-        $vd->getLogger()->debug($str);
+        $vd->getLogger()->info($str);
         return $str;
     }
 }

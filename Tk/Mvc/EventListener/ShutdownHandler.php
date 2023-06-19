@@ -24,24 +24,27 @@ class ShutdownHandler implements EventSubscriberInterface
     {
         // Echo the final line
         if (!StartupHandler::$SCRIPT_CALLED) return;
-        $this->out(StartupHandler::$SCRIPT_END . \PHP_EOL);
+        $this->info(StartupHandler::$SCRIPT_END . \PHP_EOL);
     }
 
     public function onTerminate(TerminateEvent $event)
     {
         if (!StartupHandler::$SCRIPT_CALLED) return;
-        $this->out(StartupHandler::$SCRIPT_LINE);
-        $this->out('Load Time: ' . round($this->scriptDuration(), 4) . ' sec');
-        $this->out('Peek Mem:  ' . \Tk\FileUtil::bytes2String(memory_get_peak_usage(), 4));
-
-        $this->out('Response Headers:');
-        $this->out('  HTTP Code: ' . http_response_code() . ' ');
-
+        $this->info(StartupHandler::$SCRIPT_LINE);
+        $this->info(sprintf('Time: %s sec    Peek Mem: %s',
+            round($this->scriptDuration(), 4),
+            \Tk\FileUtil::bytes2String(memory_get_peak_usage(), 4)
+        ));
     }
 
-    private function out($str)
+    private function info($str)
     {
         $this->logger->info($str);
+    }
+
+    private function debug($str)
+    {
+        $this->logger->debug($str);
     }
 
     /**

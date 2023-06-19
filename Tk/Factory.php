@@ -2,6 +2,7 @@
 namespace Tk;
 
 use Composer\Autoload\ClassLoader;
+use Monolog\Handler\ErrorLogHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
@@ -254,6 +255,8 @@ class Factory extends Collection
                     $handler->setFormatter($formatter);
                     $logger->pushHandler($handler);
                 } else {
+                    $handler = new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM);
+                    $logger->pushHandler($handler);
                     error_log('Error accessing log file: ' . ini_get('error_log'));
                 }
             }

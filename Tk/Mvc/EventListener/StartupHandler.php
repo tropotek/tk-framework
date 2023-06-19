@@ -41,7 +41,7 @@ class StartupHandler implements EventSubscriberInterface
     private function init(?Request $request = null)
     {
         self::$SCRIPT_CALLED = true;
-        $this->out(self::$SCRIPT_START);
+        $this->info(self::$SCRIPT_START);
 
         $siteName = $this->getSystem()->getRegistry()->getSiteName();
         if ($this->getSystem()->getComposerJson()) {
@@ -51,25 +51,27 @@ class StartupHandler implements EventSubscriberInterface
             $siteName .= sprintf(' [v%s]', $this->getSystem()->getVersion());
         }
 
-        $this->out('- Project: ' . trim($siteName));
-        $this->out('- Date: ' . date('Y-m-d H:i:s'));
+        $this->info('- Project: ' . trim($siteName));
+        //$this->out('- Date: ' . date('Y-m-d H:i:s'));
         if ($request) {
-            $this->out('- Host: ' . $request->getScheme() . '://' . $request->getHost());
-            $this->out('- Base Path: ' . $request->getPathInfo());
-            $this->out('- Base URL: ' . $request->getBaseUrl());
-            $this->out('- Method: ' . $request->getMethod());
-            $this->out('- Client IP: ' . $request->getClientIp());
-            $this->out('- User Agent: ' . $request->headers->get('User-Agent') );
+            $this->debug(sprintf('- Request: [%s][%s] %s%s%s',
+                $request->getMethod(),
+                http_response_code(),
+                $request->getScheme() . '://' . $request->getHost(),
+                $request->getBaseUrl(),
+                $request->getPathInfo()
+            ));
+            $this->debug('- Client IP: ' . $request->getClientIp());
+            $this->debug('- Agent: ' . $request->headers->get('User-Agent') );
             if ($request->getSession()) {
-                $this->out('- Session Name: ' . $request->getSession()->getName());
-                $this->out('- Session ID: ' . $request->getSession()->getId());
+                $this->debug(sprintf('- Session: %s [ID: %s]', $request->getSession()->getName(), $request->getSession()->getId()));
             }
         } else {
-            $this->out('- CLI: ' . implode(' ', $_SERVER['argv']));
+            $this->debug('- CLI: ' . implode(' ', $_SERVER['argv']));
+            $this->debug('- Path: ' . $this->getConfig()->getBasePath());
         }
-        $this->out('- Path: ' . $this->getConfig()->getBasePath());
-        $this->out('- PHP: ' . \PHP_VERSION);
-        $this->out(self::$SCRIPT_LINE);
+        $this->debug('- PHP: ' . \PHP_VERSION);
+        $this->info(self::$SCRIPT_LINE);
     }
 
     public function onRequest(RequestEvent $event)
@@ -79,13 +81,18 @@ class StartupHandler implements EventSubscriberInterface
             if (is_array($controller)) {
                 $controller = implode('::', $controller);
             }
-            $this->out('- Controller: ' . $controller);
+            $this->info('- Controller: ' . $controller);
         }
     }
 
-    private function out(string $str)
+    private function info(string $str)
     {
         $this->logger->info($str);
+    }
+
+    private function debug(string $str)
+    {
+        $this->logger->debug($str);
     }
 
     public static function getSubscribedEvents()
