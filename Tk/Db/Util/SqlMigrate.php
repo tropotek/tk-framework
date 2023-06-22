@@ -283,6 +283,7 @@ SQL;
      */
     protected function insertPath(string $path): int
     {
+        vd($path);
         $this->logger->info("Migrating file: {$this->toRelative($path)}");
         $path = $this->getDb()->escapeString($this->toRelative($path));
         $rev = $this->getDb()->escapeString($this->toRev($path));
