@@ -26,7 +26,7 @@ class Debug extends Console
         try {
             $devFile = $this->getSystem()->makePath($this->getConfig()->get('debug.script'));
             if (is_file($devFile)) {
-                $this->writeComment('  - Setup dev environment: ' . $this->getConfig()->get('debug.script'));
+                $this->writeComment('Setup dev environment: ' . $this->getConfig()->get('debug.script'));
                 include($devFile);
             }
         } catch (\Exception $e) {

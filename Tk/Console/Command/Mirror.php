@@ -91,7 +91,7 @@ class Mirror extends Console
                 if (!$input->getOption('no-dev')) {
                     $devFile = $this->getSystem()->makePath($config->get('debug.script'));
                     if ($config->isDebug() && is_file($devFile)) {
-                        $this->writeBlue('  - Setup dev environment: ' . $config->get('debug.script'));
+                        $this->writeBlue('Setup dev environment: ' . $config->get('debug.script'));
                         include($devFile);
                     }
                 }
