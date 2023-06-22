@@ -137,6 +137,7 @@ class SqlMigrate
                     $callback($this->getDb());
                 }
                 $this->insertPath($file);
+                return true;
             } else {                                                // is sql
                 // replace any table prefix
                 $sql = file_get_contents($file);
@@ -157,13 +158,14 @@ class SqlMigrate
                     throw new \Tk\Db\Exception("Query $i failed: " . $error[2], 0, null, $sql);
                 }
                 $this->insertPath($file);
+                return true;
             }
 
         } catch (\Exception $e){
             $this->logger->error($e->__toString());
             //throw new \Tk\Exception('File: ' . $file, $e->getCode(), $e);
         }
-        return true;
+        return false;
     }
 
     /**
@@ -283,7 +285,6 @@ SQL;
      */
     protected function insertPath(string $path): int
     {
-        vd($path);
         $this->logger->info("Migrating file: {$this->toRelative($path)}");
         $path = $this->getDb()->escapeString($this->toRelative($path));
         $rev = $this->getDb()->escapeString($this->toRev($path));
