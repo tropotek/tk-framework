@@ -125,7 +125,6 @@ class SqlMigrate
             if (!is_readable($file)) return false;
             if ($this->hasPath($file)) return false;
 
-            $this->logger->info("Migrating file: {$this->toRelative($file)}");
 
             if (!$this->backupFile) {   // only run once per session.
                 $dump = new SqlBackup($this->getDb());
@@ -284,6 +283,7 @@ SQL;
      */
     protected function insertPath(string $path): int
     {
+        $this->logger->info("Migrating file: {$this->toRelative($path)}");
         $path = $this->getDb()->escapeString($this->toRelative($path));
         $rev = $this->getDb()->escapeString($this->toRev($path));
         $sql = sprintf('INSERT INTO %s (path, rev, created) VALUES (%s, %s, NOW())', $this->getDb()->quoteParameter($this->getTable()), $this->getDb()->quote($path), $this->getDb()->quote($rev));
