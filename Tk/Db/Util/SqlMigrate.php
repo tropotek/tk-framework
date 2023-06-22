@@ -70,19 +70,20 @@ class SqlMigrate
      */
     public function migrateList(array $migrateList): array
     {
-        $list = [];
+        $processed = [];
         $this->install();
 
         foreach ($migrateList as $path) {
             if (is_file($path)) {
-                $this->migrateFile($path);
-                $list[] = $path;
+                if ($this->migrateFile($path)) {
+                    $processed[] = $path;
+                }
             } else {
-                $list += $this->migratePath($path);
+                $processed += $this->migratePath($path);
             }
         }
 
-        return $list;
+        return $processed;
     }
 
     /**
@@ -93,12 +94,14 @@ class SqlMigrate
     {
         try {
             $this->install();
-
             $list = $this->search($path);
+            $processed = [];
 
             // Find any migration files
             foreach ($list as $file) {
-                $this->migrateFile($file);
+                if ($this->migrateFile($file)) {
+                    $processed[] = $file;
+                }
             }
         } catch (\Exception $e) {
             $this->logger->error($e->__toString());
@@ -107,7 +110,7 @@ class SqlMigrate
         }
         $this->deleteBackup();
 
-        return $list;
+        return $processed;
     }
 
     /**
@@ -124,7 +127,6 @@ class SqlMigrate
             $file = $this->getConfig()->getBasePath() . $this->toRelative($file);
             if (!is_readable($file)) return false;
             if ($this->hasPath($file)) return false;
-
 
             if (!$this->backupFile) {   // only run once per session.
                 $dump = new SqlBackup($this->getDb());
