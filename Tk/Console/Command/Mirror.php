@@ -20,7 +20,7 @@ class Mirror extends Console
             ->addOption('no-cache', 'C', InputOption::VALUE_NONE, 'Force downloading of the live DB. (Cached for the day)')
             ->addOption('no-sql', 'S', InputOption::VALUE_NONE, 'Do not execute the sql component of the mirror')
             ->addOption('no-dev', 'f', InputOption::VALUE_NONE, 'Do not execute the dev sql file')
-            ->addOption('copy-data', 'd', InputOption::VALUE_NONE, 'Use scp to copy the data folder from the live site.')
+            ->addOption('copy-data', 'd', InputOption::VALUE_NONE, 'Copy the \'/data\' files from the live site.')
             ->setDescription('Mirror the data and files from the Live site');
     }
 
