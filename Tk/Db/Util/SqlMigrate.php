@@ -72,7 +72,7 @@ class SqlMigrate
     {
         $processed = [];
         $this->install();
-
+vdd($migrateList);
         foreach ($migrateList as $path) {
             if (is_file($path)) {
                 if ($this->migrateFile($path)) {
