@@ -204,7 +204,6 @@ vdd($migrateList);
             ksort($list);
             $this->foundFiles[$path] = Collection::arrayFlatten($list);
         }
-        vd($this->foundFiles);
         return $this->foundFiles[$path];
     }
 
