@@ -40,6 +40,7 @@ return function (Config $config)
     \Tk\FileUtil::mkdir($config->getSystem()->makePath($config->get('path.temp')), true);
     \Tk\FileUtil::mkdir($config->getSystem()->makePath($config->get('path.cache')), true);
 
+
     // Setup default migration paths
     $vendorPath = $config->getBasePath() . $config->get('path.vendor.org');
     $libPaths = scandir($vendorPath);

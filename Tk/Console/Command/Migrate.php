@@ -47,7 +47,7 @@ class Migrate extends Console
 
             // Migrate new SQL files
             $this->write('Migration Starting.');
-            $migrateList = $this->getConfig()->get('db.migrate.paths');
+            $migrateList = $this->getConfig()->get('db.migrate.paths', []);
             $outputLogger = new ConsoleOutputLogger($output);
             $migrate = new SqlMigrate($db, $outputLogger);
             $migrate->migrateList($migrateList);
