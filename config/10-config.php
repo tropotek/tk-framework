@@ -26,6 +26,11 @@ return function (Config $config)
     $config->set('session.db_lifetime_col',   'lifetime');
     $config->set('session.db_time_col',       'time');
 
+    $config->set('session.cookie_secure',       true);
+    $config->set('session.cookie_httponly',     true);
+    $config->set('session.cookie_samesite',     'Strict');
+    $config->set('session.cookie_path',         $config->getBaseUrl());
+
     $config->set('debug',     false);
     $config->set('debug.script', $config->get('path.config') . '/dev.php');
 
