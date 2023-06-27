@@ -29,12 +29,6 @@
       "Tk/Exception.php"
     ]
   },
-  "extra": {
-    "branch-alias": {
-      "dev-master": "8.0.x-dev"
-    }
-  },
-
   "require": {
     "php": "^8.2",
     "psr/log": "^1.0",
@@ -54,14 +48,9 @@
     "monolog/monolog": "^2.0",
     "sensiolabs/ansi-to-html": "~1.0"
   },
-
-  "config": {
-    "allow-plugins": {
-      "ttek/tk-installers": true
-    },
-    "preferred-install": {
-      "ttek/*": "source"
-    },
-    "component-dir": "vendor/components"
+  "extra": {
+    "branch-alias": {
+      "dev-master": "8.0.x-dev"
+    }
   }
 }
