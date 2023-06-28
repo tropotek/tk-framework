@@ -3,6 +3,7 @@ namespace Tk\Traits;
 
 use App\Db\User;
 use Tk\Config;
+use Tk\Cookie;
 use Tk\Factory;
 use Tk\Registry;
 use Tk\System;
@@ -71,6 +72,11 @@ trait SystemTrait
     public function getSession(): ?\Symfony\Component\HttpFoundation\Session\Session
     {
         return $this->getFactory()->getSession();
+    }
+
+    public function getCookie(): Cookie
+    {
+        return $this->getFactory()->getCookie();
     }
 
 }

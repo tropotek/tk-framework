@@ -106,6 +106,15 @@ class Factory extends Collection
         return $this->get('session');
     }
 
+    public function getCookie(): Cookie
+    {
+        if (!$this->has('cookie')) {
+            $cookie = new Cookie();
+            $this->set('cookie', $cookie);
+        }
+        return $this->get('cookie');
+    }
+
     public function getRequest(): Request
     {
         if (!$this->has('request')) {
