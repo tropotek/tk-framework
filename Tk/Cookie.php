@@ -63,7 +63,7 @@ class Cookie
         return isset($_COOKIE[$key]);
     }
 
-    public function get(string $key, ?string $default = null): string
+    public function get(string $key, ?string $default = ''): string
     {
         return $_COOKIE[$key] ?? $default;
     }
