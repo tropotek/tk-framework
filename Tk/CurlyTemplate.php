@@ -118,7 +118,7 @@ class CurlyTemplate
      *
      * @throws Exception
      */
-    function parse(array $data): string
+    function parse(array $data = []): string
     {
         $template = $this->template;
         $template = $this->parseRecursive($template, $data);

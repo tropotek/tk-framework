@@ -31,7 +31,7 @@ return function (Config $config)
     $config->set('session.cookie_samesite',     'Strict');
     $config->set('session.cookie_path',         $config->getBaseUrl());
 
-    $config->set('debug',     false);
+    $config->set('debug', false);
     $config->set('debug.script', $config->get('path.config') . '/dev.php');
 
     $config->set('log.system.request', $config->get('path.cache') . '/requestLog.txt');
