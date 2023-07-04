@@ -68,10 +68,9 @@ class Cookie
         return $_COOKIE[$key] ?? $default;
     }
 
-    public function set(string $key, string $value, ?int $expires = null): bool
+    protected function getCfg(?int $expires = null): array
     {
-        if (headers_sent()) return false;
-        $cfg = [
+        return [
             'expires' => $expires ?? time() + self::DAYS_30_SEC,
             'path' => $this->path,
             'domain' => $this->domain,
@@ -79,7 +78,13 @@ class Cookie
             'httponly' => $this->httponly,
             'samesite' => $this->samesite,
         ];
-        if (@setcookie($key, $value, $cfg)) {
+    }
+
+    public function set(string $key, string $value, ?int $expires = null): bool
+    {
+        if (headers_sent()) return false;
+        $expires = $expires ?? time() + self::DAYS_30_SEC;
+        if (@setcookie($key, $value, $this->getCfg($expires))) {
             $_COOKIE[$key] = $value;
             return true;
         }
@@ -89,15 +94,7 @@ class Cookie
     public function delete(string $key): bool
     {
         if (headers_sent()) return false;
-        $cfg = [
-            'expires' => -1,
-            'path' => $this->path,
-            'domain' => $this->domain,
-            'secure' => $this->secure,
-            'httponly' => $this->httponly,
-            'samesite' => $this->samesite,
-        ];
-        if (setcookie($key, '', $cfg)) {
+        if (setcookie($key, '', $this->getCfg(-1))) {
             unset($_COOKIE[$key]);
             unset($_REQUEST[$key]);
             return true;

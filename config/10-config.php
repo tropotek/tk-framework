@@ -28,6 +28,7 @@ return function (Config $config)
 
     $config->set('session.cookie_secure',       true);
     $config->set('session.cookie_httponly',     true);
+    $config->set('session.cookie_domain',       $config->getHostname());
     $config->set('session.cookie_samesite',     'Strict');
     $config->set('session.cookie_path',         $config->getBaseUrl());
 
