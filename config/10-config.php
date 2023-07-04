@@ -59,5 +59,6 @@ return function (Config $config)
     // These files are always executed in the /src/config/sql path
     $config->set('db.migrate.static', ['views.sql', 'procedures.sql', 'events.sql', 'triggers.sql']);
 
+    $config->set('system.encrypt', md5($config->getHostname()));
 
 };

@@ -95,8 +95,7 @@ namespace Tk\Debug {
          */
         public static function varToString($var, int $depth = 5, int $nest = 0): string
         {
-            $pad = '';
-            for ($i = 0; $i <= $nest * 2; $i++) $pad .= '  ';
+            $pad = str_repeat('  ', $nest * 2 + 1);
 
             $type = 'native';
             $str = $var;
@@ -105,7 +104,7 @@ namespace Tk\Debug {
                 $str = 'NULL';
             } else if (is_bool($var)) {
                 $type = 'Boolean';
-                $str = $var == true ? 'true' : 'false';
+                $str = $var ? 'true' : 'false';
             } else if (is_string($var)) {
                 $type = 'String';
                 $str = str_replace("\0", '|', $var);
@@ -158,7 +157,7 @@ namespace { // global code
         $str = "\n";
         $str .= $vd->makeDump(func_get_args());
         $str .= sprintf('vd(%s) %s [%s];', implode(', ', $vd->getTypeArray(func_get_args())), $path, $line['line']) . "\n";
-        $vd->getLogger()->info($str);
+        $vd->getLogger()->debug($str);
         return $str;
     }
 
@@ -174,7 +173,7 @@ namespace { // global code
         $str = "\n";
         $str .= $vd->makeDump(func_get_args(), true);
         $str .= sprintf('vdd(%s) %s [%s]', implode(', ', $vd->getTypeArray(func_get_args())), $path, $line['line']) . "\n";
-        $vd->getLogger()->info($str);
+        $vd->getLogger()->debug($str);
         return $str;
     }
 }

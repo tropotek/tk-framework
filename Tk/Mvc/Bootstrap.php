@@ -21,10 +21,9 @@ class Bootstrap
         // Init tk error handler
         \Tk\ErrorHandler::instance($this->getFactory()->getLogger());
 
-        // Setup Vardump, ensure it does not log on production installs
-        $vdLog = null;
-        if ($this->getConfig()->isDebug()) $vdLog = $this->getFactory()->getLogger();
-        \Tk\Debug\VarDump::instance($vdLog);
+        \Tk\Debug\VarDump::instance($this->getFactory()->getLogger());
+
+        TextEncrypt::$encryptKey = $this->getConfig()->get('system.encrypt');
 
         if ($this->getConfig()->isDebug()) {
             // Allow self-signed certs in file_get_contents in debug mode
@@ -32,10 +31,8 @@ class Bootstrap
                 "verify_peer" => false,
                 "verify_peer_name" => false,
             ]]);
+            Template::$ENABLE_TRACER = true;
         }
-
-
-        TextEncrypt::$encryptKey = $this->getConfig()->get('system.encrypt', md5(__FILE__));
 
         if ($this->getSystem()->isCli()) {
             $this->cliInit();
@@ -61,15 +58,6 @@ class Bootstrap
         // ready the Request
         $request = $this->getFactory()->getRequest();
         $request->setSession($session);
-
-        if ($this->getConfig()->isDebug()) {
-            // Allow self-signed certs in file_get_contents in debug mode
-            stream_context_set_default(["ssl" => [
-                "verify_peer" => false,
-                "verify_peer_name" => false,
-            ]]);
-            Template::$ENABLE_TRACER = true;
-        }
 
         // Setup EventDispatcher and subscribe events, loads routes
         $this->getFactory()->initEventDispatcher();
