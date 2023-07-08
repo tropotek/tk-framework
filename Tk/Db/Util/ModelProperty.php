@@ -55,7 +55,6 @@ class ModelProperty extends \Tk\Collection
             $dtype = 'text';
             if (!empty($this->get('Type')))
                 $dtype = strtolower($this->get('Type'));
-
             if (preg_match('/^(tinyint\(1\)|bool|boolean)/', $dtype)) {
                 $this->type = self::TYPE_BOOL;
             } else if (preg_match('/^(int|bigint|tinyint|mediumint|integer|bit)/', $dtype)) {
@@ -72,7 +71,8 @@ class ModelProperty extends \Tk\Collection
     public function getDefaultValue(): float|bool|int|string|null
     {
         $def = $this->get('Default');
-        $def = match ($this->getType()) {
+        $def = str_replace("''", '', $def);
+        return match ($this->getType()) {
             self::TYPE_BOOL => boolval($def ?? false) ? 'true' : 'false',
             self::TYPE_INT => intval($def ?? 0),
             self::TYPE_FLOAT => floatval($def ?? 0.0),
@@ -80,7 +80,6 @@ class ModelProperty extends \Tk\Collection
             self::TYPE_DATE => null,
             default => 'null',
         };
-        return $def;
     }
 
     public function getDefinition(): string
@@ -266,11 +265,12 @@ class ModelProperty extends \Tk\Collection
 //            $tag = ', ' . $this->quote('key');
 
         $tpl = <<<TPL
-                    \$map->addDataType(new %s(%s)%s);
+                    \$map->addDataType(new %s(%s)%s)
         TPL;
         if ($this->getType() == self::TYPE_DATE) {
             $tpl .= "->setDateFormat('d/m/Y h:i:s')";
         }
+        $tpl .= ';';
         return sprintf($tpl,
             $mapClass,
             $propertyName,
@@ -280,7 +280,8 @@ class ModelProperty extends \Tk\Collection
 
     public function getFilterQuery(): string
     {
-        if ($this->getName() == 'id' ) return '';
+        //if ($this->getName() == 'id' ) return '';
+        if ($this->isPrimaryKey()) return '';
 
         $filterVal = sprintf("\$this->quote(\$filter['%s'])", $this->getName());
         switch ($this->getType()) {
@@ -323,7 +324,7 @@ class ModelProperty extends \Tk\Collection
 //                $mapClass = 'Cell\Date';
 //                break;
         }
-        if ($this->getName() == 'id') {
+        if ($this->isPrimaryKey()) {
             $mapClass = 'Cell\Checkbox';
         }
 

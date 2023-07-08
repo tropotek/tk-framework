@@ -57,17 +57,31 @@ class ModelGenerator
         return ucfirst($classname);
     }
 
+    protected function makePropertyName(string $colName): string
+    {
+        $prop = preg_replace_callback('/_([a-z])/i', function ($matches) {
+            return strtoupper($matches[1]);
+        }, $colName);
+        return lcfirst($prop);
+    }
+
     protected function getDefaultData(): array
     {
         $now = \Tk\Date::create();
-        $a = [
+        $primaryKey = 'id';
+        foreach ($this->tableInfo as $col => $info) {
+            if ($info['Key'] ?? '' == 'PRI') {
+                $primaryKey = $info['Field'];
+            }
+        }
+        return [
             'author-name' => 'Tropotek',
             'author-biz' => 'Tropotek',
             'author-www' => 'http://tropotek.com.au/',
             'date' => $now->format(\Tk\Date::FORMAT_ISO_DATE),
             'year' => $now->format('Y'),
             'classname' => $this->getClassName(),
-            'name' => trim(preg_replace('/[A-Z]/', ' $0', $this->getClassName())) ,
+            'name' => trim(preg_replace('/[A-Z]/', ' $0', $this->getClassName())),
             'table' => $this->getTable(),
             'namespace' => $this->getNamespace(),
             'db-namespace' => $this->getDbNamespace(),
@@ -76,9 +90,10 @@ class ModelGenerator
             'controller-namespace' => $this->getControllerNamespace(),
             'property-name' => lcfirst($this->getClassName()),
             'namespace-url' => str_replace('_', '/', $this->getTable()),
-            'table-id' => str_replace('_', '-', $this->getTable())
+            'table-id' => str_replace('_', '-', $this->getTable()),
+            'primary-col' => $primaryKey,
+            'primary-prop' => $this->makePropertyName($primaryKey),
         ];
-        return $a;
     }
 
     public function setNamespace(string $namespace): static
@@ -318,21 +333,23 @@ class {classname}Map extends Mapper
             //\$w .= sprintf('a.name LIKE %s OR ', \$this->quote(\$kw));
             if (is_numeric(\$filter['search'])) {
                 \$id = (int)\$filter['search'];
-                \$w .= sprintf('a.id = %d OR ', \$id);
+                \$w .= sprintf('a.{primary-col} = %d OR ', \$id);
             }
             if (\$w) \$filter->appendWhere('(%s) AND ', substr(\$w, 0, -3));
         }
 
         if (!empty(\$filter['id'])) {
-            \$w = \$this->makeMultiQuery(\$filter['id'], 'a.id');
-            if (\$w) \$filter->appendWhere('(%s) AND ', \$w);
+            \$filter['{primary-prop}'] = \$filter['id'];
         }
-
-        if (!empty(\$filter['exclude'])) {
-            \$w = \$this->makeMultiQuery(\$filter['exclude'], 'a.id', 'AND', '!=');
+        if (!empty(\$filter['{primary-prop}'])) {
+            \$w = \$this->makeMultiQuery(\$filter['{primary-prop}'], 'a.{primary-col}');
             if (\$w) \$filter->appendWhere('(%s) AND ', \$w);
         }
 {filter-queries}
+        if (!empty(\$filter['exclude'])) {
+            \$w = \$this->makeMultiQuery(\$filter['exclude'], 'a.{primary-col}', 'AND', '!=');
+            if (\$w) \$filter->appendWhere('(%s) AND ', \$w);
+        }
 
         return \$filter;
     }
