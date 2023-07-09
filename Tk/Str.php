@@ -60,14 +60,6 @@ class Str
     }
 
     /**
-     * Return the string with the first character lowercase
-     */
-    public static function lcFirst(string $str): string
-    {
-        return strtolower($str[0]) . substr($str, 1);
-    }
-
-    /**
      * Convert to CamelCase so "test_func_name" would convert to "testFuncName"
      * Adds a capital at the first char and ass a space before all other upper case chars
      */
@@ -160,6 +152,21 @@ class Str
         }
         return $str;
     }
+
+    /**
+     * Generate a random string
+     */
+    public static function random($length): string
+    {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $index = rand(0, strlen($characters) - 1);
+            $randomString .= $characters[$index];
+        }
+        return $randomString;
+    }
+
 
     /**
      * Count the number of bytes of a given string.
