@@ -70,7 +70,8 @@ class ModelGenerator
         $now = \Tk\Date::create();
         $primaryKey = 'id';
         foreach ($this->tableInfo as $col => $info) {
-            if ($info['Key'] ?? '' == 'PRI') {
+            if (($info['Key'] ?? '') == 'PRI') {
+                vd($info);
                 $primaryKey = $info['Field'];
             }
         }
@@ -400,11 +401,11 @@ STR;
 <?php
 namespace {controller-namespace}\{classname};
 
-use Symfony\Component\HttpFoundation\Request;
 use Bs\PageController;
+use Bs\Table\ManagerTrait;
 use Dom\Template;
-use App\Db\User;
-use Tk\Uri;
+use Bs\Db\User;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Add Route to /src/config/routes.php:
@@ -415,22 +416,20 @@ use Tk\Uri;
  */
 class Manager extends PageController
 {
-    protected \{table-namespace}\{classname} \$table;
+    use ManagerTrait;
 
     public function __construct()
     {
         parent::__construct(\$this->getFactory()->getAdminPage());
         \$this->getPage()->setTitle('{name} Manager');
+        \$this->setAccess(User::PERM_MANAGE_STAFF);
     }
 
-    public function doDefault(Request \$request)
+    public function doDefault(Request \$request): \App\Page|\Dom\Mvc\Page
     {
-        \$this->setAccess(User::PERM_MANAGE_STAFF);
-
-        // Get the form template
-        \$this->table = new \{table-namespace}\{classname}();
-        \$this->table->doDefault(\$request);
-        \$this->table->execute(\$request);
+        \$this->setTable(new \{table-namespace}\{classname}());
+        \$this->getTable()->findList([], \$this->getTable()->getTool());
+        \$this->getTable()->init()->execute(\$request);
 
         return \$this->getPage();
     }
@@ -439,9 +438,9 @@ class Manager extends PageController
     {
         \$template = \$this->getTemplate();
         \$template->setText('title', \$this->getPage()->getTitle());
-        \$template->setAttr('create', 'href', Uri::create('/{namespace-url}Edit'));
+        \$template->setAttr('create', 'href', \$this->getBackUrl());
 
-        \$template->appendTemplate('content', \$this->table->show());
+        \$template->appendTemplate('content', \$this->getTable()->show());
 
         return \$template;
     }
@@ -458,7 +457,7 @@ class Manager extends PageController
     </div>
   </div>
   <div class="card mb-3">
-    <div class="card-header" var="title"><i class="fa fa-users"></i> </div>
+    <div class="card-header" var="title"><i class="fa fa-cogs"></i> </div>
     <div class="card-body" var="content"></div>
   </div>
 </div>
@@ -477,7 +476,9 @@ PHP;
 <?php
 namespace {table-namespace};
 
+use {db-namespace}\{classname}Map;
 use Dom\Template;
+use Bs\Table\ManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Tk\Alert;
 use Tk\Traits\SystemTrait;
@@ -489,23 +490,13 @@ use Tk\Table;
 use Tk\Table\Cell;
 use Tk\Table\Action;
 use Tk\TableRenderer;
+use Tk\Db\Tool;
 
-class {classname}
+class {classname} extends ManagerInterface
 {
     use SystemTrait;
 
-    protected Table \$table;
-
-    protected ?Form \$filter = null;
-
-
-    public function __construct()
-    {
-        \$this->table  = new Table();
-        \$this->filter = new Form(\$this->table->getId() . '-filters');
-    }
-
-    public function doDefault(Request \$request)
+    public function initCells(): void
     {
         \$editUrl = Uri::create('/{namespace-url}Edit');
 
@@ -514,71 +505,34 @@ class {classname}
         // Filters
         \$this->getFilter()->appendField(new Field\Input('search'))->setAttr('placeholder', 'Search');
 
-        // load filter values
-        \$this->getFilter()->setFieldValues(\$this->getTable()->getTableSession()->get(\$this->getFilter()->getId(), []));
-        \$this->getFilter()->appendField(new Form\Action\Submit('Search', function (Form \$form, Form\Action\ActionInterface \$action) {
-            \$this->getTable()->getTableSession()->set(\$this->getFilter()->getId(), \$form->getFieldValues());
-            Uri::create()->redirect();
-        }))->setGroup('');
-        \$this->getFilter()->appendField(new Form\Action\Submit('Clear', function (Form \$form, Form\Action\ActionInterface \$action) {
-            \$this->getTable()->getTableSession()->set(\$this->getFilter()->getId(), []);
-            Uri::create()->redirect();
-        }))->setGroup('')->addCss('btn-outline-secondary');
-        // execute filter form
-        \$this->getFilter()->execute(\$request->request->all());
-
-
         // Actions
-        if (\$this->getConfig()->isDebug()) {
-            \$this->getTable()->appendAction(new Action\Link('reset', Uri::create()->set(Table::RESET_TABLE, \$this->getTable()->getId()), 'fa fa-retweet'))
-                ->setLabel('')
-                ->setAttr('data-confirm', 'Are you sure you want to reset the Table`s session?')
-                ->setAttr('title', 'Reset table filters and order to default.');
-        }
-        \$this->getTable()->appendAction(new Action\Button('Create'))->setUrl(\$editUrl);
+        //\$this->getTable()->appendAction(new Action\Button('Create'))->setUrl(\$editUrl);
         \$this->getTable()->appendAction(new Action\Delete());
         \$this->getTable()->appendAction(new Action\Csv())->addExcluded('actions');
 
     }
 
-    public function execute(Request \$request, ?Result \$list = null): void
+    public function execute(Request \$request): static
     {
-        // Query
-        if (!\$list) {
-            \$tool = \$this->getTable()->getTool();
-            \$filter = \$this->getFilter()->getFieldValues();
-            \$list = \{db-namespace}\{classname}Map::create()->findFiltered(\$filter, \$tool);
-        }
-        \$this->getTable()->setList(\$list);
+        parent::execute(\$request);
+        return \$this;
+    }
 
-        \$this->getTable()->execute(\$request);
+    public function findList(array \$filter = [], ?Tool \$tool = null): null|array|Result
+    {
+        if (!\$tool) \$tool = \$this->getTool();
+        \$filter = array_merge(\$this->getFilterForm()->getFieldValues(), \$filter);
+        \$list = {classname}Map::create()->findFiltered(\$filter, \$tool);
+        \$this->setList(\$list);
+        return \$list;
     }
 
     public function show(): ?Template
     {
-        \$renderer = new TableRenderer(\$this->getTable());
-        \$this->getTable()->getRow()->addCss('text-nowrap');
-        \$this->getTable()->addCss('table-hover');
-
-        if (\$this->getFilter()) {
-            \$this->getFilter()->addCss('row gy-2 gx-3 align-items-center');
-            \$filterRenderer = FormRenderer::createInlineRenderer(\$this->getFilter());
-            \$renderer->getTemplate()->appendTemplate('filters', \$filterRenderer->show());
-            \$renderer->getTemplate()->setVisible('filters');
-        }
-
+        \$renderer = \$this->getTableRenderer();
+        \$this->getRow()->addCss('text-nowrap');
+        \$this->showFilterForm();
         return \$renderer->show();
-    }
-
-
-    public function getTable(): Table
-    {
-        return \$this->table;
-    }
-
-    public function getFilter(): ?Form
-    {
-        return \$this->filter;
     }
 }
 PHP;
@@ -626,10 +580,13 @@ PHP;
 <?php
 namespace {controller-namespace}\{classname};
 
+use {db-namespace}\{classname};
+use {db-namespace}\{classname}Map;
+use Bs\Form\EditTrait;
 use Bs\PageController;
 use Dom\Template;
 use Symfony\Component\HttpFoundation\Request;
-use App\Db\User;
+use Bs\Db\User;
 
 /**
  * Add Route to /src/config/routes.php:
@@ -640,10 +597,9 @@ use App\Db\User;
  */
 class Edit extends PageController
 {
+    use EditTrait;
 
     protected ?\{db-namespace}\{classname} \${property-name} = null;
-
-    protected \{form-namespace}\{classname} \$form;
 
 
     public function __construct()
@@ -656,12 +612,14 @@ class Edit extends PageController
     public function doDefault(Request \$request)
     {
         if (\$request->get('{property-name}Id')) {
-            \$this->{property-name} = \{db-namespace}\{classname}Map::create()->find(\$request->get('id', 0));
+            \$this->{property-name} = \{db-namespace}\{classname}Map::create()->find(\$request->get('id'));
+        }
+        if (!\$this->{property-name}) {
+            throw new Exception('Invalid Example ID: ' . \$request->query->getInt('exampleId'));
         }
 
-        // Get the form template
-        \$this->form = new \{form-namespace}\{classname}();
-        \$this->form->doDefault(\$request, \$request->query->get('id', 0));
+        \$this->setForm(new \{form-namespace}\{classname}(\$this->{property-name}));
+        \$this->getForm()->init()->execute(\$request->request->all());
 
         return \$this->getPage();
     }
@@ -670,6 +628,7 @@ class Edit extends PageController
     {
         \$template = \$this->getTemplate();
         \$template->setText('title', \$this->getPage()->getTitle());
+        \$template->setAttr('back', 'href', \$this->getBackUrl());
 
         \$template->appendTemplate('content', \$this->form->show());
 
