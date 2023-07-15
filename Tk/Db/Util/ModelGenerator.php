@@ -71,7 +71,6 @@ class ModelGenerator
         $primaryKey = 'id';
         foreach ($this->tableInfo as $col => $info) {
             if (($info['Key'] ?? '') == 'PRI') {
-                vd($info);
                 $primaryKey = $info['Field'];
             }
         }
@@ -290,7 +289,6 @@ use Tk\Db\Mapper\Result;
 use Tk\Db\Tool;
 use Tk\DataMap\Db;
 use Tk\DataMap\Form;
-use Tk\DataMap\Table;
 
 class {classname}Map extends Mapper
 {
@@ -480,17 +478,13 @@ use {db-namespace}\{classname}Map;
 use Dom\Template;
 use Bs\Table\ManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Tk\Alert;
 use Tk\Traits\SystemTrait;
-use Tk\Uri;
-use Tk\Form;
+use Tk\Db\Mapper\Result;
 use Tk\Form\Field;
-use Tk\FormRenderer;
-use Tk\Table;
 use Tk\Table\Cell;
 use Tk\Table\Action;
-use Tk\TableRenderer;
 use Tk\Db\Tool;
+use Tk\Uri;
 
 class {classname} extends ManagerInterface
 {
@@ -503,12 +497,12 @@ class {classname} extends ManagerInterface
 {cell-list}
 
         // Filters
-        \$this->getFilter()->appendField(new Field\Input('search'))->setAttr('placeholder', 'Search');
+        \$this->getFilterForm()->appendField(new Field\Input('search'))->setAttr('placeholder', 'Search');
 
         // Actions
-        //\$this->getTable()->appendAction(new Action\Button('Create'))->setUrl(\$editUrl);
-        \$this->getTable()->appendAction(new Action\Delete());
-        \$this->getTable()->appendAction(new Action\Csv())->addExcluded('actions');
+        //\$this->appendAction(new Action\Button('Create'))->setUrl(\$editUrl);
+        \$this->appendAction(new Action\Delete());
+        \$this->appendAction(new Action\Csv())->addExcluded('actions');
 
     }
 
@@ -587,6 +581,7 @@ use Bs\PageController;
 use Dom\Template;
 use Symfony\Component\HttpFoundation\Request;
 use Bs\Db\User;
+use Tk\Exception;
 
 /**
  * Add Route to /src/config/routes.php:
@@ -599,7 +594,7 @@ class Edit extends PageController
 {
     use EditTrait;
 
-    protected ?\{db-namespace}\{classname} \${property-name} = null;
+    protected ?{classname} \${property-name} = null;
 
 
     public function __construct()
@@ -609,13 +604,14 @@ class Edit extends PageController
         \$this->setAccess(User::PERM_ADMIN);
     }
 
-    public function doDefault(Request \$request)
+    public function doDefault(Request \$request): \App\Page|\Dom\Mvc\Page
     {
-        if (\$request->get('{property-name}Id')) {
-            \$this->{property-name} = \{db-namespace}\{classname}Map::create()->find(\$request->get('id'));
+        \$this->{property-name} = new {classname}();
+        if (\$request->query->getInt('{primary-prop}')) {
+            \$this->{property-name} = {classname}Map::create()->find(\$request->query->getInt('{primary-prop}'));
         }
         if (!\$this->{property-name}) {
-            throw new Exception('Invalid Example ID: ' . \$request->query->getInt('exampleId'));
+            throw new Exception('Invalid {classname} ID: ' . \$request->query->getInt('{primary-prop}'));
         }
 
         \$this->setForm(new \{form-namespace}\{classname}(\$this->{property-name}));
@@ -639,7 +635,7 @@ class Edit extends PageController
     {
         \$html = <<<HTML
 <div>
-  <div class="card mb-3">
+  <div class="card mb-3">7
     <div class="card-header"><i class="fa fa-cogs"></i> Actions</div>
     <div class="card-body" var="actions">
       <a href="/" title="Back" class="btn btn-outline-secondary" var="back"><i class="fa fa-arrow-left"></i> Back</a>
@@ -665,41 +661,19 @@ STR;
 <?php
 namespace {form-namespace};
 
+use Bs\Form\EditInterface;
 use Dom\Template;
-use Symfony\Component\HttpFoundation\Request;
 use Tk\Alert;
-use Tk\Exception;
 use Tk\Form;
 use Tk\Form\Field;
 use Tk\Form\Action;
-use Tk\FormRenderer;
-use Tk\Traits\SystemTrait;
 use Tk\Uri;
 
-class {classname}
+class {classname} extends EditInterface
 {
-    use SystemTrait;
-    use Form\FormTrait;
 
-    protected ?\{db-namespace}\{classname} \${property-name} = null;
-
-
-    public function __construct()
+    protected function initFields(): void
     {
-        \$this->setForm(Form::create('{property-name}'));
-    }
-
-    public function doDefault(Request \$request, int \$id)
-    {
-        \$this->{property-name} = new \{db-namespace}\{classname}();
-
-        if (\$id) {
-            \$this->{property-name} = \{db-namespace}\{classname}Map::create()->find(\$id);
-            if (!\$this->{property-name}) {
-                throw new Exception('Invalid ID: ' . \$id);
-            }
-        }
-
 {field-list}
 
         \$this->getForm()->appendField(new Action\SubmitExit('save', [\$this, 'onSubmit']));
@@ -715,7 +689,16 @@ class {classname}
 
     }
 
-    public function onSubmit(Form \$form, Action\ActionInterface \$action)
+    public function execute(array \$values = []): static
+    {
+        \$load = \$this->get{classname}()->getMapper()->getFormMap()->getArray(\$this->get{classname}());
+        \$load['{primary-prop}'] = \$this->get{classname}()->get{classname}Id();
+        \$this->getForm()->setFieldValues(\$load);
+        parent::execute(\$values);
+        return \$this;
+    }
+
+    public function onSubmit(Form \$form, Action\ActionInterface \$action): void
     {
         \$this->{property-name}->getMapper()->getFormMap()->loadObject(\$this->{property-name}, \$form->getFieldValues());
 
@@ -727,7 +710,7 @@ class {classname}
         \$this->{property-name}->save();
 
         Alert::addSuccess('Form save successfully.');
-        \$action->setRedirect(Uri::create()->set('id', \$this->{property-name}->getId()));
+        \$action->setRedirect(Uri::create()->set('{primary-prop}', \$this->{property-name}->get{classname}Id()));
         if (\$form->getTriggeredAction()->isExit()) {
             \$action->setRedirect(Uri::create('/{property-name}Manager'));
         }
@@ -748,12 +731,7 @@ class {classname}
 
     public function get{classname}(): ?\{db-namespace}\{classname}
     {
-        return \$this->{property-name};
-    }
-
-    public function set{classname}(\${property-name})
-    {
-        return \$this->{property-name} = \${property-name};
+        return \$this->getModel();
     }
 
 }

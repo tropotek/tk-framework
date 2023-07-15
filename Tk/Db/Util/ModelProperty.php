@@ -336,7 +336,7 @@ class ModelProperty extends \Tk\Collection
         }
 
         $tpl = <<<TPL
-                \$this->getTable()->appendCell(new %s(%s))%s;
+                \$this->appendCell(new %s(%s))%s;
         TPL;
 
         return sprintf($tpl,
@@ -365,11 +365,11 @@ class ModelProperty extends \Tk\Collection
         $propertyName = $this->quote($this->getName());
 
         $tpl = <<<TPL
-                \$this->getForm()->appendField(new %s(%s%s))%s;
+                \$this->appendField(new %s(%s%s))%s;
         TPL;
         if ($isModelForm) {
             $tpl = <<<TPL
-                    \$this->getForm()->appendField(new %s(%s%s))%s;
+                    \$this->appendField(new %s(%s%s))%s;
             TPL;
         }
 
