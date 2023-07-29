@@ -1,8 +1,11 @@
 <?php
 namespace Tk;
 
+use Tk\Traits\SystemTrait;
+
 class Image
 {
+    use SystemTrait;
 
     const URI_PIXEL_TRANSPARENT = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
@@ -51,7 +54,7 @@ class Image
         $obj = new Image();
         $obj->image = imagecreatetruecolor($width, $height);
         imagealphablending($obj->image, false);
-        imagesavealpha($obj->image, true);
+        imageantialias($obj->image, true);
         $transparent = imagecolorallocatealpha($obj->image, 0, 0, 0, 127);
         imagefill($obj->image, 0, 0, $transparent);
         if ($bgcolour) {
@@ -69,25 +72,31 @@ class Image
         return $obj;
     }
 
-    public static function createAvatar(string $name, Color $bgColor, string $filename = ''): Image
+    public static function createAvatar(string $text, Color $bgColor, int $size = 128): Image
     {
-        $img = new Image();
+        $fontSize = $size*0.5;
+        $config = Config::instance();
+        $font = $config->makePath($config->get('path.vendor.org') . '/tk-framework/assets/font/OpenSans-Semibold.ttf');
         $color = $bgColor->getTextColor();
-        if (class_exists('\LasseRafn\InitialAvatarGenerator\InitialAvatar')) {
-            $avatar = new \LasseRafn\InitialAvatarGenerator\InitialAvatar();
-            $av = $avatar->name($name)
-                ->length(2)
-                ->fontSize(0.5)
-                ->size(96)// 48 * 2
-                ->background($color->toString(true))
-                ->color($bgColor->toString(true))
-                ->generate()
-                ->stream('png', 100);
 
-        } else {
-
+        $text = strtoupper($text);
+        $text = str_replace(['.', 'MRS', 'MISS', 'MS', 'MASTER', 'DR', 'MR'], ' ', $text);
+        $words = explode(' ', $text);
+        $initials = strtoupper($text[0]);
+        if (count($words) > 1) {
+            $initials  = reset($words)[0];
+            $initials .= end($words)[0];
         }
-        
+
+        $img = self::createBlankPng($size, $size, $bgColor);
+        $textBoundingBox = imagettfbbox($fontSize, 0, $font, $initials);
+
+        $y = abs(ceil(($size - $textBoundingBox[5]) / 2));
+        $x = abs(ceil(($size - $textBoundingBox[2]) / 2));
+
+        $c = imagecolorallocate($img->image, $color->getRed(), $color->getGreen(), $color->getBlue());
+        imagettftext($img->image, $fontSize, 0, $x, $y, $c, $font, $initials);
+
         return $img;
     }
 
@@ -115,7 +124,7 @@ class Image
                 break;
             case 'image/png':
                 $this->image = imagecreatefrompng($this->filename);
-//                imagealphablending($this->image, false);
+                //imagealphablending($this->image, false);
                 imagesavealpha($this->image, true);
                 break;
             default:
@@ -137,19 +146,28 @@ class Image
         return $this;
     }
 
+    public function getContents(int $quality = 90): string
+    {
+        ob_start();
+        $this->save(null, $quality);
+        $data = ob_get_contents();
+        ob_end_clean();
+        return $data;
+    }
+
     /**
      * Save an image
      *    Notes:
      *        The resulting format will be determined by the file extension.
+     *
+     * @param int $quality Value from 1 - 100
      */
-    public function save(?string $filename = null, ?int $quality = null): Image
+    public function save(?string $filename = null, int $quality = 90): Image
     {
-        if (!$filename)
-            $filename = $this->filename;
         // Determine format via file extension (fall back to original format)
         $format = 'png';
-        if (FileUtil::getExtension($this->filename)) {
-            $format = FileUtil::getExtension($this->filename);
+        if ($filename && FileUtil::getExtension($filename)) {
+            $format = FileUtil::getExtension($filename);
         } else if (!empty($this->originalInfo['format'])) {
             $format = $this->originalInfo['format'];
         }
@@ -161,15 +179,11 @@ class Image
                 break;
             case 'jpg':
             case 'jpeg':
-                if ($quality === null)
-                    $quality = 85;
                 $quality = $this->keepWithin($quality, 0, 100);
                 $result = imagejpeg($this->image, $filename, $quality);
                 break;
             case 'png':
-                if ($quality === null)
-                    $quality = 9;
-                $quality = $this->keepWithin($quality, 0, 9);
+                $quality = $this->keepWithin(floor($quality/10), 0, 9);
                 $result = imagepng($this->image, $filename, $quality);
                 break;
             default:
@@ -185,7 +199,7 @@ class Image
     /**
      * Stream the image to the output buffer
      */
-    public function stream(?int $quality = null): Image
+    public function stream(int $quality = 90): Image
     {
         $format = 'png';
 
@@ -198,8 +212,6 @@ class Image
         switch (strtolower($format)) {
             case 'jpeg' :
             case 'jpg' :
-                if ($quality === null)
-                    $quality = 85;
                 $quality = $this->keepWithin($quality, 0, 100);
                 imagejpeg($this->image, null, $quality);
                 header('Content-Type: image/jpeg');
@@ -210,9 +222,7 @@ class Image
                 break;
             case 'png' :
                 header('Content-Type: image/png');
-                if ($quality === null)
-                    $quality = 9;
-                $quality = $this->keepWithin($quality, 0, 9);
+                $quality = $this->keepWithin(floor($quality/10), 0, 9);
                 imagepng($this->image, null, $quality);
                 break;
         }

@@ -88,6 +88,7 @@ class Uri implements \IteratorAggregate
                 }
             }
         }
+        $this->spec = $spec;
         if (!$this->isApplicationScheme()) {
             $spec = trim(urldecode($spec));
             if ($spec && self::$BASE_URL) {
@@ -102,8 +103,8 @@ class Uri implements \IteratorAggregate
                     }
                 }
             }
+            $this->spec = $spec;
         }
-        $this->spec = $spec;
         $this->init();
     }
 
