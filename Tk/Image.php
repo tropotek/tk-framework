@@ -83,10 +83,12 @@ class Image
                 ->color($bgColor->toString(true))
                 ->generate()
                 ->stream('png', 100);
-            
+
         } else {
 
         }
+        
+        return $img;
     }
 
     /**
