@@ -41,14 +41,14 @@ class Image
         $this->memReset();
     }
 
-    static function create(string $filename): Image
+    public static function create(string $filename): Image
     {
-        return new static($filename);
+        return new Image($filename);
     }
 
-    static function createBlankPng(int $width = 256, int $height = 256, ?Color $bgcolour = null): Image
+    public static function createBlankPng(int $width = 256, int $height = 256, ?Color $bgcolour = null): Image
     {
-        $obj = new static();
+        $obj = new Image();
         $obj->image = imagecreatetruecolor($width, $height);
         imagealphablending($obj->image, false);
         imagesavealpha($obj->image, true);
@@ -67,6 +67,26 @@ class Image
             'mime' => 'image/png'
         ];
         return $obj;
+    }
+
+    public static function createAvatar(string $name, Color $bgColor, string $filename = ''): Image
+    {
+        $img = new Image();
+        $color = $bgColor->getTextColor();
+        if (class_exists('\LasseRafn\InitialAvatarGenerator\InitialAvatar')) {
+            $avatar = new \LasseRafn\InitialAvatarGenerator\InitialAvatar();
+            $av = $avatar->name($name)
+                ->length(2)
+                ->fontSize(0.5)
+                ->size(96)// 48 * 2
+                ->background($color->toString(true))
+                ->color($bgColor->toString(true))
+                ->generate()
+                ->stream('png', 100);
+            
+        } else {
+
+        }
     }
 
     /**
@@ -453,7 +473,7 @@ class Image
     }
 
     /**
-     * Square crop Crop an image to a square size from the center
+     * Square crop an image to a square size from the center
      *
      * @param int|null $size the size in pixels of the resulting image (width and height are the same) (optional)
      */
@@ -764,7 +784,6 @@ class Image
         return $this;
     }
 
-
     /**
      * This function will overlay four tiles on top of this image
      *
@@ -797,7 +816,6 @@ class Image
         }
         return $this;
     }
-
 
     /**
      * Same as PHP's imagecopymerge() function, except preserves alpha-transparency in 24-bit PNGs
