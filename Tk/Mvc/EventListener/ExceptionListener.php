@@ -19,7 +19,7 @@ class ExceptionListener implements EventSubscriberInterface
     /**
      * @var array<class-string, array{log_level: string|null, status_code: int<100,599>|null}>
      */
-    protected $exceptionsMapping;
+    protected array $exceptionsMapping;
 
     /**
      * @param array<class-string, array{log_level: string|null, status_code: int<100,599>|null}> $exceptionsMapping
