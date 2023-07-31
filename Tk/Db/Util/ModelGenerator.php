@@ -234,7 +234,8 @@ STR;
      */
     public function makeMapper(array $params = []): string
     {
-        $tpl = $this->createMapperTemplate();
+        //$tpl = $this->createMapperTemplate();
+        $tpl = $this->createPreparedMapperTemplate();
         $data = $this->arrayMerge($this->getDefaultData(), $this->processMapper(), $params);
         return $tpl->parse($data);
     }
@@ -246,6 +247,7 @@ STR;
             'form-maps' => '',
             'table-maps' => '',
             'filter-queries' => '',
+            'prepared-filter-queries' => '',
             'set-table' => ''
         ];
         foreach ($this->tableInfo as $col) {
@@ -268,6 +270,7 @@ STR;
 
             if ($mp->getType() != ModelProperty::TYPE_DATE && $mp->get('Type') != 'text') {
                 $data['filter-queries'] .= $mp->getFilterQuery() . "\n";
+                $data['prepared-filter-queries'] .= $mp->getPreparedFilterQuery() . "\n";
                 if ($this->getTable() != $this->tableFromClass()) {
                     $data['set-table'] = "\n" . sprintf("            \$this->setTable('%s');", $this->getTable()) . "\n";
                 }
@@ -289,6 +292,7 @@ use Tk\Db\Mapper\Result;
 use Tk\Db\Tool;
 use Tk\DataMap\Db;
 use Tk\DataMap\Form;
+use Tk\DataMap\Table;
 
 class {classname}Map extends Mapper
 {
@@ -348,6 +352,86 @@ class {classname}Map extends Mapper
         if (!empty(\$filter['exclude'])) {
             \$w = \$this->makeMultiQuery(\$filter['exclude'], 'a.{primary-col}', 'AND', '!=');
             if (\$w) \$filter->appendWhere('(%s) AND ', \$w);
+        }
+
+        return \$filter;
+    }
+
+}
+STR;
+        return \Tk\CurlyTemplate::create($classTpl);
+    }
+
+    protected function createPreparedMapperTemplate(): \Tk\CurlyTemplate
+    {
+        $classTpl = <<<STR
+<?php
+namespace {db-namespace};
+
+use Tk\DataMap\DataMap;
+use Tk\Db\Mapper\Filter;
+use Tk\Db\Mapper\Mapper;
+use Tk\Db\Mapper\Result;
+use Tk\Db\Tool;
+use Tk\DataMap\Db;
+use Tk\DataMap\Form;
+use Tk\DataMap\Table;
+
+class {classname}Map extends Mapper
+{
+
+    public function makeDataMaps(): void
+    { {set-table}
+        if (!\$this->getDataMappers()->has(self::DATA_MAP_DB)) {
+            \$map = new DataMap();
+{db-maps}
+            \$this->addDataMap(self::DATA_MAP_DB, \$map);
+        }
+
+        if (!\$this->getDataMappers()->has(self::DATA_MAP_FORM)) {
+            \$map = new DataMap();
+{form-maps}
+            \$this->addDataMap(self::DATA_MAP_FORM, \$map);
+        }
+
+        if (!\$this->getDataMappers()->has(self::DATA_MAP_TABLE)) {
+            \$map = new DataMap();
+{table-maps}
+            \$this->addDataMap(self::DATA_MAP_TABLE, \$map);
+        }
+    }
+
+    /**
+     * @return Result|{classname}[]
+     */
+    public function findFiltered(array|Filter \$filter, ?Tool \$tool = null): Result
+    {
+        return \$this->prepareFromFilter(\$this->makeQuery(Filter::create(\$filter)), \$tool);
+    }
+
+    public function makeQuery(Filter \$filter): Filter
+    {
+        \$filter->appendFrom('%s a', \$this->quoteParameter(\$this->getTable()));
+
+        if (!empty(\$filter['search'])) {
+            \$filter['search'] = '%' . \$this->getDb()->escapeString(\$filter['search']) . '%';
+            \$w = '';
+            //\$w  .= 'a.name LIKE :search OR ';
+            \$w .= 'a.{primary-col} LIKE :search OR ';
+            if (\$w) \$filter->appendWhere('(%s) AND ', substr(\$w, 0, -3));
+        }
+
+        if (!empty(\$filter['id'])) {
+            \$filter['{primary-prop}'] = \$filter['id'];
+        }
+        if (!empty(\$filter['{primary-prop}'])) {
+            if (!is_array(\$filter['{primary-prop}'])) \$filter['{primary-prop}'] = array(\$filter['{primary-prop}']);
+            \$filter->appendWhere('(a.{primary-col} IN (:{primary-prop})) AND ');
+        }
+{prepared-filter-queries}
+        if (!empty(\$filter['exclude'])) {
+            if (!is_array(\$filter['exclude'])) \$filter['exclude'] = array(\$filter['exclude']);
+            \$filter->appendWhere('(a.{primary-col} NOT IN (:exclude)) AND ');
         }
 
         return \$filter;
@@ -426,8 +510,9 @@ class Manager extends PageController
     public function doDefault(Request \$request): \App\Page|\Dom\Mvc\Page
     {
         \$this->setTable(new \{table-namespace}\{classname}());
+        \$this->getTable()->init();
         \$this->getTable()->findList([], \$this->getTable()->getTool());
-        \$this->getTable()->init()->execute(\$request);
+        \$this->getTable()->execute(\$request);
 
         return \$this->getPage();
     }

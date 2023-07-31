@@ -71,7 +71,11 @@ class ModelProperty extends \Tk\Collection
     public function getDefaultValue(): float|bool|int|string|null
     {
         $def = $this->get('Default');
-        $def = str_replace("''", '', $def);
+
+        if ($def) {
+            $def = str_replace("''", '', $def);
+        }
+
         return match ($this->getType()) {
             self::TYPE_BOOL => boolval($def ?? false) ? 'true' : 'false',
             self::TYPE_INT => intval($def ?? 0),
@@ -310,6 +314,27 @@ class ModelProperty extends \Tk\Collection
             $this->getName(),
             $this->get('Field'),
             $filterVal
+        );
+    }
+
+    public function getPreparedFilterQuery(): string
+    {
+        if ($this->isPrimaryKey()) return '';
+
+        $filterValid = sprintf("!empty(\$filter['%s'])", $this->getName());
+        if ($this->getType() == self::TYPE_BOOL) {
+            $filterValid = sprintf("!\$this->isEmpty(\$filter['%s'])", $this->getName());
+        }
+
+        $tpl = <<<TPL
+                if (%s) {
+                    \$filter->appendWhere('a.%s = :%s AND ');
+                }
+        TPL;
+        return sprintf($tpl,
+            $filterValid,
+            $this->get('Field'),
+            $this->getName()
         );
     }
 
