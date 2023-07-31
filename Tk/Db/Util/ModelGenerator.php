@@ -415,9 +415,8 @@ class {classname}Map extends Mapper
 
         if (!empty(\$filter['search'])) {
             \$filter['search'] = '%' . \$this->getDb()->escapeString(\$filter['search']) . '%';
-            \$w = '';
-            //\$w  .= 'a.name LIKE :search OR ';
-            \$w .= 'a.{primary-col} LIKE :search OR ';
+            \$w  = 'a.{primary-col} LIKE :search OR ';
+            //\$w .= 'a.name LIKE :search OR ';
             if (\$w) \$filter->appendWhere('(%s) AND ', substr(\$w, 0, -3));
         }
 
@@ -425,12 +424,10 @@ class {classname}Map extends Mapper
             \$filter['{primary-prop}'] = \$filter['id'];
         }
         if (!empty(\$filter['{primary-prop}'])) {
-            if (!is_array(\$filter['{primary-prop}'])) \$filter['{primary-prop}'] = array(\$filter['{primary-prop}']);
             \$filter->appendWhere('(a.{primary-col} IN (:{primary-prop})) AND ');
         }
 {prepared-filter-queries}
         if (!empty(\$filter['exclude'])) {
-            if (!is_array(\$filter['exclude'])) \$filter['exclude'] = array(\$filter['exclude']);
             \$filter->appendWhere('(a.{primary-col} NOT IN (:exclude)) AND ');
         }
 

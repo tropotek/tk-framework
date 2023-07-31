@@ -292,41 +292,15 @@ abstract class Mapper
         $sql = sprintf('SELECT %s %s %s FROM %s %s %s ',
             $foundRowsKey, $distinct, $select, $from, $where, $toolStr);
 
-        if (is_array($params)) {
-            // find all placeholders in the SQL string
-            // the matches $m is a somewhat confusing array -- refer to the PHP docs
-            // Source: @Greg Jorgensen (OUM)
-            $fParams = [];
-            $n = preg_match_all('/:([a-zA-Z0-9_]+)/', $sql, $m, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
-            for ($i = $n-1; $i >=0; $i--) {
-                $match = $m[$i][0][0];  // the entire placeholder pattern, with optional wildcards
-                $pos = $m[$i][0][1];    // the position in the string the placeholder begins
-                $key = $m[$i][1][0];    // the placeholder name without : or wildcards
-
-                // get the value and convert it to a SQL type, with escaping and quoting strings
-                if (is_array($params[$key])) {   // assume this is for the IN query
-                    $newKey = '';
-                    foreach ($params[$key] as $k => $v) {
-                        $nk = sprintf('%s_%s', $key, $k);
-                        $newKey .= sprintf(':%s,', $nk);
-                        $fParams[$nk] = $v;
-                    }
-                    $newKey = rtrim($newKey, ',');
-                    // replace the placeholder with the value
-                    $sql = substr_replace($sql, $newKey, $pos, strlen($match));
-                } else {
-                    if (isset($params[$key])) $fParams[$key] = $params[$key];
-                }
-            }
-            $params = $fParams;
-        }
-
         $stmt = $this->getDb()->prepare($sql);
         $stmt->execute($params);
 
         return Result::createFromMapper($this, $stmt, $tool);
     }
 
+    /**
+     * @deprecated Convert all queries to use prepared statements use `prepareFromFilter()`
+     */
     public function selectFromFilter(Filter $filter, $tool = null): Result
     {
         return $this->selectFrom($filter->getFrom(), $filter->getWhere(), $tool, $filter->getSelect());
