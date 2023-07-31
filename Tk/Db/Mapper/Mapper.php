@@ -248,58 +248,9 @@ abstract class Mapper
     }
 
     /**
-     * A select query using a prepared statement. Less control
-     *
-     * @see http://www.sitepoint.com/integrating-the-data-mappers/
-     * @deprecated TODO: See if we need this ?
-     */
-    public function selectPrepared(array $bind =[], ?Tool $tool = null, string $boolOperator = 'AND'): Result
-    {
-        if (!$tool instanceof Tool) $tool = new Tool();
-
-        $alias = $this->getAlias();
-        if ($alias) $alias = $alias . '.';
-
-        if (self::$HIDE_DELETED && $this->getDeleteType()) {
-            $bind[$this->getDeleteType()->getKey()] = '0';
-        }
-
-        $from = $this->getTable() . ' ' . $this->getAlias();
-        $where = [];
-        if ($bind) {
-            foreach ($bind as $col => $value) {
-                unset($bind[$col]);
-                $bind[':' . $col] = $value;
-                $where[] = $alias. $this->quoteParameter($col) . ' = :' . $col;
-            }
-        }
-        $where = implode(' ' . $boolOperator . ' ', $where);
-
-        // Build Query
-        $foundRowsKey = '';
-        if ($this->getDb()->getDriver() == 'mysql') {
-            $foundRowsKey = 'SQL_CALC_FOUND_ROWS';
-        }
-        $sql = sprintf('SELECT %s %s * FROM %s %s ',
-            $foundRowsKey,
-            $tool->isDistinct() ? 'DISTINCT' : '',
-            $from,
-            ($bind) ? ' WHERE ' . $where : ' '
-        );
-
-        $sql .= $tool->toSql($this->getAlias(), $this->getDb());
-
-        $stmt = $this->getDb()->prepare($sql);
-        $stmt->execute($bind);
-
-        $arr = Result::createFromMapper($this, $stmt, $tool);
-        return $arr;
-    }
-
-    /**
      * Select a number of elements from a database
      */
-    public function selectFrom(string $from = '', string $where = '', ?Tool $tool = null, string $select = ''): Result
+    public function selectFrom(string $from = '', string $where = '', ?Tool $tool = null, string $select = '', ?array $params = null): Result
     {
         if (!$tool instanceof Tool) $tool = new Tool();
 
@@ -340,9 +291,38 @@ abstract class Mapper
 
         $sql = sprintf('SELECT %s %s %s FROM %s %s %s ',
             $foundRowsKey, $distinct, $select, $from, $where, $toolStr);
-        $stmt = $this->getDb()->prepare($sql);
 
-        $stmt->execute();
+        if (is_array($params)) {
+            // find all placeholders in the SQL string
+            // the matches $m is a somewhat confusing array -- refer to the PHP docs
+            // Source: @Greg Jorgensen (OUM)
+            $fParams = [];
+            $n = preg_match_all('/:([a-zA-Z0-9_]+)/', $sql, $m, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
+            for ($i = $n-1; $i >=0; $i--) {
+                $match = $m[$i][0][0];  // the entire placeholder pattern, with optional wildcards
+                $pos = $m[$i][0][1];    // the position in the string the placeholder begins
+                $key = $m[$i][1][0];    // the placeholder name without : or wildcards
+
+                // get the value and convert it to a SQL type, with escaping and quoting strings
+                if (is_array($params[$key])) {   // assume this is for the IN query
+                    $newKey = '';
+                    foreach ($params[$key] as $k => $v) {
+                        $nk = sprintf('%s_%s', $key, $k);
+                        $newKey .= sprintf(':%s,', $nk);
+                        $fParams[$nk] = $v;
+                    }
+                    $newKey = rtrim($newKey, ',');
+                    // replace the placeholder with the value
+                    $sql = substr_replace($sql, $newKey, $pos, strlen($match));
+                } else {
+                    if (isset($params[$key])) $fParams[$key] = $params[$key];
+                }
+            }
+            $params = $fParams;
+        }
+
+        $stmt = $this->getDb()->prepare($sql);
+        $stmt->execute($params);
 
         return Result::createFromMapper($this, $stmt, $tool);
     }
@@ -352,14 +332,9 @@ abstract class Mapper
         return $this->selectFrom($filter->getFrom(), $filter->getWhere(), $tool, $filter->getSelect());
     }
 
-    /**
-     * Select a number of elements from a database
-     *
-     * EG: "`column1`=4 AND `column2`='string'"
-     */
-    public function select(string $where = '', ?Tool $tool = null): Result
+    public function prepareFromFilter(Filter $filter, $tool = null): Result
     {
-        return $this->selectFrom('', $where, $tool);
+        return $this->selectFrom($filter->getFrom(), $filter->getWhere(), $tool, $filter->getSelect(), $filter->all());
     }
 
     public function find(mixed $id): ?Model
@@ -369,16 +344,13 @@ abstract class Mapper
             throw new Exception('Invalid operation, no primary key found');
         }
         $where = sprintf('%s = %s', $this->quoteParameter($this->getPrimaryType()->getKey()), $id);
-        $list = $this->select($where);
+        $list = $this->selectFrom('', $where, Tool::create('', 1));
         return $list->current();
     }
 
-    /**
-     * Find all objects in DB
-     */
     public function findAll(?Tool $tool = null): Result
     {
-        return $this->select('', $tool);
+        return $this->selectFrom('', '', $tool);
     }
 
     /**
@@ -386,6 +358,7 @@ abstract class Mapper
      * Handy for testing multiple values
      * EG:
      *   "a.type = 'Self Assessment' AND a.type != 'Testing' AND 'Thinking'"
+     * @deprecated Prefer using the query `field IN ([list])` or `field NOT IN ([list])`
      */
     public function makeMultiQuery($value, string $columnName, string $logic = 'OR', string $compare = '='): string
     {
@@ -512,7 +485,6 @@ abstract class Mapper
         return $this;
     }
 
-
     /**
      * Use this function to escape a table name and add a prefix if it is set
      */
@@ -548,4 +520,12 @@ abstract class Mapper
         return ltrim(strtolower(preg_replace('/[A-Z]/', '_$0', $property)), '_');
     }
 
+    /**
+     * Returns true if a value is an empty string or null
+     * Use this in cases where 0 and '0' are valid non-empty values
+     */
+    public function isEmpty(mixed $v): ?int
+    {
+        return ($v === '' || $v === null);
+    }
 }

@@ -15,10 +15,7 @@ class Filter extends \Tk\Collection
     protected string $where = '';
 
 
-    /**
-     * @param null|array|Filter $params
-     */
-    public static function create($params): Filter
+    public static function create(null|array|Filter $params): Filter
     {
         if ($params instanceof Filter) return $params;
         $obj = new self();
@@ -30,8 +27,7 @@ class Filter extends \Tk\Collection
     {
         $default = $this->select ?: $default;
         $default = trim($default);
-        $default = rtrim($default, ',');
-        return $default;
+        return rtrim($default, ',');
     }
 
     public function setSelect(string $select): Filter
@@ -42,27 +38,28 @@ class Filter extends \Tk\Collection
 
     public function prependSelect(string $select, ...$args): Filter
     {
-        if ($args)
-            $this->select = vsprintf($select, $args) . $this->select;
-        else
-            $this->select = $select . $this->select;
+        $this->select = vsprintf($select, $args) . $this->select;
+//        if ($args)
+//            $this->select = vsprintf($select, $args) . $this->select;
+//        else
+//            $this->select = $select . $this->select;
         return $this;
     }
 
     public function appendSelect(string $select, ...$args): Filter
     {
-        if ($args)
-            $this->select .= vsprintf($select, $args);
-        else
-            $this->select .= $select;
+        $this->select .= vsprintf($select, $args);
+//        if ($args)
+//            $this->select .= vsprintf($select, $args);
+//        else
+//            $this->select .= $select;
         return $this;
     }
 
     public function getFrom(string $default = ''): string
     {
         $default = $this->from ?: $default;
-        $default = rtrim(trim($default), ',');
-        return $default;
+        return rtrim(trim($default), ',');
     }
 
     public function setFrom(string $from): Filter
@@ -73,19 +70,21 @@ class Filter extends \Tk\Collection
 
     public function prependFrom(string $from, ...$args): Filter
     {
-        if ($args)
-            $this->from = vsprintf($from, $args) . $this->from;
-        else
-            $this->from = $from . $this->from;
+        $this->from = vsprintf($from, $args) . $this->from;
+//        if ($args)
+//            $this->from = vsprintf($from, $args) . $this->from;
+//        else
+//            $this->from = $from . $this->from;
         return $this;
     }
 
     public function appendFrom(string $from, ...$args): Filter
     {
-        if ($args)
-            $this->from .= vsprintf($from, $args);
-        else
-            $this->from .= $from;
+        $this->from .= vsprintf($from, $args);
+//        if ($args)
+//            $this->from .= vsprintf($from, $args);
+//        else
+//            $this->from .= $from;
         return $this;
     }
 
@@ -94,8 +93,7 @@ class Filter extends \Tk\Collection
         $default = $this->where ?: $default;
         $default = trim($default);
         $default = rtrim($default, 'AND');
-        $default = rtrim($default, 'OR');
-        return $default;
+        return rtrim($default, 'OR');
     }
 
     public function setWhere(string $where): Filter
@@ -106,19 +104,21 @@ class Filter extends \Tk\Collection
 
     public function prependWhere(string $where, ...$args): Filter
     {
-        if ($args)
-            $this->where = vsprintf($where, $args) . $this->where;
-        else
-            $this->where = $where . $this->where;
+        $this->where = vsprintf($where, $args) . $this->where;
+//        if ($args)
+//            $this->where = vsprintf($where, $args) . $this->where;
+//        else
+//            $this->where = $where . $this->where;
         return $this;
     }
 
     public function appendWhere(string $where, ...$args): Filter
     {
-        if ($args)
-            $this->where .= vsprintf($where, $args);
-        else
-            $this->where .= $where;
+        $this->where .= vsprintf($where, $args);
+//        if ($args)
+//            $this->where .= vsprintf($where, $args);
+//        else
+//            $this->where .= $where;
         return $this;
     }
 

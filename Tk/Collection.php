@@ -112,8 +112,6 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
 
     /**
      * Add a list of items to the collection
-     *
-     * @param array $items Key-value array of data to append to this collection
      */
     public function replace(array $items): static
     {
@@ -123,9 +121,6 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
         return $this;
     }
 
-    /**
-     * Set an item in the collection
-     */
     public function set(string $key, mixed $value): static
     {
         $this->_data[$key] = $value;
@@ -162,48 +157,27 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
         return $value;
     }
 
-    /**
-     * Get collection item for key
-     *
-     * @param mixed|null $default Return value if the key does not exist
-     */
     public function get(string $key, mixed $default = null): mixed
     {
-        return $this->all($key) ?: $default;
+        if ($this->has($key)) return $this->_data[$key];
+        return $default;
     }
 
-    /**
-     * Get all items in collection
-     *
-     * @param string|null $key The name of the headers to return or null to get them all
-     */
-    public function all(?string $key = null): mixed
+    public function all(): array
     {
-        if ($key !== null) {
-            return $this->_data[$key] ?? [];
-        }
         return $this->_data;
     }
 
-    /**
-     * Get collection array keys
-     */
     public function keys(): array
     {
         return array_keys($this->_data);
     }
 
-    /**
-     * Does this collection have a given key?
-     */
     public function has(string $key): bool
     {
         return array_key_exists($key, $this->_data);
     }
 
-    /**
-     * Remove item from collection
-     */
     public function remove(string $key): static
     {
         unset($this->_data[$key]);
@@ -212,57 +186,38 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
 
 
     /**
-     * Does this collection have a given key?
-     *
-     * @param  string $key The data key
-     *
      * @interface \ArrayAccess
      */
-    public function offsetExists($key): bool
+    public function offsetExists($offset): bool
     {
-        return $this->has($key);
+        return $this->has($offset);
     }
 
     /**
-     * Get collection item for key
-     *
-     * @param string $key The data key
-     *
-     * @return mixed The key's value, or the default value
      * @interface \ArrayAccess
      */
-    public function offsetGet($key): mixed
+    public function offsetGet($offset): mixed
     {
-        return $this->get($key);
+        return $this->get($offset);
     }
 
     /**
-     * Set collection item
-     *
-     * @param string $key The data key
-     * @param mixed $value The data value
      * @interface \ArrayAccess
      */
-    public function offsetSet($key, $value): void
+    public function offsetSet($offset, $value): void
     {
-        $this->set($key, $value);
+        $this->set($offset, $value);
     }
 
     /**
-     * Remove item from collection
-     *
-     * @param string $key The data key
      * @interface \ArrayAccess
      */
-    public function offsetUnset($key): void
+    public function offsetUnset($offset): void
     {
-        $this->remove($key);
+        $this->remove($offset);
     }
 
     /**
-     * Get number of items in collection
-     *
-     * @return int
      * @interface Countable
      */
     public function count(): int
@@ -271,9 +226,6 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
-     * Get collection iterator
-     *
-     * @return \ArrayIterator
      * @interface IteratorAggregate
      */
     public function getIterator(): \ArrayIterator

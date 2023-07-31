@@ -34,7 +34,7 @@ class PdoStatement extends \PDOStatement
      */
     public function execute($params = null): bool
     {
-        if (!is_array($params) && count(func_get_args())) {
+        if ($params !== null && !is_array($params) && count(func_get_args())) {
             $params = func_get_args();
         }
         $this->bindParams = $params;
