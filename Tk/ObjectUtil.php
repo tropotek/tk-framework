@@ -44,9 +44,11 @@ class ObjectUtil
     {
         try {
             $rClass = new \ReflectionClass($object);
-            $rProperty = $rClass->getProperty($property);
-            $rProperty->setAccessible(true);
-            return $rProperty->getValue($object);
+            if ($rClass->hasProperty($property)) {
+                $rProperty = $rClass->getProperty($property);
+                $rProperty->setAccessible(true);
+                return $rProperty->getValue($object);
+            }
         } catch (\ReflectionException $e) {
             Log::warning($e->__toString());
         }
@@ -60,9 +62,11 @@ class ObjectUtil
     {
         try {
             $rClass = new \ReflectionClass($object);
-            $rProperty = $rClass->getProperty($property);
-            $rProperty->setAccessible(true);
-            $rProperty->setValue($object, $value);
+            if ($rClass->hasProperty($property)) {
+                $rProperty = $rClass->getProperty($property);
+                $rProperty->setAccessible(true);
+                $rProperty->setValue($object, $value);
+            }
         } catch (\ReflectionException $e) {
             Log::warning($e->__toString());
         }
