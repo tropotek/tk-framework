@@ -8,6 +8,7 @@ use Tk\Db\Pdo;
 use Tk\Db\Exception;
 use Tk\Db\Tool;
 use Tk\Factory;
+use Tk\Str;
 use Tk\Traits\SystemTrait;
 
 /**
@@ -92,7 +93,8 @@ abstract class Mapper
         }
 
         $arr = explode('\\', $modelClass);
-        $table = self::toDbProperty(array_pop($arr));
+        //$table = self::toDbProperty(array_pop($arr));
+        $table = Str::toSnake(array_pop($arr));
 
         $db = $db ?? Factory::instance()->getDb();
 
@@ -317,8 +319,10 @@ abstract class Mapper
         if (!$this->getPrimaryType()) {
             throw new Exception('Invalid operation, no primary key found');
         }
-        $where = sprintf('%s = %s', $this->quoteParameter($this->getPrimaryType()->getKey()), $id);
-        $list = $this->selectFrom('', $where, Tool::create('', 1));
+        $where = sprintf('%s = :%s', $this->quoteParameter($this->getPrimaryType()->getKey()), $this->getPrimaryType()->getProperty());
+        $list = $this->selectFrom('', $where, Tool::create('', 1), '', [
+            $this->getPrimaryType()->getProperty() => $id
+        ]);
         return $list->current();
     }
 
@@ -488,6 +492,7 @@ abstract class Mapper
      * Convert camelCase property names to underscore db property name
      *
      * EG: 'someProperty' is converted to 'some_property'
+     * @deprecated use \Tk\Str::toSnake()
      */
     public static function toDbProperty(string $property): string
     {
