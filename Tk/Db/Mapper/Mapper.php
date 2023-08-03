@@ -165,7 +165,7 @@ abstract class Mapper
         $values = implode(', :', array_keys($bind));
         foreach ($bind as $col => $value) {
             unset($bind[$col]);
-            $bind[':' . $col] = $value;
+            $bind[$col] = $value;
             $inf = $this->getTableInfo($col);
             if ($inf['Extra']?? '' == 'current_timestamp()') continue;
         }
@@ -194,11 +194,11 @@ abstract class Mapper
             unset($bind[$col]);
             $inf = $this->getTableInfo($col);
             if (str_contains($inf['Extra'] ?? '', 'on update')) continue;
-            $bind[':' . $col] = $value;
+            $bind[$col] = $value;
             $set[] = $this->quoteParameter($col) . ' = :' . $col;
         }
 
-        $where = $this->quoteParameter($this->getPrimaryType()->getKey()) . ' = ' . $bind[':' . $this->getPrimaryType()->getKey()];
+        $where = $this->quoteParameter($this->getPrimaryType()->getKey()) . ' = ' . $bind[$this->getPrimaryType()->getKey()];
         $sql = sprintf('UPDATE %s SET %s WHERE %s', $this->quoteParameter($this->table), implode(', ', $set), $where);
         $stmt = $this->getDb()->prepare($sql);
         $stmt->execute($bind);
