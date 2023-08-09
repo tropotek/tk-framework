@@ -21,11 +21,6 @@ abstract class DataTypeInterface
      */
     protected array $attributes = [];
 
-    /**
-     * Can this value can be null
-     */
-//    protected bool $nullable = false;
-
 
     /**
      * @param string $property The object property to map the column to.
@@ -97,20 +92,6 @@ abstract class DataTypeInterface
     {
         return $this->key;
     }
-
-    /**
-     * If true then the data type can be null
-     */
-//    public function isNullable(): bool
-//    {
-//        return $this->nullable;
-//    }
-//
-//    public function setNullable(bool $nullable): DataTypeInterface
-//    {
-//        $this->nullable = $nullable;
-//        return $this;
-//    }
 
     /**
      * return true if the column exists in the array
