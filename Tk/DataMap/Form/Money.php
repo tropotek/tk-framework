@@ -21,7 +21,7 @@ class Money extends DataTypeInterface
     public function getKeyValue(array $array): mixed
     {
         $value = parent::getKeyValue($array);
-        if ($value !== null && !$value instanceof \Tk\Money) {
+        if (!($value === null || $value instanceof \Tk\Money)) {
             $value = \Tk\Money::parseFromString($value, \Tk\Currency::getInstance($this->currencyCode));
         }
         return $value;

@@ -24,7 +24,7 @@ abstract class DataTypeInterface
     /**
      * Can this value can be null
      */
-    protected bool $nullable = false;
+//    protected bool $nullable = false;
 
 
     /**
@@ -101,16 +101,16 @@ abstract class DataTypeInterface
     /**
      * If true then the data type can be null
      */
-    public function isNullable(): bool
-    {
-        return $this->nullable;
-    }
-
-    public function setNullable(bool $nullable): DataTypeInterface
-    {
-        $this->nullable = $nullable;
-        return $this;
-    }
+//    public function isNullable(): bool
+//    {
+//        return $this->nullable;
+//    }
+//
+//    public function setNullable(bool $nullable): DataTypeInterface
+//    {
+//        $this->nullable = $nullable;
+//        return $this;
+//    }
 
     /**
      * return true if the column exists in the array

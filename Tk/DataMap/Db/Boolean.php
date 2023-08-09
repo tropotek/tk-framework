@@ -13,11 +13,12 @@ class Boolean extends DataTypeInterface
     {
         $value = parent::getKeyValue($array);
         if ($value !== null) {
-            if ($value == $this->getKey() || strtolower($value) == 'yes' || strtolower($value) == 'true' || ((int)$value)) {
-                return true;
-            } else {
-                return false;
-            }
+            $value = (
+                $value == $this->getKey() ||
+                strtolower($value) == 'yes' ||
+                strtolower($value) == 'true' ||
+                ((int)$value)
+            );
         }
         return $value;
     }
@@ -25,9 +26,7 @@ class Boolean extends DataTypeInterface
     public function getPropertyValue(object $object): mixed
     {
         $value = parent::getPropertyValue($object);
-        if ($value !== null) {
-            $value = (int)$value;
-        }
+        if ($value !== null) $value = (int)$value;
         return $value;
     }
 

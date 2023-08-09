@@ -21,7 +21,7 @@ class Money extends DataTypeInterface
     public function getKeyValue(array $array): mixed
     {
         $value = parent::getKeyValue($array);
-        if ($value !== null) {
+        if (!($value === null || $value instanceof \Tk\Money)) {
             $value = \Tk\Money::create($value, \Tk\Currency::getInstance($this->currencyCode));
         }
         return $value;
@@ -30,7 +30,7 @@ class Money extends DataTypeInterface
     public function getPropertyValue(object $object): mixed
     {
         $value = parent::getPropertyValue($object);
-        if ($value !== null && $value instanceof \Tk\Money) {
+        if ($value instanceof \Tk\Money) {
             return $value->getAmount();
         }
         return $value;

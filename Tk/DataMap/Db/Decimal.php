@@ -19,7 +19,7 @@ class Decimal extends DataTypeInterface
     public function getPropertyValue(object $object): mixed
     {
         $value = parent::getPropertyValue($object);
-        if ($value !== null) $value .= '';
+        if ($value !== null) $value = (float)$value;
         return $value;
     }
 

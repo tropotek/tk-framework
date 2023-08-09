@@ -27,13 +27,10 @@ class Date extends DataTypeInterface
     {
         $value = parent::getKeyValue($array);
         // This date is assumed as null
-        if ($value == '0000-00-00 00:00:00') {
-            $value = 'now';
-            if ($this->isNullable()) {
-                $value = null;
-            }
-        }
-        if ($value != null) {
+//        if ($value == '0000-00-00 00:00:00') {
+//            $value = null;
+//        }
+        if (!($value === null || $value instanceof \DateTime)) {
             $value = \Tk\Date::create($value);
         }
         return $value;
@@ -43,7 +40,7 @@ class Date extends DataTypeInterface
     {
         $value = parent::getPropertyValue($object);
         if ($value instanceof \DateTime) {
-            return $value->format($this->format);
+            $value = $value->format($this->format);
         }
         return $value;
     }

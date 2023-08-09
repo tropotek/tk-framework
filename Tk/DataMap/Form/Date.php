@@ -31,8 +31,7 @@ class Date extends DataTypeInterface
     public function getKeyValue(array $array): mixed
     {
         $value = parent::getKeyValue($array);
-        if (!$value) $value = null;
-        if ($value != null && !$value instanceof \DateTime) {
+        if (!($value === null || $value instanceof \DateTime)) {
             $value = \Tk\Date::createFormDate($value, null, $this->format);
         }
 
@@ -42,7 +41,6 @@ class Date extends DataTypeInterface
     public function getPropertyValue(object $object): mixed
     {
         $value = parent::getPropertyValue($object);
-        if (!$value) $value = null;
         if ($value instanceof \DateTime) {
             return $value->format($this->format);
         }

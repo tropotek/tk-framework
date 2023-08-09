@@ -130,7 +130,6 @@ class DataMap
         return $this->keyTypes[$key] ?? null;
     }
 
-
     public function isEnableDynamic(): bool
     {
         return $this->enableDynamic;
