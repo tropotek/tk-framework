@@ -49,6 +49,13 @@ class ObjectUtil
                 $rProperty->setAccessible(true);
                 return $rProperty->getValue($object);
             }
+            $method = sprintf('get%s', ucfirst($property));
+            if ($rClass->hasMethod($method)) {
+                $rMethod = $rClass->getMethod($method);
+                if (!$rMethod->getNumberOfRequiredParameters()) {
+                    return $object->$method();
+                }
+            }
         } catch (\ReflectionException $e) {
             Log::warning($e->__toString());
         }
@@ -62,10 +69,16 @@ class ObjectUtil
     {
         try {
             $rClass = new \ReflectionClass($object);
+            $method = sprintf('set%s', ucfirst($property));
             if ($rClass->hasProperty($property)) {
                 $rProperty = $rClass->getProperty($property);
                 $rProperty->setAccessible(true);
                 $rProperty->setValue($object, $value);
+            } elseif ($rClass->hasMethod($method)) {
+                $rMethod = $rClass->getMethod($method);
+                if ($rMethod->getNumberOfRequiredParameters() == 1) {
+                    $object->$method($value);
+                }
             }
         } catch (\ReflectionException $e) {
             Log::warning($e->__toString());
