@@ -11,7 +11,7 @@ class Bootstrap
     use SingletonTrait;
     use SystemTrait;
 
-    public function init()
+    public function init(): void
     {
         // Apply all php config settings to php
         foreach ($this->getConfig()->getGroup('php', true) as $k => $v) {
@@ -41,7 +41,7 @@ class Bootstrap
         }
     }
 
-    protected function httpInit()
+    protected function httpInit(): void
     {
         /**
          * This makes our life easier when dealing with paths. Everything is relative
@@ -64,7 +64,7 @@ class Bootstrap
 
     }
 
-    protected function cliInit()
+    protected function cliInit(): void
     {
         // Setup EventDispatcher and subscribe events, loads routes
         $this->getFactory()->initEventDispatcher();
