@@ -82,7 +82,7 @@ class Image
         $text = strtoupper($text);
         $text = str_replace(['.', 'MRS', 'MISS', 'MS', 'MASTER', 'DR', 'MR'], ' ', $text);
         $words = explode(' ', $text);
-        $initials = strtoupper($text[0]);
+        $initials = strtoupper($text[0] ?? '');
         if (count($words) > 1) {
             $initials  = reset($words)[0];
             $initials .= end($words)[0];
