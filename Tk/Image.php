@@ -84,8 +84,8 @@ class Image
         $words = explode(' ', $text);
         $initials = strtoupper($text[0] ?? '');
         if (count($words) > 1) {
-            $initials  = reset($words)[0];
-            $initials .= end($words)[0];
+            $initials  = reset($words)[0] ?? '';
+            $initials .= end($words)[0] ?? '';
         }
 
         $img = self::createBlankPng($size, $size, $bgColor);
