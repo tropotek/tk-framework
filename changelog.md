@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 8.0.26 [2023-08-15]:
+-------------------------------
+  - Update ObjectUril to get value from accessors
+
+
 Ver 8.0.24 [2023-08-09]:
 -------------------------------
   - Update data mapper objects
