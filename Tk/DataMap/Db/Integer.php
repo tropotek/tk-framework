@@ -5,8 +5,6 @@ use Tk\DataMap\DataTypeInterface;
 
 /**
  * map an integer type from a DB field to an object property
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class Integer extends DataTypeInterface
 {
@@ -21,9 +19,12 @@ class Integer extends DataTypeInterface
     public function getPropertyValue(object $object): mixed
     {
         $value = parent::getPropertyValue($object);
-        if ($value !== null) $value .= '';
+        if ($value !== null) $value = (int)$value;
+//        if ($this->isNullable()) {
+//            if (!$value) $value = null;
+//        } else {
+//            if (!$value) $value = '0';
+//        }
         return $value;
     }
-
 }
-

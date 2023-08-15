@@ -6,9 +6,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Tk\Console\Command\MakeInterface;
 
-/**
- * @author Tropotek <http://www.tropotek.com/>
- */
 class MakeTable extends MakeInterface
 {
 

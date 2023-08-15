@@ -9,9 +9,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Tk\Console\Console;
 use Tk\Db\Util\ModelGenerator;
 
-/**
- * @author Tropotek <http://www.tropotek.com/>
- */
 class MakeInterface extends Console
 {
 

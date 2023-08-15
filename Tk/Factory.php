@@ -2,6 +2,7 @@
 namespace Tk;
 
 use Composer\Autoload\ClassLoader;
+use Monolog\Handler\ErrorLogHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
@@ -24,7 +25,6 @@ use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\RouteCollection;
 use Tk\Cache\Adapter\Filesystem;
 use Tk\Cache\Cache;
-use Tk\Db\Db;
 use Tk\Db\Pdo;
 use Tk\Log\MonologLineFormatter;
 use Tk\Mail\Gateway;
@@ -35,9 +35,6 @@ use Tk\Traits\SingletonTrait;
 use Tk\Traits\SystemTrait;
 use Tk\Console\Command;
 
-/**
- * @author Tropotek <http://www.tropotek.com/>
- */
 class Factory extends Collection
 {
     use SingletonTrait;
@@ -107,6 +104,15 @@ class Factory extends Collection
             }
         }
         return $this->get('session');
+    }
+
+    public function getCookie(): Cookie
+    {
+        if (!$this->has('cookie')) {
+            $cookie = new Cookie();
+            $this->set('cookie', $cookie);
+        }
+        return $this->get('cookie');
     }
 
     public function getRequest(): Request
@@ -240,10 +246,15 @@ class Factory extends Collection
             }
 
             $logger = new NullLogger();
-            if (
-                !$this->getRequest()->query->has(Log::NO_LOG) &&             // No log when using nolog in query param
-                !str_contains($this->getRequest()->getRequestUri(), '/api/')     // No logs for api calls (comment out when testing API`s)
-            ) {
+            $enabled = true;
+            if (!$this->getConfig()->get('log.ignore.noLog', false)) {
+                // No log when using nolog in query param
+                if ($this->getRequest()->query->has(Log::NO_LOG)) $enabled = false;
+                // No logs for api calls (comment out when testing API`s)
+                if (str_contains($this->getRequest()->getRequestUri(), '/api/')) $enabled = false;
+            }
+
+            if ($enabled) {
                 $logger = new Logger('system', [], $processors);
                 if (is_writable(ini_get('error_log'))) {
                     $handler = new StreamHandler(ini_get('error_log'), $this->getConfig()->get('log.logLevel', LogLevel::ERROR));
@@ -253,6 +264,8 @@ class Factory extends Collection
                     $handler->setFormatter($formatter);
                     $logger->pushHandler($handler);
                 } else {
+                    $handler = new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM);
+                    $logger->pushHandler($handler);
                     error_log('Error accessing log file: ' . ini_get('error_log'));
                 }
             }
@@ -292,9 +305,6 @@ class Factory extends Collection
         return $this->get('mailGateway');
     }
 
-    /**
-     * @return Application
-     */
     public function getConsole(): Application
     {
         if (!$this->has('console')) {
@@ -313,9 +323,9 @@ class Factory extends Collection
                 $app->add(new Command\MakeModel());
                 $app->add(new Command\MakeMapper());
                 $app->add(new Command\MakeTable());
-                //$app->add(new Command\MakeForm());
-                //$app->add(new Command\MakeManager());
-                //$app->add(new Command\MakeEdit());
+                $app->add(new Command\MakeForm());
+                $app->add(new Command\MakeManager());
+                $app->add(new Command\MakeEdit());
                 $app->add(new Command\MakeAll());
             }
 

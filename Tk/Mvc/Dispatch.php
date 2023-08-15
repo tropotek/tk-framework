@@ -14,8 +14,6 @@ use Tk\Traits\SystemTrait;
  *
  * Subclass this object in your App (to setup a Tk framework) and then override the Factory method
  * Factory::initDispatcher()
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class Dispatch
 {

@@ -1,10 +1,7 @@
 <?php
 namespace Tk;
 
-/**
- * @author Tropotek <http://www.tropotek.com/>
- */
-class Money implements \Serializable
+class Money
 {
 
     private Currency $currency;
@@ -17,10 +14,6 @@ class Money implements \Serializable
     protected int $amount = 0;
 
 
-    /**
-     * @param integer $amount The amount in cents.
-     * @param null|Currency $currency The currency, Default 'AUD'.
-     */
     public function __construct(int $amount = 0, ?Currency $currency = null)
     {
         $this->amount = $amount;
@@ -30,11 +23,7 @@ class Money implements \Serializable
         $this->setCurrency($currency);
     }
 
-    /**
-     * @param integer $amount The amount in cents.
-     * @param null|Currency $currency The currency, Default 'AUD'.
-     */
-    public static function create(int $amount = 0, ?Currency $currency = null): Money
+    public static function create(int|Money $amount = 0, ?Currency $currency = null): Money
     {
         if ($amount instanceof Money) return $amount;
         return new static($amount, $currency);
@@ -42,11 +31,6 @@ class Money implements \Serializable
 
     /**
      * Create a money object from a string representation
-     *
-     * @param string $amount An amount string: '20,000.00', '$20,000.00'
-     * @param null|Currency $currency
-     * @param string $thousandthSep Default ','
-     * @return Money Returns null on invalid format
      */
     public static function parseFromString(string $amount, ?Currency $currency = null, string $thousandthSep = ','): Money
     {
@@ -64,20 +48,13 @@ class Money implements \Serializable
         return static::create($amt * 100, $currency);
     }
 
-    /**
-     * @return string
-     */
-    public function serialize()
+    public function __serialize(): array
     {
-        return serialize(['amount' => $this->amount, 'currencyCode' => $this->currencyCode]);
+        return ['amount' => $this->amount, 'currencyCode' => $this->currencyCode];
     }
 
-    /**
-     * @param string $data
-     */
-    public function unserialize($data)
+    public function __unserialize(array $data)
     {
-        $data = unserialize($data);
         $this->amount = $data['amount'];
         $this->setCurrency(Currency::getInstance($data['currencyCode']));
     }
@@ -150,7 +127,7 @@ class Money implements \Serializable
         $this->assertCurrency($other);
         return $this->getAmount() - $other->getAmount();
     }
-    
+
     /**
      * Checks if the money value is greater than the value of another instance of money.
      */
@@ -158,7 +135,7 @@ class Money implements \Serializable
     {
         return $this->compareTo($other) > 0;
     }
-    
+
     /**
      * Checks if the money value is greater than or equal the value of another instance of money.
      */
@@ -166,7 +143,7 @@ class Money implements \Serializable
     {
         return ($this->compareTo($other) > 0) || ($other->getAmount() == $this->getAmount());
     }
-    
+
     /**
      * Checks if the money value is less than the value of another instance of money.
      */
@@ -174,7 +151,7 @@ class Money implements \Serializable
     {
         return $this->compareTo($other) < 0;
     }
-    
+
     /**
      * Checks if the money value is less than or equal the value of another instance of money.
      */
@@ -182,7 +159,7 @@ class Money implements \Serializable
     {
         return ($this->compareTo($other) < 0) || ($other->getAmount() == $this->getAmount());
     }
-    
+
     /**
      * Checks if the money value is equal to the value of another instance of money.
      */
@@ -194,13 +171,11 @@ class Money implements \Serializable
     /**
      * Test for the same currency instance
      */
-    private function assertCurrency(Money $arg): bool
+    private function assertCurrency(Money $arg): void
     {
         if ($this->getCurrency() !== $arg->getCurrency()) {
-            Log::error('Money currency instance mismatch ['.$arg->getCurrency()->getCode().' => '.$this->getCurrency()->getCode().'].');
-            return false;
+            throw new Exception('Money currency instance mismatch ['.$arg->getCurrency()->getCode().' => '.$this->getCurrency()->getCode().'].');
         }
-        return true;
     }
 
     /**
@@ -213,10 +188,6 @@ class Money implements \Serializable
 
     /**
      * Return a formatted string representing the currency EG: '$200,000.00'
-     *
-     * @param string $decSep
-     * @param string $thousandthSep
-     * @return string
      */
     public function toString(string $decSep = '.', string $thousandthSep = ''): string
     {

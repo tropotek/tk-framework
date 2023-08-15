@@ -6,9 +6,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Tk\Console\Console;
 
-/**
- * @author Tropotek <http://www.tropotek.com/>
- */
 class Maintenance extends Console
 {
 

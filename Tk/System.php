@@ -12,9 +12,6 @@ use Tk\Traits\SingletonTrait;
  *
  * Extend this class in your application to add methods relating
  * to your local App system
- *
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class System
 {
@@ -25,7 +22,6 @@ class System
 
 
     protected function __construct() {  }
-
 
     /**
      * Return the root path to the site.
@@ -45,7 +41,7 @@ class System
         if (is_file($htaccessFile)) {
             $htaccess = file_get_contents($htaccessFile);
             if ($htaccess && preg_match('/\s+RewriteBase (\/.*)\s+/i', $htaccess, $regs)) {
-                $path = $regs[1];
+                $path = $regs[1] ?? '';
             }
         }
         return rtrim($path, '/');
@@ -59,7 +55,7 @@ class System
      * If no DIRECTORY_SEPARATOR is at the beginning of the $path one will be prepended
      *
      */
-    public function makePath(string $path): string
+    public function makePath(string $path, string $prependPath = ''): string
     {
         $path = rtrim($path, DIRECTORY_SEPARATOR);
         $path = str_replace($this->getConfig()->getBasePath(), '', $path); // Prevent recurring

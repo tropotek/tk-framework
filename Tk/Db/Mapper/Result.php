@@ -16,8 +16,6 @@ use Tk\Db\Tool;
  *
  * NOTE: For large datasets that could fill the memory, this object should not be used
  *        instead get statement and manually iterate the data.
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class Result implements \Iterator, \Countable
 {

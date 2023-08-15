@@ -1,13 +1,10 @@
 <?php
 namespace Tk\Db;
 
-
 use Tk\Traits\SingletonTrait;
 
 /**
  * The Tk PDO Database driver
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class Pdo
 {
@@ -295,6 +292,11 @@ class Pdo
             throw new Exception(end($info), $e->getCode(), $e, $query);
         }
         return $result;
+    }
+
+    public function lastInsertId(?string $name = null): false|string
+    {
+        return $this->getPdo()->lastInsertId($name);
     }
 
     /**

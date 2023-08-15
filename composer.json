@@ -22,18 +22,15 @@
     }
   ],
   "autoload": {
-    "psr-0": {
-      "Tk\\": ""
+    "psr-4": {
+      "Tk\\": "Tk/"
     },
     "files": [
       "Tk/Exception.php"
-    ],
-    "exclude-from-classmap": [
-      "/tests/"
     ]
   },
   "require": {
-    "php": "^8.1",
+    "php": "^8.2",
     "psr/log": "^1.0",
     "ext-json": "*",
     "ext-pdo": "*",
@@ -42,12 +39,12 @@
     "ext-curl": "*",
     "ttek/tk-installers": "~8.0.0",
 
-    "symfony/http-foundation": "^6.1",
-    "symfony/routing": "^6.1",
-    "symfony/http-kernel": "^6.1",
-    "symfony/event-dispatcher": "^6.1",
-    "symfony/console": "^6.1",
-    "symfony/lock": "^6.1",
+    "symfony/http-foundation": "^6.2",
+    "symfony/routing": "^6.2",
+    "symfony/http-kernel": "^6.2",
+    "symfony/event-dispatcher": "^6.2",
+    "symfony/console": "^6.2",
+    "symfony/lock": "^6.2",
     "monolog/monolog": "^2.0",
     "sensiolabs/ansi-to-html": "~1.0"
   },

@@ -1,11 +1,8 @@
 <?php
 namespace Tk;
 
-
 /**
  * An object to handle basic string encryption based on a secret key
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class Encrypt
 {
@@ -17,6 +14,9 @@ class Encrypt
 
     public function __construct(string $secret)
     {
+        if (empty($secret)) {
+            throw new Exception('Invalid secret key');
+        }
         $this->secret = $secret;
     }
 

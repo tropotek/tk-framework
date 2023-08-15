@@ -1,7 +1,6 @@
 <?php
 namespace Tk\DataMap;
 
-
 /**
  * This DataMap object is used to load objects and arrays
  * from a collection of DataTypes.
@@ -10,7 +9,6 @@ namespace Tk\DataMap;
  * an array and vica-versa and use loadObject() and loadArray()
  * to populate your objects.
  *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class DataMap
 {
@@ -39,16 +37,16 @@ class DataMap
      * If the property does not exist in the object the type`s value is added to
      * the object as a dynamic property. If DataMap::dynamicProperties is set to true.
      *
-     * @param array $ignorePropertyTypes An array of property names to ignore
+     * @param array $ignoreProperties An array of property names to ignore
      * @link http://krisjordan.com/dynamic-properties-in-php-with-stdclass
      */
-    public function loadObject(object $object, array $srcArray, array $ignorePropertyTypes = []): DataMap
+    public function loadObject(object $object, array $srcArray, array $ignoreProperties = []): DataMap
     {
         // We load from the source array here, then we can add dynamic property values
         foreach ($srcArray as $key => $value) {
             $type = $this->getKeyType($key);
             if ($type) {
-                if (in_array($type->getProperty(), $ignorePropertyTypes)) continue;
+                if (in_array($type->getProperty(), $ignoreProperties)) continue;
                 $type->loadObject($object, $srcArray);
             } else {
                 if ($this->getPropertyType($key)) continue;
@@ -56,7 +54,7 @@ class DataMap
                     if ($this->isEnableDynamic()) {
                         $reflect = new \ReflectionClass($object);
                         if (!$reflect->hasProperty($key)) {
-                            $object->$key = $value;
+                            $object->set($key, $value);
                         }
                     }
                 } catch (\ReflectionException $e) { }
@@ -68,21 +66,26 @@ class DataMap
     /**
      * Using the DataMap load an array with the values from an object
      *
-     * @param array $ignoreKeyTypes An array of key names to ignore
+     * @param array $ignoreKeys An array of key names to ignore
      */
-    public function loadArray(array &$array, object $srcObject, array $ignoreKeyTypes = []): DataMap
+    public function loadArray(array &$array, object $srcObject, array $ignoreKeys = []): DataMap
     {
         foreach ($this->getPropertyTypes() as $type) {
-            if (in_array($type->getKey(), $ignoreKeyTypes)) continue;
+            if (in_array($type->getKey(), $ignoreKeys)) continue;
             $type->loadArray($array, $srcObject);
         }
         return $this;
     }
 
+    public function getArray(object $srcObject, array $ignoreKeys = []): array
+    {
+        $array = [];
+        $this->loadArray($array, $srcObject, $ignoreKeys);
+        return $array;
+    }
+
     /**
      * Add a DataType to this data map
-     *
-     * @return DataTypeInterface|null
      */
     public function addDataType(DataTypeInterface $type): DataTypeInterface
     {
@@ -126,7 +129,6 @@ class DataMap
     {
         return $this->keyTypes[$key] ?? null;
     }
-
 
     public function isEnableDynamic(): bool
     {

@@ -27,8 +27,6 @@ use Tk\Traits\SystemTrait;
  *      ...
  *  };
  * </code>
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class SqlMigrate
 {
@@ -43,12 +41,7 @@ class SqlMigrate
 
     protected LoggerInterface $logger;
 
-    private array $foundFiles = [];
 
-
-    /**
-     * @throws \Exception
-     */
     public function __construct(Pdo $db, ?LoggerInterface $logger = null, string $table = '_migrate')
     {
         $this->db = $db;
@@ -57,9 +50,6 @@ class SqlMigrate
         $this->table = $table;
     }
 
-    /**
-     * Do any object cleanup
-     */
     public function __destruct()
     {
         $this->deleteBackup();
@@ -68,50 +58,32 @@ class SqlMigrate
     /**
      * Call this with a list of paths to search for migration files and execute each migration
      * in order they are supplied in the array
-     * @throws \Exception
+     * Returns an array of processed migrate files
      */
-    public function migrateList(array $migrateList): void
+    public function migrateList(array $migrateList): array
     {
+        $processed = [];
         $this->install();
 
-        foreach ($migrateList as $path) {
+        $list = $this->search($migrateList);
+
+        foreach ($list as $k => $path) {
             if (is_file($path)) {
-                $this->migrateFile($path);
-            } else {
-                $this->migratePath($path);
+                if ($this->migrateFile($path)) {
+                    $processed[$k] = $path;
+                }
             }
         }
-    }
 
-    /**
-     * Run the migration script and find all non executed sql files within the path
-     * @throws \Exception
-     */
-    public function migratePath(string $path): void
-    {
-        try {
-            $this->install();
-
-            $list = $this->search($path);
-            // Find any migration files
-            foreach ($list as $file) {
-                $this->migrateFile($file);
-            }
-        } catch (\Exception $e) {
-            $this->logger->error($e->__toString());
-            $this->restoreBackup();
-            throw new \Tk\Exception('Path: ' . $path, $e->getCode(), $e);
-        }
-        $this->deleteBackup();
+        return $processed;
     }
 
     /**
      * Execute a migration class or sql script...
      * the file is then added to the db and cannot be executed again.
      * Ignore any files starting with an underscore '_'
-     * @throws \Exception
      */
-    protected function migrateFile(string $file): bool
+    public function migrateFile(string $file): bool
     {
         try {
             $this->install();
@@ -120,20 +92,19 @@ class SqlMigrate
             if (!is_readable($file)) return false;
             if ($this->hasPath($file)) return false;
 
-            $this->logger->info("Migrating file: {$this->toRelative($file)}");
-
             if (!$this->backupFile) {   // only run once per session.
                 $dump = new SqlBackup($this->getDb());
                 $this->backupFile = $dump->save($this->getConfig()->getTempPath());
             }
 
-            if (preg_match('/\.php$/i', basename($file))) {         // Include .php files
+            if (preg_match('/\.php$/i', basename($file))) {  // Include .php files
                 $callback = include $file;
                 if (is_callable($callback)) {
                     $callback($this->getDb());
                 }
                 $this->insertPath($file);
-            } else {                                                // is sql
+                return true;
+            } else {  // is sql
                 // replace any table prefix
                 $sql = file_get_contents($file);
                 if (!strlen(trim($sql))) return false;
@@ -153,55 +124,40 @@ class SqlMigrate
                     throw new \Tk\Db\Exception("Query $i failed: " . $error[2], 0, null, $sql);
                 }
                 $this->insertPath($file);
+                return true;
             }
 
         } catch (\Exception $e){
             $this->logger->error($e->__toString());
             //throw new \Tk\Exception('File: ' . $file, $e->getCode(), $e);
         }
-        return true;
+        return false;
     }
 
     /**
-     * Check to see if there are any new migration sql files pending execution
-     * @throws \Tk\Db\Exception
+     * Search for all migrate files in the pathList array of files/paths
+     * Return a sorted flattened array that has the files that can be executed
      */
-    public function isPending(string $path): bool
+    protected function search(array $pathList): array
     {
-        $list = $this->search($path);
-        $pending = false;
-        foreach ($list as $file) {
-            if (!$this->hasPath($file)) {
-                $pending = true;
-                break;
+        $found = [];
+        foreach ($pathList as $path) {
+            if (is_file($path) && preg_match('/.+\/([0-9]+)\.(php|sql)$/', $path, $regs)) {
+                $found[$regs[1]] = $path;
+            } else if (is_dir($path)) {
+                $directory = new \RecursiveDirectoryIterator($path);
+                $it = new \RecursiveIteratorIterator($directory);
+                $regex = new \RegexIterator($it, '/.+\/([0-9]+)\.(php|sql)$/', \RegexIterator::GET_MATCH);
+                foreach ($regex as $file) {
+                    $found[$file[1] ?? '000000'] = $file[0];
+                }
             }
         }
-        return $pending;
+
+        ksort($found);
+        return $found;
     }
 
-    /**
-     * Search a path for sql files
-     */
-    public function search(string $path): array
-    {
-        if (!array_key_exists($path, $this->foundFiles)) {
-            $list = [];
-            if (!is_dir($path)) return $list;
-            $directory = new \RecursiveDirectoryIterator($path);
-            $it = new \RecursiveIteratorIterator($directory);
-            $regex = new \RegexIterator($it, '/.+\/([0-9]+)\.(php|sql)$/', \RegexIterator::GET_MATCH);
-            foreach ($regex as $file) {
-                $list[$file[1] ?? '000000'][] = $file[0];
-            }
-            ksort($list);
-            $this->foundFiles[$path] = Collection::arrayFlatten($list);
-        }
-        return $this->foundFiles[$path];
-    }
-
-    /**
-     * @throws \Tk\Exception
-     */
     protected function restoreBackup(bool $deleteFile = true): void
     {
         if ($this->backupFile) {
@@ -213,9 +169,6 @@ class SqlMigrate
         }
     }
 
-    /**
-     * Delete the internally generated backup file if it exists
-     */
     protected function deleteBackup(): void
     {
         if (is_writable($this->backupFile)) {
@@ -225,8 +178,7 @@ class SqlMigrate
     }
 
     /**
-     * install the migration table to track executed scripts
-     * @throws \Tk\Db\Exception
+     * install the migration table to cache executed scripts
      */
     protected function install(): void
     {
@@ -247,7 +199,6 @@ SQL;
 
     /**
      * Return true if the migration table is empty or does not exist
-     * @throws \Tk\Db\Exception
      */
     protected function isInstall(): bool
     {
@@ -258,10 +209,6 @@ SQL;
         return false;
     }
 
-    /**
-     * exists
-     * @throws \Tk\Db\Exception
-     */
     protected function hasPath(string $path): bool
     {
         $path = $this->getDb()->escapeString($this->toRelative($path));
@@ -273,22 +220,15 @@ SQL;
         return false;
     }
 
-    /**
-     * insert
-     * @throws \Tk\Db\Exception
-     */
     protected function insertPath(string $path): int
     {
+        $this->logger->info("Migrating file: {$this->toRelative($path)}");
         $path = $this->getDb()->escapeString($this->toRelative($path));
         $rev = $this->getDb()->escapeString($this->toRev($path));
         $sql = sprintf('INSERT INTO %s (path, rev, created) VALUES (%s, %s, NOW())', $this->getDb()->quoteParameter($this->getTable()), $this->getDb()->quote($path), $this->getDb()->quote($rev));
         return $this->getDb()->exec($sql);
     }
 
-    /**
-     * delete
-     * @throws \Tk\Db\Exception
-     */
     protected function deletePath(string $path): int
     {
         $path = $this->getDb()->escapeString($this->toRelative($path));
@@ -296,9 +236,6 @@ SQL;
         return $this->getDb()->exec($sql);
     }
 
-    /**
-     * Return the relative path
-     */
     private function toRelative(string $path): string
     {
         return rtrim(str_replace($this->getConfig()->getBasePath(), '', $path), '/');
@@ -313,9 +250,6 @@ SQL;
         return FileUtil::removeExtension($path);
     }
 
-    /**
-     * Get the migration table name
-     */
     protected function getTable(): string
     {
         return $this->table;

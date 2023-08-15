@@ -12,10 +12,6 @@ use Tk\Traits\SystemTrait;
  * Query this when looking for a system configuration value.
  *
  * NOTE: No objects should be saved in the Config storage, only primitive types.
- *
- *
- * @author Tropotek <http://www.tropotek.com/>
- *
  */
 class Config extends Collection
 {
@@ -28,9 +24,9 @@ class Config extends Collection
         $this->set('script.start.time', microtime(true));
         parent::__construct();
 
-        $this->set('base.path', $this->getSystem()->discoverBasePath());
-        $this->set('base.url', $this->getSystem()->discoverBaseUrl());
-
+        $this->set('hostname', $_SERVER['HTTP_HOST'] ?? $_SERVER['HTTP_X_FORWARDED_HOST'] ?? 'localhost');
+        $this->set('base.path', $this->getSystem()->discoverBasePath() ?? '');
+        $this->set('base.url', $this->getSystem()->discoverBaseUrl() ?? '');
     }
 
     /**
@@ -45,14 +41,19 @@ class Config extends Collection
         return self::$_INSTANCE;
     }
 
+    public function getHostname(): string
+    {
+        return $this->get('hostname', '');
+    }
+
     public function getBasePath(): string
     {
-        return $this->get('base.path');
+        return $this->get('base.path', '');
     }
 
     public function getBaseUrl(): string
     {
-        return $this->get('base.url');
+        return $this->get('base.url', '');
     }
 
     public function getDataPath(): string
@@ -94,7 +95,6 @@ class Config extends Collection
     {
         return $this->getSystem()->makeUrl($this->get('path.template'));
     }
-
 
     public function isDebug(): bool
     {

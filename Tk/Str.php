@@ -3,8 +3,6 @@ namespace Tk;
 
 /**
  * An object filled with string utility methods.
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class Str
 {
@@ -62,14 +60,6 @@ class Str
     }
 
     /**
-     * Return the string with the first character lowercase
-     */
-    public static function lcFirst(string $str): string
-    {
-        return strtolower($str[0]) . substr($str, 1);
-    }
-
-    /**
      * Convert to CamelCase so "test_func_name" would convert to "testFuncName"
      * Adds a capital at the first char and ass a space before all other upper case chars
      */
@@ -107,10 +97,8 @@ class Str
 
     /**
      * Explode using multiple delimiters
-     *
-     * @return false|string[]|array
      */
-    public static function explode(array $delimiters, string $string)
+    public static function explode(array $delimiters, string $string): false|array
     {
         return explode( chr( 1 ), str_replace( $delimiters, chr( 1 ), $string ) );
     }
@@ -124,11 +112,10 @@ class Str
     }
 
     /**
-     * Substring without cutting a word boundry
+     * Substring without cutting a word boundary
      * tiny words (length 3 by default) are included on the result.
      * "..." is added if result do not reach original string length
      *
-     * @return string
      * @todo Lookup a more refined way of doing this
      */
     public static function wordcat(string $str, int $length, string $endStr = '', int $minword = 3): string
@@ -165,6 +152,21 @@ class Str
         }
         return $str;
     }
+
+    /**
+     * Generate a random string
+     */
+    public static function random($length): string
+    {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $index = rand(0, strlen($characters) - 1);
+            $randomString .= $characters[$index];
+        }
+        return $randomString;
+    }
+
 
     /**
      * Count the number of bytes of a given string.

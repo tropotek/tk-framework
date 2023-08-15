@@ -5,8 +5,6 @@ use Tk\DataMap\DataTypeInterface;
 
 /**
  * map a percent type from a form to an object property
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class Percent extends DataTypeInterface
 {

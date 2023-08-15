@@ -3,11 +3,6 @@ namespace Tk\Traits;
 
 use Tk\Config;
 
-/**
- *
- *
- * @author Tropotek <http://www.tropotek.com/>
- */
 trait ConfigTrait
 {
 

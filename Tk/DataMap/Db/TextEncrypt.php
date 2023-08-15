@@ -5,26 +5,17 @@ use Tk\DataMap\DataTypeInterface;
 
 /**
  * map a serialized type from a DB field to an object property
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class TextEncrypt extends DataTypeInterface
 {
+    public static string $encryptKey = '';
 
-    private string $encryptKey = '';
-
-
-    public function setEncryptKey(string $key): TextEncrypt
-    {
-        $this->encryptKey = $key;
-        return $this;
-    }
 
     public function getKeyValue(array $array): mixed
     {
         $value = parent::getKeyValue($array);
         if ($value) {
-            $value = \Tk\Encrypt::create($this->encryptKey)->decrypt($value);
+            $value = \Tk\Encrypt::create(self::$encryptKey)->decrypt($value);
         }
         return $value;
     }
@@ -33,7 +24,7 @@ class TextEncrypt extends DataTypeInterface
     {
         $value = parent::getPropertyValue($object);
         if ($value) {
-            $value = \Tk\Encrypt::create($this->encryptKey)->encrypt($value);
+            $value = \Tk\Encrypt::create(self::$encryptKey)->encrypt($value);
         }
         return $value;
     }

@@ -3,14 +3,8 @@ namespace Tk\Console\Command;
 
 use Tk\Console\Console;
 
-/**
- * @author Tropotek <http://www.tropotek.com/>
- */
 class TestData extends Console
 {
-
-
-    // ******************************************* //
 
     public function createUniqueEmail(string $username = ''): string
     {

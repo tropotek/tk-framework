@@ -1,11 +1,6 @@
 <?php
 namespace Tk\Db\Util;
 
-
-
-/**
- * @author Tropotek <http://www.tropotek.com/>
- */
 class ModelProperty extends \Tk\Collection
 {
     const TYPE_ARRAY   = 'array';
@@ -60,7 +55,6 @@ class ModelProperty extends \Tk\Collection
             $dtype = 'text';
             if (!empty($this->get('Type')))
                 $dtype = strtolower($this->get('Type'));
-
             if (preg_match('/^(tinyint\(1\)|bool|boolean)/', $dtype)) {
                 $this->type = self::TYPE_BOOL;
             } else if (preg_match('/^(int|bigint|tinyint|mediumint|integer|bit)/', $dtype)) {
@@ -77,7 +71,12 @@ class ModelProperty extends \Tk\Collection
     public function getDefaultValue(): float|bool|int|string|null
     {
         $def = $this->get('Default');
-        $def = match ($this->getType()) {
+
+        if ($def) {
+            $def = str_replace("''", '', $def);
+        }
+
+        return match ($this->getType()) {
             self::TYPE_BOOL => boolval($def ?? false) ? 'true' : 'false',
             self::TYPE_INT => intval($def ?? 0),
             self::TYPE_FLOAT => floatval($def ?? 0.0),
@@ -85,14 +84,13 @@ class ModelProperty extends \Tk\Collection
             self::TYPE_DATE => null,
             default => 'null',
         };
-        return $def;
     }
 
     public function getDefinition(): string
     {
-        $tpl = <<<TPL
+        $tpl = <<<PHP
             public %s $%s%s;
-        TPL;
+        PHP;
         $value = $this->getDefaultValue();
         if (!is_null($value)) $value = ' = ' . $value;
         return sprintf($tpl,
@@ -122,7 +120,7 @@ class ModelProperty extends \Tk\Collection
             $method = 'is';
 
         $tpl = <<<TPL
-            public function %s%s() : %s
+            public function %s%s(): %s
             {
                 return \$this->%s;
             }
@@ -142,7 +140,7 @@ class ModelProperty extends \Tk\Collection
             $classname = 'static';
 
         $tpl = <<<TPL
-            public function set%s(%s \$%s) : %s
+            public function set%s(%s \$%s): %s
             {
                 \$this->%s = \$%s;
                 return \$this;
@@ -198,11 +196,11 @@ class ModelProperty extends \Tk\Collection
         if ($this->getName() != $this->get('Field'))
             $columnName = ', '.$this->quote($this->get('Field'));
         $tag = '';
-        if ($this->isPrimaryKey())
-            $tag = ', ' . $this->quote('key');
+//        if ($this->isPrimaryKey())
+//            $tag = ', ' . $this->quote('key');
 
         $tpl = <<<TPL
-                    \$this->dbMap->addDataType(new %s(%s%s)%s);
+                    \$map->addDataType(new %s(%s%s)%s);
         TPL;
 
         return sprintf($tpl,
@@ -215,7 +213,6 @@ class ModelProperty extends \Tk\Collection
 
     public function getFormMap(): string
     {
-
         $mapClass = 'Form\Text';
         switch ($this->getType()) {
             case self::TYPE_INT:
@@ -234,12 +231,50 @@ class ModelProperty extends \Tk\Collection
 
         $propertyName = $this->quote($this->getName());
         $tag = '';
-        if ($this->isPrimaryKey())
-            $tag = ', ' . $this->quote('key');
+//        if ($this->isPrimaryKey())
+//            $tag = ', ' . $this->quote('key');
 
         $tpl = <<<TPL
-                    \$this->formMap->addDataType(new %s(%s)%s);
+                    \$map->addDataType(new %s(%s)%s);
         TPL;
+        return sprintf($tpl,
+            $mapClass,
+            $propertyName,
+            $tag
+        );
+    }
+
+
+    public function getTableMap(): string
+    {
+        $mapClass = 'Form\Text';
+        switch ($this->getType()) {
+            case self::TYPE_INT:
+                $mapClass = 'Form\Integer';
+                break;
+            case self::TYPE_FLOAT:
+                $mapClass = 'Form\Decimal';
+                break;
+            case self::TYPE_BOOL:
+                $mapClass = 'Table\Boolean';
+                break;
+            case self::TYPE_DATE:
+                $mapClass = 'Form\Date';
+                break;
+        }
+
+        $propertyName = $this->quote($this->getName());
+        $tag = '';
+//        if ($this->isPrimaryKey())
+//            $tag = ', ' . $this->quote('key');
+
+        $tpl = <<<TPL
+                    \$map->addDataType(new %s(%s)%s)
+        TPL;
+        if ($this->getType() == self::TYPE_DATE) {
+            $tpl .= "->setDateFormat('d/m/Y h:i:s')";
+        }
+        $tpl .= ';';
         return sprintf($tpl,
             $mapClass,
             $propertyName,
@@ -249,7 +284,8 @@ class ModelProperty extends \Tk\Collection
 
     public function getFilterQuery(): string
     {
-        if ($this->getName() == 'id' ) return '';
+        //if ($this->getName() == 'id' ) return '';
+        if ($this->isPrimaryKey()) return '';
 
         $filterVal = sprintf("\$this->quote(\$filter['%s'])", $this->getName());
         switch ($this->getType()) {
@@ -267,7 +303,7 @@ class ModelProperty extends \Tk\Collection
                     \$filter->appendWhere('a.%s = %%s AND ', %s);
                 }
         TPL;
-        if (preg_match('/Id$/', $this->getName()) && $this->getType() == self::TYPE_INT) {
+        if (str_ends_with($this->getName(), 'Id') && $this->getType() == self::TYPE_INT) {
             $tpl = <<<TPL
                     if (!empty(\$filter['%s'])) {
                         \$filter->appendWhere('a.%s = %%s AND ', %s);
@@ -281,6 +317,27 @@ class ModelProperty extends \Tk\Collection
         );
     }
 
+    public function getPreparedFilterQuery(): string
+    {
+        if ($this->isPrimaryKey()) return '';
+
+        $filterValid = sprintf("!empty(\$filter['%s'])", $this->getName());
+        if ($this->getType() == self::TYPE_BOOL) {
+            $filterValid = sprintf("!\$this->isEmpty(\$filter['%s'] ?? null)", $this->getName());
+        }
+
+        $tpl = <<<TPL
+                if (%s) {
+                    \$filter->appendWhere('a.%s = :%s AND ');
+                }
+        TPL;
+        return sprintf($tpl,
+            $filterValid,
+            $this->get('Field'),
+            $this->getName()
+        );
+    }
+
     public function getTableCell(string $className, string $namespace): string
     {
         $mapClass = 'Cell\Text';
@@ -288,19 +345,19 @@ class ModelProperty extends \Tk\Collection
             case self::TYPE_BOOL:
                 $mapClass = 'Cell\Boolean';
                 break;
-            case self::TYPE_DATE:
-                $mapClass = 'Cell\Date';
-                break;
+//            case self::TYPE_DATE:
+//                $mapClass = 'Cell\Date';
+//                break;
         }
-        if ($this->getName() == 'id') {
+        if ($this->isPrimaryKey()) {
             $mapClass = 'Cell\Checkbox';
         }
 
         $propertyName = $this->quote($this->getName());
         $append = '';
         if ($this->getName() == 'name' || $this->getName() == 'title') {
-            $append .= sprintf('->addCss(\'key\')');
-            $append .= sprintf('->setUrl($this->getEditUrl())', lcfirst($className));
+            $append .= '->addCss(\'key\')';
+            $append .= '->setUrl($editUrl)';
         }
 
         $tpl = <<<TPL
@@ -337,7 +394,7 @@ class ModelProperty extends \Tk\Collection
         TPL;
         if ($isModelForm) {
             $tpl = <<<TPL
-                    \$this->getForm()->appendField(new %s(%s%s))%s;
+                    \$this->appendField(new %s(%s%s))%s;
             TPL;
         }
 

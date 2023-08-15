@@ -2,13 +2,9 @@
 namespace Tk;
 
 /**
- * InstanceKey
- *
  * Create a unique key for object that need to be uniquely identified.
  * Implement this in objects that need a key to identify their instances
  *  within a session.
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 interface InstanceKey
 {

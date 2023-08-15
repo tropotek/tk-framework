@@ -1,17 +1,16 @@
 <?php
 namespace Tk\Db\Mapper;
 
+use Tk\CollectionTrait;
 use Tk\Db\Event\DbEvent;
 use Tk\Db\Pdo;
 use Tk\ObjectUtil;
 use Tk\Traits\SystemTrait;
 
-/**
- * @author Tropotek <http://www.tropotek.com/>
- */
 abstract class Model implements ModelInterface
 {
     use SystemTrait;
+    use CollectionTrait;
 
     /**
      * Object models should have a related mapper class
@@ -52,25 +51,18 @@ abstract class Model implements ModelInterface
         return $mapperClass::create($db, static::class, $table);
     }
 
-    /**
-     * @return Mapper
-     */
-    public function getMapper()
+    public function getMapper(): Mapper
     {
         return self::getMapperInstance(static::class);
     }
 
+    /**
+     * This base class automatically clones attributes of type object or
+     *   array values of type object recursively.
+     *   Just inherit your own classes from this base class.
+     */
     public function __clone()
     {
-        // TODO: These may not be needed now
-//        if (property_exists($this, 'modified'))
-//            $this->modified = \Tk\Date::create();
-//        if (property_exists($this, 'created'))
-//            $this->created = \Tk\Date::create();
-
-        // This base class automatically clones attributes of type object or
-        // array values of type object recursively.
-        // Just inherit your own classes from this base class.
         $object_vars = get_object_vars($this);
         foreach ($object_vars as $attr_name => $attr_value) {
             if (is_object($this->$attr_name)) {
@@ -90,10 +82,8 @@ abstract class Model implements ModelInterface
 
     /**
      * Get the model primary DB key, usually ID
-     *
-     * @return mixed
      */
-    public function getId()
+    public function getId(): null|string|int
     {
         $type = $this->getMapper()->getPrimaryType();
         if ($type) {
@@ -103,10 +93,7 @@ abstract class Model implements ModelInterface
         return null;
     }
 
-    /**
-     * @param mixed $id
-     */
-    protected function setId($id): Model
+    protected function setId(int|string $id): Model
     {
         $type = $this->getMapper()->getPrimaryType();
         if ($type) {
@@ -117,11 +104,8 @@ abstract class Model implements ModelInterface
 
     /**
      * Returns the current id if > 0 or the `nextInsertId` if == 0
-     *
-     * @note models using string|array type as a primary key will return 0
-     * @return mixed
      */
-    public function getVolatileId()
+    public function getVolatileId(): string|int
     {
         if (!$this->getId()) {
             try {
@@ -133,7 +117,6 @@ abstract class Model implements ModelInterface
         return $this->getId();
     }
 
-
     protected function dispatchEvent(DbEvent $e, string $eventName): DbEvent
     {
         if (!$e) $e = new DbEvent($this);
@@ -143,7 +126,6 @@ abstract class Model implements ModelInterface
 
     /**
      * Insert the object into the DB
-     * @throws \Exception
      */
     public function insert(): int
     {
@@ -159,7 +141,6 @@ abstract class Model implements ModelInterface
 
     /**
      * Update the object into the DB
-     * @throws \Exception
      */
     public function update(): int
     {
@@ -175,10 +156,8 @@ abstract class Model implements ModelInterface
     /**
      * A Utility method that checks the id and does and insert
      * or an update  based on the objects current state
-     *
-     * @throws \Exception
      */
-    public function save()
+    public function save(): void
     {
         $e = $this->dispatchEvent(new DbEvent($this), DbEvents::MODEL_SAVE);
         if (!$e->isQueryStopped()) {
@@ -189,7 +168,6 @@ abstract class Model implements ModelInterface
 
     /**
      * Delete the object from the DB
-     * @throws \Exception
      */
     public function delete(): int
     {

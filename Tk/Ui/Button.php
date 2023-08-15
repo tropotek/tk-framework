@@ -8,8 +8,6 @@ use Tk\Uri;
  * <code>
  *   \Tk\Ui\Button::create('Edit', \Tk\Uri::create('/dunno.html'), 'fa fa-edit)->addCss('btn-xs btn-success')->show();
  * </code>
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class Button extends Link
 {

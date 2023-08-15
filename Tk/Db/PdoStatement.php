@@ -1,6 +1,8 @@
 <?php
 namespace Tk\Db;
 
+use Tk\Str;
+
 /**
  * Class PdoStatement
  *
@@ -8,9 +10,6 @@ namespace Tk\Db;
  * method calls to fetch, fetchObject, etc will not be called
  * in this object, it has something to do with the way the PDOStatement
  * object uses it Traversable methods internally
- *
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class PdoStatement extends \PDOStatement
 {
@@ -37,15 +36,52 @@ class PdoStatement extends \PDOStatement
      */
     public function execute($params = null): bool
     {
-        if (!is_array($params) && count(func_get_args())) {
+        if ($params !== null && !is_array($params) && count(func_get_args())) {
             $params = func_get_args();
         }
+
+        $sql = $this->queryString;
+        if (is_array($params)) {
+            // find all placeholders in the SQL string
+            // the matches $m is a somewhat confusing array -- refer to the PHP docs
+            // Source: @Greg Jorgensen (OUM)
+            $fParams = [];
+            $n = preg_match_all('/:([a-zA-Z0-9_]+)/', $sql, $m, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
+
+            if ($n) {
+                for ($i = $n-1; $i >=0; $i--) {
+                    $match = $m[$i][0][0];  // the entire placeholder pattern, with optional wildcards
+                    $pos = $m[$i][0][1];    // the position in the string the placeholder begins
+                    $key = $m[$i][1][0];    // the placeholder name without : or wildcardss
+
+                    // get the value and convert it to a SQL type, with escaping and quoting strings
+                    if (is_array($params[$key])) {   // assume this is for the IN query
+                        $newKey = '';
+                        foreach ($params[$key] as $k => $v) {
+                            $nk = sprintf('%s_%s', $key, $k);
+                            $newKey .= sprintf(':%s,', $nk);
+                            $fParams[$nk] = $v;
+                        }
+                        $newKey = rtrim($newKey, ',');
+                        // replace the placeholder with the value
+                        $sql = substr_replace($sql, $newKey, $pos, strlen($match));
+                    } else {
+                        if (array_key_exists($key, $params)) $fParams[$key] = $params[$key];
+                    }
+                }
+                $params = $fParams;
+                //$this->queryString = $sql;    // This is readonly now (use Db::getLastQuery())
+            } else {
+                $params = [];
+            }
+        }
+
         $this->bindParams = $params;
-        $this->db->setLastQuery($this->queryString);
+        $this->db->setLastQuery($sql);
         try {
             $result = parent::execute($params);
         } catch (\Exception $e) {
-            throw new Exception($e->getMessage(), $e->getCode(), null, $this->queryString, $params);
+            throw new Exception($e->getMessage(), $e->getCode(), null, $sql, $params);
         }
         return $result;
     }

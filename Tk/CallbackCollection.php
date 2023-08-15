@@ -3,8 +3,6 @@ namespace Tk;
 
 /**
  * Use this to store and execute an array of callback events for objects
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class CallbackCollection
 {
@@ -42,10 +40,6 @@ class CallbackCollection
      * EG:
      *    closure: function (\Dom\Template $fieldGroup, \Tk\Form\Renderer\FieldGroup $element) { }
      *    string: '\Tk\Db\Model::method'
-     *
-     * @param callable|null $callable
-     * @param int $priority
-     * @return $this
      */
     public function prepend(callable $callable, int $priority = self::DEFAULT_PRIORITY): CallbackCollection
     {
@@ -87,9 +81,9 @@ class CallbackCollection
     }
 
     /**
-     * @return mixed|bool|null Returns false if the Callback is disabled
+     * @return mixed Returns false if the Callback is disabled
      */
-    public function execute(...$args)
+    public function execute(...$args): mixed
     {
         if (!$this->isEnabled()) return false;
         $this->orderList();
@@ -126,15 +120,11 @@ class CallbackCollection
         return false;
     }
 
-
     public function isEnabled(): bool
     {
         return $this->enabled;
     }
 
-    /**
-     *
-     */
     public function setEnabled(bool $enabled): CallbackCollection
     {
         $this->enabled = $enabled;
@@ -148,6 +138,5 @@ class CallbackCollection
     {
         return ksort($this->callbackList, \SORT_REGULAR);
     }
-
 
 }

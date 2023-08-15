@@ -1,10 +1,6 @@
 <?php
 namespace Tk\Debug;
 
-
-/**
- * @author Tropotek <http://www.tropotek.com/>
- */
 class StackTrace {
 
     /**
@@ -60,7 +56,8 @@ class StackTrace {
                     if (is_array($o)) {
                         $o = 'Array['.count($o).']';
                     }
-                    if (is_string($o) || $o == '') $o = "'" . str_replace(array("\n", "\r"), ' ', substr($o, 0, 32)) . "'";
+                    if ($o === null) $o = '{null}';
+                    if (is_string($o) || $o == '') $o = "'" . str_replace(["\n", "\r"], ' ', substr($o, 0, 32)) . "'";
                     $astr .= $o . ', ';
                 }
             }

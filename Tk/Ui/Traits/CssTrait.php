@@ -3,12 +3,9 @@ namespace Tk\Ui\Traits;
 
 /**
  * Use this class to manage css class attributes for an element
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 trait CssTrait
 {
-
     protected array $_cssList = [];
 
 

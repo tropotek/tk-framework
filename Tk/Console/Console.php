@@ -7,9 +7,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Tk\Traits\SystemTrait;
 
-/**
- * @author Tropotek <http://www.tropotek.com/>
- */
 abstract class Console extends Command
 {
     use SystemTrait;

@@ -1,12 +1,8 @@
 <?php
 namespace Tk\DataMap;
 
-
 use Tk\ObjectUtil;
 
-/**
- * @author Tropotek <http://www.tropotek.com/>
- */
 abstract class DataTypeInterface
 {
 

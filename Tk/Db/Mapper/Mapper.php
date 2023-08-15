@@ -8,6 +8,7 @@ use Tk\Db\Pdo;
 use Tk\Db\Exception;
 use Tk\Db\Tool;
 use Tk\Factory;
+use Tk\Str;
 use Tk\Traits\SystemTrait;
 
 /**
@@ -20,7 +21,6 @@ use Tk\Traits\SystemTrait;
  *
  * If your columns conflict, then you should modify the mapper or DB accordingly
  *
- * @author Tropotek <http://www.tropotek.com/>
  */
 abstract class Mapper
 {
@@ -93,7 +93,8 @@ abstract class Mapper
         }
 
         $arr = explode('\\', $modelClass);
-        $table = self::toDbProperty(array_pop($arr));
+        //$table = self::toDbProperty(array_pop($arr));
+        $table = Str::toSnake(array_pop($arr));
 
         $db = $db ?? Factory::instance()->getDb();
 
@@ -152,9 +153,6 @@ abstract class Mapper
         return $this->getDataMappers()->get(self::DATA_MAP_TABLE, new DataMap());
     }
 
-
-
-
     public function insert(Model $obj): int
     {
         if (!$this->getPrimaryType()) {
@@ -169,7 +167,9 @@ abstract class Mapper
         $values = implode(', :', array_keys($bind));
         foreach ($bind as $col => $value) {
             unset($bind[$col]);
-            $bind[':' . $col] = $value;
+            $bind[$col] = $value;
+            $inf = $this->getTableInfo($col);
+            if ($inf['Extra']?? '' == 'current_timestamp()') continue;
         }
         $sql = 'INSERT INTO ' . $this->quoteParameter($this->table) . ' (' . $cols . ')  VALUES (:' . $values . ')';
         $this->getDb()->prepare($sql)->execute($bind);
@@ -194,10 +194,13 @@ abstract class Mapper
         $set = [];
         foreach ($bind as $col => $value) {
             unset($bind[$col]);
-            $bind[':' . $col] = $value;
+            $inf = $this->getTableInfo($col);
+            if (str_contains($inf['Extra'] ?? '', 'on update')) continue;
+            $bind[$col] = $value;
             $set[] = $this->quoteParameter($col) . ' = :' . $col;
         }
-        $where = $this->quoteParameter($this->getPrimaryType()->getKey()) . ' = ' . $bind[':' . $this->getPrimaryType()->getKey()];
+
+        $where = $this->quoteParameter($this->getPrimaryType()->getKey()) . ' = ' . $bind[$this->getPrimaryType()->getKey()];
         $sql = sprintf('UPDATE %s SET %s WHERE %s', $this->quoteParameter($this->table), implode(', ', $set), $where);
         $stmt = $this->getDb()->prepare($sql);
         $stmt->execute($bind);
@@ -247,58 +250,9 @@ abstract class Mapper
     }
 
     /**
-     * A select query using a prepared statement. Less control
-     *
-     * @see http://www.sitepoint.com/integrating-the-data-mappers/
-     * @deprecated TODO: See if we need this ?
-     */
-    public function selectPrepared(array $bind =[], ?Tool $tool = null, string $boolOperator = 'AND'): Result
-    {
-        if (!$tool instanceof Tool) $tool = new Tool();
-
-        $alias = $this->getAlias();
-        if ($alias) $alias = $alias . '.';
-
-        if (self::$HIDE_DELETED && $this->getDeleteType()) {
-            $bind[$this->getDeleteType()->getKey()] = '0';
-        }
-
-        $from = $this->getTable() . ' ' . $this->getAlias();
-        $where = [];
-        if ($bind) {
-            foreach ($bind as $col => $value) {
-                unset($bind[$col]);
-                $bind[':' . $col] = $value;
-                $where[] = $alias. $this->quoteParameter($col) . ' = :' . $col;
-            }
-        }
-        $where = implode(' ' . $boolOperator . ' ', $where);
-
-        // Build Query
-        $foundRowsKey = '';
-        if ($this->getDb()->getDriver() == 'mysql') {
-            $foundRowsKey = 'SQL_CALC_FOUND_ROWS';
-        }
-        $sql = sprintf('SELECT %s %s * FROM %s %s ',
-            $foundRowsKey,
-            $tool->isDistinct() ? 'DISTINCT' : '',
-            $from,
-            ($bind) ? ' WHERE ' . $where : ' '
-        );
-
-        $sql .= $tool->toSql($this->getAlias(), $this->getDb());
-
-        $stmt = $this->getDb()->prepare($sql);
-        $stmt->execute($bind);
-
-        $arr = Result::createFromMapper($this, $stmt, $tool);
-        return $arr;
-    }
-
-    /**
      * Select a number of elements from a database
      */
-    public function selectFrom(string $from = '', string $where = '', ?Tool $tool = null, string $select = ''): Result
+    public function selectFrom(string $from = '', string $where = '', ?Tool $tool = null, string $select = '', ?array $params = null): Result
     {
         if (!$tool instanceof Tool) $tool = new Tool();
 
@@ -339,44 +293,42 @@ abstract class Mapper
 
         $sql = sprintf('SELECT %s %s %s FROM %s %s %s ',
             $foundRowsKey, $distinct, $select, $from, $where, $toolStr);
-        $stmt = $this->getDb()->prepare($sql);
 
-        $stmt->execute();
+        $stmt = $this->getDb()->prepare($sql);
+        $stmt->execute($params);
 
         return Result::createFromMapper($this, $stmt, $tool);
     }
 
+    /**
+     * @deprecated Convert all queries to use prepared statements use `prepareFromFilter()`
+     */
     public function selectFromFilter(Filter $filter, $tool = null): Result
     {
         return $this->selectFrom($filter->getFrom(), $filter->getWhere(), $tool, $filter->getSelect());
     }
 
-    /**
-     * Select a number of elements from a database
-     *
-     * EG: "`column1`=4 AND `column2`='string'"
-     */
-    public function select(string $where = '', ?Tool $tool = null): Result
+    public function prepareFromFilter(Filter $filter, $tool = null): Result
     {
-        return $this->selectFrom('', $where, $tool);
+        return $this->selectFrom($filter->getFrom(), $filter->getWhere(), $tool, $filter->getSelect(), $filter->all());
     }
 
     public function find(mixed $id): ?Model
     {
+        if (empty($id)) return null;
         if (!$this->getPrimaryType()) {
             throw new Exception('Invalid operation, no primary key found');
         }
-        $where = sprintf('%s = %s', $this->quoteParameter($this->getPrimaryType()->getKey()), $id);
-        $list = $this->select($where);
+        $where = sprintf('%s = :%s', $this->quoteParameter($this->getPrimaryType()->getKey()), $this->getPrimaryType()->getProperty());
+        $list = $this->selectFrom('', $where, Tool::create('', 1), '', [
+            $this->getPrimaryType()->getProperty() => $id
+        ]);
         return $list->current();
     }
 
-    /**
-     * Find all objects in DB
-     */
     public function findAll(?Tool $tool = null): Result
     {
-        return $this->select('', $tool);
+        return $this->selectFrom('', '', $tool);
     }
 
     /**
@@ -384,6 +336,7 @@ abstract class Mapper
      * Handy for testing multiple values
      * EG:
      *   "a.type = 'Self Assessment' AND a.type != 'Testing' AND 'Thinking'"
+     * @deprecated Prefer using the query `field IN ([list])` or `field NOT IN ([list])`
      */
     public function makeMultiQuery($value, string $columnName, string $logic = 'OR', string $compare = '='): string
     {
@@ -460,7 +413,7 @@ abstract class Mapper
      * Returns the name of the column to mark deleted. (update col to 1)
      * returns null if we are to physically delete the record
      */
-    public function getDeleteType(): DataTypeInterface
+    public function getDeleteType(): ?DataTypeInterface
     {
         return $this->deleteType;
     }
@@ -510,7 +463,6 @@ abstract class Mapper
         return $this;
     }
 
-
     /**
      * Use this function to escape a table name and add a prefix if it is set
      */
@@ -540,10 +492,19 @@ abstract class Mapper
      * Convert camelCase property names to underscore db property name
      *
      * EG: 'someProperty' is converted to 'some_property'
+     * @deprecated use \Tk\Str::toSnake()
      */
     public static function toDbProperty(string $property): string
     {
         return ltrim(strtolower(preg_replace('/[A-Z]/', '_$0', $property)), '_');
     }
 
+    /**
+     * Returns true if a value is an empty string or null
+     * Use this in cases where 0 and '0' are valid non-empty values
+     */
+    public function isEmpty(mixed $v): ?int
+    {
+        return ($v === '' || $v === null);
+    }
 }

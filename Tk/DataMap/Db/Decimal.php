@@ -5,8 +5,6 @@ use Tk\DataMap\DataTypeInterface;
 
 /**
  * map a decimal/float type from a DB field to an object property
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class Decimal extends DataTypeInterface
 {
@@ -21,7 +19,7 @@ class Decimal extends DataTypeInterface
     public function getPropertyValue(object $object): mixed
     {
         $value = parent::getPropertyValue($object);
-        if ($value !== null) $value .= '';
+        if ($value !== null) $value = (float)$value;
         return $value;
     }
 

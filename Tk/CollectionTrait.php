@@ -1,27 +1,15 @@
 <?php
 namespace Tk;
 
-
-/**
- * Class CollectionTrait
- *
- * @author Tropotek <http://www.tropotek.com/>
- */
 trait CollectionTrait
 {
 
-    protected Collection $_collection;
+    protected ?Collection $_collection = null;
 
-    /**
-     * Call this in your constructor to init traits data
-     */
-    public function _CollectionTrait(): void
-    {
-        $this->_collection = new Collection();
-    }
 
     public function getCollection(): Collection
     {
+        if (!$this->_collection) $this->_collection = new Collection();
         return $this->_collection;
     }
 

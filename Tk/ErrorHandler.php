@@ -7,10 +7,8 @@ use Tk\Traits\SingletonTrait;
 /**
  * To set this up just call ErrorHandler::instance($logger) at the earliest possible convenience.
  *
- * NOTICE: for startup errors and errors produced before this object is initialised 
+ * NOTICE: for startup errors and errors produced before this object is initialised
  * see the php system log file if your php.ini is set up for it.
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class ErrorHandler
 {

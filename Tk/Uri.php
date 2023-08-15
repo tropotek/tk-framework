@@ -4,7 +4,6 @@ namespace Tk;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
- *
  * Where:
  *
  * - __scheme__ defaults to http
@@ -19,18 +18,9 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
  *
  * If the static $BASE_URL is set this will be prepended to all relative paths
  * when creating a URI
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class Uri implements \IteratorAggregate
 {
-    /**
-     * Absolute http and https URIs require a host per RFC 7230 Section 2.7
-     * but in generic URIs the host can be empty. So for http(s) URIs
-     * we apply this default host when no host is given yet to form a
-     * valid URI.
-     */
-    private const HTTP_DEFAULT_HOST = 'localhost';
 
     const SCHEME_HTTP = 'http';
     const SCHEME_HTTP_SSL = 'https';
@@ -59,7 +49,7 @@ class Uri implements \IteratorAggregate
      * The site hostname.
      * NOTE: Be sure to set this in your boostrap code for CLI scripts
      */
-    public static string $SITE_HOSTNAME = '';
+    public static string $SITE_HOSTNAME = 'localhost';
 
     /**
      * This is the supplied uri string
@@ -84,7 +74,6 @@ class Uri implements \IteratorAggregate
     protected array $query = [];
 
 
-
     /**
      * Paths that do not start with a scheme section to the uri are prepended with the  self::$BASE_URL . '/' string
      */
@@ -99,6 +88,7 @@ class Uri implements \IteratorAggregate
                 }
             }
         }
+        $this->spec = $spec;
         if (!$this->isApplicationScheme()) {
             $spec = trim(urldecode($spec));
             if ($spec && self::$BASE_URL) {
@@ -113,8 +103,8 @@ class Uri implements \IteratorAggregate
                     }
                 }
             }
+            $this->spec = $spec;
         }
-        $this->spec = $spec;
         $this->init();
     }
 
@@ -124,10 +114,8 @@ class Uri implements \IteratorAggregate
      * <code>
      *   \Tk\Uri::create('http://example.com/test');
      * </code>
-     *
-     * @param string|Uri|null $spec
      */
-    public static function create(string|Uri|null $spec = null): Uri
+    public static function create(string|Uri|null $spec = null): null|Uri
     {
         if ($spec instanceof Uri) return clone $spec;
         return new static($spec);
@@ -136,13 +124,12 @@ class Uri implements \IteratorAggregate
 
     public function __serialize()
     {
-        return serialize(['spec' => $this->spec]);
+        return ['spec' => $this->spec];
     }
 
     public function __unserialize($data)
     {
-        $arr = unserialize($data);
-        $this->spec = $arr['spec'];
+        $this->spec = $data['spec'];
         $this->init();
     }
 
@@ -158,21 +145,7 @@ class Uri implements \IteratorAggregate
         }
 
         $this->scheme = $_SERVER['REQUEST_SCHEME'] ?? self::SCHEME_HTTP_SSL;
-//        if ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ||
-//            (isset($_SERVER['REQUEST_SCHEME']) && $_SERVER['REQUEST_SCHEME'] == self::SCHEME_HTTP_SSL) ||
-//            (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT']))
-//        {
-//            $this->scheme = self::SCHEME_HTTP_SSL;
-//        }
-
-        $host = self::HTTP_DEFAULT_HOST;
-        if (!empty(self::$SITE_HOSTNAME)) {
-            $host = self::$SITE_HOSTNAME;
-        } else if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
-            $host = $_SERVER['HTTP_X_FORWARDED_HOST'];
-        } else if (isset($_SERVER['HTTP_HOST'])) {
-            $host = $_SERVER['HTTP_HOST'];
-        }
+        $host = self::$SITE_HOSTNAME;
 
         // build spec into URL format
         if (preg_match('/^\/\//', $spec)) {
@@ -279,7 +252,7 @@ class Uri implements \IteratorAggregate
     public function dirname(): Uri
     {
         $uri = clone $this;
-        if ($this->isApplicationScheme()) $uri;
+        if ($this->isApplicationScheme()) return $uri;
         $uri->spec = dirname($uri->getPath());
         $uri->setPath(dirname($uri->getPath()));
         return $uri;
@@ -748,7 +721,7 @@ class Uri implements \IteratorAggregate
                 header('302: Found HTTP/1.1', true, $code);
                 break;
             case 303:
-                // dont cache, always use GET
+                // don't cache, always use GET
                 header('303: See Other HTTP/1.1', true, $code);
                 break;
             case 304:
@@ -768,7 +741,13 @@ class Uri implements \IteratorAggregate
 
         $arr = debug_backtrace();
         $arr = $arr[0];
-        \Tk\Log::notice($code . ' REDIRECT `'.$this->toString().'` Called ' . str_replace(self::$BASE_URL, '', $arr['file']) . ':' . $arr['line']);
+        $msg = sprintf('%s REDIRECT `%s` called from %s:%s',
+            $code,
+            $this->toString(),
+            str_replace(Config::instance()->getBasePath(), '', $arr['file']),
+            $arr['line']
+        );
+        \Tk\Log::notice($msg);
 
         /*CLOSE THE SESSION WITH USER DATA*/
         session_write_close();

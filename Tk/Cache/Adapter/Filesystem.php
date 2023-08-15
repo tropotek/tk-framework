@@ -1,8 +1,6 @@
 <?php
 namespace Tk\Cache\Adapter;
 
-
-
 use Tk\FileUtil;
 
 /**
@@ -11,7 +9,6 @@ use Tk\FileUtil;
  * to read the entire cache file
  *
  * @see http://www.rooftopsolutions.nl/blog/107
- * @author Tropotek <http://www.tropotek.com/>
  */
 class Filesystem implements Iface
 {
@@ -21,21 +18,14 @@ class Filesystem implements Iface
      * @var string
      */
     protected string $cachePath = '';
-    
+
 
     public function __construct(string $cachePath = '')
     {
         $this->cachePath = $cachePath;
     }
 
-    /**
-     * This is the function you store information with
-     *
-     * @param mixed $data
-     * @return bool
-     * @throws \Exception
-     */
-    public function store(string $key, $data, int $ttl = 0)
+    public function store(string $key, mixed $data, int $ttl = 0): mixed
     {
         if (!FileUtil::mkdir($this->getCachePath())) {
             throw new \Tk\Cache\Exception('Cannot create path: ' . $this->getCachePath());
@@ -61,13 +51,7 @@ class Filesystem implements Iface
         return true;
     }
 
-    /**
-     * The function to fetch data returns false on failure
-     *
-     * @param string $key
-     * @return mixed|bool
-     */
-    public function fetch(string $key)
+    public function fetch(string $key): mixed
     {
         $filename = $this->getFileName($key);
         if (!file_exists($filename)) {
@@ -97,12 +81,7 @@ class Filesystem implements Iface
         return $data;
     }
 
-    /**
-     * Delete
-     *
-     * @return bool
-     */
-    public function delete(string $key)
+    public function delete(string $key): mixed
     {
         $filename = $this->getFileName($key);
         if (file_exists($filename)) {
@@ -112,29 +91,17 @@ class Filesystem implements Iface
         }
     }
 
-    /**
-     * Delete all files in the cachePath
-     */
     public function clear(): bool
     {
         return \Tk\FileUtil::rmdir($this->getCachePath());
     }
 
-    /**
-     * Get cache filename with path
-     *
-     * @param string $key
-     * @return string
-     */
-    private function getFileName($key)
+    private function getFileName(string $key): string
     {
         return $this->getCachePath() . '/' . $key;
     }
 
-    /**
-     * @return string
-     */
-    public function getCachePath()
+    public function getCachePath(): string
     {
         return $this->cachePath;
     }

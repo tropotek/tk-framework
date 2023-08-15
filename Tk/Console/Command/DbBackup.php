@@ -9,9 +9,6 @@ use Tk\Console\Console;
 use Tk\Db\Util\SqlBackup;
 use Tk\FileUtil;
 
-/**
- * @author Tropotek <http://www.tropotek.com/>
- */
 class DbBackup extends Console
 {
 

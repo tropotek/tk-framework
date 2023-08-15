@@ -11,7 +11,6 @@ use Tk\Traits\SystemTrait;
  *
  * @note: This file uses SLI commands to backup and restore the database
  * @see https://raw.githubusercontent.com/kakhavk/database-dump-utility/master/SqlDump.php
- * @author Tropotek <http://www.tropotek.com/>
  */
 class SqlBackup
 {
