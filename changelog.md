@@ -1,5 +1,9 @@
 #CHANGELOG#
 
+Ver 8.0.28 [2023-08-15]:
+-------------------------------
+
+
 Ver 8.0.26 [2023-08-15]:
 -------------------------------
   - Update ObjectUril to get value from accessors
