@@ -23,7 +23,7 @@ class Bootstrap
 
         \Tk\Debug\VarDump::instance($this->getFactory()->getLogger());
 
-        TextEncrypt::$encryptKey = $this->getConfig()->get('system.encrypt');
+        TextEncrypt::$encryptKey = $this->getConfig()->get('system.encrypt', '');
 
         if ($this->getConfig()->isDebug()) {
             // Allow self-signed certs in file_get_contents in debug mode
@@ -31,7 +31,6 @@ class Bootstrap
                 "verify_peer" => false,
                 "verify_peer_name" => false,
             ]]);
-            Template::$ENABLE_TRACER = true;
         }
 
         if ($this->getSystem()->isCli()) {
@@ -51,6 +50,9 @@ class Bootstrap
 
         \Tk\Uri::$SITE_HOSTNAME = $this->getConfig()->getHostname();
         \Tk\Uri::$BASE_URL = $this->getConfig()->getBaseUrl();
+        if ($this->getConfig()->isDebug()) {
+            Template::$ENABLE_TRACER = true;
+        }
 
         $session = $this->getFactory()->getSession();
         $session->start();  // NOTE: stdout before $session->start() will throw error

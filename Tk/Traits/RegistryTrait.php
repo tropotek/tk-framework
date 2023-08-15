@@ -6,9 +6,13 @@ use Tk\Registry;
 trait RegistryTrait
 {
 
-    public function getRegistry(): Registry
+    public function getRegistry(): ?Registry
     {
-        return Registry::instance();
+        $r = null;
+        try {
+            $r = Registry::instance();
+        } catch(\Exception $e) {}
+        return $r;
     }
 
 }

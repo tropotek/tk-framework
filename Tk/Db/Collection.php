@@ -48,10 +48,15 @@ class Collection extends \Tk\Collection
      * Creates an instance of the Data object and loads that data from the DB
      * By Default this method uses the Config::getDb() to get the database.
      */
-    public static function create(string $table): static
+    public static function create(string $table, ?Pdo $db = null): static
     {
+
         $obj = new static($table);
-        $obj->setDb($obj->getFactory()->getDb());
+        if (!$db) $db = $obj->getFactory()->getDb();
+        if (!$db) {
+            throw new Exception('No valid DB connection found.');
+        }
+        $obj->setDb($db);
         $obj->load();
         return $obj;
     }
