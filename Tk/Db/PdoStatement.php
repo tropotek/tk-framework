@@ -40,8 +40,8 @@ class PdoStatement extends \PDOStatement
             $params = func_get_args();
         }
 
+        $sql = $this->queryString;
         if (is_array($params)) {
-            $sql = $this->queryString;
             // find all placeholders in the SQL string
             // the matches $m is a somewhat confusing array -- refer to the PHP docs
             // Source: @Greg Jorgensen (OUM)
@@ -70,18 +70,18 @@ class PdoStatement extends \PDOStatement
                     }
                 }
                 $params = $fParams;
-                $this->queryString = $sql;
+                //$this->queryString = $sql;    // This is readonly now (use Db::getLastQuery())
             } else {
                 $params = [];
             }
         }
 
         $this->bindParams = $params;
-        $this->db->setLastQuery($this->queryString);
+        $this->db->setLastQuery($sql);
         try {
             $result = parent::execute($params);
         } catch (\Exception $e) {
-            throw new Exception($e->getMessage(), $e->getCode(), null, $this->queryString, $params);
+            throw new Exception($e->getMessage(), $e->getCode(), null, $sql, $params);
         }
         return $result;
     }
