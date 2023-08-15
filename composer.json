@@ -1,54 +1,56 @@
 {
-    "name": "ttek/tk-framework",
-    "type": "library",
-    "description": "Tropotek Framework",
-    "keywords":  [
-        "Tk",
-        "framework",
-        "tropotek"
-    ],
-    "time": "2023-08-15",
-    "license": "MIT",
-    "authors":  [
-         {
-            "name": "Michael Mifsud",
-            "homepage": "http://www.tropotek.com/"
-        }
-    ],
-    "funding":  [
-         {
-            "type": "Paypal",
-            "url": "https://www.paypal.me/tropotek"
-        }
-    ],
-    "autoload":  {
-        "psr-4":  {
-            "Tk\\": "Tk/"
-        },
-        "files":  [
-            "Tk/Exception.php"
-        ]
-    },
-    "require":  {
-        "php": "^8.2",
-        "psr/log": "^1.0",
-        "ext-json": "*",
-        "ext-pdo": "*",
-        "ext-fileinfo": "*",
-        "ext-curl": "*",
-        "ttek/tk-installers": "~8.0.0",
-        "symfony/http-foundation": "^6.2",
-        "symfony/routing": "^6.2",
-        "symfony/http-kernel": "^6.2",
-        "symfony/event-dispatcher": "^6.2",
-        "symfony/console": "^6.2",
-        "symfony/lock": "^6.2",
-        "monolog/monolog": "^2.0",
-        "sensiolabs/ansi-to-html": "~1.0"
-    },
-    "extra":  {
-        "branch-alias":  {
-            "dev-master": "8.0.x-dev"
-        }
+  "name": "ttek/tk-framework",
+  "type": "library",
+  "description": "Tropotek Framework",
+  "keywords": [
+    "Tk",
+    "framework",
+    "tropotek"
+  ],
+  "time": "2022-10-15",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Michael Mifsud",
+      "homepage": "http://www.tropotek.com/"
     }
+  ],
+  "funding": [
+    {
+      "type": "Paypal",
+      "url": "https://www.paypal.me/tropotek"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Tk\\": "Tk/"
+    },
+    "files": [
+      "Tk/Exception.php"
+    ]
+  },
+  "require": {
+    "php": "^8.2",
+    "psr/log": "^1.0",
+    "ext-json": "*",
+    "ext-pdo": "*",
+    "ext-fileinfo": "*",
+    "ext-json": "*",
+    "ext-curl": "*",
+    "ttek/tk-installers": "~8.0.0",
+
+    "symfony/http-foundation": "^6.2",
+    "symfony/routing": "^6.2",
+    "symfony/http-kernel": "^6.2",
+    "symfony/event-dispatcher": "^6.2",
+    "symfony/console": "^6.2",
+    "symfony/lock": "^6.2",
+    "monolog/monolog": "^2.0",
+    "sensiolabs/ansi-to-html": "~1.0"
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "8.0.x-dev"
+    }
+  }
 }
