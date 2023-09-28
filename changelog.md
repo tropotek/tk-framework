@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 8.0.30 [2023-09-28]:
+-------------------------------
+  - Merge branch '8.0' of https://github.com/tropotek/tk-framework into 8.0
+
+
 Ver 8.0.28 [2023-08-15]:
 -------------------------------
 
