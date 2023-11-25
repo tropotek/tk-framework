@@ -6,76 +6,60 @@
  */
 namespace Tk\Session\Adapter;
 
-/**
- * A session object
- *
- */
 interface Iface extends \SessionHandlerInterface
 {
-    
 
-    
-    
     /**
-     * Regenerates the session id.
-     *
      * @return  string
      */
+    #[\ReturnTypeWillChange]
     public function regenerate();
-    
-    
-    
-    
+
     // SessionHandlerInterface
-    
 
     /**
-     * Closes a session.
-     *
      * @return  boolean
      */
+    #[\ReturnTypeWillChange]
     public function close();
 
     /**
-     * Destroys a session.
-     *
      * @param   string $sessionId
      * @return  boolean
      */
+    #[\ReturnTypeWillChange]
     public function destroy($sessionId);
 
     /**
      * Garbage collection.
      *
      * @param   integer $maxlifetime session expiration period
-     * @return  boolean
+     * @return  int|false
      */
+    #[\ReturnTypeWillChange]
     public function gc($maxlifetime);
     
     /**
-     * Opens a session.
-     *
      * @param string $path The path where to store/retrieve the session.
      * @param string $sessionId The session id.
      * @return  boolean
      */
+    #[\ReturnTypeWillChange]
     public function open($path, $sessionId);
 
     /**
-     * Reads a session.
-     *
      * @param   string $sessionId
-     * @return  string
+     * @return  string|false
      */
+    #[\ReturnTypeWillChange]
     public function read($sessionId);
 
     /**
-     * Writes a session.
-     *
      * @param   string $sessionId
      * @param   string $data
      * @return  boolean
      */
+    #[\ReturnTypeWillChange]
     public function write($sessionId, $data);
 
 }

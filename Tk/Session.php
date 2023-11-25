@@ -555,6 +555,7 @@ class Session implements \ArrayAccess
      * The return value will be casted to boolean if non-boolean was returned.
      * @since 5.0.0
      */
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         return $this->has($offset);
@@ -570,6 +571,7 @@ class Session implements \ArrayAccess
      * @return mixed Can return all value types.
      * @since 5.0.0
      */
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         return $this->get($offset);
@@ -588,6 +590,7 @@ class Session implements \ArrayAccess
      * @return void
      * @since 5.0.0
      */
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         $this->set($offset, $value);
@@ -603,6 +606,7 @@ class Session implements \ArrayAccess
      * @return void
      * @since 5.0.0
      */
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         $this->remove($offset);
