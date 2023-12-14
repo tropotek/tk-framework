@@ -121,8 +121,6 @@ class Cookie implements \ArrayAccess
         return $this->httponly;
     }
 
-
-
     /**
      * Returns true if there is a cookie with this name.
      *
@@ -210,6 +208,19 @@ class Cookie implements \ArrayAccess
         return $this;
     }
 
+    public function deleteAllCookies()
+    {
+        //$host = explode('.', $_SERVER['HTTP_HOST']);
+        $host = explode('.', $this->getDomain());
+        while ($host) {
+            // TODO: check this deletes cookies without the . at the start
+            $domain = '.' . implode('.', $host);
+            foreach ($_COOKIE as $name => $value) {
+                setcookie($name, '', -3600, '/', $domain);
+            }
+            array_shift($host);
+        }
+    }
     
     /**
      * Whether a offset exists
