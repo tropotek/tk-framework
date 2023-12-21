@@ -123,7 +123,7 @@ class Pdo
      *   Pdo::getInstance($options) is a valid call
      *
      */
-    public static function instance(string $name, array $options = []): ?Pdo
+    public static function instance(string $name = '', array $options = []): ?Pdo
     {
         // return the first available DB connection if no params
         if (!$name && !count($options) && count(self::$_INSTANCE)) {
@@ -230,9 +230,6 @@ class Pdo
     /**
      * Prepares a statement for execution and returns a statement object
      *
-     * @param string $query
-     * @param array $options
-     * @return  \PDOStatement|false
      * @throws \PDOException
      * @see \PDO::prepare()
      * @see http://www.php.net/manual/en/pdo.prepare.php
@@ -245,16 +242,13 @@ class Pdo
     /**
      * Execute an SQL statement and return the number of affected rows
      *
-     * @param string $query The SQL statement to execute
-     * @return int|false
      * @throws Exception
      * @see http://www.php.net/manual/en/pdo.exec.php
      */
     public function exec(string $query): int|false
     {
-        $this->setLastQuery($query);
-
         try {
+            $this->setLastQuery($query);
             $result = $this->getPdo()->exec($query);
         } catch (\Exception $e) {
             $info = $this->getPdo()->errorInfo();
@@ -272,16 +266,14 @@ class Pdo
     /**
      * Executes an SQL statement, returning a result set as a PDOStatement object
      *
-     * @param string $query
      * @param int $mode The fetch mode must be one of the PDO::FETCH_* constants.
      * @param mixed $fetchModeArgs The second and following parameters are the same as the parameters for PDOStatement::setFetchMode.
-     * @return PDOStatement|false \PDO::query() returns a PDOStatement object, or FALSE on failure.
      * @throws Exception
      */
-    public function query($query, $mode = \PDO::ATTR_DEFAULT_FETCH_MODE, ...$fetchModeArgs): \PDOStatement|false
+    public function query(string $query, int $mode = \PDO::ATTR_DEFAULT_FETCH_MODE, ...$fetchModeArgs): \PDOStatement|false
     {
-        $this->setLastQuery($query);
         try {
+            $this->setLastQuery($query);
             $result = call_user_func_array([$this->getPdo(), 'query'], func_get_args());
             if ($result === false) {
                 $info = $this->getPdo()->errorInfo();
@@ -345,43 +337,47 @@ class Pdo
     }
 
     /**
-     * Count a query and return the total possible results
+     * Return an array with [limit, offset, total] values for a query
+     *
+     * @param string $sql
+     * @return int[]
+     * @throws Exception
      */
-    public function countFoundRows(string $sql = ''): int
+    public function countFoundRows(string $sql, array $params = []): array
     {
         if (!$sql) $sql = $this->getLastQuery();
-        if (!$sql) return 0;
+        if (!$sql) return [0, 0, 0];
+        if (stripos($sql, 'select ') !== 0) return [0, 0, 0];
+        $sql = str_replace('SQL_CALC_FOUND_ROWS ', '', $sql);
+
+        $limit = 0;
+        $offset = 0;
+        $total = 0;
+        $cSql = $sql;   // query without limit/offset
+        if (preg_match('/(.*)?(LIMIT\s([0-9]+)((\s+OFFSET\s)?|(,\s?)?)([0-9]+)?)+$/is', trim($sql), $match)) {
+            $cSql = trim($match[1] ?? '');
+            $limit = (int)($match[3] ?? 0);
+            $offset = (int)($match[7] ?? 0);
+        }
+
+        // No limit no need to continue
+        if (!$limit) return [0, 0, 0];
+        if ($limit == 1) return [0, 0, 1];
 
         self::$Q_LOG = false;
-        $total = 0;
-        if ($this->getDriver() == 'mysql' && preg_match('/^SELECT SQL_CALC_FOUND_ROWS/i', $sql)) {   // Mysql only
-            $countSql = 'SELECT FOUND_ROWS()';
-            $result = $this->query($countSql);
-            if ($result === false) {
-                $info = $this->getPdo()->errorInfo();
-                throw new Exception(end($info));
-            }
-            $result->setFetchMode(\PDO::FETCH_ASSOC);
-            $row = $result->fetch();
-            if ($row) {
-                $total = (int) $row['FOUND_ROWS()'];
-            }
-        } else if (preg_match('/^SELECT/i', $sql)) {
-            $cSql = preg_replace('/(LIMIT [0-9]+(( )?,?( )?(OFFSET )?[0-9]+)?)?/i', '', $sql);
-            $countSql = "SELECT COUNT(*) as i FROM ($cSql) as t";
-            $result = $this->query($countSql);
-            if ($result === false) {
-                $info = $this->getPdo()->errorInfo();
-                throw new Exception(end($info));
-            }
-            $result->setFetchMode(\PDO::FETCH_ASSOC);
-            $row = $result->fetch();
-            if ($row) {
-                $total = (int) $row['i'];
-            }
+        $countSql = "SELECT COUNT(*) as i FROM ($cSql) as t";
+        $stm = $this->prepare($countSql);
+        if (false === $stm->execute($params, false)) {
+            $info = $this->getPdo()->errorInfo();
+            throw new Exception(end($info));
+        }
+        $stm->setFetchMode(\PDO::FETCH_ASSOC);
+        $row = $stm->fetch();
+        if ($row) {
+            $total = (int) $row['i'];
         }
         self::$Q_LOG = true;
-        return $total;
+        return [$limit, $offset, $total];
     }
 
     /**
@@ -407,7 +403,7 @@ class Pdo
             $sql = 'SHOW DATABASES';
             $result = $this->query($sql);
         } else if ($this->getDriver() == 'pgsql') {
-            $sql = sprintf('SELECT datname FROM pg_database WHERE datistemplate = false');
+            $sql = 'SELECT datname FROM pg_database WHERE datistemplate = false';
             $result = $this->query($sql);
         }
         if ($result) {
@@ -441,7 +437,7 @@ class Pdo
             $sql = 'SHOW TABLES';
             $result = $this->query($sql);
         } else if ($this->getDriver() == 'pgsql') {
-            $sql = sprintf('SELECT table_name FROM information_schema.tables WHERE table_schema = \'public\'');
+            $sql = 'SELECT table_name FROM information_schema.tables WHERE table_schema = \'public\'';
             $result = $this->query($sql);
         }
         if ($result) {
@@ -504,11 +500,11 @@ class Pdo
         if (!$this->hasTable($tableName)) return false;
         $sql = '';
         if ($this->getDriver() == 'mysql') {
-            $sql .= sprintf('SET FOREIGN_KEY_CHECKS = 0;SET UNIQUE_CHECKS = 0;');
+            $sql .= 'SET FOREIGN_KEY_CHECKS = 0;SET UNIQUE_CHECKS = 0;';
         }
         $sql .= sprintf('DROP TABLE IF EXISTS %s CASCADE;', $this->quoteParameter($tableName));
         if ($this->getDriver() == 'mysql') {
-            $sql .= sprintf('SET FOREIGN_KEY_CHECKS = 1;SET UNIQUE_CHECKS = 1;');
+            $sql .= 'SET FOREIGN_KEY_CHECKS = 1;SET UNIQUE_CHECKS = 1;';
         }
         $this->exec($sql);
         return true;
@@ -525,21 +521,21 @@ class Pdo
         if (!$confirm) return false;
         $sql = '';
         if ($this->getDriver() == 'mysql') {
-            $sql .= sprintf('SET FOREIGN_KEY_CHECKS = 0;SET UNIQUE_CHECKS = 0;');
+            $sql .= 'SET FOREIGN_KEY_CHECKS = 0;SET UNIQUE_CHECKS = 0;';
         }
         foreach ($this->getTableList() as $i => $v) {
             if (in_array($v, $exclude)) continue;
             $sql .= sprintf('DROP TABLE IF EXISTS %s CASCADE;', $this->quoteParameter($v));
         }
         if ($this->getDriver() == 'mysql') {
-            $sql .= sprintf('SET FOREIGN_KEY_CHECKS = 1;SET UNIQUE_CHECKS = 1;');
+            $sql .= 'SET FOREIGN_KEY_CHECKS = 1;SET UNIQUE_CHECKS = 1;';
         }
         $this->exec($sql);
         return true;
     }
 
     /**
-     * Get the insert id of the last added record.
+     * Predict the next insert ID of the table
      * Taken From: http://dev.mysql.com/doc/refman/5.0/en/innodb-auto-increment-handling.html
      *
      * @throws Exception
@@ -562,12 +558,12 @@ class Pdo
             $row = $result->fetch();
             return ((int)$row['lastId']) + 1;
         } if ($this->getDriver() == 'pgsql') {
-        $sql = sprintf('SELECT * FROM %s_%s_seq', $table, $pKey);
-        $result = $this->prepare($sql);
-        $result->execute();
-        $row = $result->fetch(\PDO::FETCH_ASSOC);
-        return ((int)$row['last_value']) + 1;
-    }
+            $sql = sprintf('SELECT * FROM %s_%s_seq', $table, $pKey);
+            $result = $this->prepare($sql);
+            $result->execute();
+            $row = $result->fetch(\PDO::FETCH_ASSOC);
+            return ((int)$row['last_value']) + 1;
+        }
 
         // Not as accurate as I would like and should not be relied upon.
         $sql = sprintf('SELECT %s FROM %s ORDER BY %s DESC LIMIT 1;', self::quoteParameter($pKey), self::quoteParameter($table), self::quoteParameter($pKey));
@@ -578,12 +574,6 @@ class Pdo
         return $row[$pKey]+1;
     }
 
-    /**
-     *
-     * @param string $str
-     * @param int $type
-     * @return string
-     */
     public function quote(string $str, int $type = \Pdo::PARAM_STR): string
     {
         return $this->getPdo()->quote($str, $type);
@@ -600,9 +590,6 @@ class Pdo
         return $str;
     }
 
-    /**
-     *
-     */
     public function quoteParameterArray(array $array): array
     {
         foreach($array as $k => $v) {

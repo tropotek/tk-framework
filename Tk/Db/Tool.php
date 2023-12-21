@@ -56,7 +56,7 @@ class Tool implements \Tk\InstanceKey
     }
 
     /**
-     * Good to use when creating from a request or session array
+     * Use when creating from a request or session array
      */
     static function createFromArray(array $array, string $defaultOrderBy = '', int $defaultLimit = 0, string $instanceId= ''): Tool
     {
