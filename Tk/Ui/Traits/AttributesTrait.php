@@ -86,7 +86,7 @@ trait AttributesTrait
     {
         $str = '';
         foreach ($this->_attrList as $k => $v) {
-            $str = sprintf('%s="%s" ', $k, $v);
+            $str .= sprintf('%s="%s" ', $k, $v);
         }
         return trim($str);
     }
