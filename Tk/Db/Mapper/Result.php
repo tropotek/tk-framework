@@ -53,7 +53,7 @@ class Result implements \Iterator, \Countable
         $obj->statement = $statement;
         $tool = $tool ?? new Tool();
         $obj->tool = $tool;
-        [$_limit, $_offset, $total] = $mapper->getDb()->countFoundRows($statement->queryString, $statement->getBindParams());
+        [$_limit, $_offset, $total] = $mapper->getDb()->countFoundRows($statement->queryString, $statement->getBindParams() ?? []);
         $tool->setFoundRows($total);
         $obj->foundRows = $tool->getFoundRows();
         return $obj;
