@@ -58,6 +58,19 @@ class SqlBackup
 
         $command = '';
         if ('mysql' == $this->db->getDriver()) {
+            // In short, the new MariaDB version adds this line to the beginning of the dump file:
+            //  /*!999999\- enable the sandbox mode */
+            // Replace "/*!999999\- enable the sandbox mode */" string on first line if exists
+            // https://gorannikolovski.com/blog/mariadb-import-issue-error-at-line-1-unknown-command
+            $f = fopen($sqlFile, 'r');
+            $line = fgets($f);
+            if (str_contains($line, '/*!999999\- enable the sandbox mode */')) {
+                $contents = file($sqlFile);
+                array_shift($contents);
+                file_put_contents($sqlFile, implode("\r\n", $contents));
+            }
+            fclose($f);
+
             $command = sprintf('mysql %s -h %s -u %s -p%s < %s', $name, $host, $user, $pass, escapeshellarg($sqlFile));
         } else {
             throw new \Tk\Exception('Only mysql driver supported');

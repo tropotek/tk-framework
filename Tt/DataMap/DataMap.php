@@ -1,5 +1,5 @@
 <?php
-namespace Tk\DataMap;
+namespace Tt\DataMap;
 
 /**
  * This DataMap object is used to load objects and arrays

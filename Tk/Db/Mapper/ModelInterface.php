@@ -12,7 +12,7 @@ interface ModelInterface
 
     /**
      * Get the model primary key, usually an ID int value
-     * But it could return a string or an array in the case of a multiple primary key
+     * But it could return a string or an array in the case of a multiple primary keys
      *
      * Only objects returning an int or string should be updatable/insertable.
      *

@@ -1,12 +1,10 @@
 <?php
 namespace Tk\Db;
 
-use Tk\Str;
-
 /**
  * Class PdoStatement
  *
- * NOTE: When using the statement in a foreach loop, any overriden
+ * NOTE: When using the statement in a foreach loop, any override
  * method calls to fetch, fetchObject, etc will not be called
  * in this object, it has something to do with the way the PDOStatement
  * object uses it Traversable methods internally

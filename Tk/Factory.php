@@ -34,6 +34,7 @@ use Tk\Mvc\FrontController;
 use Tk\Traits\SingletonTrait;
 use Tk\Traits\SystemTrait;
 use Tk\Console\Command;
+use Tt\Db;
 
 class Factory extends Collection
 {
@@ -75,6 +76,23 @@ class Factory extends Collection
                     $db = Pdo::instance($name, $options);
                     $this->set($key, $db);
                 }
+            } catch (\Exception $e) {
+                error_log($e->getMessage());
+            }
+        }
+        return $this->get($key);
+    }
+
+    public function getDbNew(string $name = 'mysql'): ?Db
+    {
+        $key = 'db.'.trim($name);
+        if (!$this->has($key)) {
+            try {
+                $db = new Db($this->getConfig()->get($key));
+                if ($this->getConfig()->has('php.date.timezone') && !isset($options['timezone'])) {
+                    $db->setTimezone($this->getConfig()->get('php.date.timezone'));
+                }
+                $this->set($key, $db);
             } catch (\Exception $e) {
                 error_log($e->getMessage());
             }

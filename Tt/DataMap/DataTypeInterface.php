@@ -1,5 +1,5 @@
 <?php
-namespace Tk\DataMap;
+namespace Tt\DataMap;
 
 use Tk\ObjectUtil;
 

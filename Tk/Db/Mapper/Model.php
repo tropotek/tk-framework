@@ -119,7 +119,6 @@ abstract class Model implements ModelInterface
 
     protected function dispatchEvent(DbEvent $e, string $eventName): DbEvent
     {
-        if (!$e) $e = new DbEvent($this);
         $this->getSystem()->getFactory()->getEventDispatcher()?->dispatch($e, $eventName);
         return $e;
     }

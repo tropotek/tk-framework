@@ -171,7 +171,7 @@ abstract class Mapper
             $inf = $this->getTableInfo($col);
             if ($inf['Extra']?? '' == 'current_timestamp()') continue;
         }
-        $sql = 'INSERT INTO ' . $this->quoteParameter($this->table) . ' (' . $cols . ')  VALUES (:' . $values . ')';
+        $sql = 'INSERT INTO ' . $this->quoteParameter($this->getTable()) . ' (' . $cols . ')  VALUES (:' . $values . ')';
         $this->getDb()->prepare($sql)->execute($bind);
 
         $seq = '';
@@ -219,7 +219,7 @@ abstract class Mapper
             $where = 'WHERE ' . $where;
         }
 
-        $sql = sprintf('DELETE FROM %s %s LIMIT 1', $this->quoteParameter($this->table), $where);
+        $sql = sprintf('DELETE FROM %s %s LIMIT 1', $this->quoteParameter($this->getTable()), $where);
         if ($this->getDeleteType()) {
             $sql = sprintf('UPDATE %s SET %s = 1 %s LIMIT 1',
                 $this->quoteParameter($this->table),

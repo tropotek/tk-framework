@@ -78,11 +78,8 @@ class Str
 
     /**
      * Convert camel case to words "testFunc" => "Test Func"
-     *
-     * @param string $str
-     * @return string
      */
-    public static function camel2words($str)
+    public static function camel2words(string $str): string
     {
         return ucfirst(preg_replace('/[A-Z]/', ' $0', $str));
     }
@@ -143,7 +140,7 @@ class Str
     }
 
     /**
-     * concatenate a sting and add a suffix to the end if it is concatenated.
+     * concatenate a string and add a suffix to the end if it is concatenated.
      */
     public static function strcat(string $str, int $length, string $suffix = '...'): string
     {
