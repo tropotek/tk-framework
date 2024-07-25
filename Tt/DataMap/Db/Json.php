@@ -19,25 +19,24 @@ class Json extends DataTypeInterface
         return $this;
     }
 
-    public function getKeyValue(array $array): mixed
+    public function getPropertyValue(array $array): mixed
     {
-        $value = parent::getKeyValue($array);
-        if ($value) {
+        $value = parent::getPropertyValue($array);
+        if (!is_null($value)) {
             $value = json_decode($value, $this->associative);
         }
         return $value;
     }
 
-    public function getPropertyValue(object $object): mixed
+    public function getColumnValue(object $object): mixed
     {
-        $value = parent::getPropertyValue($object);
+        $value = parent::getColumnValue($object);
         // Fixes bug where json_encode returns an array object instead of a string for empty arrays
         if ($this->associative && is_array($value) && !count($value)) return '';
-        if ($value) {
+        if (!is_null($value)) {
             $value = json_encode($value) ?? '';
         }
         return $value;
     }
 
 }
-

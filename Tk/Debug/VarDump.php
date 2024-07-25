@@ -83,8 +83,9 @@ namespace Tk\Debug {
             $arr = [];
             foreach ($args as $a) {
                 $type = gettype($a);
-                if ($type == 'object')
-                    $type = get_class($a);
+                if ($type == 'object') {
+                    $type = str_replace("\0", '', get_class($a));
+                }
                 $arr[] = $type;
             }
             return $arr;
@@ -101,19 +102,20 @@ namespace Tk\Debug {
             $str = $var;
 
             if ($var === null) {
-                $str = 'NULL';
+                $str = '{NULL}';
             } else if (is_bool($var)) {
                 $type = 'Boolean';
-                $str = $var ? 'true' : 'false';
+                $str = $var ? '{true}' : '{false}';
             } else if (is_string($var)) {
                 $type = 'String';
                 $str = str_replace("\0", '|', $var);
+                $str = "'{$str}'";
             } else if (is_resource($var)) {
                 $type = 'Resource';
                 $str = get_resource_type($var);
             } else if (is_array($var)) {
                 $type = sprintf('Array[%s]', count($var));
-                $a = [];
+                $a = array();
                 if ($nest >= $depth) {
                     $str = $type;
                 } else {
@@ -123,13 +125,14 @@ namespace Tk\Debug {
                     $str = sprintf("%s \n%s(\n%s\n%s)", $type, substr($pad, 0, -2), implode('', $a), substr($pad, 0, -2));
                 }
             } else if (is_object($var)) {
-                $type = '{' . get_class($var) . '} Object';
+                $class = str_replace("\0", '', get_class($var));
+                $type = '{' . $class . '} Object';
                 if ($nest >= $depth) {
                     $str = $type;
                 } else {
-                    $a = [];
+                    $a = array();
                     foreach ((array)$var as $k => $v) {
-                        $k = str_replace(get_class($var), '*', $k);
+                        $k = str_replace($class, '*', $k);
                         $a[] = sprintf("%s[%s] => %s", $pad, $k, self::varToString($v, $depth, $nest + 1));
                     }
                     $str = sprintf("%s \n%s{\n%s\n%s}", $type, substr($pad, 0, -2), implode("\n", $a), substr($pad, 0, -2));

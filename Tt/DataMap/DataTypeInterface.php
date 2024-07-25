@@ -7,37 +7,64 @@ abstract class DataTypeInterface
 {
 
     /**
-     * The storage key name, (IE: db column, form field, array key)
-     */
-    protected string $key = '';
-
-    /**
      * The object property name
      */
     protected string $property = '';
 
     /**
-     * Store any attributes related to this data type for the mapper
+     * The storage column name, (IE: db column, form field, array key)
      */
-    protected array $attributes = [];
+    protected string $column = '';
+
+    /**
+     * Store any flags/attributes related to this data type
+     */
+    protected array $flags = [];
+
+    /**
+     * Data type IO access
+     */
+    protected int $access = 0;
 
 
     /**
      * @param string $property The object property to map the column to.
-     * @param string $key (optional) The key name to map this property to. (default: $property)
+     * @param string $column (optional) The column name to map this property to. (default: $property)
      */
-    public function __construct(string $property, string $key = '')
+    public function __construct(string $property, string $column = '')
     {
+        $this->access = DataMap::READ | DataMap::WRITE;
         $this->property = $property;
-        $this->key = $key ?: $property;
+        $this->column = $column ?: $property;
+    }
+
+    public function setAccess(int $access): self
+    {
+        $this->access = $access;
+        return $this;
+    }
+
+    public function hasAccess(int $access): bool
+    {
+        return ($access & $this->access) != 0;
+    }
+
+    public function isRead(): bool
+    {
+        return $this->hasAccess(DataMap::READ);
+    }
+
+    public function isWrite(): bool
+    {
+        return $this->hasAccess(DataMap::WRITE);
     }
 
     /**
-     * Map an object property value to an array column value
+     * Get the storage column value from an object property
      * Returns null if property not found or value is null
-     * This should generally return a native PHP type or a string for forms and tables.
+     * This should generally return a native PHP type (Default: null|string).
      */
-    public function getPropertyValue(object $object): mixed
+    public function getColumnValue(object $object): mixed
     {
         $v = null;
         if ($this->hasProperty($object)) {
@@ -47,12 +74,13 @@ abstract class DataTypeInterface
     }
 
     /**
-     * Return the key value from the array supplied
+     * Return an object property value from an array column
+     * This should return the column value converted to the object property type
      */
-    public function getKeyValue(array $array): mixed
+    public function getPropertyValue(array $array): mixed
     {
-        if (array_key_exists($this->getKey(), $array)) {
-            return $array[$this->getKey()];
+        if (array_key_exists($this->getColumn(), $array)) {
+            return $array[$this->getColumn()];
         }
         return null;
     }
@@ -62,23 +90,23 @@ abstract class DataTypeInterface
      */
     public function loadObject(object $object, array $srcArray): DataTypeInterface
     {
-        $value = $this->getKeyValue($srcArray);
+        $value = $this->getPropertyValue($srcArray);
         ObjectUtil::setPropertyValue($object, $this->getProperty(), $value);
         return $this;
     }
 
     /**
-     * Set the array key/value from the object`s property
+     * Set the array key/value from the object`s properties
      */
     public function loadArray(array &$array, object $srcObject): DataTypeInterface
     {
-        $value = $this->getPropertyValue($srcObject);
-        $array[$this->getKey()] = $value;
+        $value = $this->getColumnValue($srcObject);
+        $array[$this->getColumn()] = $value;
         return $this;
     }
 
     /**
-     * The object's instance property name
+     * The object property name
      */
     public function getProperty(): string
     {
@@ -86,63 +114,36 @@ abstract class DataTypeInterface
     }
 
     /**
-     * return the mapped array key name
+     * return the storage column name
      */
-    public function getKey(): string
+    public function getColumn(): string
     {
-        return $this->key;
+        return $this->column;
     }
 
-    /**
-     * return true if the column exists in the array
-     */
     public function hasProperty(object $object): bool
     {
         return ObjectUtil::objectPropertyExists($object, $this->getProperty());
     }
 
-    /**
-     * return true if the array key exists in the src array
-     */
-    public function hasKey(array $array): bool
+    public function hasColumn(array $array): bool
     {
-        return array_key_exists($this->getKey(), $array);
+        return array_key_exists($this->getColumn(), $array);
     }
 
-    /**
-     * A tag to identify misc property settings. (IE: For db set 'key' to identify the primary key property(s))
-     */
-    public function getAttributes(): array
+    public function getFlags(): array
     {
-        return $this->attributes;
+        return $this->flags;
     }
 
-    /**
-     * A tag to identify misc property settings. (IE: For db set 'key' to identify the primary key property(s))
-     */
-    public function setAttributes(array $attributes): static
+    public function hasFlag(string $name): bool
     {
-        $this->attributes = $attributes;
-        return $this;
+        return in_array($name, $this->flags);
     }
 
-    public function getAttribute(string $name): string
+    public function setFlag(string $name): DataTypeInterface
     {
-        return $this->attributes[$name] ?? '';
-    }
-
-    public function hasAttribute(string $name): bool
-    {
-        return array_key_exists($name, $this->attributes);
-    }
-
-    public function setAttribute(string $name, ?string $value = null): DataTypeInterface
-    {
-        if (is_null($value) && isset($this->attributes[$name])) {
-            unset($this->attributes[$name]);
-        } else {
-            $this->attributes[$name] = $value;
-        }
+        $this->flags[] = $name;
         return $this;
     }
 

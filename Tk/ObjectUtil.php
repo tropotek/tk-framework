@@ -46,7 +46,6 @@ class ObjectUtil
             $rClass = new \ReflectionClass($object);
             if ($rClass->hasProperty($property)) {
                 $rProperty = $rClass->getProperty($property);
-                $rProperty->setAccessible(true);
                 return $rProperty->getValue($object);
             }
             $method = sprintf('get%s', ucfirst($property));
@@ -72,7 +71,6 @@ class ObjectUtil
             $method = sprintf('set%s', ucfirst($property));
             if ($rClass->hasProperty($property)) {
                 $rProperty = $rClass->getProperty($property);
-                $rProperty->setAccessible(true);
                 $rProperty->setValue($object, $value);
             } elseif ($rClass->hasMethod($method)) {
                 $rMethod = $rClass->getMethod($method);
@@ -130,6 +128,7 @@ class ObjectUtil
     public static function classUses(object|string $obj, string $trait): bool
     {
         $arr = class_uses($obj);
+        vd($arr, $trait);
         foreach ($arr as $v) {
             if ($v == $trait) return true;
         }

@@ -15,6 +15,11 @@ class Date
     const FORMAT_ISO_DATE = 'Y-m-d';
 
     /**
+     * EG: 24:59:59
+     */
+    const FORMAT_ISO_TIME = 'H:i:s';
+
+    /**
      * EG: Tuesday, 23 Apr 2009
      */
     const FORMAT_LONG_DATE = 'l, j M Y';

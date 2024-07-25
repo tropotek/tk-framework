@@ -383,7 +383,6 @@ class Db
 			if ($column != $primaryKey) {
 				$set[] = "{$column} = :{$column}";
 			}
-
 			$vals[$column] = $value;
 		}
 
@@ -423,17 +422,67 @@ class Db
 		return$this->execute($sql, $values);
 	}
 
-
     public function getTableInfo(string $table): array
     {
+        $types = [
+            'varchar'    => 'string',
+            'longtext'   => 'string',
+            'enum'       => 'string',
+            'set'        => 'string',
+            'text'       => 'string',
+            'tinytext'   => 'string',
+            'char'       => 'string',
+            'mediumtext' => 'string',
+            'blob'       => 'string',
+            'varbinary'  => 'string',
+            'binary'     => 'string',
+            'longblob'   => 'string',
+            'tinyblob'   => 'string',
+            'bool'       => 'bool',
+            'bigint'     => 'int',
+            'int'        => 'int',
+            'tinyint'    => 'int',
+            'smallint'   => 'int',
+            'mediumint'  => 'int',
+            'decimal'    => 'float',
+            'float'      => 'float',
+            'double'     => 'float',
+            'datetime'   => 'timestamp',
+            'timestamp'  => 'datetime',
+            'date'       => 'date',
+            'time'       => 'time',
+            'year'       => 'year',
+        ];
+
         $query = sprintf('DESCRIBE %s ', $this->quoteParameter($table));
         try {
             $list = [];
             $stm = $this->getPdo()->prepare($query);
             $stm->execute();
             $stm->setFetchMode(\PDO::FETCH_ASSOC);
+
             foreach ($stm as $row) {
-                $list[$row['Field']] = $row;
+                $col = (object)$row;
+                $col->name = $col->Field;
+                $col->name_camel = lcfirst(str_replace(' ', '', ucwords(str_replace(['_', '-'], ' ', $col->name))));
+                preg_match('/^([a-z0-9_]+)(\(([0-9]+)\))?(.+)?/i', $col->Type, $r);
+
+                $col->mysql_type = $r[1] ?? 'unknown';
+                $col->len = intval($r[3] ?? 0);
+                $col->ext = trim($r[4] ?? '');
+                $col->php_type = $types[$col->mysql_type] ?? 'unknown';
+                if ($col->php_type == 'int' && $col->len == 1) $col->php_type = 'bool';
+                if (str_starts_with($col->name, 'json_')) $col->php_type = 'json';
+
+                $col->is_primary_key = $col->Key == 'PRI';
+                $col->is_unique      = in_array($col->Key, ['PRI', 'UNI']);
+                $col->is_numeric     = in_array($col->php_type, ['int', 'tinyint', 'decimal', 'float']);
+                $col->is_string      = in_array($col->php_type, ['string', 'timestamp', 'datetime', 'date', 'time', 'year']);
+                $col->is_datetime    = in_array($col->php_type, ['timestamp', 'datetime', 'date', 'time', 'year']);
+                $col->is_enum        = ($col->mysql_type == 'enum');
+                $col->is_set         = ($col->mysql_type == 'set');
+
+                $list[$col->name] = $col;
             }
             return $list;
         } catch (\Exception $e) {
@@ -508,21 +557,5 @@ class Db
     {
         return $quote . trim($param, $quote) . $quote;
     }
-
-
-	public static function mysqlDateTime(\DateTime $dt = null): ?string
-	{
-        return empty($dt) ? null : $dt->format('Y-m-d H:i:s');
-	}
-
-    public static function mysqlDate(\DateTime $dt = null): ?string
-	{
-        return empty($dt) ? null : $dt->format('Y-m-d');
-	}
-
-	public static function mysqlTime(\DateTime $dt = null): ?string
-	{
-        return empty($dt) ? null : $dt->format('H:i:s');
-	}
 
 }
