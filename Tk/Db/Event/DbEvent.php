@@ -4,6 +4,9 @@ namespace Tk\Db\Event;
 use Symfony\Contracts\EventDispatcher\Event;
 use Tk\Db\Mapper\Model;
 
+/**
+ * @deprecated
+ */
 class DbEvent extends Event
 {
 

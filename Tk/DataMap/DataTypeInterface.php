@@ -3,6 +3,10 @@ namespace Tk\DataMap;
 
 use Tk\ObjectUtil;
 
+/**
+ *
+ * @deprecated To be replaced by \Tt\DataMap
+ */
 abstract class DataTypeInterface
 {
 

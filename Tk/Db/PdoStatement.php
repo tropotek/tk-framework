@@ -8,6 +8,8 @@ namespace Tk\Db;
  * method calls to fetch, fetchObject, etc will not be called
  * in this object, it has something to do with the way the PDOStatement
  * object uses it Traversable methods internally
+ *
+ * @deprecated
  */
 class PdoStatement extends \PDOStatement
 {
@@ -44,14 +46,27 @@ class PdoStatement extends \PDOStatement
     public function execute(?array $params = null, bool $withCount = true): bool
     {
         try {
-            $result = parent::execute($this->setBindParams($params));
+            //$p = $this->setBindParams($params);
+            //$this->bindParams = $params;
+
+            // remove any params not in query
+            if (!is_null($params)) {
+                $p = [];
+                foreach ($params as $k => $v) {
+                    if (str_contains($this->queryString, ":$k")) $p[$k] = $v;
+                }
+                $params = $p;
+            }
+
+            $result = parent::execute($params);
             if ($withCount) {
                 [$this->limit, $this->offset, $this->total] =
-                    $this->getDb()->countFoundRows($this->db->getLastQuery(), $this->getBindParams() ?? []);
+                    //$this->getDb()->countFoundRows($this->db->getLastQuery(), $this->getBindParams() ?? []);
+                    $this->getDb()->countFoundRows($this->queryString, $params ?? []);
             }
-            //vd($this->db->getLastQuery(), $this->limit, $this->offset, $this->total);
         } catch (\Exception $e) {
-            throw new Exception($e->getMessage(), $e->getCode(), null, $this->getDb()->getLastQuery(), $params);
+            //throw new Exception($e->getMessage(), $e->getCode(), null, $this->getDb()->getLastQuery(), $params);
+            throw new Exception($e->getMessage(), $e->getCode(), null, $this->queryString, $params);
         }
         return $result;
     }
@@ -64,47 +79,47 @@ class PdoStatement extends \PDOStatement
      * @param array|null $params
      * @return array|null
      */
-    private function setBindParams(?array $params = null): ?array
-    {
-        // return if null or not an associative array
-        if (!is_array($params)) return $params;
-        if (array_keys($params) === range(0, count($params) - 1)) return $params;    // is sequential
-
-        $sql = $this->queryString;
-
-        // find all placeholders in the SQL string
-        // the matches $m is a somewhat confusing array -- refer to the PHP docs
-        // Source: @Greg Jorgensen (OUM)
-        $fParams = [];
-        $n = preg_match_all('/:([a-zA-Z0-9_]+)/', $sql, $m, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
-
-        if ($n) {
-            for ($i = $n - 1; $i >= 0; $i--) {
-                $match = $m[$i][0][0];  // the entire placeholder pattern, with optional wildcards
-                $pos = $m[$i][0][1];    // the position in the string the placeholder begins
-                $key = $m[$i][1][0];    // the placeholder name without : or wildcards
-
-                // get the value and convert it to a SQL type, with escaping and quoting strings
-                if (is_array($params[$key])) {   // assume this is for the IN query
-                    $newKey = '';
-                    foreach ($params[$key] as $k => $v) {
-                        $nk = sprintf('%s_%s', $key, $k);
-                        $newKey .= sprintf(':%s,', $nk);
-                        $fParams[$nk] = $v;
-                    }
-                    $newKey = rtrim($newKey, ',');
-                    // replace the placeholder with the value
-                    $sql = substr_replace($sql, $newKey, $pos, strlen($match));
-                } else {
-                    if (array_key_exists($key, $params)) $fParams[$key] = $params[$key];
-                }
-            }
-        }
-
-        $this->bindParams = $fParams;
-        $this->getDb()->setLastQuery($sql);
-        return $fParams;
-    }
+//    private function setBindParams(?array $params = null): ?array
+//    {
+//        // return if null or not an associative array
+//        if (!is_array($params)) return $params;
+//        if (array_keys($params) === range(0, count($params) - 1)) return $params;    // is sequential
+//
+//        $sql = $this->queryString;
+//
+//        // find all placeholders in the SQL string
+//        // the matches $m is a somewhat confusing array -- refer to the PHP docs
+//        // Source: @Greg Jorgensen (OUM)
+//        $fParams = [];
+//        $n = preg_match_all('/:([a-zA-Z0-9_]+)/', $sql, $m, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
+//
+//        if ($n) {
+//            for ($i = $n - 1; $i >= 0; $i--) {
+//                $match = $m[$i][0][0];  // the entire placeholder pattern, with optional wildcards
+//                $pos = $m[$i][0][1];    // the position in the string the placeholder begins
+//                $key = $m[$i][1][0];    // the placeholder name without : or wildcards
+//
+//                // get the value and convert it to a SQL type, with escaping and quoting strings
+//                if (is_array($params[$key])) {   // assume this is for the IN query
+//                    $newKey = '';
+//                    foreach ($params[$key] as $k => $v) {
+//                        $nk = sprintf('%s_%s', $key, $k);
+//                        $newKey .= sprintf(':%s,', $nk);
+//                        $fParams[$nk] = $v;
+//                    }
+//                    $newKey = rtrim($newKey, ',');
+//                    // replace the placeholder with the value
+//                    $sql = substr_replace($sql, $newKey, $pos, strlen($match));
+//                } else {
+//                    if (array_key_exists($key, $params)) $fParams[$key] = $params[$key];
+//                }
+//            }
+//        }
+//
+//        $this->bindParams = $fParams;
+//        $this->getDb()->setLastQuery($sql);
+//        return $fParams;
+//    }
 
     /**
      * Total row count without a limit applied

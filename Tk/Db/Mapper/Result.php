@@ -1,7 +1,6 @@
 <?php
 namespace Tk\Db\Mapper;
 
-use Tk\Db\PdoStatement;
 use Tk\Db\Tool;
 
 /**
@@ -10,19 +9,12 @@ use Tk\Db\Tool;
  *
  * It automatically maps an objects data if the Model has the magic methods available
  *
- *
- * TODO: One day PDO may be able to do this serially, this is a big memory hog...
- *        Currently we cannot subclass the PDOStatement::fetch...() methods correctly [php: 5.6.27]
- *
- * NOTE: For large datasets that could fill the memory, this object should not be used
- *        instead get statement and manually iterate the data.
+ * @deprecated
  */
 class Result implements \Iterator, \Countable
 {
 
     protected ?Mapper $mapper = null;
-
-    protected ?PdoStatement $statement = null;
 
     protected ?Tool $tool = null;
 
@@ -45,47 +37,26 @@ class Result implements \Iterator, \Countable
     /**
      * Create an array object that uses the DB mappers to load the object
      */
-    static function createFromMapper(Mapper $mapper, PdoStatement $statement, ?Tool $tool = null): Result
+    static function createFromMapper(Mapper $mapper, array $rows, ?Tool $tool = null): Result
     {
-        $rows = $statement->fetchAll(\PDO::FETCH_ASSOC);
-        $obj = new self($rows);
+        $obj = self::create($rows, $tool);
         $obj->mapper = $mapper;
-        $obj->statement = $statement;
-        $tool = $tool ?? new Tool();
-        $obj->tool = $tool;
-        [$_limit, $_offset, $total] = $mapper->getDb()->countFoundRows($statement->queryString, $statement->getBindParams() ?? []);
-        $tool->setFoundRows($total);
-        $obj->foundRows = $tool->getFoundRows();
         return $obj;
     }
 
     /**
      * Create an array object from an SQL statement when no mappers and objects area used
      */
-    static function create(PdoStatement $statement, ?Tool $tool = null, ?int $foundRows = null): Result
+    static function create(array $rows, ?Tool $tool = null): Result
     {
-        $rows = $statement->fetchAll(\PDO::FETCH_ASSOC);
         $obj = new self($rows);
-        if ($foundRows === null) {
-            if ($tool && $tool->getFoundRows()) {
-                $foundRows = $tool->getFoundRows();
-            } else {
-                $foundRows = count($rows);
-                if (method_exists($statement, 'getPdo') && $statement->getPdo())
-                    $foundRows = $statement->getPdo()->countFoundRows($statement->queryString);
-            }
-        }
-        $obj->statement = $statement;
-        $tool = $tool ?? new Tool();
-        $obj->tool = $tool;
-        $tool->setFoundRows($foundRows);
-        $obj->foundRows = $tool->getFoundRows();
+        if (!is_null($tool)) $obj->foundRows = $tool->getFoundRows();
+        $obj->tool = $tool ?? new Tool();
         return $obj;
     }
 
     public function __destruct()
     {
-        $this->statement = null;
         $this->tool = null;
     }
 
@@ -105,11 +76,6 @@ class Result implements \Iterator, \Countable
     public function getMapper(): ?Mapper
     {
         return $this->mapper;
-    }
-
-    public function getStatement(): ?PdoStatement
-    {
-        return $this->statement;
     }
 
     /**

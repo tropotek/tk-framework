@@ -56,14 +56,10 @@ class LogExceptionListener implements EventSubscriberInterface
 
     private static function getCallerLine(\Throwable $e): string
     {
-        $str = '';
-        if ($e) {
-            $config = \Tk\Config::instance();
-            $line = $e->getLine();
-            $file = str_replace($config->getBasePath(), '', $e->getFile());
-            $str = sprintf('[%s:%s] ', $file, $line);
-        }
-        return $str;
+        $config = \Tk\Config::instance();
+        $line = $e->getLine();
+        $file = str_replace($config->getBasePath(), '', $e->getFile());
+        return sprintf('[%s:%s] ', $file, $line);
     }
 
     public static function getSubscribedEvents()

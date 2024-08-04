@@ -1,6 +1,13 @@
 <?php
 namespace Tk\Db;
 
+use Tk\Db\Mapper\Mapper;
+
+/**
+ *
+ *
+ * @deprecated Table to be refactored to remove the need for this object
+ */
 class Tool implements \Tk\InstanceKey
 {
     const PARAM_GROUP_BY = 'groupBy';
@@ -286,7 +293,7 @@ class Tool implements \Tk\InstanceKey
      * @note: We have an issue if we want to get the SQL query and there is no mapper,
      *        maybe we should retain the tool toSql() function for now.
      */
-    public function toSql(string $tblAlias = '', Pdo $db = null): string
+    public function toSql(string $tblAlias = ''): string
     {
         // GROUP BY
         $groupBy = '';
@@ -304,7 +311,7 @@ class Tool implements \Tk\InstanceKey
         $orderBy = '';
         if ($this->getOrderBy()) {
             $orFields = trim(str_replace([';', '-- ', '/*'], ' ', $this->getOrderBy()));
-            if ($tblAlias && $db) {
+            if ($tblAlias) {
                 if (!str_contains($tblAlias, '.')) {
                     $tblAlias = $tblAlias . '.';
                 }
@@ -315,7 +322,7 @@ class Tool implements \Tk\InstanceKey
                         if (preg_match('/^(ASC|DESC|FIELD\(|\'|RAND|CONCAT|SUBSTRING\(|IF\(|NULL|CASE)/i', $str)) continue;
                         if (!str_contains($str, '.')) {
                             $a = explode(' ', $str);
-                            $str = $tblAlias . $db->quoteParameter($a[0]);
+                            $str = $tblAlias . Mapper::quoteParameter($a[0]);
                             if (isset($a[1])) {
                                 $str = $str . ' ' . $a[1];
                             }

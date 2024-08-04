@@ -83,7 +83,11 @@ class StartupHandler implements EventSubscriberInterface
             if (is_array($controller)) {
                 $controller = implode('::', $controller);
             }
-            $this->info('- Controller: ' . $controller);
+            if (is_string($controller)) {
+                $this->info('- Controller: ' . $controller);
+            } else {
+                $this->info('- Controller: {unknown}');
+            }
         }
     }
 

@@ -130,7 +130,8 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
     public function prepend(string $key, mixed $value, ?string $refKey = null): mixed
     {
         if (!$refKey || !$this->has($refKey)) {
-            $this->_data = array_merge([$key => $value], $this->_data);
+            //$this->_data = array_merge([$key => $value], $this->_data);
+            $this->_data = [$key => $value] + $this->_data;
         } else {
             $a = [];
             foreach ($this->_data as $k => $v) {

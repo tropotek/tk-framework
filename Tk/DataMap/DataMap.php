@@ -9,6 +9,7 @@ namespace Tk\DataMap;
  * an array and vica-versa and use loadObject() and loadArray()
  * to populate your objects.
  *
+ * @deprecated To be replaced by \Tt\DataMap
  */
 class DataMap
 {

@@ -1,6 +1,9 @@
 <?php
 namespace Tk\Db\Mapper;
 
+/**
+ * @deprecated To be removed
+ */
 class DbEvents
 {
 

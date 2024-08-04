@@ -3,12 +3,19 @@ namespace Tk\Mvc\EventListener;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Event\ControllerEvent;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ViewEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Tk\Mvc\PhpController;
+use Tk\Traits\SystemTrait;
 
-class StringResponse implements EventSubscriberInterface
+class ViewHandler implements EventSubscriberInterface
 {
-    public function onView(ViewEvent $event)
+    use SystemTrait;
+
+
+    public function onView(ViewEvent $event): void
     {
         $response = $event->getControllerResult();
 
@@ -19,6 +26,8 @@ class StringResponse implements EventSubscriberInterface
 
     public static function getSubscribedEvents()
     {
-        return [KernelEvents::VIEW => 'onView'];
+        return [
+            KernelEvents::VIEW => ['onView', -100]
+        ];
     }
 }

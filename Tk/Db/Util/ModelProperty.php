@@ -1,6 +1,9 @@
 <?php
 namespace Tk\Db\Util;
 
+/**
+ * @todo Update to use the new \Tt\DbModel system
+ */
 class ModelProperty extends \Tk\Collection
 {
     const TYPE_ARRAY   = 'array';

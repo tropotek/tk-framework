@@ -1,7 +1,6 @@
 <?php
 namespace Tk;
 
-use Tk\Db\Pdo;
 use Tk\Traits\SingletonTrait;
 
 /**
@@ -17,14 +16,9 @@ class Registry extends Db\Collection
 
     use SingletonTrait;
 
-    public function __construct(?Pdo $db = null)
+    public function __construct(\PDO $pdo = null)
     {
-        parent::__construct(self::$TABLE_REGISTRY);
-        if (!$db) $db = $this->getFactory()->getDb();
-        if (!$db) {
-            throw new Exception('No valid DB connection found.');
-        }
-        $this->setDb($db);
+        parent::__construct(self::$TABLE_REGISTRY, $pdo);
         $this->load();
     }
 

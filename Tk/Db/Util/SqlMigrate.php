@@ -3,10 +3,9 @@ namespace Tk\Db\Util;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use Tk\Collection;
-use Tk\Db\Pdo;
 use Tk\FileUtil;
 use Tk\Traits\SystemTrait;
+use Tt\Db;
 
 /**
  * DB migration tool
@@ -33,26 +32,30 @@ class SqlMigrate
     use SystemTrait;
 
 
-    protected Pdo $db;
-
-    protected string $table = '';
-
-    protected string $backupFile = '';
-
-    protected LoggerInterface $logger;
+    protected \PDO             $db;
+    protected string           $table      = '';
+    protected string           $backupFile = '';
+    protected ?LoggerInterface $logger     = null;
 
 
-    public function __construct(Pdo $db, ?LoggerInterface $logger = null, string $table = '_migrate')
+    public function __construct(\PDO $db, ?LoggerInterface $logger = null, string $table = '_migrate')
     {
         $this->db = $db;
         if (!$logger) $logger = new NullLogger();
         $this->logger = $logger;
-        $this->table = $table;
+        $this->table = Db::escapeTable($table);
     }
 
     public function __destruct()
     {
         $this->deleteBackup();
+    }
+
+    protected function tableExists(string $table): bool
+    {
+        $stm = $this->getDb()->prepare("SHOW TABLES LIKE :table");
+        $stm->execute(compact('table'));
+        return $stm->fetchColumn() !== false;
     }
 
     /**
@@ -182,12 +185,10 @@ class SqlMigrate
      */
     protected function install(): void
     {
-        if($this->getDb()->hasTable($this->getTable())) {
-            return;
-        }
-        $tbl = $this->getDb()->quoteParameter($this->getTable());
+        if ($this->tableExists($this->getTable())) return;
+        $tbl = $this->getTable();
         $sql = <<<SQL
-CREATE TABLE IF NOT EXISTS $tbl (
+CREATE TABLE IF NOT EXISTS `$tbl` (
   path VARCHAR(128) NOT NULL DEFAULT '',
   rev VARCHAR(16) NOT NULL DEFAULT '',
   created TIMESTAMP,
@@ -202,8 +203,8 @@ SQL;
      */
     protected function isInstall(): bool
     {
-        if(!$this->getDb()->hasTable($this->getTable())) return true;
-        $sql = sprintf('SELECT * FROM %s WHERE 1 LIMIT 1', $this->getDb()->quoteParameter($this->getTable()));
+        if (!$this->tableExists($this->getTable())) return true;
+        $sql = "SELECT * FROM `{$this->getTable()}` LIMIT 1";
         $res = $this->getDb()->query($sql);
         if (!$res->rowCount()) return true;
         return false;
@@ -211,29 +212,27 @@ SQL;
 
     protected function hasPath(string $path): bool
     {
-        $path = $this->getDb()->escapeString($this->toRelative($path));
-        $sql = sprintf('SELECT * FROM %s WHERE path = %s LIMIT 1', $this->getDb()->quoteParameter($this->getTable()), $this->getDb()->quote($path));
-        $res = $this->getDb()->query($sql);
-        if ($res->rowCount()) {
-            return true;
-        }
-        return false;
+        $stm = $this->getDb()->prepare("SELECT * FROM `{$this->getTable()}` WHERE path = :path LIMIT 1");
+        $stm->execute(compact('path'));
+        return $stm->rowCount() > 0;
     }
 
     protected function insertPath(string $path): int
     {
         $this->logger->info("Migrating file: {$this->toRelative($path)}");
-        $path = $this->getDb()->escapeString($this->toRelative($path));
-        $rev = $this->getDb()->escapeString($this->toRev($path));
-        $sql = sprintf('INSERT INTO %s (path, rev, created) VALUES (%s, %s, NOW())', $this->getDb()->quoteParameter($this->getTable()), $this->getDb()->quote($path), $this->getDb()->quote($rev));
-        return $this->getDb()->exec($sql);
+        $path = $this->toRelative($path);
+        $rev = $this->toRev($path);
+        $stm = $this->getDb()->prepare("INSERT INTO `{$this->getTable()}` (path, rev, created) VALUES (:path, :rev, NOW())");
+        $stm->execute(compact('path', 'rev'));
+        return $stm->rowCount();
     }
 
     protected function deletePath(string $path): int
     {
-        $path = $this->getDb()->escapeString($this->toRelative($path));
-        $sql = sprintf('DELETE FROM %s WHERE path = %s LIMIT 1', $this->getDb()->quoteParameter($this->getTable()), $this->getDb()->quote($path));
-        return $this->getDb()->exec($sql);
+        $path = $this->toRelative($path);
+        $stm = $this->getDb()->prepare("DELETE FROM `{$this->getTable()}` WHERE path = :path LIMIT 1");
+        $stm->execute(compact('path'));
+        return $stm->rowCount();
     }
 
     private function toRelative(string $path): string
@@ -255,7 +254,7 @@ SQL;
         return $this->table;
     }
 
-    public function getDb(): Pdo
+    public function getDb(): \PDO
     {
         return $this->db;
     }

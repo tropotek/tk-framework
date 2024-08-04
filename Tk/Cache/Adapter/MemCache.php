@@ -23,6 +23,7 @@ class MemCache implements Iface
 
     public \MemCache $connection;
 
+
     public function __construct()
     {
         $this->connection = new \MemCache();
@@ -31,29 +32,26 @@ class MemCache implements Iface
     /**
      * Adds a memcache search server
      */
-    public function addServer(string $host, int $port = 11211, int $weight = 10)
+    public function addServer(string $host, int $port = 11211, int $weight = 10): void
     {
         $this->connection->addServer($host, $port, true, $weight);
     }
 
-    public function store(string $key, mixed $data, int $ttl = 0): mixed
+    public function store(string $key, mixed $data, int $ttl = 0): bool
     {
         return $this->connection->set($key, $data, 0, $ttl);
     }
 
-    public function fetch(string $key): mixed
+    public function fetch(string $key): string|array|false
     {
         return $this->connection->get($key);
     }
 
-    public function delete(string $key): mixed
+    public function delete(string $key): bool
     {
         return $this->connection->delete($key);
     }
 
-    /**
-     * TODO: Test if thats what flush means...????
-     */
     public function clear(): bool
     {
         return $this->connection->flush();

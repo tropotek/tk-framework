@@ -64,7 +64,7 @@ class Dispatch
             $this->getConfig()->isDebug()
         ));
 
-        $this->getDispatcher()->addSubscriber(new \Tk\Mvc\EventListener\StringResponse());
+        $this->getDispatcher()->addSubscriber(new \Tk\Mvc\EventListener\ViewHandler());
         $this->getDispatcher()->addSubscriber(new \Symfony\Component\HttpKernel\EventListener\ResponseListener('UTF-8'));
         $this->getDispatcher()->addSubscriber(new \Tk\Mvc\EventListener\ContentLength());
 

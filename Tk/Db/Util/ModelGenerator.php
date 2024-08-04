@@ -2,24 +2,24 @@
 namespace Tk\Db\Util;
 
 use Tk\Exception;
+use Tt\Db;
 
+/**
+ * @todo Update to use the new \Tt\DbModel system
+ */
 class ModelGenerator
 {
-    protected ?\Tk\Db\Pdo $db = null;
-
-    protected string $table = '';
-
+    protected ?Db    $db        = null;
+    protected string $table     = '';
     protected string $className = '';
-
     protected string $namespace = '';
-
-    protected array $tableInfo = [];
+    protected array  $tableInfo = [];
 
 
     /**
      * @throws \Exception
      */
-    protected function __construct(\Tk\Db\Pdo $db, string $table, string $namespace = 'App', string $className = '')
+    protected function __construct(Db $db, string $table, string $namespace = 'App', string $className = '')
     {
         $this->db = $db;
         $this->table = $table;
@@ -34,8 +34,8 @@ class ModelGenerator
         }
         $this->setClassName($className);
 
-        if (!$db->hasTable($table)) {   // Check the DB for the table
-            throw new \Exception('Table `' . $table . '` not found in the DB `' . $db->getDatabaseName().'`');
+        if (!$db->tableExists($table)) {   // Check the DB for the table
+            throw new \Exception('Table `' . $table . '` not found in the DB `' . $db->getDbName().'`');
         }
 
         $this->tableInfo = $db->getTableInfo($table);
@@ -44,7 +44,7 @@ class ModelGenerator
     /**
      * @throws \Exception
      */
-    public static function create(\Tk\Db\Pdo $db, string $table, string $namespace = 'App', string $className = ''): ModelGenerator
+    public static function create(Db $db, string $table, string $namespace = 'App', string $className = ''): ModelGenerator
     {
         return new static($db, $table, $namespace, $className);
     }

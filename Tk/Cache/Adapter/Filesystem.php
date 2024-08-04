@@ -12,7 +12,7 @@ use Tk\FileUtil;
  */
 class Filesystem implements Iface
 {
-    public static $DIR_MASK = 0777;
+    public static int $DIR_MASK = 0777;
 
     /**
      * @var string
@@ -25,7 +25,7 @@ class Filesystem implements Iface
         $this->cachePath = $cachePath;
     }
 
-    public function store(string $key, mixed $data, int $ttl = 0): mixed
+    public function store(string $key, mixed $data, int $ttl = 0): bool
     {
         if (!FileUtil::mkdir($this->getCachePath())) {
             throw new \Tk\Cache\Exception('Cannot create path: ' . $this->getCachePath());
@@ -74,14 +74,14 @@ class Filesystem implements Iface
         fclose($h);
 
         $data = @unserialize($data);
-        if (!$data) {     // If unserializing somehow didn't work out, we'll delete the file
+        if (!$data) {     // If un serializing somehow didn't work out, we'll delete the file
             unlink($filename);
             return false;
         }
         return $data;
     }
 
-    public function delete(string $key): mixed
+    public function delete(string $key): bool
     {
         $filename = $this->getFileName($key);
         if (file_exists($filename)) {

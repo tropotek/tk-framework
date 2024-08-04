@@ -24,15 +24,18 @@ class Collection extends \Tk\Collection
 
     private array $del = [];
 
-    private Pdo $db;
+    private ?\PDO $pdo = null;
 
 
-    public function __construct(string $table)
+    public function __construct(string $table, \PDO $pdo = null)
     {
         parent::__construct();
         $this->table = $table;
+        $this->pdo = $pdo;
+        if (is_null($this->pdo)) {
+            $this->pdo = $this->getFactory()->getDb()->getPdo();
+        }
     }
-
 
     public function __sleep()
     {
@@ -41,43 +44,30 @@ class Collection extends \Tk\Collection
 
     public function __wakeup()
     {
-        $this->setDb($this->getFactory()->getDb());
+        $this->pdo = $this->getFactory()->getDb()->getPdo();
     }
 
-    /**
-     * Creates an instance of the Data object and loads that data from the DB
-     * By Default this method uses the Config::getDb() to get the database.
-     */
-    public static function create(string $table, ?Pdo $db = null): static
+    public function getPdo(): \PDO
     {
-
-        $obj = new static($table);
-        if (!$db) $db = $obj->getFactory()->getDb();
-        if (!$db) {
-            throw new Exception('No valid DB connection found.');
-        }
-        $obj->setDb($db);
-        $obj->load();
-        return $obj;
+        return $this->pdo;
     }
 
-    public function getDb(): Pdo
+    public function setPdo(\PDO $pdo): static
     {
-        return $this->db;
-    }
-
-    public function setDb($db): static
-    {
-        $this->db = $db;
+        $this->pdo = $pdo;
         return $this;
     }
 
-    /**
-     * Get the table name for queries
-     */
     protected function getTable(): string
     {
         return $this->table;
+    }
+
+    protected function dbTableExists(string $table): bool
+    {
+        $stm = $this->getPdo()->prepare("SHOW TABLES LIKE :table");
+        $stm->execute(compact('table'));
+        return $stm->fetchColumn() !== false;
     }
 
     /**
@@ -86,14 +76,12 @@ class Collection extends \Tk\Collection
     public function load(): static
     {
         try {
-            if (!$this->getDb()->hasTable($this->getTable())) return $this;
+            if (!$this->dbTableExists($this->getTable())) return $this;
 
-            $sql = sprintf('SELECT * FROM %s WHERE 1',
-                $this->getDb()->quoteParameter($this->getTable()));
+            $stm = $this->getPdo()->prepare("SELECT * FROM {$this->getTable()}");
+            $stm->execute();
 
-            $stmt = $this->getDb()->query($sql);
-            $stmt->setFetchMode(\PDO::FETCH_OBJ);
-            foreach ($stmt as $row) {
+            foreach ($stm as $row) {
                 $this->set($row->key, $this->encodeValue($row->value));
             }
         } catch (\Exception $e) { \Tk\Log::error($e->__toString());}
@@ -140,116 +128,68 @@ class Collection extends \Tk\Collection
     }
 
     /**
-     * Set a single data value in the Database
+     * Check if a value exists in the DB
      */
+    protected function dbHas(string $key): bool
+    {
+        if (!$this->dbTableExists($this->getTable())) return false;
+
+        $stm = $this->getPdo()->prepare("SELECT * FROM {$this->getTable()} WHERE `key` = :key");
+        $stm->execute(compact('key'));
+        return $stm->rowCount() > 0;
+    }
+
     protected function dbSet(string $key, $value): static
     {
         $this->installTable();
         $value = $this->encodeValue($value);
 
         if ($this->dbHas($key)) {
-            $sql = sprintf('UPDATE %s SET value = %s WHERE %s = %s',
-                $this->getDb()->quoteParameter($this->getTable()),
-                $this->getDb()->quote($value), $this->getDb()->quoteParameter('key'),
-                $this->getDb()->quote($key));
+            $stm = $this->getPdo()->prepare("UPDATE {$this->getTable()} SET value = :value WHERE `key` = :key");
         } else {
-            $sql = sprintf('INSERT INTO %s (%s, value) VALUES (%s, %s)',
-                $this->getDb()->quoteParameter($this->getTable()),
-                $this->getDb()->quoteParameter('key'),
-                $this->getDb()->quote($key), $this->db->quote($value));
+            $stm = $this->getPdo()->prepare("INSERT INTO {$this->getTable()} (`key`, value) VALUES (:key, :value)");
         }
-        $this->getDb()->exec($sql);
+        $stm->execute(compact('key', 'value'));
         return $this;
     }
 
-    /**
-     * Get a value from the database
-     *
-     * @return string|mixed
-     * @throws Exception
-     */
-    protected function dbGet(string $key)
+    protected function dbGet(string $key): mixed
     {
-        if (!$this->getDb()->hasTable($this->getTable())) return '';
-        $sql = sprintf('SELECT * FROM %s WHERE %s = %s',
-            $this->getDb()->quoteParameter($this->getTable()),
-            $this->getDb()->quoteParameter('key'),
-            $this->getDb()->quote($key)
-        );
-
-        $row = $this->getDb()->query($sql)->fetchObject();
-        if ($row) {
-            return $this->decodeValue($row->value);
-        }
-        return '';
+        if (!$this->dbTableExists($this->getTable())) return '';
+        $stm = $this->getPdo()->prepare("SELECT value FROM {$this->getTable()} WHERE `key` = :key");
+        $stm->execute(compact('key'));
+        return $this->decodeValue($stm->fetchColumn() ?? '');
     }
 
-    /**
-     * Check if a value exists in the DB
-     * @throws Exception
-     */
-    protected function dbHas(string $key): bool
-    {
-        if (!$this->getDb()->hasTable($this->getTable())) return false;
-        $sql = sprintf('SELECT * FROM %s WHERE %s = %s',
-            $this->getDb()->quoteParameter($this->getTable()),
-            $this->getDb()->quoteParameter('key'),
-            $this->getDb()->quote($key)
-        );
-
-        $res = $this->getDb()->query($sql);
-        if ($res && $res->rowCount()) return true;
-        return false;
-    }
-
-    /**
-     * Remove a value from the DB
-     * @throws Exception
-     */
     protected function dbDelete(string $key): static
     {
-        if (!$this->getDb()->hasTable($this->getTable())) return $this;
-        $sql = sprintf('DELETE FROM %s WHERE %s = %s',
-            $this->getDb()->quoteParameter($this->getTable()),
-            $this->getDb()->quoteParameter('key'),
-            $this->getDb()->quote($key));
-
-        $this->getDb()->exec($sql);
+        if (!$this->dbTableExists($this->getTable())) return $this;
+        $stm = $this->getPdo()->prepare("DELETE FROM {$this->getTable()} WHERE `key` = :key");
+        $stm->execute(compact('key'));
         return $this;
     }
 
     /**
-     * This sql should be DB generic (tested on: mysql, pgsql)
-     *
-     * @return bool Return true if the table was created
+     * return true if the table was created
      */
     public function installTable(): bool
     {
         try {
-            if ($this->getDb()->hasTable($this->getTable())) return false;
-            $this->getDb()->exec($this->getTableSql($this->getDb()->getDriver()));
+            if ($this->dbTableExists($this->getTable())) return false;
+            $this->getPdo()->exec($this->getTableSql());
 
         } catch (\Exception $e) { \Tk\Log::error($e->__toString());}
         return true;
     }
 
-    public function getTableSql(string $type = 'mysql'): string
+    public function getTableSql(): string
     {
-        $tbl = $this->getDb()->quoteParameter($this->getTable());
-        return match ($type) {
-            'mysql' => <<<SQL
-    CREATE TABLE IF NOT EXISTS $tbl (
-      `key` VARCHAR(128) NOT NULL PRIMARY KEY,
-      `value` TEXT
-    ) ENGINE=InnoDB;
-SQL,
-            default => <<<SQL
-    CREATE TABLE IF NOT EXISTS $tbl (
-      "key" VARCHAR(128) NOT NULL PRIMARY KEY,
-      "value" TEXT
-    );
-SQL,
-        };
+        return <<<SQL
+            CREATE TABLE IF NOT EXISTS {$this->getTable()} (
+              `key` VARCHAR(128) NOT NULL PRIMARY KEY,
+              `value` TEXT
+            );
+        SQL;
     }
 
     protected function decodeValue(string $value): mixed

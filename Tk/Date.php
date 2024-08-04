@@ -166,7 +166,7 @@ class Date
         } catch (\Exception $e) {
             Log::error($e->getMessage());
         }
-        return $date ?? new \DateTime();
+        return $date ?: new \DateTime();
     }
 
 

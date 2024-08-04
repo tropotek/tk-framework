@@ -25,7 +25,6 @@ use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\RouteCollection;
 use Tk\Cache\Adapter\Filesystem;
 use Tk\Cache\Cache;
-use Tk\Db\Pdo;
 use Tk\Log\MonologLineFormatter;
 use Tk\Mail\Gateway;
 use Tk\Mvc\Bootstrap;
@@ -63,27 +62,33 @@ class Factory extends Collection
         return $this->get('frontController');
     }
 
-    public function getDb(string $name = 'default'): ?Pdo
-    {
-        $key = 'db.'.trim($name);
-        if (!$this->has($key)) {
-            try {
-                $options = $this->getConfig()->getGroup($key, true);
-                if (count($options)) {
-                    if ($this->getConfig()->has('php.date.timezone') && !isset($options['timezone'])) {
-                        $options['timezone'] = $this->getConfig()->get('php.date.timezone');
-                    }
-                    $db = Pdo::instance($name, $options);
-                    $this->set($key, $db);
-                }
-            } catch (\Exception $e) {
-                error_log($e->getMessage());
-            }
-        }
-        return $this->get($key);
-    }
+    /**
+     * @todo refactor this method to only return the Db object, as Pdo is deprecated
+     */
+//    public function getDb(string $name = 'default'): null|Pdo|Db
+//    {
+//        $key = 'db.'.trim($name);
+//        if (!$this->has($key)) {
+//            if ($name == 'mysql') {
+//                return $this->getDbNew($name);
+//            }
+//            try {
+//                $options = $this->getConfig()->getGroup($key, true);
+//                if (count($options)) {
+//                    if ($this->getConfig()->has('php.date.timezone') && !isset($options['timezone'])) {
+//                        $options['timezone'] = $this->getConfig()->get('php.date.timezone');
+//                    }
+//                    $db = Pdo::instance($name, $options);
+//                    $this->set($key, $db);
+//                }
+//            } catch (\Exception $e) {
+//                error_log($e->getMessage());
+//            }
+//        }
+//        return $this->get($key);
+//    }
 
-    public function getDbNew(string $name = 'mysql'): ?Db
+    public function getDb(string $name = 'mysql'): ?Db
     {
         $key = 'db.'.trim($name);
         if (!$this->has($key)) {
@@ -159,7 +164,7 @@ class Factory extends Collection
         if ((!$compiledRoutes = $systemCache->fetch('compiledRoutes')) || $this->getSystem()->isRefreshCacheRequest()) {
             ConfigLoader::create()->loadRoutes(new CollectionConfigurator($this->getRouteCollection(), 'routes'));
             $compiledRoutes = (new CompiledUrlMatcherDumper($this->getRouteCollection()))->getCompiledRoutes();
-            // Storing the data in the cache for 60 minutes
+            // Storing the data in the cache for 60 minutes (comment this out if using callables in routes)
             $systemCache->store('compiledRoutes', $compiledRoutes, 60*60);
         }
         return $compiledRoutes;
@@ -266,8 +271,10 @@ class Factory extends Collection
             $logger = new NullLogger();
             $enabled = true;
             if (!$this->getConfig()->get('log.ignore.noLog', false)) {
+
                 // No log when using nolog in query param
                 if ($this->getRequest()->query->has(Log::NO_LOG)) $enabled = false;
+
                 // No logs for api calls (comment out when testing API`s)
                 if (str_contains($this->getRequest()->getRequestUri(), '/api/')) $enabled = false;
             }

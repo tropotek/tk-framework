@@ -3,10 +3,13 @@ namespace Tk\Db\Mapper;
 
 use Tk\CollectionTrait;
 use Tk\Db\Event\DbEvent;
-use Tk\Db\Pdo;
 use Tk\ObjectUtil;
 use Tk\Traits\SystemTrait;
+use Tt\Db;
 
+/**
+ * @deprecated to be replaced by \Tt\DbModel
+ */
 abstract class Model implements ModelInterface
 {
     use SystemTrait;
@@ -33,7 +36,7 @@ abstract class Model implements ModelInterface
      * The method setDb() must be called after calling getMapper() if you do not wish to use the DB from the config
      *
      */
-    static function getMapperInstance(string $mapperClass = '', ?Pdo $db = null)
+    static function getMapperInstance(string $mapperClass = '', ?Db $db = null)
     {
         if (!$mapperClass)
             $mapperClass = get_called_class() . self::$MAPPER_APPEND;

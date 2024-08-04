@@ -2,8 +2,11 @@
 
 namespace Tk\Db\Mapper;
 
+
 /**
  * Use this object to enhance your Mapper filtered queries
+ *
+ * @deprecated Model Mapper to be removed
  */
 class Filter extends \Tk\Collection
 {
@@ -21,6 +24,18 @@ class Filter extends \Tk\Collection
         $obj = new self();
         $obj->replace($params);
         return $obj;
+    }
+
+    public function getIn($vals): string
+    {
+        if (!is_array($vals)) $vals = [$vals];
+        foreach ($vals as $k => $v) {
+            if (is_string($v)) {
+                $v = "'$v'";
+            }
+            $vals[$k] = $v;
+        }
+        return sprintf("(%s)", implode(',', $vals));
     }
 
     public function getSelect(string $default = ''): string

@@ -27,7 +27,8 @@
       "Tt\\": "Tt/"
     },
     "files": [
-      "Tk/Exception.php"
+      "Tk/Exception.php",
+      "Tt/functions.php"
     ]
   },
   "require": {

@@ -1,44 +1,38 @@
 <?php
 namespace Tk\Db\Util;
 
-use Tk\Db\Pdo;
 use Tk\Db\Exception;
 use Tk\FileUtil;
 use Tk\Traits\SystemTrait;
+use Tt\Db;
 
 /**
- * A utility to backup and restore a DB in PHP.
+ * A utility to back up and restore a DB in PHP.
  *
- * @note: This file uses SLI commands to backup and restore the database
+ * @note: This file uses SLI commands to back up and restore the database
  * @see https://raw.githubusercontent.com/kakhavk/database-dump-utility/master/SqlDump.php
  */
 class SqlBackup
 {
     use SystemTrait;
 
-    /**
-     * @var Pdo
-     */
-    private Pdo $db;
+    private \PDO $db;
 
 
-    public function __construct(Pdo $db)
+    public function __construct(\PDO $db)
     {
         $this->db = $db;
     }
 
-    protected function getDb(): Pdo
+    protected function getDb(): \PDO
     {
         return $this->db;
     }
 
     /**
      * Restore an sql file
-     *
-     * @throws Exception
-     * @throws \Tk\Exception
      */
-    public function restore(string $sqlFile, array $options = [])
+    public function restore(string $sqlFile, array $options = []): void
     {
         if (!is_readable($sqlFile)) return;
 
@@ -53,28 +47,24 @@ class SqlBackup
             $sqlFile = $regs[1];
         }
 
-        $options = ($this->getDb()->getOptions() + $options);
-        extract($options);
+        $dsn = Db::parseDsn($this->getConfig()->get('db.mysql'));
 
-        $command = '';
-        if ('mysql' == $this->db->getDriver()) {
-            // In short, the new MariaDB version adds this line to the beginning of the dump file:
-            //  /*!999999\- enable the sandbox mode */
-            // Replace "/*!999999\- enable the sandbox mode */" string on first line if exists
-            // https://gorannikolovski.com/blog/mariadb-import-issue-error-at-line-1-unknown-command
-            $f = fopen($sqlFile, 'r');
-            $line = fgets($f);
-            if (str_contains($line, '/*!999999\- enable the sandbox mode */')) {
-                $contents = file($sqlFile);
-                array_shift($contents);
-                file_put_contents($sqlFile, implode("\r\n", $contents));
-            }
-            fclose($f);
-
-            $command = sprintf('mysql %s -h %s -u %s -p%s < %s', $name, $host, $user, $pass, escapeshellarg($sqlFile));
-        } else {
-            throw new \Tk\Exception('Only mysql driver supported');
+        // In short, the new MariaDB version adds this line to the beginning of the dump file:
+        //  /*!999999\- enable the sandbox mode */
+        // Replace "/*!999999\- enable the sandbox mode */" string on first line if exists
+        // https://gorannikolovski.com/blog/mariadb-import-issue-error-at-line-1-unknown-command
+        $f = fopen($sqlFile, 'r');
+        $line = fgets($f);
+        if (str_contains($line, '/*!999999\- enable the sandbox mode */')) {
+            $contents = file($sqlFile);
+            array_shift($contents);
+            file_put_contents($sqlFile, implode("\r\n", $contents));
         }
+        fclose($f);
+
+        // todo: add the db port to the command
+        $command = sprintf('mysql %s -h %s -u %s -p%s < %s', $dsn['dbName'], $dsn['host'], $dsn['user'], $dsn['pass'], escapeshellarg($sqlFile));
+
         exec($command, $out, $ret);
         if ($ret != 0) throw new Exception(implode("\n", $out));
     }
@@ -84,49 +74,40 @@ class SqlBackup
      *
      * If no file is supplied then the default file name is used: {DbName}_2016-01-01-12-00-00.sql
      * if the path does not already contain a .sql file extension
-     *
-     * @throws Exception
      */
     public function save(string $path = '', array $options = []): string
     {
         $sqlFile = $path;
+        $dsn = Db::parseDsn($this->getConfig()->get('db.mysql'));
+
         if (!preg_match('/\.sql$/', $sqlFile)) {
             $path = rtrim($path, '/');
             FileUtil::mkdir($path);
 
             if (!is_writable($path)) throw new Exception('Cannot access path: ' . $path);
 
-            $file = $this->getDb()->getDatabaseName() . "_" . $this->getDb()->getDriver() . "_" . date("Y-m-d-H-i-s").".sql";
+            $file = $dsn['dbName'] . "_" . date("Y-m-d-H-i-s").".sql";
             $sqlFile = $path.'/'.$file;
         }
 
-        $options = ($this->getDb()->getOptions() + $options);
-        extract($options);
-
-        $command = '';
-        if ('mysql' == $this->getDb()->getDriver()) {
-            $exclude = $exclude ?? [];
-            if (!in_array($this->getConfig()->get('session.db_table', ''), $exclude)) {
-                $exclude[] = $this->getConfig()->get('session.db_table');
-            }
-            // Exclude all views
-            $sql = "SHOW FULL TABLES IN `{$name}` WHERE TABLE_TYPE LIKE 'VIEW';";
-            $result = $this->getDb()->query($sql);
-            while ($row = $result->fetch(\PDO::FETCH_ASSOC)) {
-                $v = array_shift($row);
-                $exclude[] = $v;
-            }
-
-            $excludeParams = [];
-            foreach ($exclude as $tbl) {
-                $excludeParams[] = "--ignore-table={$name}.$tbl";
-            }
-            $command = sprintf('mysqldump --skip-triggers --max_allowed_packet=1G --single-transaction --quick --lock-tables=false %s --opt -h %s -u %s -p%s %s > %s', implode(' ', $excludeParams), $host, $user, $pass, $name, escapeshellarg($sqlFile));
-        } else {
-            throw new \Tk\Exception('Only mysql driver supported');
+        $exclude = $exclude ?? [];
+        if (!in_array($this->getConfig()->get('session.db_table', ''), $exclude)) {
+            $exclude[] = $this->getConfig()->get('session.db_table');
+        }
+        // Exclude all views
+        $sql = "SHOW FULL TABLES IN `{$dsn['dbName']}` WHERE TABLE_TYPE LIKE 'VIEW';";
+        $result = $this->getDb()->query($sql);
+        while ($row = $result->fetch(\PDO::FETCH_ASSOC)) {
+            $v = array_shift($row);
+            $exclude[] = $v;
         }
 
-        if(!$command) throw new Exception('Database driver not supported:  ' . $this->getDb()->getDriver());
+        $excludeParams = [];
+        foreach ($exclude as $tbl) {
+            $excludeParams[] = "--ignore-table={$dsn['dbName']}.$tbl";
+        }
+        $command = sprintf('mysqldump --skip-triggers --max_allowed_packet=1G --single-transaction --quick --lock-tables=false %s --opt -h %s -u %s -p%s %s > %s',
+            implode(' ', $excludeParams), $dsn['host'], $dsn['user'], $dsn['pass'], $dsn['dbName'], escapeshellarg($sqlFile));
 
         exec($command, $out, $ret);
 
@@ -137,39 +118,31 @@ class SqlBackup
     }
 
     /**
-     *
      * @throws Exception
      * @note: This could have memory issues with large databases, use SqlBackup:save() in those cases
      */
     public function dump(array $options = []): string
     {
-        $options = ($this->getDb()->getOptions() + $options);
-        extract($options);
+        $dsn = Db::parseDsn($this->getConfig()->get('db.mysql'));
 
-        $command = '';
-        if ('mysql' == $this->getDb()->getDriver()) {
-            $exclude = $exclude ?? [];
-            if (!in_array($this->getConfig()->get('session.db_table', ''), $exclude)) {
-                $exclude[] = $this->getConfig()->get('session.db_table');
-            }
-            // Exclude all views
-            $sql = "SHOW FULL TABLES IN `{$name}` WHERE TABLE_TYPE LIKE 'VIEW';";
-            $result = $this->getDb()->query($sql);
-            while ($row = $result->fetch(\PDO::FETCH_ASSOC)) {
-                $v = array_shift($row);
-                $exclude[] = $v;
-            }
-
-            $excludeParams = [];
-            foreach ($exclude as $tbl) {
-                $excludeParams[] = "--ignore-table={$name}.$tbl";
-            }
-            $command = sprintf('mysqldump --max_allowed_packet=1G --single-transaction --quick --lock-tables=false %s --opt -h %s -u %s -p%s %s', implode(' ', $excludeParams), $host, $user, $pass, $name);
-        } else {
-            throw new \Tk\Exception('Only mysql driver supported');
+        $exclude = $exclude ?? [];
+        if (!in_array($this->getConfig()->get('session.db_table', ''), $exclude)) {
+            $exclude[] = $this->getConfig()->get('session.db_table');
+        }
+        // Exclude all views
+        $sql = "SHOW FULL TABLES IN `{$dsn['dbName']}` WHERE TABLE_TYPE LIKE 'VIEW';";
+        $result = $this->getDb()->query($sql);
+        while ($row = $result->fetch(\PDO::FETCH_ASSOC)) {
+            $v = array_shift($row);
+            $exclude[] = $v;
         }
 
-        if(!$command) throw new Exception('Database driver not supported: ' . $this->getDb()->getDriver());
+        $excludeParams = [];
+        foreach ($exclude as $tbl) {
+            $excludeParams[] = "--ignore-table={$dsn['dbName']}.$tbl";
+        }
+        $command = sprintf('mysqldump --max_allowed_packet=1G --single-transaction --quick --lock-tables=false %s --opt -h %s -u %s -p%s %s',
+            implode(' ', $excludeParams), $dsn['host'], $dsn['user'], $dsn['pass'], $dsn['dbName']);
 
         exec($command, $out, $ret);
 

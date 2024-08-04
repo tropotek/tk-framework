@@ -12,12 +12,12 @@ class Apc implements Iface
         return apc_fetch($key);
     }
 
-    public function store(string $key, mixed $data, int $ttl = 0): mixed
+    public function store(string $key, mixed $data, int $ttl = 0): array|bool
     {
         return apc_store($key, $data, $ttl);
     }
 
-    public function delete(string $key): mixed
+    public function delete(string $key): array|bool
     {
         return apc_delete($key);
     }

@@ -51,7 +51,7 @@ class StackTrace {
             if (isset($t['args'])) {
                 foreach ($t['args'] as $o) {
                     if (is_object($o)) {
-                        $o = get_class($o);
+                        $o = str_replace("\0", '', get_class($o));
                     }
                     if (is_array($o)) {
                         $o = 'Array['.count($o).']';
@@ -70,9 +70,6 @@ class StackTrace {
         return trim($str);
     }
 
-    /**
-     *
-     */
     public static function dumpLine(int $dumpLine = 1, bool $showClass = false, bool $showFunction = false): string
     {
         $line = debug_backtrace();
@@ -80,16 +77,14 @@ class StackTrace {
 
         $class = '';
         if ($showClass && !empty($line['object'])) {
-            $class = ': ' . get_class($line['object']);
+            $class = ': ' . str_replace("\0", '', get_class($line['object']));
         }
 
         if ($showFunction && !empty($line['function'])) {
             $class .= '::' . $line['function'] . '()';
-
         }
 
         $path = str_replace(\Tk\Config::instance()->getBasePath(), '', $line['file']);
-        $str  = sprintf('%s [%s]%s', $path, $line['line'], $class);
-        return $str;
+        return sprintf('%s [%s]%s', $path, $line['line'], $class);
     }
 }

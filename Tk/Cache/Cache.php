@@ -1,7 +1,6 @@
 <?php
 namespace Tk\Cache;
 
-use Tk\Cache\Adapter\Iface;
 
 /**
  * Use an instance of this object to cache any required data.
@@ -36,31 +35,20 @@ use Tk\Cache\Adapter\Iface;
  */
 class Cache
 {
-    /**
-     * @var Iface|null
-     */
-    protected $adapter = null;
-
-    /**
-     * @var bool
-     */
-    protected $enabled = true;
-
+    protected ?Adapter\Iface $adapter = null;
+    protected bool           $enabled = true;
 
     public function __construct(Adapter\Iface $adapter)
     {
         $this->adapter = $adapter;
     }
 
-    /**
-     * Enable/Disable the cache
-     */
-    public function setEnabled(bool $b = true)
+    public function setEnabled(bool $b = true): void
     {
         $this->enabled = $b;
     }
 
-    public function getAdapter(): ?Iface
+    public function getAdapter(): ?Adapter\Iface
     {
         return $this->adapter;
     }
@@ -90,7 +78,7 @@ class Cache
      * @return bool true on success or false on failure.
      * Store
      */
-    public function store(string $key, $data, int $ttl = 0): bool
+    public function store(string $key, mixed $data, int $ttl = 0): bool
     {
         return $this->adapter->store($key, $data, $ttl);
     }
@@ -108,7 +96,7 @@ class Cache
      * </p>
      * @return mixed The stored variable or array of variables on success; false on failure
      */
-    public function fetch(string $key)
+    public function fetch(string $key): mixed
     {
         return $this->adapter->fetch($key);
     }
@@ -127,7 +115,7 @@ class Cache
      * an empty array is returned on success, or an array of failed files
      * is returned.
      */
-    public function delete(string $key)
+    public function delete(string $key): bool
     {
         return $this->adapter->delete($key);
     }

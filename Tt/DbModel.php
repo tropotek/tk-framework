@@ -20,8 +20,14 @@ abstract class DbModel
     protected string $_primaryKey = 'id';
 
 
+    public function __construct()
+    {
+        $this->_primaryKey = self::getDataMap()->getPrimaryKey()->getProperty();
+    }
+
     /**
-     * Map table columns to object properties using a DataMap
+     * Magic method called by DbStatement to map a row to an object
+     * In this case we use a DataMap to load the object with PHP values
      */
     public function __map(array $row): void
     {
@@ -38,10 +44,9 @@ abstract class DbModel
      * name with 'v_' prepended.
      *
      * Alternatively call self::getDataMap('my_table', 'v_my_view') from the constructor to
-     * initialise your own names.
+     * init with your own table names.
      *
      * Override this method if you want to create a custom DataMap
-     *
      */
     public static function getDataMap(string $table = '', string $view = ''): DataMap
     {
@@ -82,8 +87,6 @@ abstract class DbModel
         return $map;
     }
 
-
-
 	/**
 	 * load properties of this object from database
 	 * necessary to set properties if using views
@@ -108,16 +111,9 @@ abstract class DbModel
         return intval($this->{$this->_primaryKey});
     }
 
-//    public static function mustGet(int $id): static
-//    {
-//        $obj = static::get($id);
-//		assert($obj instanceof self, "failed to get ".static::class." object id {$id}");
-//		return $obj;
-//    }
-
     public static function getDb(): Db
     {
-        return Factory::instance()->getDbNew();
+        return Factory::instance()->getDb();
     }
 
 }

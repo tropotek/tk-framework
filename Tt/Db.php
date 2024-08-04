@@ -1,6 +1,8 @@
 <?php
 namespace Tt;
 
+use Tk\Db\Exception;
+
 /**
  * @phpver 8.1
  */
@@ -26,17 +28,31 @@ class Db
     public function __construct(string $dsn, array $options = [])
     {
         $this->dsn = $dsn;
-		[$host, $user, $pass, $this->dbName] = explode('/', $dsn);
-        $port = 3306;
-        if (str_contains($host, ':')) {
-            [$host, $port] = explode(':', $host);
-        }
+        [$host, $port, $user, $pass, $this->dbName] = array_values(self::parseDsn($dsn));
 
         $pdoDsn = sprintf('mysql:host=%s;port=%s;charset=utf8mb4;dbname=%s', $host, $port, $this->dbName);
         $this->pdo = new \PDO($pdoDsn, $user, $pass, $options);
         $this->pdo->setAttribute(\PDO::ATTR_STATEMENT_CLASS, [DbStatement::class, [$this]]);
         $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
         $this->pdo->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_OBJ);
+    }
+
+    public static function parseDsn(string $dsn): array
+    {
+        $a = explode('/', $dsn);
+        $dsnArray = [
+            'host'   => $a[0] ?? 'localhost',
+            'port'   => 3306,
+            'user'   => $a[1] ?? '',
+            'pass'   => $a[2] ?? '',
+            'dbName' => $a[3] ?? '',
+        ];
+        if (str_contains($dsnArray['host'], ':')) {
+            $a = explode(':', $dsnArray['host']);
+            $dsnArray['host'] = $a[0] ?? '';
+            $dsnArray['port'] = intval($a[1] ?? 3306);
+        }
+        return $dsnArray;
     }
 
     public function getPdo(): \PDO
@@ -110,14 +126,14 @@ class Db
     }
 
     /**
-     * substitute array values for IN queries
+     * substitute arrays for prepared statements items
      */
-    private function prepareQuery(string $query, array|object|null $params = null): array
+    public function prepareQuery(string &$query, array|object|null &$params = null): void
     {
 		if (is_object($params)) $params = get_object_vars($params);
-        if (!is_array($params)) return [$query, $params];
-        // is sequential
-        if (array_keys($params) === range(0, count($params) - 1)) return [$query, $params];
+        if (!is_array($params)) return;
+        // is array sequential (not assoc)
+        if (array_keys($params) === range(0, count($params) - 1)) return;
 
         $replace = [];
         $newParams = [];
@@ -135,8 +151,7 @@ class Db
             }
         }
         $query = str_replace(array_keys($replace), $replace, $query);
-
-        return [$query, $newParams];
+        $params = $newParams;
     }
 
     /**
@@ -147,7 +162,7 @@ class Db
     public function execute(string $query, array|object|null $params = null): int|bool
     {
         try {
-            [$query, $params] = $this->prepareQuery($query, $params);
+            $this->prepareQuery($query, $params);
             $this->lastQuery = $query;
 
             $stm = $this->getPdo()->prepare($query);
@@ -174,7 +189,7 @@ class Db
     public function query(string $query, array|object|null $params = null, string $classname = 'stdClass'): array
     {
         try {
-            [$query, $params] = $this->prepareQuery($query, $params);
+            $this->prepareQuery($query, $params);
             $this->lastQuery = $query;
 
             /** @var DbStatement $stm */
@@ -204,7 +219,7 @@ class Db
 	public function queryOne(string $query, array|object|null $params = null, string $classname = 'stdClass'): ?object
 	{
         try {
-            [$query, $params] = $this->prepareQuery($query, $params);
+            $this->prepareQuery($query, $params);
             $this->lastQuery = $query;
 
             /** @var DbStatement $stm */
@@ -229,7 +244,7 @@ class Db
 	public function queryVal(string $query, array|object|null $params = null): mixed
 	{
         try {
-            [$query, $params] = $this->prepareQuery($query, $params);
+            $this->prepareQuery($query, $params);
             $this->lastQuery = $query;
 
             $stm = $this->getPdo()->prepare($query);
@@ -422,6 +437,51 @@ class Db
 		return$this->execute($sql, $values);
 	}
 
+    /**
+     * Predict the next insert ID of the table
+     * Taken From: http://dev.mysql.com/doc/refman/5.0/en/innodb-auto-increment-handling.html
+     */
+    public function getNextInsertId(string $table): int
+    {
+        $stm = $this->getPdo()->prepare("SELECT AUTO_INCREMENT FROM information_schema.tables WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = :table");
+        $stm->execute(compact('table'));
+        return intval($stm->fetchColumn());
+    }
+
+    /**
+     * Return an array with [limit, offset, total] values for a query
+     */
+    public function countFoundRows(string $sql, ?array $params = null): array
+    {
+        if (!$sql) return [0, 0, 0];
+        if (stripos($sql, 'select ') !== 0) return [0, 0, 0];
+
+        $limit = 0;
+        $offset = 0;
+        $total = 0;
+        $cSql = $sql;   // query without limit/offset
+        if (preg_match('/(.*)?(LIMIT\s([0-9]+)((\s+OFFSET\s)?|(,\s?)?)([0-9]+)?)+$/is', trim($sql), $match)) {
+            $cSql = trim($match[1] ?? '');
+            $limit = (int)($match[3] ?? 0);
+            $offset = (int)($match[7] ?? 0);
+        }
+
+        // No limit no need to continue
+        if (!$limit) return [0, 0, 0];
+        if ($limit == 1) return [0, 0, 1];
+
+        $countSql = "SELECT COUNT(*) as i FROM ($cSql) as t";
+        $stm = $this->getPdo()->prepare($countSql);
+        if (false === $stm->execute($params)) {
+            $info = $this->getPdo()->errorInfo();
+            throw new Exception(end($info));
+        }
+        $stm->setFetchMode(\PDO::FETCH_ASSOC);
+        $row = $stm->fetch();
+        if ($row) $total = (int) $row['i'];
+        return [$limit, $offset, $total];
+    }
+
     public function getTableInfo(string $table): array
     {
         $types = [
@@ -453,8 +513,9 @@ class Db
             'time'       => 'time',
             'year'       => 'year',
         ];
+        $table = self::escapeTable($table);
 
-        $query = sprintf('DESCRIBE %s ', $this->quoteParameter($table));
+        $query = "DESCRIBE `{$table}`";
         try {
             $list = [];
             $stm = $this->getPdo()->prepare($query);
@@ -506,15 +567,17 @@ class Db
 
     public function tableExists(string $table): bool
     {
-        $list = $this->getTableList();
-        return in_array($table, $list);
+        $stm = $this->getPdo()->prepare("SHOW TABLES LIKE :table");
+        $stm->execute(compact('table'));
+        return $stm->fetchColumn() !== false;
     }
 
     public function dropTable(string $tableName): int
     {
+        $tableName = self::escapeTable($tableName);
         if (!$this->tableExists($tableName)) return 0;
-        $query = "SET FOREIGN_KEY_CHECKS = 0;SET UNIQUE_CHECKS = 0;";
-        $query .= sprintf("DROP TABLE IF EXISTS %s CASCADE;", $this->quoteParameter($tableName));
+        $query = "SET FOREIGN_KEY_CHECKS = 0;SET UNIQUE_CHECKS = 0;\n";
+        $query .= "DROP TABLE IF EXISTS `{$tableName}` CASCADE;\n";
         $query .= "SET FOREIGN_KEY_CHECKS = 1;SET UNIQUE_CHECKS = 1;";
         $stm = $this->getPdo()->prepare($query);
         $stm->execute();
@@ -528,34 +591,23 @@ class Db
     public function dropAllTables(bool $confirm = false, array $exclude = []): int
     {
         if (!$confirm) return 0;
-        $query = 'SET FOREIGN_KEY_CHECKS = 0;SET UNIQUE_CHECKS = 0;';
-        foreach ($this->getTableList() as $i => $v) {
+        $query = "SET FOREIGN_KEY_CHECKS = 0;SET UNIQUE_CHECKS = 0;\n";
+        foreach ($this->getTableList() as $v) {
             if (in_array($v, $exclude)) continue;
-            $query .= sprintf('DROP TABLE IF EXISTS %s CASCADE;', $this->quoteParameter($v));
+            $query .= "DROP TABLE IF EXISTS `{$v}` CASCADE;\n";
         }
-        $query .= 'SET FOREIGN_KEY_CHECKS = 1;SET UNIQUE_CHECKS = 1;';
+        $query .= "SET FOREIGN_KEY_CHECKS = 1;SET UNIQUE_CHECKS = 1;";
         $stm = $this->getPdo()->prepare($query);
         $stm->execute();
 
         return $stm->rowCount();
     }
 
-    public function quote(string $str, int $type = \Pdo::PARAM_STR): string
+    /**
+     * sanitize a table/Db name for queries
+     */
+    public static function escapeTable($table): string
     {
-        return $this->getPdo()->quote($str, $type);
+        return preg_replace('/[^a-z0-9_]/i', '', $table);
     }
-
-    public function escapeString(string $str): string
-    {
-        if ($str) {
-            return substr($this->quote($str), 1, -1);
-        }
-        return $str;
-    }
-
-    public function quoteParameter(string $param, $quote = '`'): string
-    {
-        return $quote . trim($param, $quote) . $quote;
-    }
-
 }

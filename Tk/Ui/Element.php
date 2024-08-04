@@ -3,7 +3,6 @@ namespace Tk\Ui;
 
 use Tk\Traits\SystemTrait;
 use Tk\Ui\Traits\AttributesTrait;
-use Tk\Ui\Traits\CssTrait;
 
 /**
  * Use this object as a base class to render UI elements
@@ -11,7 +10,6 @@ use Tk\Ui\Traits\CssTrait;
 abstract class Element
 {
     use AttributesTrait;
-    use CssTrait;
     use SystemTrait;
 
     /**

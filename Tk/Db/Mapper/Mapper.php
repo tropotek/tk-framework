@@ -4,12 +4,12 @@ namespace Tk\Db\Mapper;
 use Tk\Collection;
 use Tk\DataMap\DataMap;
 use Tk\DataMap\DataTypeInterface;
-use Tk\Db\Pdo;
 use Tk\Db\Exception;
 use Tk\Db\Tool;
 use Tk\Factory;
 use Tk\Str;
 use Tk\Traits\SystemTrait;
+use Tt\Db;
 
 /**
  * Some reserved column names and assumed meanings:
@@ -21,6 +21,7 @@ use Tk\Traits\SystemTrait;
  *
  * If your columns conflict, then you should modify the mapper or DB accordingly
  *
+ * @deprecated Mapper system to be removed see \Tt\Db and new object mapper system
  */
 abstract class Mapper
 {
@@ -41,7 +42,7 @@ abstract class Mapper
      */
     public static bool $HIDE_DELETED = true;
 
-    protected Pdo $db;
+    protected Db $db;
 
     protected string $table = '';
 
@@ -71,7 +72,7 @@ abstract class Mapper
     protected ?DataTypeInterface $deleteType = null;
 
 
-    public function __construct(?Pdo $db = null)
+    public function __construct(?Db $db = null)
     {
         $this->dataMappers = new Collection();
         $this->setDb($db);
@@ -81,7 +82,7 @@ abstract class Mapper
     /**
      * Get/Create an instance of a data mapper.
      */
-    static function create(?Pdo $db = null): static
+    static function create(?Db $db = null): static
     {
         $mapperClass = static::class;
         if (!preg_match('/(.+)(Map)$/', $mapperClass, $regs)) {
@@ -127,7 +128,6 @@ abstract class Mapper
 
     abstract protected function makeDataMaps(): void;
 
-    // TODO: These are helper functions, should we remove them or are they worth having.
 
     /**
      * Returns a valid DB DataMap
@@ -163,23 +163,18 @@ abstract class Mapper
         $this->getDbMap()->loadArray($bind, $obj);
 
         $keys = array_keys($bind);
-        $cols = implode(', ', $this->getDb()->quoteParameterArray($keys));
+        $cols = implode(', ', self::quoteParameterArray($keys));
         $values = implode(', :', array_keys($bind));
         foreach ($bind as $col => $value) {
             unset($bind[$col]);
             $bind[$col] = $value;
             $inf = $this->getTableInfo($col);
-            if ($inf['Extra']?? '' == 'current_timestamp()') continue;
+            if ($inf->Extra ?? '' == 'current_timestamp()') continue;
         }
-        $sql = 'INSERT INTO ' . $this->quoteParameter($this->getTable()) . ' (' . $cols . ')  VALUES (:' . $values . ')';
-        $this->getDb()->prepare($sql)->execute($bind);
+        $sql = 'INSERT INTO ' . self::quoteParameter($this->getTable()) . ' (' . $cols . ')  VALUES (:' . $values . ')';
+        $this->getDb()->getPdo()->prepare($sql)->execute($bind);
 
-        $seq = '';
-        if ($this->getDb()->getDriver() == 'pgsql') {   // Generate the seq key for Postgres only
-            $seq = $this->getTable().'_'.$this->getPrimaryType()->getProperty().'_seq';
-        }
-        $id = (int)$this->getDb()->lastInsertId($seq);
-        return $id;
+        return (int)$this->getDb()->lastInsertId();
     }
 
     public function update(Model $obj): int
@@ -195,14 +190,14 @@ abstract class Mapper
         foreach ($bind as $col => $value) {
             unset($bind[$col]);
             $inf = $this->getTableInfo($col);
-            if (str_contains($inf['Extra'] ?? '', 'on update')) continue;
+            if (str_contains($inf->Extra ?? '', 'on update')) continue;
             $bind[$col] = $value;
-            $set[] = $this->quoteParameter($col) . ' = :' . $col;
+            $set[] = self::quoteParameter($col) . ' = :' . $col;
         }
 
-        $where = $this->quoteParameter($this->getPrimaryType()->getKey()) . ' = ' . $bind[$this->getPrimaryType()->getKey()];
-        $sql = sprintf('UPDATE %s SET %s WHERE %s', $this->quoteParameter($this->table), implode(', ', $set), $where);
-        $stmt = $this->getDb()->prepare($sql);
+        $where = self::quoteParameter($this->getPrimaryType()->getKey()) . ' = ' . $bind[$this->getPrimaryType()->getKey()];
+        $sql = sprintf('UPDATE %s SET %s WHERE %s', self::quoteParameter($this->table), implode(', ', $set), $where);
+        $stmt = $this->getDb()->getPdo()->prepare($sql);
         $stmt->execute($bind);
 
         return $stmt->rowCount();
@@ -214,20 +209,20 @@ abstract class Mapper
             throw new Exception('Invalid operation, no primary key found');
         }
 
-        $where = $this->quoteParameter($this->getPrimaryType()->getKey()) . ' = ' . $this->getPrimaryType()->getPropertyValue($obj);
+        $where = sprintf('%s = %s', self::quoteParameter($this->getPrimaryType()->getKey()), $this->getPrimaryType()->getPropertyValue($obj));
         if ($where) {
             $where = 'WHERE ' . $where;
         }
 
-        $sql = sprintf('DELETE FROM %s %s LIMIT 1', $this->quoteParameter($this->getTable()), $where);
+        $sql = sprintf('DELETE FROM %s %s LIMIT 1', self::quoteParameter($this->getTable()), $where);
         if ($this->getDeleteType()) {
             $sql = sprintf('UPDATE %s SET %s = 1 %s LIMIT 1',
-                $this->quoteParameter($this->table),
-                $this->quoteParameter($this->getDeleteType()->getKey()),
+                self::quoteParameter($this->getTable()),
+                $this->getDeleteType()->getKey(),
                 $where
             );
         }
-        $stmt = $this->getDb()->prepare($sql);
+        $stmt = $this->getDb()->getPdo()->prepare($sql);
         $stmt->execute();
         return $stmt->rowCount();
     }
@@ -260,18 +255,18 @@ abstract class Mapper
         if ($alias) $alias = $alias . '.';
 
         if (!$from) {
-            $from = sprintf('%s %s', $this->quoteParameter($this->getTable()), $this->getAlias());
+            $from = sprintf('%s %s', self::quoteParameter($this->getTable()), $this->getAlias());
         }
 
         if (
             self::$HIDE_DELETED &&
             $this->getDeleteType() &&
-            !str_contains($where, $this->quoteParameter($this->getDeleteType()->getKey()))
+            !str_contains($where, self::quoteParameter($this->getDeleteType()->getKey()))
         ) {
             if ($where) {
-                $where = sprintf('%s%s = 0 AND %s ', $alias, $this->quoteParameter($this->getDeleteType()->getKey()), $where);
+                $where = sprintf('%s%s = 0 AND %s ', $alias, self::quoteParameter($this->getDeleteType()->getKey()), $where);
             } else {
-                $where = sprintf('%s%s = 0 ', $alias, $this->quoteParameter($this->getDeleteType()->getKey()));
+                $where = sprintf('%s%s = 0 ', $alias, self::quoteParameter($this->getDeleteType()->getKey()));
             }
         }
         if ($where) $where = 'WHERE ' . $where;
@@ -280,24 +275,25 @@ abstract class Mapper
         if ($tool->isDistinct()) $distinct = 'DISTINCT';
 
         // OrderBy, GroupBy, Limit, etc
-        $toolStr = $tool->toSql($alias, $this->getDb());
-
-        $foundRowsKey = '';
-        if ($this->getDb()->getDriver() == 'mysql') {
-            $foundRowsKey = 'SQL_CALC_FOUND_ROWS';
-        }
+        $toolStr = $tool->toSql($alias);
 
         if (!$select) {
             $select = $alias.'*';
         }
 
-        $sql = sprintf('SELECT %s %s %s FROM %s %s %s ',
-            $foundRowsKey, $distinct, $select, $from, $where, $toolStr);
+//        $sql = sprintf('SELECT SQL_CALC_FOUND_ROWS %s %s FROM %s %s %s ',
+//            $distinct, $select, $from, $where, $toolStr);
+        $sql = sprintf('SELECT %s %s FROM %s %s %s ',
+            $distinct, $select, $from, $where, $toolStr);
 
-        $stmt = $this->getDb()->prepare($sql);
+        $stmt = $this->getDb()->getPdo()->prepare($sql);
         $stmt->execute($params);
 
-        return Result::createFromMapper($this, $stmt, $tool);
+        [$_limit, $_offset, $total] = $this->getDb()->countFoundRows($sql, $params);
+        $tool->setFoundRows($total);
+
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        return Result::createFromMapper($this, $rows, $tool);
     }
 
     /**
@@ -319,7 +315,7 @@ abstract class Mapper
         if (!$this->getPrimaryType()) {
             throw new Exception('Invalid operation, no primary key found');
         }
-        $where = sprintf('%s = :%s', $this->quoteParameter($this->getPrimaryType()->getKey()), $this->getPrimaryType()->getProperty());
+        $where = sprintf('%s = :%s', self::quoteParameter($this->getPrimaryType()->getKey()), $this->getPrimaryType()->getProperty());
         $list = $this->selectFrom('', $where, Tool::create('', 1), '', [
             $this->getPrimaryType()->getProperty() => $id
         ]);
@@ -344,7 +340,7 @@ abstract class Mapper
         $w = '';
         foreach ($value as $r) {
             if ($r === null || $r === '') continue;
-            $w .= sprintf('%s %s %s %s ', $columnName, $compare, $this->getDb()->quote($r), $logic);
+            $w .= sprintf("%s %s '%s' %s ", $columnName, $compare, $r, $logic);
         }
         if ($w)
             $w = rtrim($w, ' '.$logic.' ');
@@ -423,7 +419,7 @@ abstract class Mapper
      */
     public function setTable(string $table): Mapper
     {
-        if (!$this->getDb()->hasTable($table)) {
+        if (!$this->getDb()->tableExists($table)) {
             throw new Exception('Table not found: ' . $table);
         }
         $this->table = $table;
@@ -431,7 +427,7 @@ abstract class Mapper
 
         // Set primary field
         foreach ($this->tableInfo as $key => $atts) {
-            if (strtoupper($atts['Key']) == 'PRI') {
+            if (strtoupper($atts->Key) == 'PRI') {
                 $this->primaryType = $this->getDbMap()->getKeyType($key);
                 break;
             }
@@ -442,7 +438,7 @@ abstract class Mapper
     /**
      * If a colum name is supplied then that column info is returned
      */
-    public function getTableInfo(?string $column = null): ?array
+    public function getTableInfo(?string $column = null): null|array|object
     {
         return (is_string($column) ? $this->tableInfo[$column] : $this->tableInfo);
     }
@@ -452,40 +448,32 @@ abstract class Mapper
         return array_key_exists($column, $this->tableInfo);
     }
 
-    public function getDb(): Pdo
+    public function getDb(): Db
     {
         return $this->db;
     }
 
-    private function setDb(Pdo $db): Mapper
+    private function setDb(Db $db): Mapper
     {
         $this->db = $db;
         return $this;
     }
 
     /**
-     * Use this function to escape a table name and add a prefix if it is set
-     */
-    public function quote(string $str): string
-    {
-        return  $this->getDb()->quote($str);
-    }
-
-    /**
      * Quote a parameter or table name based on the quote system
      * if the param exists in the reserved words list
      */
-    public function quoteParameter(string $str): string
+    public static function quoteParameter(string $str): string
     {
-        return  $this->getDb()->quoteParameter($str);
+        return  sprintf('`%s`', $str);
     }
 
-    /**
-     * Encode string to avoid sql injections.
-     */
-    public function escapeString(string $str): string
+    public static function quoteParameterArray(array $array): array
     {
-        return  $this->getDb()->escapeString($str);
+        foreach($array as $k => $v) {
+            $array[$k] = self::quoteParameter($v);
+        }
+        return $array;
     }
 
     /**

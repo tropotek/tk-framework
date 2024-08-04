@@ -5,6 +5,8 @@ use Tk\Traits\SingletonTrait;
 
 /**
  * The Tk PDO Database driver
+ *
+ * @deprecated
  */
 class Pdo
 {

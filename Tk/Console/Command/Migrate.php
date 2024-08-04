@@ -12,7 +12,7 @@ use Tk\Log\ConsoleOutputLogger;
 class Migrate extends Console
 {
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('migrate')
             ->setAliases(array('mgt'))
@@ -49,12 +49,12 @@ class Migrate extends Console
             $this->write('Migration Starting.');
             $migrateList = $this->getConfig()->get('db.migrate.paths', []);
             $outputLogger = new ConsoleOutputLogger($output);
-            $migrate = new SqlMigrate($db, $outputLogger);
+            $migrate = new SqlMigrate($db->getPdo(), $outputLogger);
             $migrate->migrateList($migrateList);
 
             // Execute static files
             $config = $this->getConfig();
-            $dbBackup = new SqlBackup($db);
+            $dbBackup = new SqlBackup($db->getPdo());
             foreach ($config->get('db.migrate.static') as $file) {
                 $path = "{$config->getBasePath()}/src/config/sql/{$file}";
                 if (is_file($path)) {
