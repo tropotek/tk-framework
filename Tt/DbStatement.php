@@ -3,13 +3,8 @@ namespace Tt;
 
 class DbStatement extends \PDOStatement
 {
-    protected Db $db;
     protected ?array $meta = null;
 
-    protected function __construct(Db $db)
-    {
-        $this->db = $db;
-    }
 
     public function execute(array|null $params = null): bool
     {
@@ -52,11 +47,6 @@ class DbStatement extends \PDOStatement
 
         $obj->__map($row);
         return $obj;
-    }
-
-    public function getDb(): Db
-    {
-        return $this->db;
     }
 
 }

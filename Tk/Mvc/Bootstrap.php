@@ -5,6 +5,7 @@ use Dom\Template;
 use Tk\DataMap\Db\TextEncrypt;
 use Tk\Traits\SingletonTrait;
 use Tk\Traits\SystemTrait;
+use Tt\Db;
 
 class Bootstrap
 {
@@ -13,6 +14,14 @@ class Bootstrap
 
     public function init(): void
     {
+        Db::connect(
+            $this->getConfig()->get('db.mysql', ''),
+            $this->getConfig()->get('db.mysql.options', []),
+        );
+        if ($this->getConfig()->get('php.date.timezone')) {
+            DB::setTimezone($this->getConfig()->get('php.date.timezone'));
+        }
+
         // Apply all php config settings to php
         foreach ($this->getConfig()->getGroup('php', true) as $k => $v) {
             @ini_set($k, $v);

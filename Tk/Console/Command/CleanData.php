@@ -82,7 +82,7 @@ class CleanData extends Console
     {
         $this->write('   - Cleaning obsolete sessions.');
         if ($this->getConfig()->get('session.db_enable', false)) {
-            $db = $this->getFactory()->getDb()->getPdo();
+            $db = Db::getPdo();
             $expire = session_cache_expire() * 4;
             $tbl = $this->getConfig()->get('session.db_table');
             $i = $db->exec("DELETE FROM {$tbl} WHERE modified < DATE_SUB(NOW(), INTERVAL {$expire} MINUTE)");

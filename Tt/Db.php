@@ -4,38 +4,76 @@ namespace Tt;
 use Tk\Db\Exception;
 
 /**
- * @phpver 8.1
+ * @phpver 8.2
  */
 class Db
 {
     public static bool $LOG = true;
 
-    private \PDO           $pdo;
-    private ?\PDOStatement $lastStatement   = null;
-	private string         $lastQuery       = '';
-	private int            $lastId          = 0;
+    private static ?\PDO          $pdo           = null;
+    private static ?\PDOStatement $lastStatement = null;
 
-	private string  $dsn              = '';    // dsn to use when opening connection
-	private string  $timezone         = '';    // last timezone explicitly set on the db connection
-    private array   $options          = [];    // DB connection options
-    private int     $transactions     = 0;     // count of transactions started to detect nested transactions
-	private string  $dbName           = '';
+	private static string $lastQuery     = '';
+	private static int    $lastId        = 0;
+    private static int    $transactions  = 0;     // count of transactions started to detect nested transactions
+	private static array  $dsn_stack     = [];    // stack of DSNs and timezones for push/pop
+	private static string $dbName        = '';
+
+	private static string $dsn           = '';    // dsn to use when opening connection
+	private static string $timezone      = '';    // last timezone explicitly set on the db connection
+    private static array  $options       = [];    // DB connection options
 
     /**
      * Create a Mysql SQL driver object from a dsn:
      *   - 'hostname[:port]/username/password/dbname'
      */
-    public function __construct(string $dsn, array $options = [])
+	public static function connect(string $dsn, array $options = []): \Pdo
     {
-        $this->dsn = $dsn;
-        [$host, $port, $user, $pass, $this->dbName] = array_values(self::parseDsn($dsn));
+		assert(!empty($dsn), "no DSN for database connection");
 
-        $pdoDsn = sprintf('mysql:host=%s;port=%s;charset=utf8mb4;dbname=%s', $host, $port, $this->dbName);
-        $this->pdo = new \PDO($pdoDsn, $user, $pass, $options);
-        $this->pdo->setAttribute(\PDO::ATTR_STATEMENT_CLASS, [DbStatement::class, [$this]]);
-        $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-        $this->pdo->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_OBJ);
+        [$host, $port, $user, $pass, self::$dbName] = array_values(self::parseDsn($dsn));
+
+        $pdoDsn = sprintf('mysql:host=%s;port=%s;charset=utf8mb4;dbname=%s', $host, $port, self::$dbName);
+        self::$pdo = new \PDO($pdoDsn, $user, $pass, $options);
+        self::$pdo->setAttribute(\PDO::ATTR_STATEMENT_CLASS, [DbStatement::class]);
+        self::$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        self::$pdo->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_OBJ);
+
+        self::$dsn          = $dsn;
+        self::$options      = $options;
+		self::$lastQuery    = '';
+		self::$lastId       = 0;
+		self::$transactions = 0;
+
+        //self::$pdo->exec('SET CHARACTER SET utf8mb4;');
+        //self::$pdo->exec('ALTER DATABASE CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;');
+		if (self::$timezone) {
+			$st = self::$pdo->prepare("SET time_zone = :timezone");
+            $st->execute(['timezone' => self::$timezone]);
+		}
+
+		return self::$pdo;
     }
+
+	/**
+	 * remembers current DSN and timezone, connects to database with passed DSN
+	 */
+	public static function push_dsn(string $dsn, array $options = []): void
+	{
+		array_push(self::$dsn_stack, [self::$dsn, self::$options, self::$timezone]);
+		self::connect($dsn, $options);
+	}
+
+	/**
+	 * pops DSN and timezone from stack and connects to database
+	 */
+	public static function pop_dsn(): void
+	{
+		assert(count(self::$dsn_stack) > 0, "no pushed DSN to pop");
+		[$dsn, $options, $timezone] = array_pop(self::$dsn_stack);
+		self::$timezone = $timezone;
+		self::connect($dsn, $options);
+	}
 
     public static function parseDsn(string $dsn): array
     {
@@ -55,80 +93,80 @@ class Db
         return $dsnArray;
     }
 
-    public function getPdo(): \PDO
+    public static function getPdo(): \PDO
     {
-        return $this->pdo;
+        return self::$pdo;
     }
 
-    public function lastInsertId(): int
+    public static function lastInsertId(): int
     {
-        return $this->lastId;
+        return self::$lastId;
     }
 
-    public function getLastQuery(): string
+    public static function getLastQuery(): string
     {
-        return $this->lastQuery;
+        return self::$lastQuery;
     }
 
-    public function getLastStatement(): \PDOStatement
+    public static function getLastStatement(): \PDOStatement
     {
-        return $this->lastStatement;
+        return self::$lastStatement;
     }
 
-    public function getOptions(): array
+    public static function getOptions(): array
     {
-        return $this->options;
+        return self::$options;
     }
 
-    public function getDbName(): string
+    public static function getDbName(): string
     {
-        return $this->dbName;
+        return self::$dbName;
     }
 
 	/**
 	 * set the session timezone, which persists for the MySQL session
 	 * returns the previous timezone value
 	 */
-	public function setTimezone(string $timezone='SYSTEM'): string
+	public static function setTimezone(string $timezone = 'SYSTEM'): string
 	{
-		$tz = $this->timezone;
-		if ($timezone && $timezone != $this->timezone) {
-            $this->execute("SET time_zone = :timezone", compact('timezone'));
-            $this->timezone = $timezone;
+		$tz = self::$timezone;
+		if ($timezone && $timezone != self::$timezone) {
+            self::execute("SET time_zone = :timezone", compact('timezone'));
+            self::$timezone = $timezone;
 		}
 		return $tz;
 	}
 
-    public function beginTransaction(): bool
+    public static function beginTransaction(): bool
     {
-        if (!$this->transactions++) {
-            return $this->getPdo()->beginTransaction();
+        if (!self::$transactions++) {
+            return self::$pdo->beginTransaction();
         }
-        $this->execute('SAVEPOINT trans' . $this->transactions);
-        return $this->transactions >= 0;
+        self::execute('SAVEPOINT trans' . self::$transactions);
+        return self::$transactions >= 0;
     }
 
-    public function commit(): bool
+    public static function commit(): bool
     {
-        if (!--$this->transactions) {
-            return $this->getPdo()->commit();
+        if (!--self::$transactions) {
+            return self::$pdo->commit();
         }
-        return $this->transactions >= 0;
+        return self::$transactions >= 0;
     }
 
-    public function rollback(): bool
+    public static function rollback(): bool
     {
-        if (--$this->transactions) {
-            $this->execute('ROLLBACK TO trans' . $this->transactions + 1);
+        if (--self::$transactions) {
+            self::execute('ROLLBACK TO trans' . self::$transactions + 1);
             return true;
         }
-        return $this->getPdo()->rollback();
+        return self::$pdo->rollback();
     }
 
     /**
      * substitute arrays for prepared statements items
      */
-    public function prepareQuery(string &$query, array|object|null &$params = null): void
+    public static function prepareQuery(string &$query, array|object|null &$params = null): void
     {
 		if (is_object($params)) $params = get_object_vars($params);
         if (!is_array($params)) return;
@@ -159,18 +197,18 @@ class Db
 	 * e.g. update, insert, delete
 	 * returns number of affected rows or true if succeeded, false if failed
      */
-    public function execute(string $query, array|object|null $params = null): int|bool
+    public static function execute(string $query, array|object|null $params = null): int|bool
     {
         try {
-            $this->prepareQuery($query, $params);
-            $this->lastQuery = $query;
+            self::prepareQuery($query, $params);
+            self::$lastQuery = $query;
 
-            $stm = $this->getPdo()->prepare($query);
+            $stm = self::$pdo->prepare($query);
             $stm->execute($params);
-            $this->lastStatement = $stm;
+            self::$lastStatement = $stm;
 
-            if (!empty($this->getPdo()->lastInsertId())) {
-                $this->lastId = intval($this->getPdo()->lastInsertId());
+            if (!empty(self::$pdo->lastInsertId())) {
+                self::$lastId = intval(self::$pdo->lastInsertId());
             }
 
             return $stm->rowCount();
@@ -186,16 +224,16 @@ class Db
 	 * @param class-string<T> $classname
 	 * @return array<int,T>
      */
-    public function query(string $query, array|object|null $params = null, string $classname = 'stdClass'): array
+    public static function query(string $query, array|object|null $params = null, string $classname = 'stdClass'): array
     {
         try {
-            $this->prepareQuery($query, $params);
-            $this->lastQuery = $query;
+            self::prepareQuery($query, $params);
+            self::$lastQuery = $query;
 
             /** @var DbStatement $stm */
-            $stm = $this->getPdo()->prepare($query);
+            $stm = self::$pdo->prepare($query);
             $stm->execute($params);
-            $this->lastStatement = $stm;
+            self::$lastStatement = $stm;
 
             $rows = [];
             while ($row = $stm->fetchMappedObject($classname)) {
@@ -204,7 +242,7 @@ class Db
             }
             return $rows;
         } catch (\Exception $e) {
-            throw new DbException($e->getMessage(), $e->getCode(), $e, $query);
+            throw new DbException($e->getMessage(), $e->getCode(), $e, $query, $params);
         }
     }
 
@@ -216,16 +254,16 @@ class Db
 	 * @param class-string<T> $classname
 	 * @return T|null
 	 */
-	public function queryOne(string $query, array|object|null $params = null, string $classname = 'stdClass'): ?object
+	public static function queryOne(string $query, array|object|null $params = null, string $classname = 'stdClass'): ?object
 	{
         try {
-            $this->prepareQuery($query, $params);
-            $this->lastQuery = $query;
+            self::prepareQuery($query, $params);
+            self::$lastQuery = $query;
 
             /** @var DbStatement $stm */
-            $stm = $this->getPdo()->prepare($query);
+            $stm = self::$pdo->prepare($query);
             $stm->execute($params);
-            $this->lastStatement = $stm;
+            self::$lastStatement = $stm;
 
             /** @var T|null $row */
             $row = $stm->fetchMappedObject($classname);
@@ -241,15 +279,15 @@ class Db
 	 * returns string representation of first value of the first row of the result
 	 * or null if nothing selected
 	 */
-	public function queryVal(string $query, array|object|null $params = null): mixed
+	public static function queryVal(string $query, array|object|null $params = null): mixed
 	{
         try {
-            $this->prepareQuery($query, $params);
-            $this->lastQuery = $query;
+            self::prepareQuery($query, $params);
+            self::$lastQuery = $query;
 
-            $stm = $this->getPdo()->prepare($query);
+            $stm = self::$pdo->prepare($query);
             $stm->execute($params);
-            $this->lastStatement = $stm;
+            self::$lastStatement = $stm;
 
             return $stm->fetchColumn(0);
         } catch (\Exception $e) {
@@ -260,9 +298,9 @@ class Db
     /**
      * query a single value, always convert to int
      */
-    public function queryInt(string $query, array|object|null $params = null): int
+    public static function queryInt(string $query, array|object|null $params = null): int
     {
-        $v = $this->queryVal($query, $params);
+        $v = self::queryVal($query, $params);
         return intval($v);
     }
 
@@ -270,27 +308,27 @@ class Db
      * query a single value, always convert to string
      * returns empty string for null
      */
-    public function queryString(string $query, array|object|null $params = null, string $nullvalue = ''): string
+    public static function queryString(string $query, array|object|null $params = null, string $nullvalue = ''): string
     {
-        $v = $this->queryVal($query, $params);
+        $v = self::queryVal($query, $params);
         return strval($v ?? $nullvalue);
     }
 
     /**
      * query a single value, always convert to float
      */
-    public function queryFloat(string $query, array|object|null $params = null): float
+    public static function queryFloat(string $query, array|object|null $params = null): float
     {
-        $v = $this->queryVal($query, $params);
+        $v = self::queryVal($query, $params);
         return floatval($v);
     }
 
     /**
      * query a single value, always convert to bool
      */
-    public function queryBool(string $query, array|object|null $params = null): bool
+    public static function queryBool(string $query, array|object|null $params = null): bool
     {
-        $v = $this->queryVal($query, $params);
+        $v = self::queryVal($query, $params);
         return boolval($v);
     }
 
@@ -303,9 +341,9 @@ class Db
      * @template T of object
      * @param class-string<T> $classname
      */
-    public function queryList(string $sql, string $key, string $value, array|object|null $params = null, string $classname = 'stdClass'): array
+    public static function queryList(string $sql, string $key, string $value, array|object|null $params = null, string $classname = 'stdClass'): array
     {
-        $rows = $this->query($sql, $params, $classname);
+        $rows = self::query($sql, $params, $classname);
 
         $list = [];
         if ($key) {
@@ -329,9 +367,9 @@ class Db
      * @template T of object
      * @param class-string<T> $classname
      */
-    public function queryAssoc(string $sql, string $key, array|object|null $params = null, string $classname = 'stdClass'): array
+    public static function queryAssoc(string $sql, string $key, array|object|null $params = null, string $classname = 'stdClass'): array
     {
-        $rows = $this->query($sql, $params, $classname);
+        $rows = self::query($sql, $params, $classname);
         $list = [];
         foreach ($rows as $row) {
             $list[$row->$key] = $row;
@@ -344,24 +382,24 @@ class Db
 	 * convenience function: insert a row
 	 * $values is [column => value, ...] or an object
 	 */
-	public function insert(string $table, array|object $values): int|bool
+	public static function insert(string $table, array|object $values): int|bool
 	{
 		if (is_object($values)) $values = get_object_vars($values);
 		$cols = implode(', ', array_keys($values));
 		$vals = preg_replace('/([^, ]+)/', ':$1', $cols);
-		return $this->execute("INSERT INTO {$table} ({$cols}) VALUES ({$vals})", $values);
+		return self::execute("INSERT INTO {$table} ({$cols}) VALUES ({$vals})", $values);
 	}
 
 	/**
 	 * convenience function: insert a row ignoring errors
 	 * $values is [column => value, ...] or an object
 	 */
-	public function insertIgnore(string $table, array|object $values): int|bool
+	public static function insertIgnore(string $table, array|object $values): int|bool
 	{
 		if (is_object($values)) $values = get_object_vars($values);
 		$cols = implode(', ', array_keys($values));
 		$vals = preg_replace('/([^, ]+)/', ':$1', $cols);
-		return $this->execute("INSERT IGNORE INTO {$table} ({$cols}) VALUES ({$vals})", $values);
+		return self::execute("INSERT IGNORE INTO {$table} ({$cols}) VALUES ({$vals})", $values);
 	}
 
 	/**
@@ -369,7 +407,7 @@ class Db
 	 * $values is [column => value, ...] or an object
 	 * $values must contain at least one condition
 	 */
-	public function delete(string $table, array|object $values): int|bool
+	public static function delete(string $table, array|object $values): int|bool
     {
 		if (is_object($values)) $values = get_object_vars($values);
         $where = [];
@@ -378,7 +416,7 @@ class Db
         }
 		$where = implode(' AND ', $where);
 
-        return $this->execute("DELETE FROM {$table} WHERE {$where}", $values);
+        return self::execute("DELETE FROM {$table} WHERE {$where}", $values);
     }
 
 	/**
@@ -388,7 +426,7 @@ class Db
 	 *
 	 * note: cannot change primary key with this function
 	 */
-	public function update(string $table, string $primaryKey, array|object $values): int|bool
+	public static function update(string $table, string $primaryKey, array|object $values): int|bool
 	{
 		if (is_object($values)) $values = get_object_vars($values);
 
@@ -403,7 +441,7 @@ class Db
 
 		$set = implode(', ', $set);
 		$sql = "UPDATE {$table} SET {$set} WHERE {$primaryKey} = :{$primaryKey}";
-		return $this->execute($sql, $vals);
+		return self::execute($sql, $vals);
 	}
 
 	/**
@@ -411,7 +449,7 @@ class Db
 	 * $primaryKey is not updated
 	 * values is [column => value, ...] or an object
 	 */
-	public function insertUpdate(string $table, string $primaryKey, array|object $values): int|bool
+	public static function insertUpdate(string $table, string $primaryKey, array|object $values): int|bool
 	{
 		if (is_object($values)) $values = get_object_vars($values);
 		if (empty($values[$primaryKey])) $values[$primaryKey] = null;
@@ -434,16 +472,16 @@ class Db
 			$sql = "INSERT IGNORE INTO {$table} ({$cols}) VALUES ({$vals})";
 		}
 
-		return$this->execute($sql, $values);
+		return self::execute($sql, $values);
 	}
 
     /**
      * Predict the next insert ID of the table
      * Taken From: http://dev.mysql.com/doc/refman/5.0/en/innodb-auto-increment-handling.html
      */
-    public function getNextInsertId(string $table): int
+    public static function getNextInsertId(string $table): int
     {
-        $stm = $this->getPdo()->prepare("SELECT AUTO_INCREMENT FROM information_schema.tables WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = :table");
+        $stm = self::$pdo->prepare("SELECT AUTO_INCREMENT FROM information_schema.tables WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = :table");
         $stm->execute(compact('table'));
         return intval($stm->fetchColumn());
     }
@@ -451,7 +489,7 @@ class Db
     /**
      * Return an array with [limit, offset, total] values for a query
      */
-    public function countFoundRows(string $sql, ?array $params = null): array
+    public static function countFoundRows(string $sql, ?array $params = null): array
     {
         if (!$sql) return [0, 0, 0];
         if (stripos($sql, 'select ') !== 0) return [0, 0, 0];
@@ -471,9 +509,9 @@ class Db
         if ($limit == 1) return [0, 0, 1];
 
         $countSql = "SELECT COUNT(*) as i FROM ($cSql) as t";
-        $stm = $this->getPdo()->prepare($countSql);
+        $stm = self::$pdo->prepare($countSql);
         if (false === $stm->execute($params)) {
-            $info = $this->getPdo()->errorInfo();
+            $info = self::$pdo->errorInfo();
             throw new Exception(end($info));
         }
         $stm->setFetchMode(\PDO::FETCH_ASSOC);
@@ -482,7 +520,7 @@ class Db
         return [$limit, $offset, $total];
     }
 
-    public function getTableInfo(string $table): array
+    public static function getTableInfo(string $table): array
     {
         $types = [
             'varchar'    => 'string',
@@ -518,7 +556,7 @@ class Db
         $query = "DESCRIBE `{$table}`";
         try {
             $list = [];
-            $stm = $this->getPdo()->prepare($query);
+            $stm = self::$pdo->prepare($query);
             $stm->execute();
             $stm->setFetchMode(\PDO::FETCH_ASSOC);
 
@@ -551,35 +589,35 @@ class Db
         }
     }
 
-    public function getDatabaseList(): array
+    public static function getDatabaseList(): array
     {
-        $stm = $this->getPdo()->prepare("SHOW DATABASES");
+        $stm = self::$pdo->prepare("SHOW DATABASES");
         $stm->execute();
         return $stm->fetchAll(\PDO::FETCH_COLUMN, 0);
     }
 
-    public function getTableList(): array
+    public static function getTableList(): array
     {
-        $stm = $this->getPdo()->prepare("SHOW TABLES");
+        $stm = self::$pdo->prepare("SHOW TABLES");
         $stm->execute();
         return $stm->fetchAll(\PDO::FETCH_COLUMN, 0);
     }
 
-    public function tableExists(string $table): bool
+    public static function tableExists(string $table): bool
     {
-        $stm = $this->getPdo()->prepare("SHOW TABLES LIKE :table");
+        $stm = self::$pdo->prepare("SHOW TABLES LIKE :table");
         $stm->execute(compact('table'));
         return $stm->fetchColumn() !== false;
     }
 
-    public function dropTable(string $tableName): int
+    public static function dropTable(string $tableName): int
     {
         $tableName = self::escapeTable($tableName);
-        if (!$this->tableExists($tableName)) return 0;
+        if (!self::tableExists($tableName)) return 0;
         $query = "SET FOREIGN_KEY_CHECKS = 0;SET UNIQUE_CHECKS = 0;\n";
         $query .= "DROP TABLE IF EXISTS `{$tableName}` CASCADE;\n";
         $query .= "SET FOREIGN_KEY_CHECKS = 1;SET UNIQUE_CHECKS = 1;";
-        $stm = $this->getPdo()->prepare($query);
+        $stm = self::$pdo->prepare($query);
         $stm->execute();
         return $stm->rowCount();
     }
@@ -588,16 +626,16 @@ class Db
      * Remove all tables from a DB
      * You must send true as a parameter to ensure it executes
      */
-    public function dropAllTables(bool $confirm = false, array $exclude = []): int
+    public static function dropAllTables(bool $confirm = false, array $exclude = []): int
     {
         if (!$confirm) return 0;
         $query = "SET FOREIGN_KEY_CHECKS = 0;SET UNIQUE_CHECKS = 0;\n";
-        foreach ($this->getTableList() as $v) {
+        foreach (self::getTableList() as $v) {
             if (in_array($v, $exclude)) continue;
             $query .= "DROP TABLE IF EXISTS `{$v}` CASCADE;\n";
         }
         $query .= "SET FOREIGN_KEY_CHECKS = 1;SET UNIQUE_CHECKS = 1;";
-        $stm = $this->getPdo()->prepare($query);
+        $stm = self::$pdo->prepare($query);
         $stm->execute();
 
         return $stm->rowCount();

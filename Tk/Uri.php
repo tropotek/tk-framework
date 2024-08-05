@@ -77,13 +77,13 @@ class Uri implements \IteratorAggregate
     /**
      * Paths that do not start with a scheme section to the uri are prepended with the  self::$BASE_URL . '/' string
      */
-    public function __construct(?string $spec = null)
+    public function __construct(?string $spec = null, array $queryParams = [])
     {
         if ($spec === null) {   // Create an auto request uri.
             $spec = '/';
             if (isset($_SERVER['REQUEST_URI'])) {
                 $spec = $_SERVER['REQUEST_URI'];
-                if (!empty($_SERVER['QUERY_STRING']) && strstr($spec, '?') === false) {
+                if (!empty($_SERVER['QUERY_STRING']) && !str_contains($spec, '?')) {
                     $spec .= '?' . $_SERVER['QUERY_STRING'];
                 }
             }
@@ -106,6 +106,7 @@ class Uri implements \IteratorAggregate
             $this->spec = $spec;
         }
         $this->init();
+        $this->set($queryParams);
     }
 
     /**
@@ -115,10 +116,10 @@ class Uri implements \IteratorAggregate
      *   \Tk\Uri::create('http://example.com/test');
      * </code>
      */
-    public static function create(string|Uri|null $spec = null): null|Uri
+    public static function create(string|Uri|null $spec = null, array $queryParams = []): null|Uri
     {
         if ($spec instanceof Uri) return clone $spec;
-        return new static($spec);
+        return new static($spec, $queryParams);
     }
 
 
@@ -270,8 +271,12 @@ class Uri implements \IteratorAggregate
     /**
      * Add a field to the query string
      */
-    public function set(string $field, ?string $value = null): Uri
+    public function set(string|array $field, ?string $value = null): Uri
     {
+        if (is_array($field)) {
+            $this->query = $this->query + $field;
+            return $this;
+        }
         if ($value === null)  $value = $field;
         $this->query[$field] = $value;
         return $this;

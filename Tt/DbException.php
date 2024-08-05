@@ -1,12 +1,13 @@
 <?php
 namespace Tt;
 
-class DbException extends \Tk\Exception
+class DbException extends \Exception
 {
 
-    public function __construct($message = "", int|string $code = 0, \Throwable $previous = null, $dump = '', $args = null)
+    protected string $dump = '';
+
+    public function __construct(string $message = "", int|string $code = 0, \Throwable $previous = null, string $dump = '', array|object|null $args = null)
     {
-        //format dump query
         if ($dump) {
             $dump = explode("\n", str_replace([',', ' WHERE', ' FROM', ' LIMIT', ' ORDER', ' LEFT JOIN'],
                 [', ', "\n  WHERE", "\n  FROM", "\n  LIMIT", "\n  ORDER", "\n  LEFT JOIN"], $dump));
@@ -18,8 +19,18 @@ class DbException extends \Tk\Exception
         if (is_array($args)) {
             $dump .= "\n\nBind: \n" . print_r($args, true);
         }
+        $this->dump = $dump;
 
-        parent::__construct($message, (int)$code, $previous, $dump);
+        parent::__construct($message, (int)$code, $previous);
+    }
+
+    public function __toString(): string
+    {
+        $str = parent::__toString();
+        if ($this->dump != null) {
+            $str .= $this->dump . "\n\n";
+        }
+        return $str;
     }
 
 }

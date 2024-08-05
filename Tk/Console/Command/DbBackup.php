@@ -8,6 +8,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Tk\Console\Console;
 use Tk\Db\Util\SqlBackup;
 use Tk\FileUtil;
+use Tt\Db;
 
 class DbBackup extends Console
 {
@@ -24,10 +25,9 @@ class DbBackup extends Console
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
-            $db = $this->getFactory()->getDb();
             $options = [];
             $outfile = $input->getArgument('output');
-            $bak = new SqlBackup($db);
+            $bak = new SqlBackup(Db::getPdo());
 
             if ($outfile) {
                 if (is_dir($outfile)) {

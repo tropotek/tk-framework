@@ -63,46 +63,11 @@ class Factory extends Collection
     }
 
     /**
-     * @todo refactor this method to only return the Db object, as Pdo is deprecated
+     * @deprecated
      */
-//    public function getDb(string $name = 'default'): null|Pdo|Db
-//    {
-//        $key = 'db.'.trim($name);
-//        if (!$this->has($key)) {
-//            if ($name == 'mysql') {
-//                return $this->getDbNew($name);
-//            }
-//            try {
-//                $options = $this->getConfig()->getGroup($key, true);
-//                if (count($options)) {
-//                    if ($this->getConfig()->has('php.date.timezone') && !isset($options['timezone'])) {
-//                        $options['timezone'] = $this->getConfig()->get('php.date.timezone');
-//                    }
-//                    $db = Pdo::instance($name, $options);
-//                    $this->set($key, $db);
-//                }
-//            } catch (\Exception $e) {
-//                error_log($e->getMessage());
-//            }
-//        }
-//        return $this->get($key);
-//    }
-
-    public function getDb(string $name = 'mysql'): ?Db
+    final public function getDb(string $name = 'mysql'): void
     {
-        $key = 'db.'.trim($name);
-        if (!$this->has($key)) {
-            try {
-                $db = new Db($this->getConfig()->get($key));
-                if ($this->getConfig()->has('php.date.timezone') && !isset($options['timezone'])) {
-                    $db->setTimezone($this->getConfig()->get('php.date.timezone'));
-                }
-                $this->set($key, $db);
-            } catch (\Exception $e) {
-                error_log($e->getMessage());
-            }
-        }
-        return $this->get($key);
+        throw new \Exception("Deprecated:: Use \Tt\Db object ");
     }
 
     public function getSession(): ?Session
@@ -110,9 +75,9 @@ class Factory extends Collection
         if (!$this->has('session')) {
             try {
                 $sessionDbHandler = null;
-                if ($this->getDb() && $this->getConfig()->get('session.db_enable')) { //
+                if (Db::getPdo() && $this->getConfig()->get('session.db_enable')) {
                     $sessionDbHandler = new PdoSessionHandler(
-                        $this->getDb()->getPdo(), $this->getConfig()->getGroup('session', true)
+                        Db::getPdo(), $this->getConfig()->getGroup('session', true)
                     );
                     try {
                         $sessionDbHandler->createTable();
@@ -121,6 +86,12 @@ class Factory extends Collection
                 $sessionStorage = new NativeSessionStorage($this->getConfig()->getGroup('session', true), $sessionDbHandler);
                 $session = new Session($sessionStorage);
                 $session->setName('sn_' . md5($this->getConfig()->getBaseUrl()) ?? 'PHPSESSID');
+
+                $bags = $this->getConfig()->getGroup('session.bags');
+                foreach ($bags as $bag) {
+                    $session->registerBag($bag);
+                }
+
                 $this->set('session', $session);
             } catch (\PDOException $e) {
                 die($e->getMessage());

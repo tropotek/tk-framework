@@ -9,7 +9,6 @@ use Tt\Db;
  */
 class ModelGenerator
 {
-    protected ?Db    $db        = null;
     protected string $table     = '';
     protected string $className = '';
     protected string $namespace = '';
@@ -19,9 +18,8 @@ class ModelGenerator
     /**
      * @throws \Exception
      */
-    protected function __construct(Db $db, string $table, string $namespace = 'App', string $className = '')
+    protected function __construct(string $table, string $namespace = 'App', string $className = '')
     {
-        $this->db = $db;
         $this->table = $table;
         $namespace = trim($namespace);
         if (!$namespace)
@@ -34,19 +32,19 @@ class ModelGenerator
         }
         $this->setClassName($className);
 
-        if (!$db->tableExists($table)) {   // Check the DB for the table
-            throw new \Exception('Table `' . $table . '` not found in the DB `' . $db->getDbName().'`');
+        if (!Db::tableExists($table)) {   // Check the DB for the table
+            throw new \Exception('Table `' . $table . '` not found in the DB `' . Db::getDbName() . '`');
         }
 
-        $this->tableInfo = $db->getTableInfo($table);
+        $this->tableInfo = Db::getTableInfo($table);
     }
 
     /**
      * @throws \Exception
      */
-    public static function create(Db $db, string $table, string $namespace = 'App', string $className = ''): ModelGenerator
+    public static function create(string $table, string $namespace = 'App', string $className = ''): ModelGenerator
     {
-        return new static($db, $table, $namespace, $className);
+        return new static($table, $namespace, $className);
     }
 
     protected function makeClassname(string $table): string

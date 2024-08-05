@@ -4,6 +4,7 @@ namespace Tk\Db\Util;
 use Symfony\Component\HttpFoundation\Request;
 use Tk\Traits\SystemTrait;
 use Tk\Uri;
+use Tt\Db;
 
 /**
  * @todo The saved sql file should also be encoded with a secret key
@@ -37,7 +38,7 @@ class Mirror
     public function doDbBackup(Request $request)
     {
 
-        $dbBackup = new SqlBackup($this->getFactory()->getDb()->getPdo());
+        $dbBackup = new SqlBackup(Db::getPdo());
         $exclude = [$this->getConfig()->get('session.db_table')];
 
         $path = $this->getConfig()->getTempPath() . '/db_mirror.sql';

@@ -42,8 +42,6 @@ abstract class Mapper
      */
     public static bool $HIDE_DELETED = true;
 
-    protected Db $db;
-
     protected string $table = '';
 
     protected string $modelClass = '';
@@ -72,17 +70,16 @@ abstract class Mapper
     protected ?DataTypeInterface $deleteType = null;
 
 
-    public function __construct(?Db $db = null)
+    public function __construct()
     {
         $this->dataMappers = new Collection();
-        $this->setDb($db);
         $this->makeDataMaps();
     }
 
     /**
      * Get/Create an instance of a data mapper.
      */
-    static function create(?Db $db = null): static
+    static function create(): static
     {
         $mapperClass = static::class;
         if (!preg_match('/(.+)(Map)$/', $mapperClass, $regs)) {
@@ -94,13 +91,10 @@ abstract class Mapper
         }
 
         $arr = explode('\\', $modelClass);
-        //$table = self::toDbProperty(array_pop($arr));
         $table = Str::toSnake(array_pop($arr));
 
-        $db = $db ?? Factory::instance()->getDb();
-
         if (!isset(self::$_INSTANCE[$mapperClass])) {
-            $obj = new $mapperClass($db);
+            $obj = new $mapperClass();
             $obj->setModelClass($modelClass);
             $obj->setTable($table);
             self::$_INSTANCE[$mapperClass] = $obj;
@@ -172,9 +166,9 @@ abstract class Mapper
             if ($inf->Extra ?? '' == 'current_timestamp()') continue;
         }
         $sql = 'INSERT INTO ' . self::quoteParameter($this->getTable()) . ' (' . $cols . ')  VALUES (:' . $values . ')';
-        $this->getDb()->getPdo()->prepare($sql)->execute($bind);
+        Db::getPdo()->prepare($sql)->execute($bind);
 
-        return (int)$this->getDb()->lastInsertId();
+        return Db::lastInsertId();
     }
 
     public function update(Model $obj): int
@@ -197,7 +191,7 @@ abstract class Mapper
 
         $where = self::quoteParameter($this->getPrimaryType()->getKey()) . ' = ' . $bind[$this->getPrimaryType()->getKey()];
         $sql = sprintf('UPDATE %s SET %s WHERE %s', self::quoteParameter($this->table), implode(', ', $set), $where);
-        $stmt = $this->getDb()->getPdo()->prepare($sql);
+        $stmt = Db::getPdo()->prepare($sql);
         $stmt->execute($bind);
 
         return $stmt->rowCount();
@@ -222,7 +216,7 @@ abstract class Mapper
                 $where
             );
         }
-        $stmt = $this->getDb()->getPdo()->prepare($sql);
+        $stmt = Db::getPdo()->prepare($sql);
         $stmt->execute();
         return $stmt->rowCount();
     }
@@ -286,10 +280,10 @@ abstract class Mapper
         $sql = sprintf('SELECT %s %s FROM %s %s %s ',
             $distinct, $select, $from, $where, $toolStr);
 
-        $stmt = $this->getDb()->getPdo()->prepare($sql);
+        $stmt = Db::getPdo()->prepare($sql);
         $stmt->execute($params);
 
-        [$_limit, $_offset, $total] = $this->getDb()->countFoundRows($sql, $params);
+        [$_limit, $_offset, $total] = Db::countFoundRows($sql, $params);
         $tool->setFoundRows($total);
 
         $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -419,11 +413,11 @@ abstract class Mapper
      */
     public function setTable(string $table): Mapper
     {
-        if (!$this->getDb()->tableExists($table)) {
+        if (!Db::tableExists($table)) {
             throw new Exception('Table not found: ' . $table);
         }
         $this->table = $table;
-        $this->tableInfo = $this->getDb()->getTableInfo($this->getTable());
+        $this->tableInfo = Db::getTableInfo($this->getTable());
 
         // Set primary field
         foreach ($this->tableInfo as $key => $atts) {
@@ -446,17 +440,6 @@ abstract class Mapper
     public function hasColumn(string $column): bool
     {
         return array_key_exists($column, $this->tableInfo);
-    }
-
-    public function getDb(): Db
-    {
-        return $this->db;
-    }
-
-    private function setDb(Db $db): Mapper
-    {
-        $this->db = $db;
-        return $this;
     }
 
     /**

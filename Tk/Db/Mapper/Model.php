@@ -112,7 +112,8 @@ abstract class Model implements ModelInterface
     {
         if (!$this->getId()) {
             try {
-                return self::getMapperInstance()->getDb()->getNextInsertId(self::getMapperInstance()->getTable());
+                return Db::getNextInsertId(self::getMapperInstance()->getTable());
+                //return self::getMapperInstance()->getDb()->getNextInsertId(self::getMapperInstance()->getTable());
             } catch (\Exception $e) {
                 \Tk\Log::warning('Volatile ID not found!');
             }

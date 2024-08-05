@@ -57,13 +57,13 @@ abstract class DbModel
         if (empty($table) && empty($view)) {
             $table = strtolower(preg_replace('/(?<!^)[A-Z]+|(?<!^|\d)[\d]+/', '_$0', ObjectUtil::basename(static::class)));
             $view = "v_{$table}";
-            if (!self::getDb()->tableExists($view)) $view = $table;
+            if (!Db::tableExists($view)) $view = $table;
         }
 
         $v_meta = [];
-        $t_meta = self::getDb()->getTableInfo($table);
+        $t_meta = Db::getTableInfo($table);
         if (!empty($view)) {
-            $v_meta = self::getDb()->getTableInfo($view);
+            $v_meta = Db::getTableInfo($view);
         }
         $roCols = array_diff_key($v_meta, $t_meta);
 
@@ -109,11 +109,6 @@ abstract class DbModel
     {
         if (!$this->_primaryKey) return 0;
         return intval($this->{$this->_primaryKey});
-    }
-
-    public static function getDb(): Db
-    {
-        return Factory::instance()->getDb();
     }
 
 }

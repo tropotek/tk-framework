@@ -7,8 +7,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Tk\Console\Console;
 use Tk\Db\Util\SqlBackup;
-use Tk\Exception;
 use Tk\Uri;
+use Tt\Db;
 
 class Mirror extends Console
 {
@@ -52,8 +52,7 @@ class Mirror extends Console
                 }
             }
 
-            $db = $this->getFactory()->getDb();
-            $dbBackup = new SqlBackup($db);
+            $dbBackup = new SqlBackup(Db::getPdo());
             $exclude = [$config->get('session.db_table')];
 
             if (!$input->getOption('no-sql')) {
@@ -74,7 +73,7 @@ class Mirror extends Console
                 $dbBackup->save($backupSqlFile, ['exclude' => $exclude]);
 
                 $this->write('Drop this DB tables');
-                $db->dropAllTables(true, $exclude);
+                Db::dropAllTables(true, $exclude);
 
                 $this->write('Import mirror file to this DB');
                 $dbBackup->restore($mirrorSqlFile);

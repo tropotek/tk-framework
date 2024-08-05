@@ -4,6 +4,7 @@ namespace Tk\Db;
 use Tk\Traits\ConfigTrait;
 use Tk\Traits\FactoryTrait;
 use Tk\Traits\SystemTrait;
+use Tt\Db;
 
 /**
  * A collection object that can store its values in a DB table.
@@ -24,17 +25,11 @@ class Collection extends \Tk\Collection
 
     private array $del = [];
 
-    private ?\PDO $pdo = null;
 
-
-    public function __construct(string $table, \PDO $pdo = null)
+    public function __construct(string $table)
     {
         parent::__construct();
         $this->table = $table;
-        $this->pdo = $pdo;
-        if (is_null($this->pdo)) {
-            $this->pdo = $this->getFactory()->getDb()->getPdo();
-        }
     }
 
     public function __sleep()
@@ -42,32 +37,9 @@ class Collection extends \Tk\Collection
         return ['table', 'del'];
     }
 
-    public function __wakeup()
-    {
-        $this->pdo = $this->getFactory()->getDb()->getPdo();
-    }
-
-    public function getPdo(): \PDO
-    {
-        return $this->pdo;
-    }
-
-    public function setPdo(\PDO $pdo): static
-    {
-        $this->pdo = $pdo;
-        return $this;
-    }
-
     protected function getTable(): string
     {
         return $this->table;
-    }
-
-    protected function dbTableExists(string $table): bool
-    {
-        $stm = $this->getPdo()->prepare("SHOW TABLES LIKE :table");
-        $stm->execute(compact('table'));
-        return $stm->fetchColumn() !== false;
     }
 
     /**
@@ -76,12 +48,10 @@ class Collection extends \Tk\Collection
     public function load(): static
     {
         try {
-            if (!$this->dbTableExists($this->getTable())) return $this;
+            if (!Db::tableExists($this->getTable())) return $this;
 
-            $stm = $this->getPdo()->prepare("SELECT * FROM {$this->getTable()}");
-            $stm->execute();
-
-            foreach ($stm as $row) {
+            $rows = Db::query("SELECT * FROM {$this->getTable()}");
+            foreach ($rows as $row) {
                 $this->set($row->key, $this->encodeValue($row->value));
             }
         } catch (\Exception $e) { \Tk\Log::error($e->__toString());}
@@ -127,45 +97,49 @@ class Collection extends \Tk\Collection
         return $this;
     }
 
-    /**
-     * Check if a value exists in the DB
-     */
     protected function dbHas(string $key): bool
     {
-        if (!$this->dbTableExists($this->getTable())) return false;
-
-        $stm = $this->getPdo()->prepare("SELECT * FROM {$this->getTable()} WHERE `key` = :key");
-        $stm->execute(compact('key'));
-        return $stm->rowCount() > 0;
+        if (!Db::tableExists($this->getTable())) return false;
+        $rows = Db::query("SELECT * FROM {$this->getTable()} WHERE `key` = :key", compact('key'));
+        return count($rows) > 0;
     }
 
     protected function dbSet(string $key, $value): static
     {
         $this->installTable();
         $value = $this->encodeValue($value);
-
         if ($this->dbHas($key)) {
-            $stm = $this->getPdo()->prepare("UPDATE {$this->getTable()} SET value = :value WHERE `key` = :key");
+            Db::update($this->getTable(), 'key', compact('key', 'value'));
+//            Db::execute("UPDATE {$this->getTable()} SET value = :value WHERE `key` = :key",
+//                compact('key', 'value')
+//            );
         } else {
-            $stm = $this->getPdo()->prepare("INSERT INTO {$this->getTable()} (`key`, value) VALUES (:key, :value)");
+            Db::insert($this->getTable(), compact('key', 'value'));
+//            Db::execute("INSERT INTO {$this->getTable()} (`key`, value) VALUES (:key, :value)",
+//                compact('key', 'value')
+//            );
         }
-        $stm->execute(compact('key', 'value'));
         return $this;
     }
 
     protected function dbGet(string $key): mixed
     {
-        if (!$this->dbTableExists($this->getTable())) return '';
-        $stm = $this->getPdo()->prepare("SELECT value FROM {$this->getTable()} WHERE `key` = :key");
-        $stm->execute(compact('key'));
-        return $this->decodeValue($stm->fetchColumn() ?? '');
+        if (!Db::tableExists($this->getTable())) return '';
+        $val = Db::queryVal("SELECT value FROM {$this->getTable()} WHERE `key` = :key",
+            compact('key')
+        );
+        return $this->decodeValue($val ?? '');
+//        $stm = $this->getPdo()->prepare("SELECT value FROM {$this->getTable()} WHERE `key` = :key");
+//        $stm->execute(compact('key'));
+//        return $this->decodeValue($stm->fetchColumn() ?? '');
     }
 
     protected function dbDelete(string $key): static
     {
-        if (!$this->dbTableExists($this->getTable())) return $this;
-        $stm = $this->getPdo()->prepare("DELETE FROM {$this->getTable()} WHERE `key` = :key");
-        $stm->execute(compact('key'));
+        if (!Db::tableExists($this->getTable())) return $this;
+        Db::delete($this->getTable(), compact('key'));
+//        $stm = $this->getPdo()->prepare("DELETE FROM {$this->getTable()} WHERE `key` = :key");
+//        $stm->execute(compact('key'));
         return $this;
     }
 
@@ -175,8 +149,8 @@ class Collection extends \Tk\Collection
     public function installTable(): bool
     {
         try {
-            if ($this->dbTableExists($this->getTable())) return false;
-            $this->getPdo()->exec($this->getTableSql());
+            if (Db::tableExists($this->getTable())) return false;
+            Db::execute($this->getTableSql());
 
         } catch (\Exception $e) { \Tk\Log::error($e->__toString());}
         return true;

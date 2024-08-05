@@ -8,6 +8,7 @@ use Tk\Console\Console;
 use Tk\Db\Util\SqlBackup;
 use Tk\Db\Util\SqlMigrate;
 use Tk\Log\ConsoleOutputLogger;
+use Tt\Db;
 
 class Migrate extends Console
 {
@@ -25,10 +26,8 @@ class Migrate extends Console
         try {
             $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
 
-            $db = $this->getFactory()->getDb();
-
             $drop = false;
-            $tables = $db->getTableList();
+            $tables = Db::getTableList();
 
             if (count($tables)) {
                 $drop = $this->askConfirmation('Replace the existing database. WARNING: Existing data tables will be deleted! [N]: ', false);
@@ -39,7 +38,7 @@ class Migrate extends Console
                 if ($this->getConfig()->isDebug()) {
                     $exclude = [$this->getConfig()->get('session.db_table')];
                 }
-                $db->dropAllTables(true, $exclude);
+                Db::dropAllTables(true, $exclude);
                 $this->write('Mode: Install');
             } else {
                 $this->write('Mode: Upgrade');
@@ -49,12 +48,12 @@ class Migrate extends Console
             $this->write('Migration Starting.');
             $migrateList = $this->getConfig()->get('db.migrate.paths', []);
             $outputLogger = new ConsoleOutputLogger($output);
-            $migrate = new SqlMigrate($db->getPdo(), $outputLogger);
+            $migrate = new SqlMigrate(Db::getPdo(), $outputLogger);
             $migrate->migrateList($migrateList);
 
             // Execute static files
             $config = $this->getConfig();
-            $dbBackup = new SqlBackup($db->getPdo());
+            $dbBackup = new SqlBackup(Db::getPdo());
             foreach ($config->get('db.migrate.static') as $file) {
                 $path = "{$config->getBasePath()}/src/config/sql/{$file}";
                 if (is_file($path)) {

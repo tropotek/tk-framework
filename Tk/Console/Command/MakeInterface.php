@@ -40,7 +40,7 @@ class MakeInterface extends Console
         if (!$this->getBasePath())
             $this->basePath = $this->getSystem()->makePath($this->getConfig()->get('path.src'));
 
-        $this->gen = ModelGenerator::create($this->getFactory()->getDb(),
+        $this->gen = ModelGenerator::create(
             $input->getArgument('table'),
             $input->getOption('namespace'),
             $input->getOption('classname')
