@@ -10,15 +10,27 @@ class Table
 {
     use AttributesTrait;
 
-    protected string     $id      = '';
-    protected array      $cells   = [];
-    protected string     $orderBy = '';
+    const PARAM_LIMIT    = 'limit';
+    const PARAM_OFFSET   = 'offset';
+    const PARAM_PAGE     = 'page';
+    const PARAM_TOTAL    = 'total';
+    const PARAM_ORDERBY  = 'orderBy';
+
+    protected string     $id        = '';
+    protected array      $cells     = [];
+    protected int        $totalRows = 0;
+    protected int        $limit     = 0;
+    protected int        $page      = 1;
+    protected string     $orderBy   = '';
+
     protected Attributes $rowAttrs;
+    protected Attributes $headerAttrs;
 
 
-    public function __construct(string $tableId = 'table')
+    public function __construct(string $tableId = 't')
     {
-        $this->rowAttrs = new Attributes();
+        $this->rowAttrs    = new Attributes();
+        $this->headerAttrs = new Attributes();
         $this->setId($tableId);
     }
 
@@ -34,7 +46,7 @@ class Table
         } else {
             $instances[$id] = 0;
         }
-        if ($instances[$id] > 0) $id = $instances[$id].'_'.$id;
+        if ($instances[$id] > 0) $id = $instances[$id].$id;
         $this->id = $id;
         $this->setAttr('id', $this->getId());
         return $this;
@@ -61,9 +73,58 @@ class Table
         return $this->rowAttrs;
     }
 
+    public function setRowAttrs(Attributes $rowAttrs): Table
+    {
+        $this->rowAttrs = $rowAttrs;
+        return $this;
+    }
+
+    public function getHeaderAttrs(): Attributes
+    {
+        return $this->headerAttrs;
+    }
+
     public function getCells(): array
     {
         return $this->cells;
+    }
+
+    public function getTotalRows(): int
+    {
+        return $this->totalRows;
+    }
+
+    public function setTotalRows(int $totalRows): Table
+    {
+        $this->totalRows = ($totalRows < 0) ? 0 : $totalRows;
+        return $this;
+    }
+
+    public function getLimit(): int
+    {
+        return $this->limit;
+    }
+
+    public function setLimit(int $limit): Table
+    {
+        $this->limit = ($limit < 0) ? 0 : $limit;
+        return $this;
+    }
+
+    public function getPage(): int
+    {
+        return $this->page;
+    }
+
+    public function setPage(int $page): Table
+    {
+        $this->page = ($page < 1) ? 1 : $page;
+        return $this;
+    }
+
+    public function getOffset(): int
+    {
+        return $this->getLimit() * ($this->getPage()-1);
     }
 
     public function appendCell(string|Cell $cell, string $refCell = ''): Cell
@@ -127,6 +188,11 @@ class Table
     public function getCell(string $name): ?Cell
     {
         return $this->cells[$name] ?? null;
+    }
+
+    public function makeInstanceKey($key): string
+    {
+        return $this->getId() . '_' . $key;
     }
 
 }

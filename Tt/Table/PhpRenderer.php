@@ -2,22 +2,10 @@
 
 namespace Tt\Table;
 
-use Tt\Table;
-
-class PhpRenderer extends Renderer
+class PhpRenderer extends TableRenderer
 {
-    protected string $path = '';
 
-    public function __construct(Table $table, string $templatePath)
-    {
-        $this->table = $table;
-        if (!is_file($templatePath)) {
-            throw new \Exception("File not found: $templatePath");
-        }
-        $this->path = $templatePath;
-    }
-
-    public function getHtml(array $rows): string
+    public function getHtml(): string
     {
         // TODO: Implement getHtml() method.
         ob_start();

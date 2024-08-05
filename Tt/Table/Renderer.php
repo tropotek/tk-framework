@@ -6,12 +6,15 @@ use Tt\Table;
 
 abstract class Renderer
 {
-    protected Table $table;
+    protected array   $footer        = [];
+    protected bool    $footerEnabled = true;
+    protected Table   $table;
+
 
     /**
      * render a HTML string of the rendered table
      */
-    abstract public function getHtml(array $rows): string;
+    abstract public function getHtml(): string;
 
     public function getTable(): Table
     {
@@ -23,7 +26,5 @@ abstract class Renderer
         $this->table = $table;
         return $this;
     }
-
-
 
 }

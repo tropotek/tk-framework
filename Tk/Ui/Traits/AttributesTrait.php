@@ -51,8 +51,11 @@ trait AttributesTrait
         return $this;
     }
 
-    public function getAttrList(): array
+    public function getAttrList(bool $withCss = false): array
     {
+        if ($withCss && !($this->_attrList['class'] ?? false) && $this->getCssString()) {
+            return $this->_attrList + ['class' => $this->getCssString()];
+        }
         return $this->_attrList;
     }
 
