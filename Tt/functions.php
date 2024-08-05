@@ -1,7 +1,5 @@
 <?php
 
-vd('----');
-
 /**
  * returns $s escaped for HTML output
  */

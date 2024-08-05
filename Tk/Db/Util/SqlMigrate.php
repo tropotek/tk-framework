@@ -93,7 +93,7 @@ class SqlMigrate
 
             $file = $this->getConfig()->getBasePath() . $this->toRelative($file);
             if (!is_readable($file)) return false;
-            if ($this->hasPath($file)) return false;
+            if ($this->hasPath($this->toRelative($file))) return false;
 
             if (!$this->backupFile) {   // only run once per session.
                 $dump = new SqlBackup($this->getDb());
@@ -132,7 +132,6 @@ class SqlMigrate
 
         } catch (\Exception $e){
             $this->logger->error($e->__toString());
-            //throw new \Tk\Exception('File: ' . $file, $e->getCode(), $e);
         }
         return false;
     }
