@@ -4,7 +4,7 @@ namespace Tt;
 class DbStatement extends \PDOStatement
 {
     protected ?array $meta = null;
-
+    protected ?array $lastParams = null;
 
     public function execute(array|null $params = null): bool
     {
@@ -17,13 +17,21 @@ class DbStatement extends \PDOStatement
                 }
                 $params = $p;
             }
-
+            $this->lastParams = $params;
             $result = parent::execute($params);
         } catch (\Exception $e) {
-            //throw new DbException($e->getMessage(), $e->getCode(), null, $this->getDb()->getLastQuery(), $params);
             throw new DbException($e->getMessage(), $e->getCode(), null, $this->queryString, $params);
         }
         return $result;
+    }
+
+    /**
+     * get total rows from query without any LIMITs
+     */
+    public function getTotalRows(): int
+    {
+        [$_, $_, $total] = Db::countTotalRows($this->queryString, $this->lastParams);
+        return $total;
     }
 
     /**
@@ -47,6 +55,11 @@ class DbStatement extends \PDOStatement
 
         $obj->__map($row);
         return $obj;
+    }
+
+    public function getLastParams(): ?array
+    {
+        return $this->lastParams;
     }
 
 }

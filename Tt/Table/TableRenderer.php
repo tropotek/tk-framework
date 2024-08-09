@@ -1,5 +1,4 @@
 <?php
-
 namespace Tt\Table;
 
 use Tt\Table;

@@ -1,9 +1,10 @@
 <?php
-
 namespace Tt\Table;
 
+use Tk\CallbackCollection;
 use Tk\Ui\Attributes;
 use Tk\Ui\Traits\AttributesTrait;
+use Tk\Uri;
 use Tt\Table;
 
 class Cell
@@ -16,17 +17,16 @@ class Cell
     protected bool       $visible     = true;
     protected bool       $sortable    = false;
     protected ?Table     $table       = null;
-    protected Attributes $headerAttrs;
 
-    /**
-     * an array of callable types, called with call_user_func_array()
-     */
-    protected array $onValue  = [];
+    protected Attributes $headerAttrs;
+    protected CallbackCollection $onValue;
 
 
     public function __construct(string $name, string $header = '')
     {
         $this->name = $name;
+        $this->onValue = CallbackCollection::create();
+
         $this->headerAttrs = new Attributes();
         $this->addCss('m'.ucfirst($name));
         $this->headerAttrs->addCss('mh'.ucfirst($name));
@@ -39,46 +39,43 @@ class Cell
         $this->setHeader($header);
     }
 
-    public static function create(string $name, string $header = ''): static
-    {
-        return new static($name, $header);
-    }
-
     public function getName(): string
     {
         return $this->name;
     }
 
     /**
-     * Called before the value is used, set this to change the table raw data value
-     * Use this to set the cell properties before rendering
-     *
-     * Callback: function (array|object $row, Cell $cell) {  }
+     * Callbacks are executed when getValue() is called
+     * @callable function (array|object $row, Cell $cell) {  }
      */
-    public function addOnValue(callable $callable): static
+    public function addOnValue(callable $callable, int $priority = CallbackCollection::DEFAULT_PRIORITY): static
     {
-        $this->onValue[] = $callable;
+        $this->getOnValue()->append($callable, $priority);
         return $this;
     }
 
-    public function setOnValue(array $onValue): static
+    /**
+     * an array of callable types, called with call_user_func_array()
+     */
+    public function getOnValue(): CallbackCollection
     {
-        $this->onValue = $onValue;
-        return $this;
+        return $this->onValue;
     }
 
+    /**
+     * Get the cell value:
+     *     1. execute callbacks return non-null value
+     *     2. return non-null value from this cells value property
+     *     3. return the value if exists in the $row
+     *
+     */
     public function getValue(array|object $row): mixed
     {
-        if (!is_null($this->value)) return $this->value;
         if (is_array($row)) $row = (object)$row;
-        $return = null;
-        foreach ($this->onValue as $callable) {
-            $r = call_user_func_array($callable, [$row, $this]);
-            if (!is_null($r)) $return = $r;
-        }
+        $return = $this->getOnValue()->execute($row, $this);
         if (!is_null($return)) return $return;
-
-        return $row->{$this->getName()};
+        if (!is_null($this->value)) return $this->value;
+        return $row->{$this->getName()} ?? null;
     }
 
     public function setValue(mixed $value): static
@@ -140,6 +137,38 @@ class Cell
     {
         $this->table = $table;
         return $this;
+    }
+
+    /**
+     * Get the order by url for this cell.
+     * This will create an orderBy URL, when clicked it will
+     * redirect the page and update the table order to the opposite order
+     */
+    public function getOrderByUrl(): ?Uri
+    {
+        if (!$this->isSortable()) return null;
+
+        $key = $this->getTable()->makeInstanceKey(Table::PARAM_ORDERBY);
+        $url = Uri::create()->remove($key);
+
+        $col = $this->getTable()->getOrderBy();
+        $dir = '-';
+        if ($col && $col[0] == '-') {
+            $col = substr($col, 1);
+            $dir = '';
+        }
+
+        if ($col == $this->getName()) {
+            if ($dir == '-') {
+                $url->set($key, $dir.$col);
+            } else {
+                $url->remove($key);
+            }
+        } else {
+            $url->set($key, $this->getName());
+        }
+
+        return $url;
     }
 
 }

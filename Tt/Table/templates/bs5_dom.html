@@ -22,74 +22,64 @@
           crossorigin="anonymous"></script>
 </head>
 <body class="bg-white">
+<!--
+  The HTML page elements are ignored, the DomTemplate elements are in the body tag.
 
+-->
 
 <div class="tk-table" var="tk-table" id="tpl-table">
+  <script src="/vendor/ttek/tk-framework/Tt/Table/templates/tkTable.js" data-priority="1"></script>
 
   <div class="tk-filters" choice="filters"></div>
 
-  <div class="tk-actions" choice="actions"></div>
+  <form method="post" class="tk-table-form" id="tk-table-form" var="form">
+    <div class="tk-actions" choice="actions"></div>
 
-  <div class="tk-table-wrapper table-responsive">
-    <table class="tk-table table table-bordered table-hover" var="table">
-      <thead var="thead">
-        <tr var="thr">
-          <th repeat="th"><a class="noblock" href="#" var="a"></a></th>
-        </tr>
-      </thead>
-      <tbody var="tbody">
-        <tr repeat="tr">
-          <td repeat="td"></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="tk-foot row" choice="footer">
-
-    <div class="tk-results col-3">
-      <small choice="results-wrap">
-        <span var="results-from"></span>-<span var="results-to"></span> of <span var="results-total"></span> rows
-      </small>
+    <div class="tk-table-wrapper table-responsive">
+      <table class="table table-bordered table-hover" var="table">
+        <thead var="thead">
+          <tr var="thr">
+            <th repeat="th"><a class="noblock" href="#" var="a"></a></th>
+          </tr>
+        </thead>
+        <tbody var="tbody">
+          <tr repeat="tr">
+            <td repeat="td"></td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-    <nav class="tk-pager paging_simple_numbers col-6 ">
-      <div class="row justify-content-center" choice="limit-wrap">
-        <ul class="pagination pagination-sm pagination-rounded col-auto" choice="pager-wrap">
-          <li class="paginate_button page-item" var="start"><a class="page-link" href="javascript:;" var="startUrl" rel="nofollow">&lt;&lt;</a></li>
-          <li class="paginate_button page-item" var="back"><a class="page-link" href="javascript:;" var="backUrl">&lt;</a></li>
-          <li class="paginate_button page-item" repeat="page"><a class="page-link" href="javascript:;" var="pageUrl" rel="nofollow"></a></li>
-          <li class="paginate_button page-item" var="next"><a class="page-link" href="javascript:;" var="nextUrl">&gt;</a></li>
-          <li class="paginate_button page-item" var="end"><a class="page-link" href="javascript:;" var="endUrl" rel="nofollow">&gt;&gt;</a></li>
-        </ul>
+
+    <div class="tk-foot row" choice="footer">
+
+      <div class="tk-results col-3">
+        <small choice="results-wrap">
+          <span var="results-from"></span>-<span var="results-to"></span> of <span var="results-total"></span> rows
+        </small>
       </div>
-    </nav>
-    <div class="tk-limit col-3">
-      <div class="row justify-content-end" choice="limit-wrap">
-        <div class="col-auto">
-          <select class="form-select form-select-sm" name="limit" var="limit-select"></select>
+      <div class="tk-pager paging_simple_numbers col-6">
+        <div class="row justify-content-center" choice="pager-wrap">
+          <ul class="pagination pagination-sm pagination-rounded col-auto">
+            <li class="paginate_button page-item" var="start"><a class="page-link" href="#" var="startUrl" title="Start Page" rel="nofollow">&lt;&lt;</a></li>
+            <li class="paginate_button page-item" var="back"><a class="page-link" href="#" var="backUrl" title="Previous Page">&lt;</a></li>
+            <li class="paginate_button page-item" repeat="page"><a class="page-link" href="#" var="pageUrl" title="" rel="nofollow"></a></li>
+            <li class="paginate_button page-item" var="next"><a class="page-link" href="#" var="nextUrl" title="Next Page">&gt;</a></li>
+            <li class="paginate_button page-item" var="end"><a class="page-link" href="#" var="endUrl" title="Last Page" rel="nofollow">&gt;&gt;</a></li>
+          </ul>
         </div>
       </div>
-    </div>
+      <div class="tk-limit col-3">
+        <div class="row justify-content-end" choice="limit-wrap">
+          <div class="col-auto">
+            <select class="form-select form-select-sm" name="limit" var="limit-select"></select>
+          </div>
+        </div>
+      </div>
 
-  </div>
+    </div>
+  </form>
 
 </div>
-
-
-  <!-- Table action button templates -->
-  <button type="submit" class="btn btn-sm btn-light me-2" var="btn" id="tpl-action-button"><i var="icon" choice="icon"></i> <span var="text"></span></button>
-  <a class="btn btn-sm btn-light me-2" var="btn" id="tpl-action-link"><i var="icon"></i> <span var="text"></span></a>
-
-  <!-- Table order by template -->
-  <div class="tk-orderBy text-center" var="orderBy" id="tpl-cell-orderBy">
-    <div class="btn-group" role="group">
-      <a href="javascript:;" title="Move Order Up" rel="nofollow" class="btn btn-default btn-sm btn-xs" var="upUrl"><i class="fa fa-caret-up" var="upIcon"></i></a>
-      <a href="javascript:;" title="Move Order Down" rel="nofollow" class="btn btn-default btn-sm btn-xs" var="dnUrl"><i class="fa fa-caret-down" var="dnIcon"></i></a>
-    </div>
-    <a href="javascript:;" title="Click And Drag" rel="nofollow" class="drag">
-      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAAPAgMAAABGuH3ZAAAACVBMVEX///8AAAAAM8wY6EL2AAAAAXRSTlMAQObYZgAAAAFiS0dEAIgFHUgAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQfjCwYAHAmRFEi4AAAAH0lEQVQI12NgAANGEMHqACREA2Bc/ARYHVgHI8QIBgAy+QFeo6/RgQAAAABJRU5ErkJggg==" alt="Drag"/>
-    </a>
-  </div>
 
 </body>
 </html>

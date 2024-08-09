@@ -6,6 +6,8 @@ namespace Tk\Db\Mapper;
  *
  * I have implemented this so that the framework can use DB models
  * and depend on a set of functions.
+ *
+ * @deprecated
  */
 interface ModelInterface
 {

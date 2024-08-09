@@ -11,7 +11,7 @@ class Db
     public static bool $LOG = true;
 
     private static ?\PDO          $pdo           = null;
-    private static ?\PDOStatement $lastStatement = null;
+    private static ?DbStatement   $lastStatement = null;
 
 	private static string $lastQuery     = '';
 	private static int    $lastId        = 0;
@@ -98,7 +98,7 @@ class Db
         return self::$pdo;
     }
 
-    public static function lastInsertId(): int
+    public static function getLastInsertId(): int
     {
         return self::$lastId;
     }
@@ -108,7 +108,7 @@ class Db
         return self::$lastQuery;
     }
 
-    public static function getLastStatement(): \PDOStatement
+    public static function getLastStatement(): DbStatement
     {
         return self::$lastStatement;
     }
@@ -203,6 +203,7 @@ class Db
             self::prepareQuery($query, $params);
             self::$lastQuery = $query;
 
+            /** @var DbStatement $stm */
             $stm = self::$pdo->prepare($query);
             $stm->execute($params);
             self::$lastStatement = $stm;
@@ -285,6 +286,7 @@ class Db
             self::prepareQuery($query, $params);
             self::$lastQuery = $query;
 
+            /** @var DbStatement $stm */
             $stm = self::$pdo->prepare($query);
             $stm->execute($params);
             self::$lastStatement = $stm;
@@ -489,10 +491,11 @@ class Db
     /**
      * Return an array with [limit, offset, total] values for a query
      */
-    public static function countFoundRows(string $sql, ?array $params = null): array
+    public static function countTotalRows(string $sql, ?array $params = null): array
     {
+        $sql = trim($sql);
         if (!$sql) return [0, 0, 0];
-        if (stripos($sql, 'select ') !== 0) return [0, 0, 0];
+        if (stripos($sql, 'SELECT ') !== 0) return [0, 0, 0];
 
         $limit = 0;
         $offset = 0;
@@ -503,10 +506,6 @@ class Db
             $limit = (int)($match[3] ?? 0);
             $offset = (int)($match[7] ?? 0);
         }
-
-        // No limit no need to continue
-        if (!$limit) return [0, 0, 0];
-        if ($limit == 1) return [0, 0, 1];
 
         $countSql = "SELECT COUNT(*) as i FROM ($cSql) as t";
         $stm = self::$pdo->prepare($countSql);

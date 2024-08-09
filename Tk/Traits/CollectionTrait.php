@@ -1,5 +1,7 @@
 <?php
-namespace Tk;
+namespace Tk\Traits;
+
+use Tk\Collection;
 
 trait CollectionTrait
 {

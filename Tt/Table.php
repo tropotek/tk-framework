@@ -1,9 +1,12 @@
 <?php
-
 namespace Tt;
 
+use Symfony\Component\HttpFoundation\Request;
+use Tk\Collection;
+use Tk\Str;
 use Tk\Ui\Attributes;
 use Tk\Ui\Traits\AttributesTrait;
+use Tt\Table\Action;
 use Tt\Table\Cell;
 
 class Table
@@ -17,12 +20,13 @@ class Table
     const PARAM_ORDERBY  = 'orderBy';
 
     protected string     $id        = '';
-    protected array      $cells     = [];
-    protected int        $totalRows = 0;
     protected int        $limit     = 0;
     protected int        $page      = 1;
     protected string     $orderBy   = '';
+    protected int        $totalRows = 0;
 
+    protected Collection $cells;
+    protected Collection $actions;
     protected Attributes $rowAttrs;
     protected Attributes $headerAttrs;
 
@@ -31,7 +35,28 @@ class Table
     {
         $this->rowAttrs    = new Attributes();
         $this->headerAttrs = new Attributes();
+        $this->cells       = new Collection();
+        $this->actions     = new Collection();
         $this->setId($tableId);
+    }
+
+    /**
+     * Execute table actions
+     */
+    public function execute(Request $request): static
+    {
+        /* @var Action $action */
+        foreach ($this->getActions() as $action) {
+            $action->execute($request);
+        }
+
+        // get the order by value from the request (if any)
+        $orderByKey = $this->makeInstanceKey(self::PARAM_ORDERBY);
+        if (!empty($request->query->get($orderByKey))) {
+            $this->setOrderBy($request->query->get($orderByKey));
+        }
+
+        return $this;
     }
 
     /**
@@ -48,7 +73,6 @@ class Table
         }
         if ($instances[$id] > 0) $id = $instances[$id].$id;
         $this->id = $id;
-        $this->setAttr('id', $this->getId());
         return $this;
     }
 
@@ -82,11 +106,6 @@ class Table
     public function getHeaderAttrs(): Attributes
     {
         return $this->headerAttrs;
-    }
-
-    public function getCells(): array
-    {
-        return $this->cells;
     }
 
     public function getTotalRows(): int
@@ -127,68 +146,86 @@ class Table
         return $this->getLimit() * ($this->getPage()-1);
     }
 
-    public function appendCell(string|Cell $cell, string $refCell = ''): Cell
+    public function getCells(): Collection
     {
-        if (is_string($cell)) {
-            $cell = new Cell($cell);
-        }
-        if ($this->getCell($cell->getName())) {
-            throw new \Exception("Cell with name '{$cell->getName()}' already exists.");
-        }
-        $cell->setTable($this);
-
-        $ref = $this->getCell($refCell);
-        if ($ref instanceof Cell) {
-            $a = [];
-            foreach ($this->cells as $k => $v) {
-                $a[$k] = $v;
-                if ($k === $refCell) $a[$cell->getName()] = $cell;
-            }
-            $this->cells = $a;
-        } else {
-            $this->cells[$cell->getName()] = $cell;
-        }
-
-        return $cell;
-    }
-
-    public function prependCell(string|Cell $cell, string $refCell = ''): Cell
-    {
-        if (is_string($cell)) {
-            $cell = new Cell($cell);
-        }
-        if ($this->getCell($cell->getName())) {
-            throw new \Exception("Cell with name '{$cell->getName()}' already exists.");
-        }
-        $cell->setTable($this);
-
-        $ref = $this->getCell($refCell);
-        if ($ref instanceof Cell) {
-            $a = [];
-            foreach ($this->cells as $k => $v) {
-                if ($k === $refCell) $a[$cell->getName()] = $cell;
-                $a[$k] = $v;
-            }
-            $this->cells = $a;
-        } else {
-            $this->cells = [$cell->getName() => $cell] + $this->cells;
-        }
-
-        return $cell;
-    }
-
-    public function removeCell($cellName): static
-    {
-        if ($this->cells[$cellName] ?? false) {
-            unset($this->cells[$cellName]);
-        }
-        return $this;
+        return $this->cells;
     }
 
     public function getCell(string $name): ?Cell
     {
-        return $this->cells[$name] ?? null;
+        return $this->getCells()->get($name);
     }
+
+    public function removeCell($cellName): static
+    {
+        $this->getCells()->remove($cellName);
+        return $this;
+    }
+
+    public function appendCell(string|Cell $cell, ?string $refName = null): Cell
+    {
+        if (is_string($cell)) {
+            $cell = new Cell($cell);
+        }
+        if ($this->getCells()->has($cell->getName())) {
+            throw new \Exception("Cell with name '{$cell->getName()}' already exists.");
+        }
+        $cell->setTable($this);
+        return $this->getCells()->append($cell->getName(), $cell, $refName);
+    }
+
+    public function prependCell(string|Cell $cell, ?string $refName = null): Cell
+    {
+        if (is_string($cell)) {
+            $cell = new Cell($cell);
+        }
+        if ($this->getCells()->has($cell->getName())) {
+            throw new \Exception("Cell with name '{$cell->getName()}' already exists.");
+        }
+        $cell->setTable($this);
+        return $this->getCells()->prepend($cell->getName(), $cell, $refName);
+    }
+
+    public function getActions(): Collection
+    {
+        return $this->actions;
+    }
+
+    public function getAction(string $name): ?Action
+    {
+        return $this->getActions()->get($name);
+    }
+
+    public function removeAction($actionName): static
+    {
+        $this->getActions()->remove($actionName);
+        return $this;
+    }
+
+    public function appendAction(string|Action $action, ?string $refName = null): Action
+    {
+        if (is_string($action)) {
+            $action = new Action($action);
+        }
+        if ($this->getActions()->has($action->getName())) {
+            throw new \Tk\Table\Exception("Action with name '{$action->getName()}' already exists.");
+        }
+        $action->setTable($this);
+        return $this->getActions()->append($action->getName(), $action, $refName);
+    }
+
+    public function prependAction(string|Action $action, ?string $refName = null): Action
+    {
+        if (is_string($action)) {
+            $action = new Action($action);
+        }
+        if ($this->getActions()->has($action->getName())) {
+            throw new \Tk\Table\Exception("Action with name '{$action->getName()}' already exists.");
+        }
+        $action->setTable($this);
+        return $this->getActions()->prepend($action->getName(), $action, $refName);
+    }
+
 
     public function makeInstanceKey($key): string
     {

@@ -1,14 +1,11 @@
 <?php
-
 namespace Tt\Table;
 
 use Tt\Table;
 
 abstract class Renderer
 {
-    protected array   $footer        = [];
-    protected bool    $footerEnabled = true;
-    protected Table   $table;
+    protected Table $table;
 
 
     /**

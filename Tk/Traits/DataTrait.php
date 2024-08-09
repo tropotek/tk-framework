@@ -13,9 +13,8 @@ trait DataTrait
         $this->_data[$name] = $value;
     }
 
-    public function __get($name)
+    public function __get($name): mixed
     {
-        if (array_key_exists($name, $this->_data)) return $this->_data[$name];
-        throw new Exception("Undefined property name '{$name}'");
+        return $this->_data[$name] ?? null;
     }
 }

@@ -1,7 +1,7 @@
 <?php
 namespace Tk\Db\Mapper;
 
-use Tk\CollectionTrait;
+use Tk\Traits\CollectionTrait;
 use Tk\Db\Event\DbEvent;
 use Tk\ObjectUtil;
 use Tk\Traits\SystemTrait;

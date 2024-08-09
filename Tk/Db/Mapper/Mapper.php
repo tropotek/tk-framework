@@ -168,7 +168,7 @@ abstract class Mapper
         $sql = 'INSERT INTO ' . self::quoteParameter($this->getTable()) . ' (' . $cols . ')  VALUES (:' . $values . ')';
         Db::getPdo()->prepare($sql)->execute($bind);
 
-        return Db::lastInsertId();
+        return Db::getLastInsertId();
     }
 
     public function update(Model $obj): int
@@ -283,7 +283,7 @@ abstract class Mapper
         $stmt = Db::getPdo()->prepare($sql);
         $stmt->execute($params);
 
-        [$_limit, $_offset, $total] = Db::countFoundRows($sql, $params);
+        [$_, $_, $total] = Db::countTotalRows($sql, $params);
         $tool->setFoundRows($total);
 
         $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);

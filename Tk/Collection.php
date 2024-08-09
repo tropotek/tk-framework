@@ -61,7 +61,6 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
     public static function arrayFlatten(array $array): array
     {
         $return = [];
-        //array_walk_recursive($array, function($a) use (&$return) { if ($a !== null) $return[] = $a; });
         array_walk_recursive($array, function($a) use (&$return) { $return[] = $a;});
         return $return;
     }

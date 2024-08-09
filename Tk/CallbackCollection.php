@@ -80,19 +80,34 @@ class CallbackCollection
         return $this;
     }
 
-    /**
-     * @return mixed Returns false if the Callback is disabled
-     */
     public function execute(...$args): mixed
     {
-        if (!$this->isEnabled()) return false;
+        if (!$this->isEnabled()) return null;
         $this->orderList();
         $return = null;
-        foreach ($this->callbackList as $priority => $list) {
-            foreach ($list as $i => $callable) {
+        foreach ($this->callbackList as $list) {
+            foreach ($list as $callable) {
                 $args[] = $return;
                 $r = call_user_func_array($callable, $args);
                 if ($r !== null) $return = $r;
+            }
+        }
+        return $return;
+    }
+
+    /**
+     * Return an array of all results from all callables that return non-null values
+     */
+    public function executeAll(...$args): array
+    {
+        if (!$this->isEnabled()) return [];
+        $this->orderList();
+        $return = [];
+        foreach ($this->callbackList as $list) {
+            foreach ($list as $callable) {
+                $args[] = $return;
+                $r = call_user_func_array($callable, $args);
+                if ($r !== null) $return[] = $r;
             }
         }
         return $return;
@@ -112,8 +127,8 @@ class CallbackCollection
      */
     public function isCallable(): bool
     {
-        foreach ($this->callbackList as $priority => $list) {
-            foreach ($list as $i => $callable) {
+        foreach ($this->callbackList as $list) {
+            foreach ($list as $callable) {
                 if (is_callable($callable)) return true;
             }
         }

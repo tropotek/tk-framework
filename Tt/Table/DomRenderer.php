@@ -9,6 +9,7 @@ use Dom\Renderer\Traits\RendererTrait;
 use Dom\Template;
 use Tk\Log;
 use Tk\ObjectUtil;
+use Tk\Uri;
 use Tt\Table;
 
 class DomRenderer extends TableRenderer implements RendererInterface
@@ -61,7 +62,6 @@ class DomRenderer extends TableRenderer implements RendererInterface
         return $this->builder->getTemplate('tpl-' . $type);
     }
 
-
     public function getHtml(): string
     {
         return $this->show()->toString();
@@ -71,6 +71,12 @@ class DomRenderer extends TableRenderer implements RendererInterface
     {
         // This is the cell repeat
         $template = $this->getTemplate();
+
+        /* @var Action $action */
+        foreach ($this->getTable()->getActions() as $action) {
+            $template->appendHtml('actions', $action->getHtml());
+            $template->setVisible('actions');
+        }
 
         // Render table header elements
         $template->setAttr('thr', $this->getTable()->getHeaderAttrs()->getAttrList());
@@ -83,12 +89,24 @@ class DomRenderer extends TableRenderer implements RendererInterface
             $th->addCss('th', $cell->getHeaderAttrs()->getCssList());
 
             if ($cell->isSortable()) {
-                // todo mm: get the orderBy URL from the cell?
-                $orderUrl = '#';
-                $th->setAttr('a', 'href', $orderUrl);
-                $th->setText('a', e($cell->getHeader()));
+                // set header orderBy URL and css class
+                $orderUrl = $cell->getOrderByUrl();
+                $orderCss = '';
+                $order = $this->getTable()->getOrderBy();
+                $dir = '';
+                if ($order && $order[0] == '-') {
+                    $order = substr($order, 1);
+                    $dir = '-';
+                }
+                if ($order == $cell->getName()) {
+                    $orderCss = ($dir == '-') ? 'desc' : 'asc';
+                }
+                $th->addCss('a', $orderCss);
+                $th->setAttr('a', 'href', $orderUrl->toString());
+
+                $th->setHtml('a', $cell->getHeader());
             } else {
-                $th->setText('th', e($cell->getHeader()));
+                $th->setHtml('th', $cell->getHeader());
             }
             $th->appendRepeat();
         }
@@ -99,9 +117,11 @@ class DomRenderer extends TableRenderer implements RendererInterface
             $tr = $template->getRepeat('tr');
             foreach ($this->getTable()->getCells() as $cell) {
                 $td = $tr->getRepeat('td');
-                $td->setHtml('td', $cell->getValue($row));
+                $cellAttrs = $cell->getAttrList();
+                $td->setHtml('td', $cell->getValue($row) ?? '');
                 $td->setAttr('td', $cell->getAttrList());
                 $td->addCss('td', $cell->getCssList());
+                $cell->setAttrList($cellAttrs);
                 $td->appendRepeat();
             }
 
@@ -112,6 +132,7 @@ class DomRenderer extends TableRenderer implements RendererInterface
             $this->getTable()->setRowAttrs(clone $rowAttrs);
         }
 
+        $template->setAttr('tk-table', 'id', $this->getTable()->getId());
         $template->setAttr('table', $this->getTable()->getAttrList());
         $template->addCss('table', $this->getTable()->getCssList());
 
@@ -190,7 +211,6 @@ class DomRenderer extends TableRenderer implements RendererInterface
             $repeat->setAttr('pageUrl', 'href', $pageUrl->toString());
             if ($i == $page) {
                 $repeat->addCss('page', self::CSS_SELECTED);
-                $repeat->setAttr('pageUrl', 'title', 'Current Page ' . ($i));
             }
             $repeat->appendRepeat();
         }
@@ -198,10 +218,8 @@ class DomRenderer extends TableRenderer implements RendererInterface
         if ($page > 1) {
             $pageUrl->set($pageKey, $page-1);
             $template->setAttr('backUrl', 'href', $pageUrl->toString());
-            $template->setAttr('backUrl', 'title', 'Previous Page');
             $pageUrl->set($pageKey, 1);
             $template->setAttr('startUrl', 'href', $pageUrl->toString());
-            $template->setAttr('startUrl', 'title', 'Start Page');
         } else {
             $template->addCss('start', self::CSS_DISABLED);
             $template->addCss('back', self::CSS_DISABLED);
@@ -210,10 +228,8 @@ class DomRenderer extends TableRenderer implements RendererInterface
         if ($page < $endPage) {
             $pageUrl->set($pageKey, $page+1);
             $template->setAttr('nextUrl', 'href', $pageUrl->toString());
-            $template->setAttr('nextUrl', 'title', 'Next Page');
             $pageUrl->set($pageKey, $numPages);
             $template->setAttr('endUrl', 'href', $pageUrl->toString());
-            $template->setAttr('endUrl', 'title', 'Last Page');
         } else {
             $template->addCss('end', self::CSS_DISABLED);
             $template->addCss('next', self::CSS_DISABLED);
@@ -227,7 +243,8 @@ class DomRenderer extends TableRenderer implements RendererInterface
         $total = max(count($this->rows), $this->getTable()->getTotalRows());
         if (!$total) return;
 
-        $form = $template->getForm();
+        $form = $template->getForm('tk-table-form');
+        $template->removeAttr('form', 'id');
 
         $select = $form->getFormElement('limit');
         if (!($select instanceof Select)) return;
@@ -241,23 +258,6 @@ class DomRenderer extends TableRenderer implements RendererInterface
         $select->setAttribute('data-page', $this->getTable()->makeInstanceKey(Table::PARAM_PAGE));
         $select->setAttribute('data-total', $total);
         $select->setAttribute('name', null);
-
-        $js = <<<JS
-jQuery(function($) {
-    // Table limit on-change event
-    $('.tk-limit select').change(function(e) {
-        if ($(this).val() == 0 && $(this).data('total') > 1000) {
-            if (!confirm('WARNING: There are large number of records, page load time may be slowed.')) return false;
-        }
-        const searchParams = new URLSearchParams(location.search);
-        searchParams.set($(this).data('name'), $(this).val());
-        searchParams.delete($(this).data('page'));
-        location.search = searchParams.toString();
-        return false;
-    });
-});
-JS;
-        $template->appendJs($js);
 
         $template->setVisible('limit-wrap');
     }

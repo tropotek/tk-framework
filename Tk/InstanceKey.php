@@ -5,6 +5,8 @@ namespace Tk;
  * Create a unique key for object that need to be uniquely identified.
  * Implement this in objects that need a key to identify their instances
  *  within a session.
+ *
+ * @deprecated
  */
 interface InstanceKey
 {

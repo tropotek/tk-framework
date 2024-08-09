@@ -35,6 +35,12 @@ use Tk\Traits\SystemTrait;
 use Tk\Console\Command;
 use Tt\Db;
 
+
+/**
+ *
+ * @todo Time to refactor the Factory and try to remove a lot of unnecessary methods
+ *       Suggest moving all the MVC stuff to the Bs lib
+ */
 class Factory extends Collection
 {
     use SingletonTrait;
@@ -67,9 +73,12 @@ class Factory extends Collection
      */
     final public function getDb(string $name = 'mysql'): void
     {
-        throw new \Exception("Deprecated:: Use \Tt\Db object ");
+        throw new \Exception("Deprecated:: Use \Tt\Db static object ");
     }
 
+    /**
+     * @todo I think we should implement a DB session for the standard PHP platform as we had already
+     */
     public function getSession(): ?Session
     {
         if (!$this->has('session')) {
