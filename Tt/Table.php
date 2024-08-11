@@ -31,7 +31,7 @@ class Table
     protected Attributes $headerAttrs;
 
 
-    public function __construct(string $tableId = 't')
+    public function __construct(string $tableId = 'tbl')
     {
         $this->rowAttrs    = new Attributes();
         $this->headerAttrs = new Attributes();
@@ -51,7 +51,7 @@ class Table
         }
 
         // get the order by value from the request (if any)
-        $orderByKey = $this->makeInstanceKey(self::PARAM_ORDERBY);
+        $orderByKey = $this->makeRequestKey(self::PARAM_ORDERBY);
         if (!empty($request->query->get($orderByKey))) {
             $this->setOrderBy($request->query->get($orderByKey));
         }
@@ -226,8 +226,11 @@ class Table
         return $this->getActions()->prepend($action->getName(), $action, $refName);
     }
 
-
-    public function makeInstanceKey($key): string
+    /**
+     * Create request key with prepended string
+     * returns: `{id}_{$key}`
+     */
+    public function makeRequestKey($key): string
     {
         return $this->getId() . '_' . $key;
     }

@@ -16,7 +16,7 @@ class DbFilter extends \Tk\Collection
     {
         if ($params instanceof DbFilter) return $params;
         $obj = new self();
-        $obj->orderBy = $orderBy;
+        $obj->orderBy = preg_replace('/[^a-z0-9, _-]/', '', $orderBy);
         $obj->limit = $limit;
         $obj->offset = $offset;
         $obj->replace($params);

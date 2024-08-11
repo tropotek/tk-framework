@@ -148,7 +148,7 @@ class Cell
     {
         if (!$this->isSortable()) return null;
 
-        $key = $this->getTable()->makeInstanceKey(Table::PARAM_ORDERBY);
+        $key = $this->getTable()->makeRequestKey(Table::PARAM_ORDERBY);
         $url = Uri::create()->remove($key);
 
         $col = $this->getTable()->getOrderBy();
@@ -162,7 +162,7 @@ class Cell
             if ($dir == '-') {
                 $url->set($key, $dir.$col);
             } else {
-                $url->remove($key);
+                $url->set($key, '');
             }
         } else {
             $url->set($key, $this->getName());

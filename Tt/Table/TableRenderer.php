@@ -5,6 +5,8 @@ use Tt\Table;
 
 abstract class TableRenderer extends Renderer
 {
+    // TODO: this needs to be configurable (maybe along with template paths?)
+    const TABLE_JS = '/vendor/ttek/tk-framework/Tt/Table/templates/tkTable.js';
 
     // max page links to how in the pager
     const MAX_PAGES = 10;
@@ -23,17 +25,30 @@ abstract class TableRenderer extends Renderer
 
     protected string  $path          = '';
     protected array   $footer        = [];
+    protected array   $rows          = [];
     protected bool    $footerEnabled = true;
-    protected ?array  $rows          = null;
 
-    public function __construct(Table $table, array $rows, string $templatePath)
+    public function __construct(Table $table, string $templatePath)
     {
         if (!is_file($templatePath)) {
             throw new \Exception("File not found: $templatePath");
         }
         $this->setTable($table);
-        $this->rows = $rows;
         $this->path = $templatePath;
+    }
+
+    public function getRows(): ?array
+    {
+        return $this->rows;
+    }
+
+    public function setRows(array $rows, ?int $totalRows = null): static
+    {
+        if (!is_null($totalRows)) {
+            $this->getTable()->setTotalRows($totalRows);
+        }
+        $this->rows = $rows;
+        return $this;
     }
 
     public function getPath(): string
@@ -46,13 +61,13 @@ abstract class TableRenderer extends Renderer
         return $this->footerEnabled;
     }
 
-    public function setFooterEnabled(bool $footerEnabled): TableRenderer
+    public function setFooterEnabled(bool $footerEnabled): static
     {
         $this->footerEnabled = $footerEnabled;
         return $this;
     }
 
-    public function addFooter(string $name, Renderer $renderer): TableRenderer
+    public function addFooter(string $name, Renderer $renderer): static
     {
         $this->footer[$name] = $renderer;
         return $this;

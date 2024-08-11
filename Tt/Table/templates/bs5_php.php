@@ -7,7 +7,6 @@ use Tt\Table\TableRenderer;
 /** @var \Tt\Table\Cell $cell */
 
 /** @var array $rows */
-
 $rows = $this->rows;
 
 /** @var Table $table */
@@ -55,15 +54,13 @@ if ($endPage >= $numPages) {
     $endPage = $numPages;
 }
 $pageUrl = \Tk\Uri::create();
-$pageKey = $this->getTable()->makeInstanceKey(Table::PARAM_PAGE);
+$pageKey = $this->getTable()->makeRequestKey(Table::PARAM_PAGE);
 $pageUrl->remove($pageKey);
 
 
 ?>
 <div class="tk-table" id="<?= $table->getId() ?>">
-    <script src="/vendor/ttek/tk-framework/Tt/Table/templates/tkTable.js" data-priority="1"></script>
-
-<!--    <div class="tk-filters"></div>-->
+    <script src="<?= TableRenderer::TABLE_JS ?>" data-priority="1"></script>
 
     <form method="post" class="tk-table-form">
 
@@ -185,7 +182,7 @@ $pageUrl->remove($pageKey);
                 <div class="tk-limit col-3">
                     <div class="row justify-content-end">
                         <div class="col-auto">
-                            <select class="form-select form-select-sm" data-name="<?= $table->makeInstanceKey(Table::PARAM_LIMIT) ?>" data-page="<?= $table->makeInstanceKey(Table::PARAM_PAGE) ?>" data-total="<?= $total ?>">
+                            <select class="form-select form-select-sm" data-name="<?= $table->makeRequestKey(Table::PARAM_LIMIT) ?>" data-page="<?= $table->makeRequestKey(Table::PARAM_PAGE) ?>" data-total="<?= $total ?>">
                                 <? foreach (TableRenderer::LIMIT_LIST as $k => $v): ?>
                                     <option value="<?= eattr($v)?>" <?= ($table->getLimit() == $v) ? 'selected' : ''?>><?= e($k) ?></option>
                                 <? endforeach ?>

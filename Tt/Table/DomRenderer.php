@@ -7,6 +7,7 @@ use Dom\Form\Select;
 use Dom\Renderer\RendererInterface;
 use Dom\Renderer\Traits\RendererTrait;
 use Dom\Template;
+use Tk\Exception;
 use Tk\Log;
 use Tk\ObjectUtil;
 use Tk\Uri;
@@ -20,9 +21,9 @@ class DomRenderer extends TableRenderer implements RendererInterface
     protected Builder $builder;
 
 
-    public function __construct(Table $table, array $rows, string $templatePath)
+    public function __construct(Table $table, string $templatePath)
     {
-        parent::__construct($table, $rows, $templatePath);
+        parent::__construct($table, $templatePath);
         $this->init($this->path);
     }
 
@@ -113,7 +114,7 @@ class DomRenderer extends TableRenderer implements RendererInterface
 
         // Render table rows
         $rowAttrs = clone $this->getTable()->getRowAttrs();
-        foreach ($this->rows as $row) {
+        foreach ($this->getRows() as $row) {
             $tr = $template->getRepeat('tr');
             foreach ($this->getTable()->getCells() as $cell) {
                 $td = $tr->getRepeat('td');
@@ -138,7 +139,6 @@ class DomRenderer extends TableRenderer implements RendererInterface
 
 
         if ($this->isFooterEnabled()) {
-
             $this->showResults($template);
             $this->showPager($template);
             $this->showLimit($template);
@@ -146,6 +146,7 @@ class DomRenderer extends TableRenderer implements RendererInterface
             $template->setVisible('footer', $this->isFooterEnabled());
         }
 
+        $template->appendJsUrl(self::TABLE_JS, ['data-priority' => '1']);
         return $template;
     }
 
@@ -200,7 +201,7 @@ class DomRenderer extends TableRenderer implements RendererInterface
         }
 
         $pageUrl = \Tk\Uri::create();
-        $pageKey = $this->getTable()->makeInstanceKey(Table::PARAM_PAGE);
+        $pageKey = $this->getTable()->makeRequestKey(Table::PARAM_PAGE);
         $pageUrl->remove($pageKey);
 
         for ($i = $startPage; $i <= $endPage; $i++) {
@@ -254,8 +255,8 @@ class DomRenderer extends TableRenderer implements RendererInterface
         }
 
         $select->setValue($this->getTable()->getLimit());
-        $select->setAttribute('data-name', $this->getTable()->makeInstanceKey(Table::PARAM_LIMIT));
-        $select->setAttribute('data-page', $this->getTable()->makeInstanceKey(Table::PARAM_PAGE));
+        $select->setAttribute('data-name', $this->getTable()->makeRequestKey(Table::PARAM_LIMIT));
+        $select->setAttribute('data-page', $this->getTable()->makeRequestKey(Table::PARAM_PAGE));
         $select->setAttribute('data-total', $total);
         $select->setAttribute('name', null);
 

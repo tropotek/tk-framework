@@ -2,6 +2,8 @@
 
 namespace Tt\Table;
 
+use Tk\Exception;
+
 class PhpRenderer extends TableRenderer
 {
 

@@ -40,7 +40,7 @@ class Csv extends Action
 
     public function execute(Request $request): void
     {
-        $val = $this->getTable()->makeInstanceKey($this->getName());
+        $val = $this->getTable()->makeRequestKey($this->getName());
         $this->setActive($request->get($this->getName(), '') == $val);
         if (!$this->isActive()) return;
 
@@ -89,7 +89,7 @@ class Csv extends Action
 
     public function getHtml(): string
     {
-        $val = $this->getTable()->makeInstanceKey($this->getName());
+        $val = $this->getTable()->makeRequestKey($this->getName());
 
         return <<<HTML
 <button type="submit" name="{$this->getName()}" value="{$val}" class="tk-action-csv btn btn-sm btn-light"
