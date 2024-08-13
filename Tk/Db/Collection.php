@@ -110,14 +110,8 @@ class Collection extends \Tk\Collection
         $value = $this->encodeValue($value);
         if ($this->dbHas($key)) {
             Db::update($this->getTable(), 'key', compact('key', 'value'));
-//            Db::execute("UPDATE {$this->getTable()} SET value = :value WHERE `key` = :key",
-//                compact('key', 'value')
-//            );
         } else {
             Db::insert($this->getTable(), compact('key', 'value'));
-//            Db::execute("INSERT INTO {$this->getTable()} (`key`, value) VALUES (:key, :value)",
-//                compact('key', 'value')
-//            );
         }
         return $this;
     }
@@ -129,17 +123,12 @@ class Collection extends \Tk\Collection
             compact('key')
         );
         return $this->decodeValue($val ?? '');
-//        $stm = $this->getPdo()->prepare("SELECT value FROM {$this->getTable()} WHERE `key` = :key");
-//        $stm->execute(compact('key'));
-//        return $this->decodeValue($stm->fetchColumn() ?? '');
     }
 
     protected function dbDelete(string $key): static
     {
         if (!Db::tableExists($this->getTable())) return $this;
         Db::delete($this->getTable(), compact('key'));
-//        $stm = $this->getPdo()->prepare("DELETE FROM {$this->getTable()} WHERE `key` = :key");
-//        $stm->execute(compact('key'));
         return $this;
     }
 

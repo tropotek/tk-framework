@@ -1,13 +1,14 @@
 <?php
 namespace Tt;
 
-use Tk\Factory;
 use Tk\ObjectUtil;
 use Tk\Traits\DataTrait;
+use Tk\Traits\SystemTrait;
 use Tt\DataMap\DataMap;
 
 abstract class DbModel
 {
+    use SystemTrait;
     use DataTrait;
 
     /**
@@ -17,13 +18,6 @@ abstract class DbModel
      */
     protected static array $_MAPS = [];
 
-    protected string $_primaryKey = 'id';
-
-
-    public function __construct()
-    {
-        $this->_primaryKey = self::getDataMap()->getPrimaryKey()->getProperty();
-    }
 
     /**
      * Magic method called by DbStatement to map a row to an object
@@ -32,7 +26,6 @@ abstract class DbModel
     public function __map(array $row): void
     {
         $map = static::getDataMap();
-        $this->_primaryKey = strval($map->getPrimaryKey()?->getProperty());
         $map->loadObject($this, $row);
     }
 
@@ -93,22 +86,23 @@ abstract class DbModel
 	 */
     public function reload(): void
     {
-        if (!method_exists($this, 'get')) return;
+        $map = $this->getDataMap();
+        $priKey = $map->getPrimaryKey()?->getProperty();
+        if (is_null($priKey)) return;
+        $id = $this->$priKey;
 
-        if ($this->getId()) {
-            $obj = static::get($this->getId());
+        if ($id && method_exists($this, 'get')) {
+            $obj = static::get($id);
+        } elseif ($id && method_exists($this, 'find')) {
+            $obj = static::find($id);
         } else {
             $obj = new static();
         }
+        if (is_null($obj)) return;
+
 		foreach (get_object_vars($obj) as $prop => $val) {
 			$this->$prop = $val;
 		}
-    }
-
-    public function getId(): int
-    {
-        if (!$this->_primaryKey) return 0;
-        return intval($this->{$this->_primaryKey});
     }
 
 }

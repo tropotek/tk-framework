@@ -116,7 +116,7 @@ class Uri implements \IteratorAggregate
      *   \Tk\Uri::create('http://example.com/test');
      * </code>
      */
-    public static function create(string|Uri|null $spec = null, array $queryParams = []): null|Uri
+    public static function create(string|Uri|null $spec = null, array $queryParams = []): Uri
     {
         if ($spec instanceof Uri) return clone $spec;
         return new static($spec, $queryParams);

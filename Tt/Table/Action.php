@@ -58,7 +58,7 @@ class Action extends Renderer
     }
 
     /**
-     * @callable function (ActionInterface $action, Request $request) { }
+     * @callable function (Action $action, Request $request) { }
      */
     public function addOnExecute(callable $callable, int $priority = CallbackCollection::DEFAULT_PRIORITY): static
     {
@@ -72,7 +72,7 @@ class Action extends Renderer
     }
 
     /**
-     * @callable function (ActionInterface $action) { }
+     * @callable function (Action $action) { }
      */
     public function addOnShow(callable $callable, int $priority = CallbackCollection::DEFAULT_PRIORITY): static
     {

@@ -106,6 +106,18 @@ class Cell
         return $this;
     }
 
+    public function addHeaderCss(string $css): static
+    {
+        $this->headerAttrs->addCss($css);
+        return $this;
+    }
+
+    public function setHeaderAttr(array|string $name, string $value = null): static
+    {
+        $this->headerAttrs->setAttr($name, $value);
+        return $this;
+    }
+
     public function setVisible(bool $visible): static
     {
         $this->visible = $visible;

@@ -389,7 +389,8 @@ class Db
 		if (is_object($values)) $values = get_object_vars($values);
 		$cols = implode(', ', array_keys($values));
 		$vals = preg_replace('/([^, ]+)/', ':$1', $cols);
-		return self::execute("INSERT INTO {$table} ({$cols}) VALUES ({$vals})", $values);
+		$cols = implode(', ', array_map(fn($r) => '`'.$r.'`', array_keys($values)));
+		return self::execute("INSERT INTO $table ($cols) VALUES ($vals)", $values);
 	}
 
 	/**
@@ -401,7 +402,8 @@ class Db
 		if (is_object($values)) $values = get_object_vars($values);
 		$cols = implode(', ', array_keys($values));
 		$vals = preg_replace('/([^, ]+)/', ':$1', $cols);
-		return self::execute("INSERT IGNORE INTO {$table} ({$cols}) VALUES ({$vals})", $values);
+        $cols = implode(', ', array_map(fn($r) => '`'.$r.'`', array_keys($values)));
+		return self::execute("INSERT IGNORE INTO $table ($cols) VALUES ($vals)", $values);
 	}
 
 	/**
@@ -414,11 +416,11 @@ class Db
 		if (is_object($values)) $values = get_object_vars($values);
         $where = [];
 		foreach (array_keys($values) as $col) {
-			$where[] = "{$col} = :{$col}";
+			$where[] = "`$col` = :$col";
         }
 		$where = implode(' AND ', $where);
 
-        return self::execute("DELETE FROM {$table} WHERE {$where}", $values);
+        return self::execute("DELETE FROM $table WHERE $where", $values);
     }
 
 	/**
@@ -436,13 +438,13 @@ class Db
 		$vals = [];
 		foreach ($values as $column => $value) {
 			if ($column != $primaryKey) {
-				$set[] = "{$column} = :{$column}";
+				$set[] = "`$column` = :$column";
 			}
 			$vals[$column] = $value;
 		}
 
 		$set = implode(', ', $set);
-		$sql = "UPDATE {$table} SET {$set} WHERE {$primaryKey} = :{$primaryKey}";
+		$sql = "UPDATE $table SET $set WHERE `$primaryKey` = :$primaryKey";
 		return self::execute($sql, $vals);
 	}
 
@@ -461,17 +463,17 @@ class Db
 		$set = [];
 		foreach (array_keys($values) as $column) {
 			if ($column != $primaryKey) {
-				$set[] = "{$column} = :{$column}";
+				$set[] = "`$column` = :$column";
 			}
 		}
 
 		$set = implode(', ', $set);
 
 		if ($set) {
-			$sql = "INSERT INTO {$table} ({$cols}) VALUES ({$vals}) ON DUPLICATE KEY UPDATE {$set}";
+			$sql = "INSERT INTO $table ($cols) VALUES ($vals) ON DUPLICATE KEY UPDATE $set";
 		} else {
 			// only got primary key column, insert ignore new row
-			$sql = "INSERT IGNORE INTO {$table} ({$cols}) VALUES ({$vals})";
+			$sql = "INSERT IGNORE INTO $table ($cols) VALUES ($vals)";
 		}
 
 		return self::execute($sql, $values);
@@ -552,7 +554,7 @@ class Db
         ];
         $table = self::escapeTable($table);
 
-        $query = "DESCRIBE `{$table}`";
+        $query = "DESCRIBE `$table`";
         try {
             $list = [];
             $stm = self::$pdo->prepare($query);

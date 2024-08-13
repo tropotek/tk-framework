@@ -7,12 +7,12 @@ class DbFilter extends \Tk\Collection
 {
 
     protected string $orderBy   = '';
-    protected int    $limit     = 0;
-    protected int    $offset    = 0;
+    protected ?int   $limit     = null;
+    protected ?int   $offset    = null;
     protected string $where     = '';
 
 
-    public static function create(null|array|DbFilter $params, string $orderBy = '', int $limit = 10, int $offset = 0): static
+    public static function create(null|array|DbFilter $params, string $orderBy = '', ?int $limit = null, ?int $offset = null): static
     {
         if ($params instanceof DbFilter) return $params;
         $obj = new self();
@@ -58,12 +58,12 @@ class DbFilter extends \Tk\Collection
         return $this->orderBy;
     }
 
-    public function getLimit(): int
+    public function getLimit(): ?int
     {
         return $this->limit;
     }
 
-    public function getOffset(): int
+    public function getOffset(): ?int
     {
         return $this->offset;
     }
@@ -85,9 +85,9 @@ class DbFilter extends \Tk\Collection
 
         // LIMIT
         $limitStr = '';
-        if ($this->getLimit() > 0) {
+        if (($this->getLimit() ?? 0) > 0) {
             $limitStr = 'LIMIT ' . $this->getLimit();
-            if ($this->getOffset()) {
+            if (($this->getOffset() ?? 0) > 0) {
                 $limitStr .= ' OFFSET ' . $this->getOffset();
             }
         }
@@ -98,11 +98,11 @@ class DbFilter extends \Tk\Collection
         }
 
         $sql = <<<SQL
-%s
-%s
-%s
-SQL;
-        return trim(sprintf($sql, $where, $orderBy, $limitStr));
+            $where
+            $orderBy
+            $limitStr
+        SQL;
+        return trim($sql);
     }
 
     private function getSqlOrderBy(): string
