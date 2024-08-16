@@ -6,7 +6,7 @@ class DbException extends \Exception
 
     protected string $dump = '';
 
-    public function __construct(string $message = "", int|string $code = 0, \Throwable $previous = null, string $dump = '', array|object|null $args = null)
+    public function __construct(string $message = "", int|string $code = 0, string $dump = '', array|object|null $args = null)
     {
         if ($dump) {
             $dump = explode("\n", str_replace([',', ' WHERE', ' FROM', ' LIMIT', ' ORDER', ' LEFT JOIN'],
@@ -21,7 +21,7 @@ class DbException extends \Exception
         }
         $this->dump = $dump;
 
-        parent::__construct($message, (int)$code, $previous);
+        parent::__construct($message, (int)$code);
     }
 
     public function __toString(): string

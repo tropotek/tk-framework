@@ -214,7 +214,7 @@ class Db
 
             return $stm->rowCount();
         } catch (\Exception $e) {
-            throw new DbException($e->getMessage(), $e->getCode(), null, $query);
+            throw new DbException($e->getMessage(), $e->getCode(), $query);
         }
     }
 
@@ -243,7 +243,7 @@ class Db
             }
             return $rows;
         } catch (\Exception $e) {
-            throw new DbException($e->getMessage(), $e->getCode(), $e, $query, $params);
+            throw new DbException($e->getMessage(), $e->getCode(), $query, $params);
         }
     }
 
@@ -271,7 +271,7 @@ class Db
 
             return $row;
         } catch (\Exception $e) {
-            throw new DbException($e->getMessage(), $e->getCode(), $e, $query);
+            throw new DbException($e->getMessage(), $e->getCode(), $query);
         }
 	}
 
@@ -293,7 +293,7 @@ class Db
 
             return $stm->fetchColumn(0);
         } catch (\Exception $e) {
-            throw new DbException($e->getMessage(), $e->getCode(), $e, $query);
+            throw new DbException($e->getMessage(), $e->getCode(), $query);
         }
 	}
 
@@ -586,7 +586,7 @@ class Db
             }
             return $list;
         } catch (\Exception $e) {
-            throw new DbException($e->getMessage(), $e->getCode(), null, $query);
+            throw new DbException($e->getMessage(), $e->getCode(), $query);
         }
     }
 

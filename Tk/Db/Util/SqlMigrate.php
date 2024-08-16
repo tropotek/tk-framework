@@ -3,6 +3,8 @@ namespace Tk\Db\Util;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Tk\Config;
+use Tk\Factory;
 use Tk\FileUtil;
 use Tk\Traits\SystemTrait;
 use Tt\Db;
@@ -50,6 +52,23 @@ class SqlMigrate
     {
         $this->deleteBackup();
     }
+
+
+    //
+    public static function migrateSite(?callable $write = null) :bool
+    {
+        $migrate = new SqlMigrate(Db::getPdo(), Factory::instance()->getLogger());
+        $migrateList = Config::instance()->get('db.migrate.paths', []);
+        vd($migrateList);
+        $processed = $migrate->migrateList($migrateList);
+        foreach ($processed as $file) {
+            if (is_callable($write)) {
+                call_user_func_array($write, ['Migrated ' . $file]);
+            }
+        }
+        return true;
+    }
+
 
     protected function tableExists(string $table): bool
     {
