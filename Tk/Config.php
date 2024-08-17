@@ -1,7 +1,6 @@
 <?php
 namespace Tk;
 
-use Psr\Log\LogLevel;
 use Tk\Traits\SingletonTrait;
 use Tk\Traits\SystemTrait;
 
@@ -99,6 +98,16 @@ class Config extends Collection
     public function isDebug(): bool
     {
         return $this->get('debug', false);
+    }
+
+    public function isProd(): bool
+    {
+        return $this->get('env.type', 'dev') == 'prod';
+    }
+
+    public function isDev(): bool
+    {
+        return $this->get('env.type', 'dev') == 'dev';
     }
 
     /**

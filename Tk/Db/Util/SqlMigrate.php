@@ -53,18 +53,55 @@ class SqlMigrate
         $this->deleteBackup();
     }
 
-
-    //
+    /**
+     * execute new site/lib sql files that have not been migrated yet
+     */
     public static function migrateSite(?callable $write = null) :bool
     {
         $migrate = new SqlMigrate(Db::getPdo(), Factory::instance()->getLogger());
         $migrateList = Config::instance()->get('db.migrate.paths', []);
-        vd($migrateList);
         $processed = $migrate->migrateList($migrateList);
         foreach ($processed as $file) {
             if (is_callable($write)) {
                 call_user_func_array($write, ['Migrated ' . $file]);
             }
+        }
+        return true;
+    }
+
+    /**
+     * execute static sql file listed in the config setting 'db.migrate.static'
+     */
+    public static function migrateStatic(?callable $write = null) :bool
+    {
+        $config = Config::instance();
+        $dbBackup = new SqlBackup(Db::getPdo());
+        foreach ($config->get('db.migrate.static') as $file) {
+            $path = "{$config->getBasePath()}{$file}";
+            if (is_file($path)) {
+                call_user_func_array($write, ['Applying ' . $file]);
+                $dbBackup->restore($path);
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Execute the dev php file to allow configuration of a dev environment.
+     * Cannot be executed in a production environment.
+     */
+    public static function migrateDev(?callable $write = null) :bool
+    {
+        $config = Config::instance();
+        if (!$config->isDev()) {
+            call_user_func_array($write, ['Warning: Ignoring dev environment configuration']);
+            return false;
+        }
+        $devFile = $config->getBasePath() . $config->get('debug.script');
+        if (is_file($devFile)) {
+            call_user_func_array($write, ['Setup dev environment: ' . $config->get('debug.script')]);
+            include($devFile);
         }
         return true;
     }

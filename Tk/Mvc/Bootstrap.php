@@ -34,8 +34,10 @@ class Bootstrap
 
         TextEncrypt::$encryptKey = $this->getConfig()->get('system.encrypt', '');
 
-        if ($this->getConfig()->isDebug()) {
-            // Allow self-signed certs in file_get_contents in debug mode
+        //\Bs\Db\User::$USER_CLASS = \App\Db\User::class;
+
+        if ($this->getConfig()->isDev()) {
+            // Allow self-signed certs in file_get_contents in dev environment
             stream_context_set_default(["ssl" => [
                 "verify_peer" => false,
                 "verify_peer_name" => false,

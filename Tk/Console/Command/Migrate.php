@@ -46,27 +46,15 @@ class Migrate extends Console
 
             // Migrate new SQL files
             $this->write('Migration Starting.');
-            $migrateList = $this->getConfig()->get('db.migrate.paths', []);
-            $outputLogger = new ConsoleOutputLogger($output);
-            $migrate = new SqlMigrate(Db::getPdo(), $outputLogger);
-            $migrate->migrateList($migrateList);
+
+            // migrate site sql files
+            SqlMigrate::migrateSite([$this, 'write']);
 
             // Execute static files
-            $config = $this->getConfig();
-            $dbBackup = new SqlBackup(Db::getPdo());
-            foreach ($config->get('db.migrate.static') as $file) {
-                $path = "{$config->getBasePath()}/src/config/sql/{$file}";
-                if (is_file($path)) {
-                    $this->writeGreen('Applying ' . $file);
-                    $dbBackup->restore($path);
-                }
-            }
+            SqlMigrate::migrateStatic([$this, 'writeGreen']);
 
-            $devFile = $this->getSystem()->makePath($config->get('debug.script'));
-            if ($config->isDebug() && is_file($devFile)) {
-                $this->writeBlue('Setup dev environment: ' . $config->get('debug.script'));
-                include($devFile);
-            }
+            // setup dev environment if site in dev mode
+            SqlMigrate::migrateDev([$this, 'writeBlue']);
 
             $this->write('Migration Complete.');
         } catch (\Exception $e) {

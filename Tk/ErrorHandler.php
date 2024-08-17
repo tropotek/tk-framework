@@ -2,31 +2,32 @@
 namespace Tk;
 
 use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Tk\Traits\SingletonTrait;
 
 /**
  * To set this up just call ErrorHandler::instance($logger) at the earliest possible convenience.
  *
- * NOTICE: for startup errors and errors produced before this object is initialised
+ * NOTICE: for startup errors and errors produced before this object is initialized
  * see the php system log file if your php.ini is set up for it.
  */
 class ErrorHandler
 {
     use SingletonTrait;
 
-    protected ?LoggerInterface $log = null;
+    protected LoggerInterface $logger;
 
 
-    public function __construct(LoggerInterface $log = null)
+    public function __construct(?LoggerInterface $logger = null)
     {
-        $this->log = $log;
+        $this->logger = $logger ?? new NullLogger();
         set_error_handler([$this, 'errorHandler']);
     }
 
-    public static function instance(LoggerInterface $log = null): ErrorHandler
+    public static function instance(LoggerInterface $logger = null): ErrorHandler
     {
         if (static::$_INSTANCE == null) {
-            static::$_INSTANCE = new static($log);
+            static::$_INSTANCE = new static($logger);
         }
         return static::$_INSTANCE;
     }
@@ -61,11 +62,7 @@ class ErrorHandler
 
         if ($errno == E_DEPRECATED || $errno == E_USER_DEPRECATED || $errno == E_RECOVERABLE_ERROR || $errno == E_WARNING || $errno == E_NOTICE) {
             $msg = trim($e->getMessage()) . ' in ' . $errfile . ' on line ' . $errline;
-            if ($this->log) {
-                $this->log->warning($msg);
-            } else {
-                error_log($msg . "\n");
-            }
+            $this->logger->warning($msg);
             return true;
         }
 

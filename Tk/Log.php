@@ -3,6 +3,7 @@ namespace Tk;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
+use Psr\Log\NullLogger;
 use Tk\Traits\SingletonTrait;
 
 /**
@@ -19,21 +20,22 @@ class Log
     /**
      * use this in your query to disable logging for a request
      * Handy for API calls to reduce clutter in a log
+     * @todo: move this property to the \Bs lib somewhere??
      */
     const NO_LOG = 'nolog';
 
     private LoggerInterface $logger;
 
 
-    protected function __construct(LoggerInterface $logger)
+    protected function __construct(?LoggerInterface $logger = null)
     {
-        $this->logger = $logger;
+        $this->logger = $logger ?? new NullLogger();
     }
 
     public static function instance(?LoggerInterface $logger = null): Log
     {
         if (!self::$_INSTANCE && $logger) {
-            self::$_INSTANCE = new static($logger ?? new \Symfony\Component\HttpKernel\Log\Logger());
+            self::$_INSTANCE = new static($logger);
         }
         return self::$_INSTANCE;
     }

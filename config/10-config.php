@@ -56,12 +56,16 @@ return function (Config $config)
         array_map(fn($path) => $vendorPath . '/' . $path . '/config/sql' , $libPaths);
     $config->set('db.migrate.paths', $migratePaths);
 
-    // These files are always executed in the /src/config/sql path
+    // These files are execute if they exist
     $config->set('db.migrate.static', [
-        'views.sql',
-        'procedures.sql',
-        'events.sql',
-        'triggers.sql'
+        '/vendor/ttek/tk-base/config/sql/views.sql',
+        '/vendor/ttek/tk-base/config/sql/procedures.sql',
+        '/vendor/ttek/tk-base/config/sql/events.sql',
+        '/vendor/ttek/tk-base/config/sql/triggers.sql',
+        '/src/config/sql/views.sql',
+        '/src/config/sql/procedures.sql',
+        '/src/config/sql/events.sql',
+        '/src/config/sql/triggers.sql'
     ]);
 
     $config->set('system.encrypt', md5($config->getHostname()));

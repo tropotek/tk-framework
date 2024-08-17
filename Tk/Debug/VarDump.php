@@ -13,23 +13,20 @@ namespace Tk\Debug {
 
         protected string $basePath = '';
 
-        protected ?LoggerInterface $logger = null;
+        protected LoggerInterface $logger;
 
 
         public function __construct(?LoggerInterface $logger = null, string $basePath = '')
         {
-            $this->logger = $logger;
+            $this->logger = $logger ?? new NullLogger();
             $this->basePath = $basePath;
         }
 
         public static function instance(?LoggerInterface $logger = null, string $basePath = ''): VarDump
         {
             if (static::$_INSTANCE == null) {
-                if (!$logger)
-                    $logger = new NullLogger();
                 if (!$basePath)
                     $basePath = dirname(__DIR__, 3);
-
                 static::$_INSTANCE = new static($logger, $basePath);
             }
             return static::$_INSTANCE;
@@ -98,20 +95,20 @@ namespace Tk\Debug {
         {
             $pad = str_repeat('  ', $nest * 2 + 1);
 
-            $type = 'native';
+            //$type = 'native';
             $str = $var;
 
             if ($var === null) {
                 $str = '{NULL}';
             } else if (is_bool($var)) {
-                $type = 'Boolean';
+                //$type = 'Boolean';
                 $str = $var ? '{true}' : '{false}';
             } else if (is_string($var)) {
-                $type = 'String';
+                //$type = 'String';
                 $str = str_replace("\0", '|', $var);
                 $str = "'{$str}'";
             } else if (is_resource($var)) {
-                $type = 'Resource';
+                //$type = 'Resource';
                 $str = get_resource_type($var);
             } else if (is_array($var)) {
                 $type = sprintf('Array[%s]', count($var));
