@@ -1,7 +1,6 @@
 <?php
 namespace Tt\Table;
 
-use Symfony\Component\HttpFoundation\Request;
 use Tk\CallbackCollection;
 
 class Action extends Renderer
@@ -23,10 +22,10 @@ class Action extends Renderer
         $this->label     = ucfirst(preg_replace('/[A-Z]/', ' $0', $name));
     }
 
-    public function execute(Request $request): void
+    public function execute(): void
     {
         if (!$this->isActive()) return;
-        $this->getOnExecute()->execute($this, $request);
+        $this->getOnExecute()->execute($this);
     }
 
     public function getHtml(): string
@@ -58,7 +57,7 @@ class Action extends Renderer
     }
 
     /**
-     * @callable function (Action $action, Request $request) { }
+     * @callable function (Action $action) { }
      */
     public function addOnExecute(callable $callable, int $priority = CallbackCollection::DEFAULT_PRIORITY): static
     {

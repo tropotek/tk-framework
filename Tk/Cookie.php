@@ -106,7 +106,12 @@ class Cookie
     {
         $id = trim($this->get(self::BROWSER_ID)) ?? '';
         if (!preg_match('/[0-9A-F]{32}/i', $id)) {
-            $id = md5(time().$this->getRequest()->getClientIp().$this->getRequest()->server->get('HTTP_USER_AGENT'));
+            $id = md5(
+                time().
+                ($_SERVER['REMOTE_ADDR'] ?? '1.1.1.1').
+                ($_SERVER['HTTP_USER_AGENT'] ?? 'TK-UNKNOWN-AGENT')
+            );
+            //$id = md5(time().$this->getRequest()->getClientIp().$this->getRequest()->server->get('HTTP_USER_AGENT'));
         }
         $this->set(self::BROWSER_ID, $id);
         return $id;

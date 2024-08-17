@@ -67,7 +67,7 @@ class Bootstrap
         // init session
         $this->getFactory()->getSession();
 
-        // ready the Request
+        // init the Request
         $this->getFactory()->getRequest();
 
         // Setup EventDispatcher and subscribe events, loads routes

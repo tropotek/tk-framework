@@ -134,8 +134,6 @@ class Factory extends Collection
     {
         if (!$this->has('request')) {
             $request = Request::createFromGlobals();
-            //$this->getSession(); // init our session
-            error_log('test');
             $request->setSession(new Session());
             $this->set('request', $request);
         }
@@ -206,6 +204,7 @@ class Factory extends Collection
 
     public function getControllerResolver(): ControllerResolver
     {
+        // todo: move to FrontController
         if (!$this->has('controllerResolver')) {
             $controllerResolver = new ControllerResolver();
             $this->set('controllerResolver', $controllerResolver);
@@ -215,6 +214,7 @@ class Factory extends Collection
 
     public function getArgumentResolver(): ArgumentResolver
     {
+        // todo: move to FrontController
         if (!$this->has('argumentResolver')) {
             $argumentResolver = new ArgumentResolver();
             $this->set('argumentResolver', $argumentResolver);
@@ -227,6 +227,7 @@ class Factory extends Collection
      */
     public function getEventDispatcher(): ?EventDispatcher
     {
+        // todo: move to FrontController, keep method save in factory
         if (!$this->has('eventDispatcher')) {
             $dispatcher = new EventDispatcher();
             $this->set('eventDispatcher', $dispatcher);
@@ -236,12 +237,17 @@ class Factory extends Collection
 
     public function initEventDispatcher(): ?EventDispatcher
     {
+        // todo: move to bootstrap
         if ($this->getEventDispatcher()) {
             new Dispatch($this->getEventDispatcher());
         }
         return $this->getEventDispatcher();
     }
 
+    /**
+     * @deprecated Soon to be removed, use \Tk\Log::error(), etc
+     * @todo remove monolog and use php error log, investigate options
+     */
     public function getLogger(): ?LoggerInterface
     {
         if (!$this->has('logger')) {
@@ -301,9 +307,9 @@ class Factory extends Collection
     /**
      * Get the composer Class Loader object returned from the autoloader in the _prepend.php file
      */
-    public function getClassLoader(): ?ClassLoader
+    public function getComposerLoader(): ?ClassLoader
     {
-        return $this->get('classLoader');
+        return $this->get('composerLoader');
     }
 
     /**
@@ -311,12 +317,13 @@ class Factory extends Collection
      */
     public function getMailGateway(): ?Gateway
     {
+        // move init to bootstrap keep method
         if (!$this->has('mailGateway')) {
             $params = $this->getConfig()->all();
             if (!$this->getSystem()->isCli()) {
                 $params['clientIp'] = $this->getRequest()->getClientIp();
                 $params['hostname'] = $this->getRequest()->getHost();
-                $params['referer'] = $this->getRequest()->server->get('HTTP_REFERER', '');
+                $params['referer']  = $_SERVER['HTTP_REFERER'] ?? '';
             }
             $gateway = new \Tk\Mail\Gateway($params);
             $gateway->setDispatcher($this->getEventDispatcher());

@@ -82,10 +82,10 @@ class System
      */
     public function isRefreshCacheRequest(): bool
     {
-        $headers = $this->getFactory()->getRequest()->headers;
-        if ($headers->get('Pragma') == 'no-cache' || $headers->get('Cache-Control') == 'no-cache')
-            return true;
-        return false;
+        return (
+            ($_SERVER['HTTP_PRAGMA'] ?? '') == 'no-cache' ||
+            ($_SERVER['HTTP_CACHE_CONTROL'] ?? false) == 'no-cache'
+        );
     }
 
     /**

@@ -63,11 +63,6 @@ trait SystemTrait
         return $this->getFactory()->getTemplateLoader()->loadFile($path);
     }
 
-    public function getRequest(): \Symfony\Component\HttpFoundation\Request
-    {
-        return $this->getFactory()->getRequest();
-    }
-
     public function getCookie(): Cookie
     {
         return $this->getFactory()->getCookie();

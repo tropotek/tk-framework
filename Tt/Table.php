@@ -1,9 +1,7 @@
 <?php
 namespace Tt;
 
-use Symfony\Component\HttpFoundation\Request;
 use Tk\Collection;
-use Tk\Str;
 use Tk\Ui\Attributes;
 use Tk\Ui\Traits\AttributesTrait;
 use Tt\Table\Action;
@@ -43,17 +41,17 @@ class Table
     /**
      * Execute table actions
      */
-    public function execute(Request $request): static
+    public function execute(): static
     {
         /* @var Action $action */
         foreach ($this->getActions() as $action) {
-            $action->execute($request);
+            $action->execute();
         }
 
         // get the order by value from the request (if any)
         $orderByKey = $this->makeRequestKey(self::PARAM_ORDERBY);
-        if (!empty($request->query->get($orderByKey))) {
-            $this->setOrderBy($request->query->get($orderByKey));
+        if (isset($_REQUEST[$orderByKey])) {
+            $this->setOrderBy(trim($_REQUEST[$orderByKey]));
         }
 
         return $this;
