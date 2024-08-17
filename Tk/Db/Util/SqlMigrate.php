@@ -6,6 +6,7 @@ use Psr\Log\NullLogger;
 use Tk\Config;
 use Tk\Factory;
 use Tk\FileUtil;
+use Tk\Log;
 use Tk\Traits\SystemTrait;
 use Tt\Db;
 
@@ -37,14 +38,11 @@ class SqlMigrate
     protected \PDO             $db;
     protected string           $table      = '';
     protected string           $backupFile = '';
-    protected ?LoggerInterface $logger     = null;
 
 
-    public function __construct(\PDO $db, ?LoggerInterface $logger = null, string $table = '_migrate')
+    public function __construct(\PDO $db, string $table = '_migrate')
     {
         $this->db = $db;
-        if (!$logger) $logger = new NullLogger();
-        $this->logger = $logger;
         $this->table = Db::escapeTable($table);
     }
 
@@ -58,7 +56,7 @@ class SqlMigrate
      */
     public static function migrateSite(?callable $write = null) :bool
     {
-        $migrate = new SqlMigrate(Db::getPdo(), Factory::instance()->getLogger());
+        $migrate = new SqlMigrate(Db::getPdo());
         $migrateList = Config::instance()->get('db.migrate.paths', []);
         $processed = $migrate->migrateList($migrateList);
         foreach ($processed as $file) {
@@ -187,7 +185,7 @@ class SqlMigrate
             }
 
         } catch (\Exception $e){
-            $this->logger->error($e->__toString());
+            Log::error($e->__toString());
         }
         return false;
     }
@@ -274,7 +272,7 @@ SQL;
 
     protected function insertPath(string $path): int
     {
-        $this->logger->info("Migrating file: {$this->toRelative($path)}");
+        Log::info("Migrating file: {$this->toRelative($path)}");
         $path = $this->toRelative($path);
         $rev = $this->toRev($path);
         $stm = $this->getDb()->prepare("INSERT INTO `{$this->getTable()}` (path, rev, created) VALUES (:path, :rev, NOW())");

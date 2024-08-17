@@ -13,21 +13,18 @@ namespace Tk\Debug {
 
         protected string $basePath = '';
 
-        protected LoggerInterface $logger;
 
-
-        public function __construct(?LoggerInterface $logger = null, string $basePath = '')
+        public function __construct(string $basePath = '')
         {
-            $this->logger = $logger ?? new NullLogger();
             $this->basePath = $basePath;
         }
 
-        public static function instance(?LoggerInterface $logger = null, string $basePath = ''): VarDump
+        public static function instance(string $basePath = ''): VarDump
         {
             if (static::$_INSTANCE == null) {
                 if (!$basePath)
                     $basePath = dirname(__DIR__, 3);
-                static::$_INSTANCE = new static($logger, $basePath);
+                static::$_INSTANCE = new static($basePath);
             }
             return static::$_INSTANCE;
         }
@@ -40,17 +37,6 @@ namespace Tk\Debug {
         public function setBasePath(string $basePath): VarDump
         {
             $this->basePath = $basePath;
-            return $this;
-        }
-
-        public function getLogger(): ?LoggerInterface
-        {
-            return $this->logger;
-        }
-
-        public function setLogger(?LoggerInterface $logger): VarDump
-        {
-            $this->logger = $logger;
             return $this;
         }
 
@@ -144,6 +130,7 @@ namespace Tk\Debug {
 namespace { // global code
     use Tk\Debug\VarDump;
     use Tk\Factory;
+    use Tk\Log;
 
     /**
      * logger Helper function
@@ -151,13 +138,13 @@ namespace { // global code
      */
     function vd(): string
     {
-        $vd = VarDump::instance(Factory::instance()->getLogger());
+        $vd = VarDump::instance();
         $line = current(debug_backtrace());
         $path = str_replace($vd->getBasePath(), '', $line['file']);
         $str = "\n";
         $str .= $vd->makeDump(func_get_args());
         $str .= sprintf('vd(%s) %s [%s];', implode(', ', $vd->getTypeArray(func_get_args())), $path, $line['line']) . "\n";
-        $vd->getLogger()->debug($str);
+        Log::debug($str);
         return $str;
     }
 
@@ -167,13 +154,13 @@ namespace { // global code
      */
     function vdd(): string
     {
-        $vd = VarDump::instance(Factory::instance()->getLogger());
+        $vd = VarDump::instance();
         $line = current(debug_backtrace());
         $path = str_replace($vd->getBasePath(), '', $line['file']);
         $str = "\n";
         $str .= $vd->makeDump(func_get_args(), true);
         $str .= sprintf('vdd(%s) %s [%s]', implode(', ', $vd->getTypeArray(func_get_args())), $path, $line['line']) . "\n";
-        $vd->getLogger()->debug($str);
+        Log::debug($str);
         return $str;
     }
 }

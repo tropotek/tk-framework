@@ -5,17 +5,15 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpKernel\Event\TerminateEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Tk\Log;
 
 class ShutdownHandler implements EventSubscriberInterface
 {
-    private LoggerInterface $logger;
-
     protected float $scriptStartTime = 0;
 
 
-    function __construct(LoggerInterface $logger, float $scriptStartTime = 0)
+    function __construct(float $scriptStartTime = 0)
     {
-        $this->logger = $logger;
         $this->scriptStartTime = $scriptStartTime;
         register_shutdown_function(array($this, 'onShutdown'));
     }
@@ -37,14 +35,14 @@ class ShutdownHandler implements EventSubscriberInterface
         ));
     }
 
-    private function info($str)
+    private function info(string $str)
     {
-        $this->logger->info($str);
+        Log::info($str);
     }
 
-    private function debug($str)
+    private function debug(string $str)
     {
-        $this->logger->debug($str);
+        Log::debug($str);
     }
 
     /**

@@ -15,19 +15,16 @@ class ErrorHandler
 {
     use SingletonTrait;
 
-    protected LoggerInterface $logger;
 
-
-    public function __construct(?LoggerInterface $logger = null)
+    public function __construct()
     {
-        $this->logger = $logger ?? new NullLogger();
         set_error_handler([$this, 'errorHandler']);
     }
 
-    public static function instance(LoggerInterface $logger = null): ErrorHandler
+    public static function instance(): ErrorHandler
     {
         if (static::$_INSTANCE == null) {
-            static::$_INSTANCE = new static($logger);
+            static::$_INSTANCE = new static();
         }
         return static::$_INSTANCE;
     }
@@ -62,7 +59,7 @@ class ErrorHandler
 
         if ($errno == E_DEPRECATED || $errno == E_USER_DEPRECATED || $errno == E_RECOVERABLE_ERROR || $errno == E_WARNING || $errno == E_NOTICE) {
             $msg = trim($e->getMessage()) . ' in ' . $errfile . ' on line ' . $errline;
-            $this->logger->warning($msg);
+            Log::warning($msg);
             return true;
         }
 

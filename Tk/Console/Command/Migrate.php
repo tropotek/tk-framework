@@ -5,9 +5,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Tk\Console\Console;
-use Tk\Db\Util\SqlBackup;
 use Tk\Db\Util\SqlMigrate;
-use Tk\Log\ConsoleOutputLogger;
 use Tt\Db;
 
 class Migrate extends Console

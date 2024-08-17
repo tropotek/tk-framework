@@ -1,9 +1,8 @@
 <?php
 namespace Tk;
 
-use Psr\Log\LoggerInterface;
-use Psr\Log\LogLevel;
-use Psr\Log\NullLogger;
+use Tk\Logger\Handler;
+use Tk\Logger\LoggerInterface;
 use Tk\Traits\SingletonTrait;
 
 /**
@@ -20,53 +19,38 @@ class Log
     /**
      * use this in your query to disable logging for a request
      * Handy for API calls to reduce clutter in a log
-     * @todo: move this property to the \Bs lib somewhere??
      */
     const NO_LOG = 'nolog';
 
-    private LoggerInterface $logger;
+    private Handler $logger;
 
 
-    protected function __construct(?LoggerInterface $logger = null)
+    public function __construct()
     {
-        $this->logger = $logger ?? new NullLogger();
+        $this->logger = new Handler();
     }
 
-    public static function instance(?LoggerInterface $logger = null): Log
+    public static function instance(): Log
     {
-        if (!self::$_INSTANCE && $logger) {
-            self::$_INSTANCE = new static($logger);
+        if (!self::$_INSTANCE) {
+            self::$_INSTANCE = new static();
         }
         return self::$_INSTANCE;
     }
 
-    /**
-     * Logs with an arbitrary level.
-     */
-    public static function log(string $level, string $message, array $context = []): void
+    public static function addHandler(\Psr\Log\LoggerInterface $logger): void
     {
-        $l = self::instance()->getLogger();
-        $l->log($level, self::getCallerLine(2) . $message, $context);
+        self::instance()->getLogger()->addHandler($logger);
     }
 
-    private static function getCallerLine(int $shift = 2): string
+    public static function setEnableNoLog(bool $b): void
     {
-        $bt = debug_backtrace();
-        for($i = 0; $i < $shift; $i++) array_shift($bt);
-        $caller = array_shift($bt);
-        $str = '';
-        if ($caller) {
-            $config = Config::instance();
-            $line = $caller['line'];
-            $file = str_replace($config->getBasePath(), '', $caller['file']);
-            $str = sprintf('[%s:%s] ', $file, $line);
-        }
-        return $str;
+        self::instance()->getLogger()->noLogEnabled = $b;
     }
 
-    public function getLogger(): LoggerInterface
+    public static function getLogger(): \Psr\Log\LoggerInterface|Handler
     {
-        return $this->logger;
+        return self::instance()->logger;
     }
 
     /**
@@ -74,7 +58,7 @@ class Log
      */
     public static function emergency(string $message, array $context = []): void
     {
-        self::log(LogLevel::EMERGENCY, $message, $context);
+        self::instance()->getLogger()->emergency($message, $context);
     }
 
     /**
@@ -85,7 +69,7 @@ class Log
      */
     public static function alert(string $message, array $context = []): void
     {
-        self::log(LogLevel::ALERT, $message, $context);
+        self::instance()->getLogger()->alert($message, $context);
     }
 
     /**
@@ -95,7 +79,7 @@ class Log
      */
     public static function critical(string $message, array $context = []): void
     {
-        self::log(LogLevel::CRITICAL, $message, $context);
+        self::instance()->getLogger()->critical($message, $context);
     }
 
     /**
@@ -104,7 +88,7 @@ class Log
      */
     public static function error(string $message, array $context = []): void
     {
-        self::log(LogLevel::ERROR, $message, $context);
+        self::instance()->getLogger()->error($message, $context);
     }
 
     /**
@@ -115,7 +99,7 @@ class Log
      */
     public static function warning(string $message, array $context = []): void
     {
-        self::log(LogLevel::WARNING, $message, $context);
+        self::instance()->getLogger()->warning($message, $context);
     }
 
     /**
@@ -123,7 +107,7 @@ class Log
      */
     public static function notice(string $message, array $context = []): void
     {
-        self::log(LogLevel::NOTICE, $message, $context);
+        self::instance()->getLogger()->notice($message, $context);
     }
 
     /**
@@ -133,7 +117,7 @@ class Log
      */
     public static function info(string $message, array $context = []): void
     {
-        self::log(LogLevel::INFO, $message, $context);
+        self::instance()->getLogger()->info($message, $context);
     }
 
     /**
@@ -141,7 +125,7 @@ class Log
      */
     public static function debug(string $message, array $context = []): void
     {
-        self::log(LogLevel::DEBUG, $message, $context);
+        self::instance()->getLogger()->debug($message, $context);
     }
 
 }

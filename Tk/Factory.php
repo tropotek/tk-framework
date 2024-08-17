@@ -2,12 +2,6 @@
 namespace Tk;
 
 use Composer\Autoload\ClassLoader;
-use Monolog\Handler\ErrorLogHandler;
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
-use Psr\Log\LoggerInterface;
-use Psr\Log\LogLevel;
-use Psr\Log\NullLogger;
 use Symfony\Component\Console\Application;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,7 +17,9 @@ use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\RouteCollection;
 use Tk\Cache\Adapter\Filesystem;
 use Tk\Cache\Cache;
-use Tk\Log\MonologLineFormatter;
+use Tk\Logger\ErrorLog;
+use Tk\Logger\RequestLog;
+use Tk\Logger\StreamLog;
 use Tk\Mail\Gateway;
 use Tk\Mvc\Bootstrap;
 use Tk\Mvc\Dispatch;
@@ -72,41 +68,6 @@ class Factory extends Collection
     {
         throw new \Exception("Deprecated:: Use \Tt\Db static object ");
     }
-
-    /**
-     * @todo I think we should implement a DB session for the standard PHP platform as we had already
-     */
-//    public function getSession(): ?Session
-//    {
-//        if (!$this->has('session')) {
-//            try {
-//                $sessionDbHandler = null;
-//                if (Db::getPdo() && $this->getConfig()->get('session.db_enable')) {
-//                    $sessionDbHandler = new PdoSessionHandler(
-//                        Db::getPdo(), $this->getConfig()->getGroup('session', true)
-//                    );
-//                    try {
-//                        $sessionDbHandler->createTable();
-//                    } catch (\Exception $e) { }
-//                }
-//                $sessionStorage = new NativeSessionStorage($this->getConfig()->getGroup('session', true), $sessionDbHandler);
-//                $session = new Session($sessionStorage);
-//                $session->setName('sn_' . md5($this->getConfig()->getBaseUrl()) ?? 'PHPSESSID');
-//
-//                $bags = $this->getConfig()->getGroup('session.bags');
-//                foreach ($bags as $bag) {
-//                    $session->registerBag($bag);
-//                }
-//
-//                $session->start();  // NOTE: stdout before $session->start() will throw error
-//
-//                $this->set('session', $session);
-//            } catch (\PDOException $e) {
-//                die($e->getMessage());
-//            }
-//        }
-//        return $this->get('session');
-//    }
 
     /**
      * setup DB based session object
@@ -244,64 +205,17 @@ class Factory extends Collection
         return $this->getEventDispatcher();
     }
 
-    /**
-     * @deprecated Soon to be removed, use \Tk\Log::error(), etc
-     * @todo remove monolog and use php error log, investigate options
-     */
-    public function getLogger(): ?LoggerInterface
+    public function initLogger(): void
     {
-        if (!$this->has('logger')) {
-            $processors = [];
-            if ($this->getConfig()->get('log.system.request')) {
-                $requestLog = $this->getSystem()->makePath($this->getConfig()->get('log.system.request'));
-                if (!is_file($requestLog) || is_writable($requestLog)) {
-                    FileUtil::mkdir(dirname($requestLog));
-                    file_put_contents($requestLog, ''); // Refresh log for this session
-                }
-                $processors[] = function ($record) use ($requestLog) {
-                    if (isset($record['message'])) {
-                        $str = $record['message'] . "\n";
-                        if (is_writable($requestLog)) {
-                            file_put_contents($requestLog, $str, FILE_APPEND | LOCK_EX);
-                        }
-                    }
-                    return $record;
-                };
-            }
-
-            $logger = new NullLogger();
-            $enabled = true;
-            if (!$this->getConfig()->get('log.ignore.noLog', false)) {
-
-                // No log when using nolog in query param
-                if (isset($_GET[Log::NO_LOG])) $enabled = false;
-
-                // No logs for api calls (comment out when testing API`s)
-                if (str_contains($_SERVER['REQUEST_URI'] ?? '', '/api/')) $enabled = false;
-            }
-
-            if ($enabled) {
-                $logger = new Logger('system', [], $processors);
-                if (is_writable(ini_get('error_log'))) {
-                    $handler = new StreamHandler(ini_get('error_log'), $this->getConfig()->get('log.logLevel', LogLevel::ERROR));
-                    $formatter = new MonologLineFormatter();
-                    $formatter->setColorsEnabled(true);
-                    $formatter->setScriptTime($this->getConfig()->get('script.time'));
-                    $handler->setFormatter($formatter);
-                    $logger->pushHandler($handler);
-                } else {
-                    $handler = new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM);
-                    $logger->pushHandler($handler);
-                    error_log('Error accessing log file: ' . ini_get('error_log'));
-                }
-            }
-
-            // Init \Tk\Log
-            Log::instance($logger);
-
-            $this->set('logger', $logger);
+        // Init \Tk\Log
+        Log::setEnableNoLog($this->getConfig()->get('log.enableNoLog', true));
+        $requestLog = $this->getSystem()->makePath($this->getConfig()->get('log.system.request'));
+        Log::addHandler(new RequestLog($requestLog));
+        if (is_writable(ini_get('error_log'))) {
+            Log::addHandler(new StreamLog(ini_get('error_log')));
+        } else {
+            Log::addHandler(new ErrorLog());
         }
-        return $this->get('logger');
     }
 
     /**

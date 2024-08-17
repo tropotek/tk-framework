@@ -38,7 +38,7 @@ return function (Config $config)
     $config->set('log.system.request', $config->get('path.cache') . '/requestLog.txt');
     $config->set('log.logLevel', \Psr\Log\LogLevel::ERROR);
 
-    $config->set('log.ignore.noLog', false);
+    $config->set('log.enableNoLog', true);
 
     // Set the timezone in the config.ini
     $config->set('php.date.timezone', 'Australia/Melbourne');

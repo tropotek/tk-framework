@@ -28,10 +28,12 @@ class Bootstrap
             DB::setTimezone($this->getConfig()->get('php.date.timezone'));
         }
 
-        // Init tk error handler
-        \Tk\ErrorHandler::instance($this->getFactory()->getLogger());
+        $this->getFactory()->initLogger();
 
-        \Tk\Debug\VarDump::instance($this->getFactory()->getLogger());
+        // Init tk error handler
+        \Tk\ErrorHandler::instance();
+
+        \Tk\Debug\VarDump::instance();
 
         TextEncrypt::$encryptKey = $this->getConfig()->get('system.encrypt', '');
 

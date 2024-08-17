@@ -8,18 +8,16 @@ use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
+use Tk\Log;
 
 class LogExceptionListener implements EventSubscriberInterface
 {
 
-    protected LoggerInterface $logger;
-
     protected bool $debug = false;
 
 
-    public function __construct(LoggerInterface $logger, bool $debug = false)
+    public function __construct(bool $debug = false)
     {
-        $this->logger = $logger;
         $this->debug = $debug;
     }
 
@@ -36,19 +34,19 @@ class LogExceptionListener implements EventSubscriberInterface
     protected function logException(\Throwable $e)
     {
         if ($e instanceof ResourceNotFoundException || $e instanceof NotFoundHttpException) {
-            $this->logger->error(self::getCallerLine($e) . $e->getMessage());
+            Log::error(self::getCallerLine($e) . $e->getMessage());
         } else {
             if ($this->debug) {
                 if ($e instanceof \Tk\WarningException) {
-                    $this->logger->warning(self::getCallerLine($e) . $e->__toString());
+                    Log::warning(self::getCallerLine($e) . $e->__toString());
                 } else {
-                    $this->logger->error(self::getCallerLine($e) . $e->__toString());
+                    Log::error(self::getCallerLine($e) . $e->__toString());
                 }
             } else {
                 if ($e instanceof \Tk\WarningException) {
-                    $this->logger->warning(self::getCallerLine($e) . $e->getMessage());
+                    Log::warning(self::getCallerLine($e) . $e->getMessage());
                 } else {
-                    $this->logger->error(self::getCallerLine($e) . $e->getMessage());
+                    Log::error(self::getCallerLine($e) . $e->getMessage());
                 }
             }
         }

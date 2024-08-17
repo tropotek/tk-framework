@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Tk\Log;
 use Tk\Traits\SystemTrait;
 
 class StartupHandler implements EventSubscriberInterface
@@ -20,13 +21,6 @@ class StartupHandler implements EventSubscriberInterface
 
     public static bool $SCRIPT_CALLED = false;
 
-    private LoggerInterface $logger;
-
-
-    function __construct(LoggerInterface $logger)
-    {
-        $this->logger = $logger;
-    }
 
     public function onInit(RequestEvent $event)
     {
@@ -93,12 +87,12 @@ class StartupHandler implements EventSubscriberInterface
 
     private function info(string $str)
     {
-        $this->logger->info($str);
+        Log::info($str);
     }
 
     private function debug(string $str)
     {
-        $this->logger->debug($str);
+        Log::debug($str);
     }
 
     public static function getSubscribedEvents()

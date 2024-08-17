@@ -47,7 +47,6 @@
     "symfony/event-dispatcher": "^6.2",
     "symfony/console": "^6.2",
     "symfony/lock": "^6.2",
-    "monolog/monolog": "^2.0",
     "sensiolabs/ansi-to-html": "~1.0"
   },
   "extra": {

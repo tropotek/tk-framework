@@ -44,8 +44,8 @@ class Dispatch
     protected function commonInit()
     {
         if ($this->getConfig()->isDebug()) {
-            $this->getDispatcher()->addSubscriber(new StartupHandler($this->getFactory()->getLogger()));
-            $this->getDispatcher()->addSubscriber(new ShutdownHandler($this->getFactory()->getLogger(), $this->getConfig()->get('script.start.time')));
+            $this->getDispatcher()->addSubscriber(new StartupHandler());
+            $this->getDispatcher()->addSubscriber(new ShutdownHandler($this->getConfig()->get('script.start.time')));
         }
     }
 
@@ -60,7 +60,6 @@ class Dispatch
         ));
 
         $this->getDispatcher()->addSubscriber(new \Tk\Mvc\EventListener\LogExceptionListener(
-            $this->getFactory()->getLogger(),
             $this->getConfig()->isDebug()
         ));
 
