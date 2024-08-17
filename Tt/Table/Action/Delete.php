@@ -1,7 +1,6 @@
 <?php
 namespace Tt\Table\Action;
 
-use Symfony\Component\HttpFoundation\Request;
 use Tk\CallbackCollection;
 use Tk\Uri;
 use Tt\Table\Action;
@@ -32,13 +31,13 @@ class Delete extends Action
         return $obj;
     }
 
-    public function execute(Request $request): void
+    public function execute(): void
     {
         $val = $this->getTable()->makeRequestKey($this->getName());
-        $this->setActive($request->get($this->getName(), '') == $val);
+        $this->setActive(($_POST[$this->getName()] ?? '') == $val);
         if (!$this->isActive()) return;
 
-        $selected = $request->get($this->rowSelect->getName(), []);
+        $selected = $_POST[$this->rowSelect->getName()] ?? [];
         $this->getOnDelete()->execute($this, $selected);
         Uri::create()->redirect();
     }

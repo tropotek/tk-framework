@@ -1,7 +1,6 @@
 <?php
 namespace Tk\Mvc\EventListener;
 
-use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\HttpFoundation\Request;

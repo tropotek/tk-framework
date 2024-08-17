@@ -2,7 +2,6 @@
 namespace Tk\Mvc\EventListener;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpKernel\Event\TerminateEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Tk\Log;

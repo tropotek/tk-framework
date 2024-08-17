@@ -1,5 +1,4 @@
 <?php
-
 namespace Tt\Table;
 
 use Dom\Builder;
@@ -7,10 +6,8 @@ use Dom\Form\Select;
 use Dom\Renderer\RendererInterface;
 use Dom\Renderer\Traits\RendererTrait;
 use Dom\Template;
-use Tk\Exception;
 use Tk\Log;
 use Tk\ObjectUtil;
-use Tk\Uri;
 use Tt\Table;
 
 class DomRenderer extends TableRenderer implements RendererInterface
