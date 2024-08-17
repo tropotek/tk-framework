@@ -268,8 +268,7 @@ class Db
 
             /** @var T|null $row */
             $row = $stm->fetchMappedObject($classname);
-
-            return $row;
+            return (false === $row) ? null : $row;
         } catch (\Exception $e) {
             throw new DbException($e->getMessage(), $e->getCode(), $query);
         }
@@ -606,9 +605,8 @@ class Db
 
     public static function tableExists(string $table): bool
     {
-        $stm = self::$pdo->prepare("SHOW TABLES LIKE :table");
-        $stm->execute(compact('table'));
-        return $stm->fetchColumn() !== false;
+        $val = self::queryVal("SHOW TABLES LIKE :table", compact('table'));
+        return $val == $table;
     }
 
     public static function dropTable(string $tableName): int

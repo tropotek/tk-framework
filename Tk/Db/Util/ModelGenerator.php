@@ -1,6 +1,7 @@
 <?php
 namespace Tk\Db\Util;
 
+use Bs\Db\Permissions;
 use Tk\Exception;
 use Tt\Db;
 
@@ -499,7 +500,7 @@ class Manager extends PageController
     {
         parent::__construct(\$this->getFactory()->getAdminPage());
         \$this->getPage()->setTitle('{name} Manager');
-        \$this->setAccess(User::PERM_MANAGE_STAFF);
+        \$this->setAccess(Permissions::PERM_MANAGE_STAFF);
     }
 
     public function doDefault(Request \$request): \App\Page|\Dom\Mvc\Page
@@ -681,7 +682,7 @@ class Edit extends PageController
     {
         parent::__construct(\$this->getFactory()->getAdminPage());
         \$this->getPage()->setTitle('Edit {name}');
-        \$this->setAccess(User::PERM_ADMIN);
+        \$this->setAccess(Permissions::PERM_ADMIN);
     }
 
     public function doDefault(Request \$request): \App\Page|\Dom\Mvc\Page

@@ -125,7 +125,7 @@ class SqlMigrate
         $this->install();
 
         $list = $this->search($migrateList);
-vd($list);
+
         foreach ($list as $k => $path) {
             if (is_file($path)) {
                 if ($this->migrateFile($path)) {

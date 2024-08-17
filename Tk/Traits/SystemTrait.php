@@ -68,11 +68,6 @@ trait SystemTrait
         return $this->getFactory()->getRequest();
     }
 
-    public function getSession(): ?\Symfony\Component\HttpFoundation\Session\Session
-    {
-        return $this->getFactory()->getSession();
-    }
-
     public function getCookie(): Cookie
     {
         return $this->getFactory()->getCookie();

@@ -20,7 +20,7 @@ class DbStatement extends \PDOStatement
             $this->lastParams = $params;
             $result = parent::execute($params);
         } catch (\Exception $e) {
-            throw new DbException($e->getMessage(), $e->getCode(), null, $this->queryString, $params);
+            throw new DbException($e->getMessage(), $e->getCode(), $this->queryString, $params);
         }
         return $result;
     }

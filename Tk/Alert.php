@@ -8,6 +8,8 @@ class Alert
 {
     use SystemTrait;
 
+    const SID = 'tk-alerts';
+
     const TYPE_SUCCESS = 'success';
     const TYPE_INFO = 'info';
     const TYPE_WARNING = 'warning';
@@ -21,7 +23,7 @@ class Alert
     public static function add(string $message, string $type = self::TYPE_SUCCESS, string $title = '', string $icon = ''): object
     {
         $a = (object)compact('message', 'type', 'title', 'icon');
-        Factory::instance()->getSession()->getFlashBag()->add($type, serialize($a));
+        self::saveAlert($type, serialize($a));
         return $a;
     }
 
@@ -43,6 +45,29 @@ class Alert
     public static function addInfo(string $message, string $title = '', string $icon = ''): object
     {
         return self::add($message, self::TYPE_INFO, $title, $icon);
+    }
+
+
+    protected static function saveAlert($type, $data): void
+    {
+        $_SESSION[self::SID][$type][] = $data;
+    }
+
+    public static function getAlerts(bool $clear = true): array
+    {
+        $list = $_SESSION[self::SID] ?? [];
+        if ($clear) unset($_SESSION[self::SID]);
+        foreach ($list as $type => $arr) {
+            foreach ($arr as $i => $data) {
+                $list[$type][$i] = unserialize($data);
+            }
+        }
+        return $list;
+    }
+
+    public static function hasAlerts(): bool
+    {
+        return count($_SESSION[self::SID] ?? []) > 0;
     }
 
 }

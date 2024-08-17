@@ -3,6 +3,7 @@ namespace Tk\Mvc;
 
 use Dom\Template;
 use Tk\DataMap\Db\TextEncrypt;
+use Tk\Db\Session;
 use Tk\Traits\SingletonTrait;
 use Tk\Traits\SystemTrait;
 use Tt\Db;
@@ -34,8 +35,6 @@ class Bootstrap
 
         TextEncrypt::$encryptKey = $this->getConfig()->get('system.encrypt', '');
 
-        //\Bs\Db\User::$USER_CLASS = \App\Db\User::class;
-
         if ($this->getConfig()->isDev()) {
             // Allow self-signed certs in file_get_contents in dev environment
             stream_context_set_default(["ssl" => [
@@ -65,12 +64,11 @@ class Bootstrap
             Template::$ENABLE_TRACER = true;
         }
 
-        $session = $this->getFactory()->getSession();
-        $session->start();  // NOTE: stdout before $session->start() will throw error
+        // init session
+        $this->getFactory()->getSession();
 
         // ready the Request
-        $request = $this->getFactory()->getRequest();
-        $request->setSession($session);
+        $this->getFactory()->getRequest();
 
         // Setup EventDispatcher and subscribe events, loads routes
         $this->getFactory()->initEventDispatcher();

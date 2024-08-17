@@ -13,8 +13,6 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\HttpFoundation\Session\Storage\Handler\PdoSessionHandler;
-use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 use Symfony\Component\HttpKernel\Controller\ArgumentResolver;
 use Symfony\Component\HttpKernel\Controller\ControllerResolver;
 use Symfony\Component\Routing\Generator\CompiledUrlGenerator;
@@ -33,7 +31,6 @@ use Tk\Mvc\FrontController;
 use Tk\Traits\SingletonTrait;
 use Tk\Traits\SystemTrait;
 use Tk\Console\Command;
-use Tt\Db;
 
 
 /**
@@ -79,32 +76,47 @@ class Factory extends Collection
     /**
      * @todo I think we should implement a DB session for the standard PHP platform as we had already
      */
-    public function getSession(): ?Session
+//    public function getSession(): ?Session
+//    {
+//        if (!$this->has('session')) {
+//            try {
+//                $sessionDbHandler = null;
+//                if (Db::getPdo() && $this->getConfig()->get('session.db_enable')) {
+//                    $sessionDbHandler = new PdoSessionHandler(
+//                        Db::getPdo(), $this->getConfig()->getGroup('session', true)
+//                    );
+//                    try {
+//                        $sessionDbHandler->createTable();
+//                    } catch (\Exception $e) { }
+//                }
+//                $sessionStorage = new NativeSessionStorage($this->getConfig()->getGroup('session', true), $sessionDbHandler);
+//                $session = new Session($sessionStorage);
+//                $session->setName('sn_' . md5($this->getConfig()->getBaseUrl()) ?? 'PHPSESSID');
+//
+//                $bags = $this->getConfig()->getGroup('session.bags');
+//                foreach ($bags as $bag) {
+//                    $session->registerBag($bag);
+//                }
+//
+//                $session->start();  // NOTE: stdout before $session->start() will throw error
+//
+//                $this->set('session', $session);
+//            } catch (\PDOException $e) {
+//                die($e->getMessage());
+//            }
+//        }
+//        return $this->get('session');
+//    }
+
+    /**
+     * setup DB based session object
+     */
+    public function getSession(): ?\Tk\Db\Session
     {
         if (!$this->has('session')) {
-            try {
-                $sessionDbHandler = null;
-                if (Db::getPdo() && $this->getConfig()->get('session.db_enable')) {
-                    $sessionDbHandler = new PdoSessionHandler(
-                        Db::getPdo(), $this->getConfig()->getGroup('session', true)
-                    );
-                    try {
-                        $sessionDbHandler->createTable();
-                    } catch (\Exception $e) { }
-                }
-                $sessionStorage = new NativeSessionStorage($this->getConfig()->getGroup('session', true), $sessionDbHandler);
-                $session = new Session($sessionStorage);
-                $session->setName('sn_' . md5($this->getConfig()->getBaseUrl()) ?? 'PHPSESSID');
-
-                $bags = $this->getConfig()->getGroup('session.bags');
-                foreach ($bags as $bag) {
-                    $session->registerBag($bag);
-                }
-
-                $this->set('session', $session);
-            } catch (\PDOException $e) {
-                die($e->getMessage());
-            }
+            session_name('sn_' . md5($this->getConfig()->getBaseUrl()));
+            $session = new \Tk\Db\Session();
+            $this->set('session', $session);
         }
         return $this->get('session');
     }
@@ -122,6 +134,9 @@ class Factory extends Collection
     {
         if (!$this->has('request')) {
             $request = Request::createFromGlobals();
+            //$this->getSession(); // init our session
+            error_log('test');
+            $request->setSession(new Session());
             $this->set('request', $request);
         }
         return $this->get('request');
@@ -253,10 +268,10 @@ class Factory extends Collection
             if (!$this->getConfig()->get('log.ignore.noLog', false)) {
 
                 // No log when using nolog in query param
-                if ($this->getRequest()->query->has(Log::NO_LOG)) $enabled = false;
+                if (isset($_GET[Log::NO_LOG])) $enabled = false;
 
                 // No logs for api calls (comment out when testing API`s)
-                if (str_contains($this->getRequest()->getRequestUri(), '/api/')) $enabled = false;
+                if (str_contains($_SERVER['REQUEST_URI'] ?? '', '/api/')) $enabled = false;
             }
 
             if ($enabled) {
