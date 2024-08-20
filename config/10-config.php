@@ -68,6 +68,4 @@ return function (Config $config)
         '/src/config/sql/triggers.sql'
     ]);
 
-    $config->set('system.encrypt', md5($config->getHostname()));
-
 };

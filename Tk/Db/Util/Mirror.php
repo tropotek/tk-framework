@@ -22,7 +22,10 @@ class Mirror
         if (strtolower($request->getScheme()) != Uri::SCHEME_HTTP_SSL) {
             throw new \Tk\Exception('Only available over SSL connections.', 500);
         }
-        if ($this->getConfig()->get('db.mirror.secret') !== $request->request->get('secret')) {
+        if (!$this->getConfig()->get('db.mirror.secret', false)) {
+            throw new \Tk\Exception('Access Disabled');
+        }
+        if ($this->getConfig()->get('db.mirror.secret', null) !== $request->request->get('secret')) {
             throw new \Tk\Exception('Invalid access key.', 500);
         }
 

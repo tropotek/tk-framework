@@ -1,18 +1,22 @@
 <?php
 namespace Tk\Db;
 
+use Tk\Traits\SingletonTrait;
 use Tt\Db;
 
 /**
  * A basic DB session handler
  *
+ * @todo allow for db/session params to be sent as options in the constructor
  */
 class Session
 {
+    use SingletonTrait;
+
     public static int $DATA_TTL_DAYS = 15;
 
 
-    public function __construct()
+    public function __construct(array $options = [])
     {
         // Set handler to override SESSION
         session_set_save_handler(
@@ -23,13 +27,19 @@ class Session
             [$this, "_destroy"],
             [$this, "_gc"]
         );
-
-        session_start();
     }
 
     public function __destruct()
     {
         session_write_close();
+    }
+
+    public static function instance(array $options = []): static
+    {
+        if (self::$_INSTANCE == null) {
+            self::$_INSTANCE = new static($options);
+        }
+        return self::$_INSTANCE;
     }
 
 

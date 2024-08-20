@@ -2,7 +2,6 @@
 namespace Tk;
 
 use Tk\Logger\Handler;
-use Tk\Logger\LoggerInterface;
 use Tk\Traits\SingletonTrait;
 
 /**

@@ -290,7 +290,7 @@ class Db
             $stm->execute($params);
             self::$lastStatement = $stm;
 
-            return $stm->fetchColumn(0);
+            return $stm->fetchColumn();
         } catch (\Exception $e) {
             throw new DbException($e->getMessage(), $e->getCode(), $query);
         }

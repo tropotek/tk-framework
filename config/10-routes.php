@@ -8,7 +8,7 @@ use Symfony\Component\Routing\Loader\Configurator\CollectionConfigurator;
 
 return function (CollectionConfigurator $routes) {
 
-    if (\Tk\Config::instance()->get('db.mirror.secret', '')) {
+    if (\Tk\Config::instance()->get('db.mirror.secret', false)) {
         $routes->add('system-mirror', '/util/mirror')
             ->controller([\Tk\Db\Util\Mirror::class, 'doDefault']);
     }

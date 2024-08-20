@@ -2,6 +2,7 @@
 namespace Tk;
 
 use Composer\Autoload\ClassLoader;
+use Psr\Log\LogLevel;
 use Symfony\Component\Console\Application;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
@@ -72,12 +73,16 @@ class Factory extends Collection
     /**
      * setup DB based session object
      */
-    public function getSession(): ?\Tk\Db\Session
+    public function initSession(): ?\Tk\Db\Session
     {
         if (!$this->has('session')) {
             session_name('sn_' . md5($this->getConfig()->getBaseUrl()));
-            $session = new \Tk\Db\Session();
-            $this->set('session', $session);
+            // init DB session if enabled
+            if ($this->getConfig()->get('session.db_enable', false)) {
+                \Tk\Db\Session::instance();
+            }
+            session_start();
+            $this->set('session', null);
         }
         return $this->get('session');
     }
@@ -212,9 +217,9 @@ class Factory extends Collection
         $requestLog = $this->getSystem()->makePath($this->getConfig()->get('log.system.request'));
         Log::addHandler(new RequestLog($requestLog));
         if (is_writable(ini_get('error_log'))) {
-            Log::addHandler(new StreamLog(ini_get('error_log')));
+            Log::addHandler(new StreamLog(ini_get('error_log'), $this->getConfig()->get('log.logLevel', LogLevel::DEBUG)));
         } else {
-            Log::addHandler(new ErrorLog());
+            Log::addHandler(new ErrorLog($this->getConfig()->get('log.logLevel', LogLevel::DEBUG)));
         }
     }
 

@@ -33,11 +33,11 @@ class Mirror extends Console
                 $this->writeError('Only run this command in a debug environment.');
                 return Command::FAILURE;
             }
-            if (!$this->getConfig()->get('db.mirror.secret')) {
+            if (!$this->getConfig()->get('db.mirror.secret', false)) {
                 $this->writeError('Secret key not valid: ' . $this->getConfig()->get('db.mirror.secret'));
                 return Command::FAILURE;
             }
-            if (!$config->get('db.mirror.url')) {
+            if (!$config->get('db.mirror.url', false)) {
                 $this->writeError('Invalid source mirror URL: ' . $config->get('db.mirror.url'));
                 return Command::FAILURE;
             }

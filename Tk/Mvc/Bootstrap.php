@@ -67,7 +67,7 @@ class Bootstrap
         }
 
         // init session
-        $this->getFactory()->getSession();
+        $this->getFactory()->initSession();
 
         // init the Request
         $this->getFactory()->getRequest();
