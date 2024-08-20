@@ -60,13 +60,14 @@ class DataMap
     {
         foreach ($srcArray as $key => $value) {
             $type = $this->getTypeByColumn($key);
-            if ($type instanceof DataTypeInterface && $type->hasAccess($access)) {
+            if (!($type instanceof DataTypeInterface)) continue;
+
+            if ($type->hasAccess($access)) {
                 $type->loadObject($object, $srcArray);
             } else {
                 if ($object instanceof DbModel) {
-                    if (!property_exists($object, $key)) {
-                        $object->$key = $value;
-                    }
+                    if (property_exists($object, $key)) continue;
+                    $object->$key = $value;
                 }
             }
         }
