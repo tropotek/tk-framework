@@ -8,10 +8,9 @@ class Exception extends \Tk\Exception
     {
         //format dump query
         if ($dump) {
-            $dump = explode("\n", str_replace([',', ' WHERE', ' FROM', ' LIMIT', ' ORDER', ' LEFT JOIN'],
-                [', ', "\n  WHERE", "\n  FROM", "\n  LIMIT", "\n  ORDER", "\n  LEFT JOIN"], $dump));
+            $dump = explode("\n", $dump);
             foreach ($dump as $i => $s) {
-                $dump[$i] = '  ' . wordwrap($s, 120, "\n  ");
+                $dump[$i] = '  ' . wordwrap(trim($s), 120, "\n  ");
             }
             $dump = "\n\nQuery: \n" . implode("\n", $dump);
         }
