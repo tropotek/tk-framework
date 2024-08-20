@@ -34,11 +34,6 @@ class DataMap
      */
     private array $columnTypes = [];
 
-    /**
-     * If this is true objects without the defined property will be added dynamically
-     */
-    protected bool $enableDynamic = true;
-
 
     public static function makeType(\stdClass $meta): DataTypeInterface
     {
@@ -67,7 +62,7 @@ class DataMap
             $type = $this->getTypeByColumn($key);
             if ($type instanceof DataTypeInterface && $type->hasAccess($access)) {
                 $type->loadObject($object, $srcArray);
-            } elseif ($this->isEnableDynamic()) {
+            } else {
                 if ($object instanceof DbModel) {
                     if (!property_exists($object, $key)) {
                         $object->$key = $value;
@@ -119,17 +114,6 @@ class DataMap
     public function getTypeByColumn(string $column): ?DataTypeInterface
     {
         return $this->columnTypes[$column] ?? null;
-    }
-
-    public function isEnableDynamic(): bool
-    {
-        return $this->enableDynamic;
-    }
-
-    public function setEnableDynamic(bool $enableDynamic): DataMap
-    {
-        $this->enableDynamic = $enableDynamic;
-        return $this;
     }
 
     public function getPrimaryKey(): ?DataTypeInterface

@@ -8,19 +8,21 @@ use Tt\DataMap\DataTypeInterface;
  */
 class DateTime extends DataTypeInterface
 {
-    protected string $format = 'Y-m-d H:i:s';
+    protected string $format   = 'Y-m-d H:i:s';
+    protected string $timezone = '';
 
     public function __construct(string $property, string $key = '')
     {
         parent::__construct($property, $key);
         $this->format = \Tk\Date::FORMAT_ISO_DATETIME;
+        $this->timezone = date_default_timezone_get();
     }
 
     public function getPropertyValue(array $array): mixed
     {
         $value = parent::getPropertyValue($array);
         if (is_string($value)) {
-            $value = \Tk\Date::create($value);
+            $value = \DateTime::createFromFormat($this->format, $value, $this->getTimeZone());
         }
         return $value;
     }
@@ -38,6 +40,18 @@ class DateTime extends DataTypeInterface
     {
         $this->format = $format;
         return $this;
+    }
+
+    public function setTimezone(string $timezone): DateTime
+    {
+        $this->timezone = $timezone;
+        return $this;
+    }
+
+    public function getTimeZone(): ?\DateTimeZone
+    {
+        if (empty($this->timezone)) return null;
+        return new \DateTimeZone($this->timezone);
     }
 
 }
