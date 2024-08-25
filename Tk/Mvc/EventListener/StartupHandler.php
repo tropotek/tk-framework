@@ -49,12 +49,13 @@ class StartupHandler implements EventSubscriberInterface
         $this->info('- Project: ' . trim($siteName));
 
         if ($request) {
-            $this->debug(sprintf('- Request: [%s][%s] %s%s%s',
+            $this->debug(sprintf('- Request: [%s][%s] %s%s%s%s',
                 $request->getMethod(),
                 http_response_code(),
                 $request->getScheme() . '://' . $request->getHost(),
                 $request->getBaseUrl(),
-                $request->getPathInfo()
+                $request->getPathInfo(),
+                '?' . $_SERVER['QUERY_STRING'] ?? ''
             ));
             $this->debug('- Client IP: ' . $request->getClientIp());
             $this->debug('- Agent: ' . $request->headers->get('User-Agent') );

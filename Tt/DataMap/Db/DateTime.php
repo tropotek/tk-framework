@@ -1,6 +1,7 @@
 <?php
 namespace Tt\DataMap\Db;
 
+use Tk\Exception;
 use Tt\DataMap\DataTypeInterface;
 
 /**
@@ -20,9 +21,12 @@ class DateTime extends DataTypeInterface
 
     public function getPropertyValue(array $array): mixed
     {
-        $value = parent::getPropertyValue($array);
+        $value = trim(parent::getPropertyValue($array));
         if (is_string($value)) {
-            $value = \DateTime::createFromFormat($this->format, $value, $this->getTimeZone());
+            $v = \DateTime::createFromFormat($this->format, $value, $this->getTimeZone());
+            if ($v === false) throw new Exception(implode(", ", (\DateTime::getLastErrors()['errors'] ?? ['Unknown Date Error'])) .
+                " for date: '$value'");
+            $value = $v;
         }
         return $value;
     }

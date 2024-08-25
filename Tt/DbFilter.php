@@ -122,4 +122,13 @@ class DbFilter extends \Tk\Collection
         }
         return implode(', ', $sql);
     }
+
+    /**
+     * @todo: should we rename this getParams() ???
+     */
+    public function all(): array
+    {
+        $sql = $this->getSql();
+        return array_filter(parent::all(), fn($v, $k) => str_contains($sql, ":$k"), ARRAY_FILTER_USE_BOTH);
+    }
 }

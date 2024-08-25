@@ -2,8 +2,7 @@
 namespace Tk\Mvc;
 
 use Dom\Template;
-use Tk\DataMap\Db\TextEncrypt;
-use Tk\Db\Session;
+use Tt\DataMap\Db\TextEncrypt;
 use Tk\Traits\SingletonTrait;
 use Tk\Traits\SystemTrait;
 use Tt\Db;
@@ -36,6 +35,8 @@ class Bootstrap
         \Tk\Debug\VarDump::instance();
 
         TextEncrypt::$encryptKey = $this->getConfig()->get('system.encrypt', '');
+        // TODO remove when done
+        \Tk\DataMap\Db\TextEncrypt::$encryptKey = $this->getConfig()->get('system.encrypt', '');
 
         if ($this->getConfig()->isDev()) {
             // Allow self-signed certs in file_get_contents in dev environment
