@@ -6,7 +6,8 @@ use Tt\Table\Cell;
 
 class DateTime
 {
-    public static string $format = 'd/m/Y H:i:s';
+    //public static string $format = 'j M Y H:i:s';
+    public static string $format = 'j M Y g:ia';
 
     public static function onValue(array|object $row, Cell $cell): string
     {

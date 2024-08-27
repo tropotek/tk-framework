@@ -11,29 +11,27 @@ use Tt\Table\Cell\RowSelect;
  *
  * NOTE: This Action does not call the onExecute() or onShow() callback queues
  */
-class Csv extends Action
+class Csv extends Select
 {
     const EXCLUDED_CELLS = [
         RowSelect::class,
     ];
 
-    protected string    $confirmStr = 'Export selected records to CSV?';
     protected string    $filename = '';
     protected array     $excluded = [];
-    protected RowSelect $rowSelect;
-    protected CallbackCollection $onCsv;
 
 
     public function __construct(string $name)
     {
         parent::__construct($name);
-        $this->onCsv = CallbackCollection::create();
+        $this->setAttr('title', 'Export Records');
+        $this->removeAttr('disabled');
     }
 
-    public static function create(RowSelect $rowSelect, string $name = 'export'): static
+    public static function create(RowSelect $rowSelect, string $name = 'export', $icon = 'fa fa-fw fa-list-alt'): static
     {
-        $obj = new static($name);
-        $obj->rowSelect = $rowSelect;
+        $obj = parent::create($rowSelect, $name, $icon);
+        $obj->setConfirmStr('Export selected records to CSV?');
         return $obj;
     }
 
@@ -81,34 +79,6 @@ class Csv extends Action
 
         fclose($out);
         exit;
-
-
-
-    }
-
-    public function getHtml(): string
-    {
-        $val = $this->getTable()->makeRequestKey($this->getName());
-
-        return <<<HTML
-<button type="submit" name="{$this->getName()}" value="{$val}" class="tk-action-csv btn btn-sm btn-light"
-    title="Export Records"
-    data-confirm="{$this->getConfirmStr()}"
-    data-row-select="{$this->rowSelect->getName()}">
-    <i class="fa fa-fw fa-list-alt"></i> {$this->getLabel()}
-</button>
-HTML;
-    }
-
-    protected function getConfirmStr(): string
-    {
-        return $this->confirmStr;
-    }
-
-    public function setConfirmStr(string $confirmStr): static
-    {
-        $this->confirmStr = $confirmStr;
-        return $this;
     }
 
     /**
@@ -116,13 +86,13 @@ HTML;
      */
     public function addOnCsv(callable $callable, int $priority = CallbackCollection::DEFAULT_PRIORITY): static
     {
-        $this->getOnCsv()->append($callable, $priority);
+        $this->getOnSelect()->append($callable, $priority);
         return $this;
     }
 
     public function getOnCsv(): CallbackCollection
     {
-        return $this->onCsv;
+        return $this->getOnSelect();
     }
 
     public function getExcluded(): array

@@ -2,72 +2,26 @@
 namespace Tt\Table\Action;
 
 use Tk\CallbackCollection;
-use Tk\Uri;
-use Tt\Table\Action;
 use Tt\Table\Cell\RowSelect;
 
 /**
  *
  * NOTE: This Action does not call the onExecute() or onShow() callback queues
  */
-class Delete extends Action
+class Delete extends Select
 {
-
-    protected string             $confirmStr = 'Delete the selected records?';
-    protected RowSelect          $rowSelect;
-    protected CallbackCollection $onDelete;
-
 
     public function __construct(string $name)
     {
         parent::__construct($name);
-        $this->onDelete = CallbackCollection::create();
+        $this->setAttr('title', 'Delete Selected Records');
     }
 
-    public static function create(RowSelect $rowSelect, string $name = 'delete'): static
+    public static function create(RowSelect $rowSelect, string $name = 'delete', $icon = 'fa fa-fw fa-trash'): static
     {
-        $obj = new static($name);
-        $obj->rowSelect = $rowSelect;
+        $obj = parent::create($rowSelect, $name, $icon);
+        $obj->setConfirmStr('Delete the selected records?');
         return $obj;
-    }
-
-    public function execute(): void
-    {
-        $val = $this->getTable()->makeRequestKey($this->getName());
-        $this->setActive(($_POST[$this->getName()] ?? '') == $val);
-        if (!$this->isActive()) return;
-
-        $selected = $_POST[$this->rowSelect->getName()] ?? [];
-        $this->getOnDelete()->execute($this, $selected);
-        Uri::create()->redirect();
-    }
-
-    /**
-     * @note see `tkTable.js` for supporting JS to this action
-     */
-    public function getHtml(): string
-    {
-        $val = $this->getTable()->makeRequestKey($this->getName());
-
-        return <<<HTML
-<button type="submit" name="{$this->getName()}" value="{$val}" class="tk-action-delete btn btn-sm btn-light" disabled
-    title="Delete Records"
-    data-confirm="{$this->getConfirmStr()}"
-    data-row-select="{$this->rowSelect->getName()}">
-    <i class="fa fa-fw fa-trash"></i> {$this->getLabel()}
-</button>
-HTML;
-    }
-
-    protected function getConfirmStr(): string
-    {
-        return $this->confirmStr;
-    }
-
-    public function setConfirmStr(string $confirmStr): static
-    {
-        $this->confirmStr = $confirmStr;
-        return $this;
     }
 
     /**
@@ -75,13 +29,13 @@ HTML;
      */
     public function addOnDelete(callable $callable, int $priority = CallbackCollection::DEFAULT_PRIORITY): static
     {
-        $this->getOnDelete()->append($callable, $priority);
+        $this->addOnSelect($callable, $priority);
         return $this;
     }
 
     public function getOnDelete(): CallbackCollection
     {
-        return $this->onDelete;
+        return $this->getOnSelect();
     }
 
 }

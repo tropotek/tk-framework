@@ -28,7 +28,7 @@ trait AttributesTrait
             $this->_attrList = $this->_attrList + $name;
         } else {
             $name = strip_tags(trim($name));
-            $this->_attrList[$name] = $value ?? $name;
+            $this->_attrList[$name] = eattr($value ?? $name);
         }
         return $this;
     }

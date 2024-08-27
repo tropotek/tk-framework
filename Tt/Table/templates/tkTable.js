@@ -34,15 +34,17 @@ jQuery(function ($) {
 
     // Class: \Tt\Table\Action\Delete
     function updateBtn(btn) {
+      if (!btn.data('selectedOnly')) return;
       var rsName = btn.data('rowSelect');
       btn.prop('disabled', false);
       if(!$(`input[name^="${rsName}"]:checked`, table).length) {
         btn.prop('disabled', true);
       }
     }
-    $('.tk-action-delete', table).each(function () {
+    $('.tk-action-select', table).each(function () {
       var btn = $(this);
       var rsName = btn.data('rowSelect');
+      btn.data('selectedOnly', btn.prop('disabled'))
       btn.on('click', function () {
         return $(`input[name^="${rsName}"]:checked`, table).length > 0;
       });
