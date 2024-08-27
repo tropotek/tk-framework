@@ -21,9 +21,9 @@ class DateTime extends DataTypeInterface
 
     public function getPropertyValue(array $array): mixed
     {
-        $value = trim(parent::getPropertyValue($array));
+        $value = parent::getPropertyValue($array);
         if (is_string($value)) {
-            $v = \DateTime::createFromFormat($this->format, $value, $this->getTimeZone());
+            $v = \DateTime::createFromFormat($this->format, trim($value), $this->getTimeZone());
             if ($v === false) throw new Exception(implode(", ", (\DateTime::getLastErrors()['errors'] ?? ['Unknown Date Error'])) .
                 " for date: '$value'");
             $value = $v;
