@@ -37,7 +37,7 @@ class Button extends Link
     public function __makeTemplate(): ?Template
     {
         $html = <<<HTML
-<button type="button" var="element"><i choice="icon-l"></i><span var="text"></span><i choice="iconR"></i></button>
+<button type="button" var="element"><i choice="icon-l"></i> <span var="text"></span> <i choice="iconR"></i></button>
 HTML;
         return $this->getFactory()->loadTemplate($html);
     }
