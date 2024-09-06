@@ -32,26 +32,21 @@ abstract class DbModel
     /**
      * Auto generate a DataMap for this object.
      *
-     * if no table and view names are supplied this objects class name will be
-     * converted to snake case and used as the table name, the view will be the table
-     * name with 'v_' prepended.
+     * Default table name is the snake case of the class name, 'MenuItem' => 'menu_item'
+     * Default view name is the same with 'v_' prepended, ''v_menu_item'
+     * If the view table does not exist it is ignored
      *
-     * Alternatively call self::getDataMap('my_table', 'v_my_view') from the constructor to
-     * init with your own table names.
-     *
-     * Override this method if you want to create a custom DataMap
+     * Override this method if you need to create a custom DataMap with different table names
      */
-    public static function getDataMap(string $table = '', string $view = ''): DataMap
+    public static function getDataMap(): DataMap
     {
         $map = self::$_MAPS[static::class] ?? null;
         if (!is_null($map)) return $map;
 
-        // autogen table/view from class name if empty
-        if (empty($table) && empty($view)) {
-            $table = strtolower(preg_replace('/(?<!^)[A-Z]+|(?<!^|\d)[\d]+/', '_$0', ObjectUtil::basename(static::class)));
-            $view = "v_{$table}";
-            if (!Db::tableExists($view)) $view = $table;
-        }
+        // autogen table/view name from class
+        $table = strtolower(preg_replace('/(?<!^)[A-Z]+|(?<!^|\d)[\d]+/', '_$0', ObjectUtil::basename(static::class)));
+        $view = "v_{$table}";
+        if (!Db::tableExists($view)) $view = $table;
 
         $v_meta = [];
         $t_meta = Db::getTableInfo($table);
@@ -99,7 +94,6 @@ abstract class DbModel
             $obj = new static();
         }
         if (is_null($obj)) return;
-
 		foreach (get_object_vars($obj) as $prop => $val) {
 			$this->$prop = $val;
 		}
