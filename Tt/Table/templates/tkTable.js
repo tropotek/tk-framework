@@ -6,7 +6,7 @@
 
 jQuery(function ($) {
 
-  let init = function () {
+  tkRegisterInit(function () {
     let table = $(this);
 
     // Class: \Tt\Table
@@ -32,7 +32,7 @@ jQuery(function ($) {
     }).trigger('change');
 
 
-    // Class: \Tt\Table\Action\Delete
+    // Class: \Tt\Table\Action\Select
     function updateBtn(btn) {
       if (!btn.data('selectedOnly')) return;
       var rsName = btn.data('rowSelect');
@@ -54,11 +54,8 @@ jQuery(function ($) {
       updateBtn(btn);
     });
 
+  });
 
-
-  };
-
-  $('.tk-table').on('tk-init-table', document, init).each(init);
 });
 
 
