@@ -206,7 +206,7 @@ class Db
             /** @var DbStatement $stm */
             $stm = self::$pdo->prepare($query);
             $stm->execute($params);
-            self::$lastStatement = $stm;
+            self::setLastStatement($stm);
 
             if (!empty(self::$pdo->lastInsertId())) {
                 self::$lastId = intval(self::$pdo->lastInsertId());
@@ -234,7 +234,7 @@ class Db
             /** @var DbStatement $stm */
             $stm = self::$pdo->prepare($query);
             $stm->execute($params);
-            self::$lastStatement = $stm;
+            self::setLastStatement($stm);
 
             $rows = [];
             while ($row = $stm->fetchMappedObject($classname)) {
@@ -264,7 +264,7 @@ class Db
             /** @var DbStatement $stm */
             $stm = self::$pdo->prepare($query);
             $stm->execute($params);
-            self::$lastStatement = $stm;
+            self::setLastStatement($stm);
 
             /** @var T|null $row */
             $row = $stm->fetchMappedObject($classname);
@@ -288,7 +288,7 @@ class Db
             /** @var DbStatement $stm */
             $stm = self::$pdo->prepare($query);
             $stm->execute($params);
-            self::$lastStatement = $stm;
+            self::setLastStatement($stm);
 
             return $stm->fetchColumn();
         } catch (\Exception $e) {
@@ -638,6 +638,13 @@ class Db
         $stm->execute();
 
         return $stm->rowCount();
+    }
+
+    private static function setLastStatement(DbStatement $stm): void
+    {
+        if(self::$LOG) {
+            self::$lastStatement = $stm;
+        }
     }
 
     /**

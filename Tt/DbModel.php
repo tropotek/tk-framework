@@ -40,6 +40,7 @@ abstract class DbModel
      */
     public static function getDataMap(): DataMap
     {
+        Db::$LOG = false;   // disable cache of last statement
         $map = self::$_MAPS[static::class] ?? null;
         if (!is_null($map)) return $map;
 
@@ -72,6 +73,7 @@ abstract class DbModel
         }
 
         self::$_MAPS[static::class] = $map;
+        Db::$LOG = true;
         return $map;
     }
 
