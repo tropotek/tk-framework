@@ -80,10 +80,10 @@ class Mirror extends Console
                 $dbBackup->restore($mirrorSqlFile);
 
                 // Execute static files
-                SqlMigrate::migrateStatic([$this, 'writeGreen']);
+                //SqlMigrate::migrateStatic([$this, 'writeGreen']);
 
                 // setup dev environment if site in dev mode
-                SqlMigrate::migrateDev([$this, 'writeBlue']);
+                //SqlMigrate::migrateDev([$this, 'writeBlue']);
 
                 //unlink($backupSqlFile);
             }
