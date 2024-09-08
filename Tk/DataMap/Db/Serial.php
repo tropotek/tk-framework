@@ -9,19 +9,19 @@ use Tk\DataMap\DataTypeInterface;
 class Serial extends DataTypeInterface
 {
 
-    public function getKeyValue(array $array): mixed
+    public function getPropertyValue(array $array): mixed
     {
-        $value = parent::getKeyValue($array);
-        if ($value) {
+        $value = parent::getPropertyValue($array);
+        if (is_string($value)) {
             $value = unserialize(base64_decode($value));
         }
         return $value;
     }
 
-    public function getPropertyValue(object $object): mixed
+    public function getColumnValue(object $object): mixed
     {
-        $value = parent::getPropertyValue($object);
-        if ($value) {
+        $value = parent::getColumnValue($object);
+        if (!is_null($value)) {
             $value = base64_encode(serialize($value));
         }
         return $value;

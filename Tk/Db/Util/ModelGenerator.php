@@ -1,12 +1,11 @@
 <?php
 namespace Tk\Db\Util;
 
-use Bs\Db\Permissions;
 use Tk\Exception;
-use Tt\Db;
+use Tk\Db;
 
 /**
- * @todo Update to use the new \Tt\DbModel system
+ * @todo Update to use the new \Tk\Db\Model system
  */
 class ModelGenerator
 {

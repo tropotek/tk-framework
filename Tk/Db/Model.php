@@ -1,12 +1,13 @@
 <?php
-namespace Tt;
+namespace Tk\Db;
 
 use Tk\ObjectUtil;
 use Tk\Traits\DataTrait;
 use Tk\Traits\SystemTrait;
-use Tt\DataMap\DataMap;
+use Tk\DataMap\DataMap;
+use Tk\Db;
 
-abstract class DbModel
+abstract class Model
 {
     use SystemTrait;
     use DataTrait;

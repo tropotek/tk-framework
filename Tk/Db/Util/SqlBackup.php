@@ -4,7 +4,7 @@ namespace Tk\Db\Util;
 use Tk\Db\Exception;
 use Tk\FileUtil;
 use Tk\Traits\SystemTrait;
-use Tt\Db;
+use Tk\Db;
 
 /**
  * A utility to back up and restore a DB in PHP.

@@ -11,20 +11,20 @@ class TextEncrypt extends DataTypeInterface
     public static string $encryptKey = '';
 
 
-    public function getKeyValue(array $array): mixed
+    public function getPropertyValue(array $array): mixed
     {
-        $value = parent::getKeyValue($array);
-        if ($value) {
-            $value = \Tk\Encrypt::create(self::$encryptKey)->decrypt($value);
+        $value = parent::getPropertyValue($array);
+        if (!is_null($value)) {
+            $value = \Tk\Encrypt::create(self::$encryptKey)->decrypt(strval($value));
         }
         return $value;
     }
 
-    public function getPropertyValue(object $object): mixed
+    public function getColumnValue(object $object): mixed
     {
-        $value = parent::getPropertyValue($object);
-        if ($value) {
-            $value = \Tk\Encrypt::create(self::$encryptKey)->encrypt($value);
+        $value = parent::getColumnValue($object);
+        if (!is_null($value)) {
+            $value = \Tk\Encrypt::create(self::$encryptKey)->encrypt(strval($value));
         }
         return $value;
     }

@@ -1,9 +1,10 @@
 <?php
-namespace Tt;
+namespace Tk\Db;
 
 use Tk\Str;
+use Tt\Table;
 
-class DbFilter extends \Tk\Collection
+class Filter extends \Tk\Collection
 {
 
     protected string $orderBy   = '';
@@ -12,9 +13,9 @@ class DbFilter extends \Tk\Collection
     protected string $where     = '';
 
 
-    public static function create(null|array|DbFilter $params, string $orderBy = '', ?int $limit = null, ?int $offset = null): static
+    public static function create(null|array|Filter $params, string $orderBy = '', ?int $limit = null, ?int $offset = null): static
     {
-        if ($params instanceof DbFilter) return $params;
+        if ($params instanceof Filter) return $params;
         $obj = new self();
         $obj->orderBy = preg_replace('/[^a-z0-9, _-]/', '', $orderBy);
         $obj->limit = $limit;
@@ -23,7 +24,7 @@ class DbFilter extends \Tk\Collection
         return $obj;
     }
 
-    public static function createFromTable(null|array|DbFilter $params, Table $table): static
+    public static function createFromTable(null|array|Filter $params, Table $table): static
     {
         return static::create($params, $table->getOrderBy(), $table->getLimit(), $table->getOffset());
     }

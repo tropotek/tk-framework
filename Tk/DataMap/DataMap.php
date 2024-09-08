@@ -1,6 +1,8 @@
 <?php
 namespace Tk\DataMap;
 
+use Tk\Db\Model;
+
 /**
  * This DataMap object is used to load objects and arrays
  * from a collection of DataTypes.
@@ -8,58 +10,65 @@ namespace Tk\DataMap;
  * Load it with the data types you want to map from an object to
  * an array and vica-versa and use loadObject() and loadArray()
  * to populate your objects.
- *
- * @deprecated To be replaced by \Tt\DataMap
  */
 class DataMap
 {
-    public const ATTR_PRIMARY_KEY = 'pri';
+    public const PRI    = 'pri';    // DB primary key flag
+
+    // Data type IO flags
+    // READ => property will be read into the object
+    // WRITE => object property will be written to teh storage array
+    // READ|WRITE => (default) property will be read into the object and written to the storage array
+    public const READ       = 0x01;      // For view/table reads only
+    public const WRITE      = 0x02;      // For table writes only
 
     /**
-     * A list of types sorted by property name
+     * A list of types indexed by property name
      * @var DataTypeInterface[]|array
      */
     private array $propertyTypes = [];
 
     /**
-     * A list of types sorted by key name
+     * A list of types indexed by column name
      * @var DataTypeInterface[]|array
      */
-    private array $keyTypes = [];
+    private array $columnTypes = [];
 
-    /**
-     * If this is true objects without the defined property will be added dynamically
-     */
-    protected bool $enableDynamic = true;
 
+    public static function makeType(\stdClass $meta): DataTypeInterface
+    {
+        return match ($meta->php_type) {
+            'bool'  => new Db\Boolean($meta->name_camel, $meta->name),
+            'int'   => new Db\Integer($meta->name_camel, $meta->name),
+            'float' => new Db\Decimal($meta->name_camel, $meta->name),
+            'json'  => new Db\Json($meta->name_camel, $meta->name),
+            'timestamp', 'datetime' => new Db\DateTime($meta->name_camel, $meta->name),
+            'date'  => new Db\Date($meta->name_camel, $meta->name),
+            'time'  => new Db\Time($meta->name_camel, $meta->name),
+            'year'  => new Db\Year($meta->name_camel, $meta->name),
+            default => new Db\Text($meta->name_camel, $meta->name),
+        };
+    }
 
     /**
      * Map all types from an array to an object.
      *
      * If the property does not exist in the object the type`s value is added to
      * the object as a dynamic property. If DataMap::dynamicProperties is set to true.
-     *
-     * @param array $ignoreProperties An array of property names to ignore
-     * @link http://krisjordan.com/dynamic-properties-in-php-with-stdclass
      */
-    public function loadObject(object $object, array $srcArray, array $ignoreProperties = []): DataMap
+    public function loadObject(object $object, array $srcArray, int $access = self::READ): DataMap
     {
-        // We load from the source array here, then we can add dynamic property values
         foreach ($srcArray as $key => $value) {
-            $type = $this->getKeyType($key);
-            if ($type) {
-                if (in_array($type->getProperty(), $ignoreProperties)) continue;
+            $type = $this->getTypeByColumn($key);
+            if (!($type instanceof DataTypeInterface)) continue;
+
+            if ($type->hasAccess($access)) {
                 $type->loadObject($object, $srcArray);
             } else {
-                if ($this->getPropertyType($key)) continue;
-                try {
-                    if ($this->isEnableDynamic()) {
-                        $reflect = new \ReflectionClass($object);
-                        if (!$reflect->hasProperty($key)) {
-                            $object->set($key, $value);
-                        }
-                    }
-                } catch (\ReflectionException $e) { }
+                if ($object instanceof DbModel) {
+                    if (property_exists($object, $key)) continue;
+                    $object->$key = $value;
+                }
             }
         }
         return $this;
@@ -67,80 +76,53 @@ class DataMap
 
     /**
      * Using the DataMap load an array with the values from an object
-     *
-     * @param array $ignoreKeys An array of key names to ignore
      */
-    public function loadArray(array &$array, object $srcObject, array $ignoreKeys = []): DataMap
+    public function loadArray(array &$array, object $srcObject, int $access = self::WRITE): DataMap
     {
-        foreach ($this->getPropertyTypes() as $type) {
-            if (in_array($type->getKey(), $ignoreKeys)) continue;
+        foreach ($this->propertyTypes as $type) {
+            if (!$type->hasAccess($access)) continue;
             $type->loadArray($array, $srcObject);
         }
         return $this;
     }
 
-    public function getArray(object $srcObject, array $ignoreKeys = []): array
+    public function getArray(object $srcObject, int $access = self::WRITE): array
     {
         $array = [];
-        $this->loadArray($array, $srcObject, $ignoreKeys);
+        $this->loadArray($array, $srcObject, $access);
         return $array;
     }
 
     /**
-     * Add a DataType to this data map
+     * Add a mapper data type to this data map
      */
-    public function addDataType(DataTypeInterface $type): DataTypeInterface
+    public function addType(DataTypeInterface $type, int $access = 0): DataTypeInterface
     {
+        if ($access) {
+            $type->setAccess($access);
+        }
+
         $this->propertyTypes[$type->getProperty()] = $type;
-        $this->keyTypes[$type->getKey()] = $type;
+        $this->columnTypes[$type->getColumn()] = $type;
         return $type;
     }
 
-    /**
-     * Gets the list of property types.
-     *
-     * @return array|DataTypeInterface[]
-     */
-    public function getPropertyTypes(): array
-    {
-        return $this->propertyTypes;
-    }
-
-    /**
-     * Gets a type by its property name
-     */
-    public function getPropertyType(string $property): ?DataTypeInterface
+    public function getTypeByProperty(string $property): ?DataTypeInterface
     {
         return $this->propertyTypes[$property] ?? null;
     }
 
-    /**
-     * Gets the list of key types.
-     *
-     * @return array|DataTypeInterface[]
-     */
-    public function getKeyTypes(): array
+    public function getTypeByColumn(string $column): ?DataTypeInterface
     {
-        return $this->keyTypes;
+        return $this->columnTypes[$column] ?? null;
     }
 
-    /**
-     * Gets a type by its key name
-     */
-    public function getKeyType(string $key): ?DataTypeInterface
+    public function getPrimaryKey(): ?DataTypeInterface
     {
-        return $this->keyTypes[$key] ?? null;
-    }
-
-    public function isEnableDynamic(): bool
-    {
-        return $this->enableDynamic;
-    }
-
-    public function setEnableDynamic(bool $enableDynamic): DataMap
-    {
-        $this->enableDynamic = $enableDynamic;
-        return $this;
+        foreach ($this->propertyTypes as $type) {
+            if ($type->hasFlag(DataMap::PRI)) return $type;
+        }
+        return null;
     }
 
 }

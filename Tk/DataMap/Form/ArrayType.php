@@ -9,16 +9,16 @@ use Tk\DataMap\DataTypeInterface;
 class ArrayType extends DataTypeInterface
 {
 
-    public function getKeyValue(array $array): mixed
+    public function getPropertyValue(array $array): mixed
     {
-        $value = parent::getKeyValue($array);
-        if ($value) $value = explode(',', $value);
+        $value = parent::getPropertyValue($array);
+        if (is_string($value)) $value = explode(',', $value);
         return $value;
     }
 
-    public function getPropertyValue(object $object): mixed
+    public function getColumnValue(object $object): mixed
     {
-        $value = parent::getPropertyValue($object);
+        $value = parent::getColumnValue($object);
         if (is_array($value)) $value = implode(',', $value);
         return $value;
     }

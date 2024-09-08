@@ -1,5 +1,7 @@
 <?php
-namespace Tt;
+namespace Tk;
+
+use Tk\Db\Model;
 
 class DbStatement extends \PDOStatement
 {
@@ -20,7 +22,7 @@ class DbStatement extends \PDOStatement
             $this->lastParams = $params;
             $result = parent::execute($params);
         } catch (\Exception $e) {
-            throw new DbException($e->getMessage(), $e->getCode(), $this->queryString, $params);
+            throw new Db\Exception($e->getMessage(), $e->getCode(), $this->queryString, $params);
         }
         return $result;
     }
@@ -42,13 +44,13 @@ class DbStatement extends \PDOStatement
     public function fetchMappedObject(string $classname): object|null|false
     {
         if (!class_exists($classname)) {
-            throw new DbException("class name '{$classname}' does not exist");
+            throw new Db\Exception("class name '{$classname}' does not exist");
         }
 
         $obj = new $classname;
 
         // use PDO mapping if class is not a DbModel object
-        if (!($obj instanceof DbModel)) return $this->fetchObject($classname);
+        if (!($obj instanceof Model)) return $this->fetchObject($classname);
 
         $row = $this->fetch(\PDO::FETCH_ASSOC);
         if ($row === false) return false;

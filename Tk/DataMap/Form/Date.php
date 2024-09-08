@@ -8,12 +8,12 @@ use Tk\DataMap\DataTypeInterface;
  */
 class Date extends DataTypeInterface
 {
-
     /**
      * The date format received from the array/form
      * @default 'd/m/Y' => `31/12/2000`
      */
     protected string $format = 'd/m/Y';
+
 
     public function __construct(string $property)
     {
@@ -28,19 +28,19 @@ class Date extends DataTypeInterface
         return $this;
     }
 
-    public function getKeyValue(array $array): mixed
+    public function getPropertyValue(array $array): mixed
     {
-        $value = parent::getKeyValue($array);
-        if (!($value === null || $value instanceof \DateTime)) {
+        $value = parent::getPropertyValue($array);
+        if (!(empty($value) || $value instanceof \DateTime)) {
             $value = \Tk\Date::createFormDate($value, null, $this->format);
         }
-
+        if (empty($value)) $value = null;
         return $value;
     }
 
-    public function getPropertyValue(object $object): mixed
+    public function getColumnValue(object $object): mixed
     {
-        $value = parent::getPropertyValue($object);
+        $value = parent::getColumnValue($object);
         if ($value instanceof \DateTime) {
             return $value->format($this->format);
         }

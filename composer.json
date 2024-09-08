@@ -7,7 +7,7 @@
     "framework",
     "tropotek"
   ],
-  "time": "2022-10-15",
+  "time": "2024-10-01",
   "license": "MIT",
   "authors": [
     {
@@ -28,7 +28,7 @@
     },
     "files": [
       "Tk/Exception.php",
-      "Tt/functions.php"
+      "Tk/functions.php"
     ]
   },
   "require": {

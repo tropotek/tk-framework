@@ -1,5 +1,5 @@
 <?php
-namespace Tt;
+namespace Tk;
 
 use Tk\Db\Exception;
 
@@ -60,7 +60,7 @@ class Db
 	 */
 	public static function push_dsn(string $dsn, array $options = []): void
 	{
-		array_push(self::$dsn_stack, [self::$dsn, self::$options, self::$timezone]);
+		self::$dsn_stack[] = [self::$dsn, self::$options, self::$timezone];
 		self::connect($dsn, $options);
 	}
 
@@ -214,7 +214,7 @@ class Db
 
             return $stm->rowCount();
         } catch (\Exception $e) {
-            throw new DbException($e->getMessage(), $e->getCode(), $query);
+            throw new Exception($e->getMessage(), $e->getCode(), $query);
         }
     }
 
@@ -243,7 +243,7 @@ class Db
             }
             return $rows;
         } catch (\Exception $e) {
-            throw new DbException($e->getMessage(), $e->getCode(), $query, $params);
+            throw new Exception($e->getMessage(), $e->getCode(), $query, $params);
         }
     }
 
@@ -270,7 +270,7 @@ class Db
             $row = $stm->fetchMappedObject($classname);
             return (false === $row) ? null : $row;
         } catch (\Exception $e) {
-            throw new DbException($e->getMessage(), $e->getCode(), $query);
+            throw new Exception($e->getMessage(), $e->getCode(), $query);
         }
 	}
 
@@ -292,7 +292,7 @@ class Db
 
             return $stm->fetchColumn();
         } catch (\Exception $e) {
-            throw new DbException($e->getMessage(), $e->getCode(), $query);
+            throw new Exception($e->getMessage(), $e->getCode(), $query);
         }
 	}
 
@@ -585,7 +585,7 @@ class Db
             }
             return $list;
         } catch (\Exception $e) {
-            throw new DbException($e->getMessage(), $e->getCode(), $query);
+            throw new Exception($e->getMessage(), $e->getCode(), $query);
         }
     }
 

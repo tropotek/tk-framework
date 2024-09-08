@@ -2,7 +2,7 @@
 namespace Tk\Db\Util;
 
 /**
- * @todo Update to use the new \Tt\DbModel system
+ * @todo Update to use the new \Tk\Db\Model system
  */
 class ModelProperty extends \Tk\Collection
 {

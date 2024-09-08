@@ -9,7 +9,7 @@ jQuery(function ($) {
   tkRegisterInit(function () {
     let table = $(this);
 
-    // Class: \Tt\Table
+    // Class: \Tk\Table
     // Table limit on-change event
     $('.tk-limit select', table).change(function (e) {
       if ($(this).val() == 0 && $(this).data('total') > 1000) {
@@ -23,7 +23,7 @@ jQuery(function ($) {
     });
 
 
-    // Class: \Tt\Table\Cell\RowSelect
+    // Class: \Tk\Table\Cell\RowSelect
     $('.tk-tcb-head', table).on('change', function(e) {
       let cbh = $(this);
       let name = cbh.attr('name').match(/([a-zA-Z0-9]+)_all/i)[1];
@@ -32,7 +32,7 @@ jQuery(function ($) {
     }).trigger('change');
 
 
-    // Class: \Tt\Table\Action\Select
+    // Class: \Tk\Table\Action\Select
     function updateBtn(btn) {
       if (!btn.data('selectedOnly')) return;
       var rsName = btn.data('rowSelect');

@@ -4,7 +4,7 @@ namespace Tk\Db\Util;
 use Symfony\Component\HttpFoundation\Request;
 use Tk\Traits\SystemTrait;
 use Tk\Uri;
-use Tt\Db;
+use Tk\Db;
 
 /**
  * @todo The saved sql file should also be encoded with a secret key

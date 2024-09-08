@@ -1,14 +1,11 @@
 <?php
 namespace Tk\Db\Util;
 
-use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
 use Tk\Config;
-use Tk\Factory;
 use Tk\FileUtil;
 use Tk\Log;
 use Tk\Traits\SystemTrait;
-use Tt\Db;
+use Tk\Db;
 
 /**
  * DB migration tool

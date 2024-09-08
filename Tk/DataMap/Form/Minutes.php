@@ -9,18 +9,18 @@ use Tk\DataMap\DataTypeInterface;
 class Minutes extends DataTypeInterface
 {
 
-    public function getKeyValue(array $array): mixed
+    public function getPropertyValue(array $array): mixed
     {
-        $value = parent::getKeyValue($array);
+        $value = parent::getPropertyValue($array);
         if ($value !== null && preg_match('/^([0-9]+):([0-9]+)$/', $value, $regs)) {
             $value = (int)($regs[1] * 60) + (int)$regs[2];
         }
         return $value;
     }
 
-    public function getPropertyValue(object $object): mixed
+    public function getColumnValue(object $object): mixed
     {
-        $value = parent::getPropertyValue($object);
+        $value = parent::getColumnValue($object);
         if ($value !== null) {
             $h = $value/60;
             $m = $value%60;

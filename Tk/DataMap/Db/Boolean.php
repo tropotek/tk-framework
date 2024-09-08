@@ -9,26 +9,26 @@ use Tk\DataMap\DataTypeInterface;
 class Boolean extends DataTypeInterface
 {
 
-    public function getKeyValue(array $array): mixed
+    public function getPropertyValue(array $array): mixed
     {
-        $value = parent::getKeyValue($array);
-        if ($value !== null) {
+        $value = parent::getPropertyValue($array);
+        if (!(is_null($value) || is_bool($value))) {
             $value = (
-                $value == $this->getKey() ||
+                $value == $this->getColumn() ||
+                $value == $this->getProperty() ||
                 strtolower($value) == 'yes' ||
                 strtolower($value) == 'true' ||
-                ((int)$value)
+                (int)$value == 1
             );
         }
         return $value;
     }
 
-    public function getPropertyValue(object $object): mixed
+    public function getColumnValue(object $object): mixed
     {
-        $value = parent::getPropertyValue($object);
-        if ($value !== null) $value = (int)$value;
+        $value = parent::getColumnValue($object);
+        if (!is_null($value)) $value = (int)$value;
         return $value;
     }
 
 }
-

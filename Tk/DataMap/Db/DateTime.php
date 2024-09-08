@@ -1,8 +1,8 @@
 <?php
-namespace Tt\DataMap\Db;
+namespace Tk\DataMap\Db;
 
 use Tk\Exception;
-use Tt\DataMap\DataTypeInterface;
+use Tk\DataMap\DataTypeInterface;
 
 /**
  * map a datetime/timestamp from a DB field to a \DateTime object

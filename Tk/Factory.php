@@ -67,7 +67,7 @@ class Factory extends Collection
      */
     final public function getDb(string $name = 'mysql'): void
     {
-        throw new \Exception("Deprecated:: Use \Tt\Db static object ");
+        throw new \Exception("Deprecated:: Use \Tk\Db static object ");
     }
 
     /**

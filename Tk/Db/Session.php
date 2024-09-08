@@ -2,14 +2,14 @@
 namespace Tk\Db;
 
 use Tk\Traits\SingletonTrait;
-use Tt\Db;
+use Tk\Db;
 
 /**
  * A basic DB session handler
  *
  * @todo allow for db/session params to be sent as options in the constructor
  */
-class Session
+class Session implements \SessionHandlerInterface
 {
     use SingletonTrait;
 
@@ -19,14 +19,7 @@ class Session
     public function __construct(array $options = [])
     {
         // Set handler to override SESSION
-        session_set_save_handler(
-            [$this, "_open"],
-            [$this, "_close"],
-            [$this, "_read"],
-            [$this, "_write"],
-            [$this, "_destroy"],
-            [$this, "_gc"]
-        );
+        session_set_save_handler($this);
     }
 
     public function __destruct()
@@ -97,27 +90,27 @@ class Session
     }
 
 
-    public function _open(): bool
+    public function open(string $path, string $name): bool
     {
         return true;
     }
 
-    public function _close(): bool
+    public function close(): bool
     {
         return true;
     }
 
-    public function _read(string $session_id): string
+    public function read(string $id): string
     {
         return Db::queryVal("
             SELECT data
             FROM _session
-            WHERE session_id = :session_id",
-            compact('session_id')
+            WHERE session_id = :id",
+            compact('id')
         );
     }
 
-    public function _write(string $session_id, mixed $data): bool
+    public function write(string $id, mixed $data): bool
     {
         // Create time stamp
         $time = new \DateTimeImmutable();
@@ -125,26 +118,26 @@ class Session
         $time = $time->getTimestamp();
 
         return (false !== Db::execute("
-            REPLACE INTO _session VALUES (:session_id, :data, :lifetime, :time)",
-            compact('session_id', 'data', 'lifetime', 'time')
+            REPLACE INTO _session VALUES (:id, :data, :lifetime, :time)",
+            compact('id', 'data', 'lifetime', 'time')
         ));
     }
 
-    public function _destroy(string $session_id): bool
+    public function destroy(string $id): bool
     {
-        return (false !== Db::delete('_session', compact('session_id')));
+        return (false !== Db::delete('_session', ['session_id' => $id]));
     }
 
     /**
-     * Garbage Collection
+     * Rubbish Collection
      */
-    public function _gc($max) {
-        // Calculate what is to be deemed old
-        $old = time() - $max;
-        return (false !== Db::execute("
+    public function gc(int $max_lifetime): false|int
+    {
+        $old = time() - $max_lifetime;
+        return Db::execute("
             DELETE FROM _session WHERE time < :old",
             compact('old')
-        ));
+        );
     }
 
 }

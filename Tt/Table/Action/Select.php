@@ -8,7 +8,7 @@ use Tt\Table\Action;
 use Tt\Table\Cell\RowSelect;
 
 /**
- * This action depends on \Tt\Table\Cell\RowSelect Cell
+ * This action depends on \Tk\Table\Cell\RowSelect Cell
  * Use this to attach an action that can be triggered on selected rows
  *
  * NOTE: This Action does not call the onExecute() or onShow() callback queues

@@ -7,9 +7,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Tk\Console\Console;
 use Tk\Db\Util\SqlBackup;
-use Tk\Db\Util\SqlMigrate;
 use Tk\Uri;
-use Tt\Db;
+use Tk\Db;
 
 class Mirror extends Console
 {

@@ -18,18 +18,18 @@ class Money extends DataTypeInterface
         return $this;
     }
 
-    public function getKeyValue(array $array): mixed
+    public function getPropertyValue(array $array): mixed
     {
-        $value = parent::getKeyValue($array);
-        if (!($value === null || $value instanceof \Tk\Money)) {
+        $value = parent::getPropertyValue($array);
+        if (is_numeric($value)) {
             $value = \Tk\Money::parseFromString($value, \Tk\Currency::getInstance($this->currencyCode));
         }
         return $value;
     }
 
-    public function getPropertyValue(object $object): mixed
+    public function getColumnValue(object $object): mixed
     {
-        $value = parent::getPropertyValue($object);
+        $value = parent::getColumnValue($object);
         if ($value instanceof \Tk\Money) {
             return $value->toFloatString();
         }

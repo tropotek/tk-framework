@@ -1,10 +1,8 @@
 <?php
 namespace Tk\Db;
 
-use Tk\Traits\ConfigTrait;
-use Tk\Traits\FactoryTrait;
 use Tk\Traits\SystemTrait;
-use Tt\Db;
+use Tk\Db;
 
 /**
  * A collection object that can store its values in a DB table.

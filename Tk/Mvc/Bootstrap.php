@@ -2,10 +2,10 @@
 namespace Tk\Mvc;
 
 use Dom\Template;
-use Tt\DataMap\Db\TextEncrypt;
+use Tk\DataMap\Db\TextEncrypt;
 use Tk\Traits\SingletonTrait;
 use Tk\Traits\SystemTrait;
-use Tt\Db;
+use Tk\Db;
 
 class Bootstrap
 {

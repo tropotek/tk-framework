@@ -9,16 +9,16 @@ use Tk\DataMap\DataTypeInterface;
 class Percent extends DataTypeInterface
 {
 
-    public function getKeyValue(array $array): mixed
+    public function getPropertyValue(array $array): mixed
     {
-        $value = parent::getKeyValue($array);
+        $value = parent::getPropertyValue($array);
         if ($value !== null) $value = (float)($value/100);
         return $value;
     }
 
-    public function getPropertyValue(object $object): mixed
+    public function getColumnValue(object $object): mixed
     {
-        $value = parent::getPropertyValue($object);
+        $value = parent::getColumnValue($object);
         if ($value !== null) $value = ($value*100) . '';
         return $value;
     }

@@ -1,5 +1,5 @@
 <?php
-namespace Tt\DataMap\Db;
+namespace Tk\DataMap\Db;
 
 /**
  * map a year from a DB field to a \DateTime object

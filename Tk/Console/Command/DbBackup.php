@@ -8,7 +8,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Tk\Console\Console;
 use Tk\Db\Util\SqlBackup;
 use Tk\FileUtil;
-use Tt\Db;
+use Tk\Db;
 
 class DbBackup extends Console
 {
