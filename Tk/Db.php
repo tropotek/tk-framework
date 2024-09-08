@@ -642,6 +642,7 @@ class Db
 
     private static function setLastStatement(DbStatement $stm): void
     {
+        if (function_exists('vd')) vd(self::$LOG, $stm->queryString);
         if(self::$LOG) {
             self::$lastStatement = $stm;
         }

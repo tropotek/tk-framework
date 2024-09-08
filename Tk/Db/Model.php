@@ -41,13 +41,14 @@ abstract class Model
      */
     public static function getDataMap(): DataMap
     {
-        Db::$LOG = false;   // disable cache of last statement
         $map = self::$_MAPS[static::class] ?? null;
         if (!is_null($map)) return $map;
 
         // autogen table/view name from class
         $table = strtolower(preg_replace('/(?<!^)[A-Z]+|(?<!^|\d)[\d]+/', '_$0', ObjectUtil::basename(static::class)));
         $view = "v_{$table}";
+        
+        Db::$LOG = false;   // disable cache of last statement
         if (!Db::tableExists($view)) $view = $table;
 
         $v_meta = [];
@@ -56,6 +57,7 @@ abstract class Model
             $v_meta = Db::getTableInfo($view);
         }
         $roCols = array_diff_key($v_meta, $t_meta);
+        Db::$LOG = true;
 
         $map = new DataMap();
 
@@ -74,7 +76,6 @@ abstract class Model
         }
 
         self::$_MAPS[static::class] = $map;
-        Db::$LOG = true;
         return $map;
     }
 
