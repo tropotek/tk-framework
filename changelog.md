@@ -1,5 +1,28 @@
 #CHANGELOG#
 
+Ver 8.0.34 [2024-09-08]:
+-------------------------------
+  - Update libs with new table object
+  - migrate new objects to libs
+  - fix dbfilter for managers
+  - fixed select dialogs
+  - finish upgrading libs
+  - update user management
+  - Merge branch '8.0' of https://github.com/tropotek/tk-framework into 8.0
+  - WIP
+  - Update dom template ready to MVC code
+  - remove monolog calls
+  - minimise symfony request usage
+  - Implement php native session
+  - Update libs and site to use new DbModel, Form and Table objects
+  - Update user manager, add new Bs table object
+  - Added Bs\Table with filter form
+  - added actions and orderby to new Tt table
+  - Fix migrate cmd
+  - Make DB static
+  - add new table objects
+
+
 Ver 8.0.32 [2024-04-16]:
 -------------------------------
   - Fix wiki menu edit page_id api error
