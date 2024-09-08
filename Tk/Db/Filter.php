@@ -2,7 +2,7 @@
 namespace Tk\Db;
 
 use Tk\Str;
-use Tt\Table;
+use Tk\Table;
 
 class Filter extends \Tk\Collection
 {
