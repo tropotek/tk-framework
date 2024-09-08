@@ -47,7 +47,7 @@ abstract class Model
         // autogen table/view name from class
         $table = strtolower(preg_replace('/(?<!^)[A-Z]+|(?<!^|\d)[\d]+/', '_$0', ObjectUtil::basename(static::class)));
         $view = "v_{$table}";
-        
+
         Db::$LOG = false;   // disable cache of last statement
         if (!Db::tableExists($view)) $view = $table;
 
