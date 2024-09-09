@@ -90,7 +90,6 @@ class SqlMigrate
     {
         $config = Config::instance();
         if (!$config->isDev()) {
-            call_user_func_array($write, ['Warning: Ignoring dev environment configuration']);
             return false;
         }
         $devFile = $config->getBasePath() . $config->get('debug.script');
