@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 8.0.36 [2024-09-09]:
+-------------------------------
+  - fix menu edit and page select dialog
+
+
 Ver 8.0.34 [2024-09-08]:
 -------------------------------
   - Update libs with new table object
