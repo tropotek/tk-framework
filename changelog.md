@@ -1,5 +1,11 @@
 #CHANGELOG#
 
+Ver 8.0.38 [2024-09-10]:
+-------------------------------
+  - Use hash in place of secret ID
+  - Added sessions manager admin page
+
+
 Ver 8.0.36 [2024-09-09]:
 -------------------------------
   - fix menu edit and page select dialog
