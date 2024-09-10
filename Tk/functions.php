@@ -21,8 +21,6 @@ function get_client_ip(): string
     return $ip;
 }
 
-
-
 /**
  * returns $s escaped for HTML output
  */
