@@ -12,27 +12,14 @@ use Tk\Traits\SingletonTrait;
  */
 class Registry extends Db\Collection
 {
-    public static string $TABLE_REGISTRY = 'registry';
+    public static string $DB_TABLE = 'registry';
 
     use SingletonTrait;
 
     public function __construct(\PDO $pdo = null)
     {
-        parent::__construct(self::$TABLE_REGISTRY, $pdo);
+        parent::__construct(self::$DB_TABLE, $pdo);
         $this->load();
-    }
-
-    /**
-     * Save modified Data to the DB
-     */
-    public function save(): static
-    {
-        try {
-            if ($this->installTable()) {
-                $this->save();
-            }
-        } catch (\Exception $e) { \Tk\Log::error($e->__toString());}
-        return parent::save();
     }
 
     public function getSiteName(): string

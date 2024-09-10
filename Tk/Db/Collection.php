@@ -28,6 +28,7 @@ class Collection extends \Tk\Collection
     {
         parent::__construct();
         $this->table = $table;
+        $this->installTable();
     }
 
     public function __sleep()
@@ -46,8 +47,7 @@ class Collection extends \Tk\Collection
     public function load(): static
     {
         try {
-            if (!Db::tableExists($this->getTable())) return $this;
-
+            if (!$this->installTable()) return $this;
             $rows = Db::query("SELECT * FROM {$this->getTable()}");
             foreach ($rows as $row) {
                 $this->set($row->key, $this->encodeValue($row->value));
@@ -97,14 +97,14 @@ class Collection extends \Tk\Collection
 
     protected function dbHas(string $key): bool
     {
-        if (!Db::tableExists($this->getTable())) return false;
+        if (!$this->installTable()) return false;
         $rows = Db::query("SELECT * FROM {$this->getTable()} WHERE `key` = :key", compact('key'));
         return count($rows) > 0;
     }
 
     protected function dbSet(string $key, $value): static
     {
-        $this->installTable();
+        if (!$this->installTable()) return $this;
         $value = $this->encodeValue($value);
         if ($this->dbHas($key)) {
             Db::update($this->getTable(), 'key', compact('key', 'value'));
@@ -116,7 +116,7 @@ class Collection extends \Tk\Collection
 
     protected function dbGet(string $key): mixed
     {
-        if (!Db::tableExists($this->getTable())) return '';
+        if (!$this->installTable()) return '';
         $val = Db::queryVal("SELECT value FROM {$this->getTable()} WHERE `key` = :key",
             compact('key')
         );
@@ -125,25 +125,21 @@ class Collection extends \Tk\Collection
 
     protected function dbDelete(string $key): static
     {
-        if (!Db::tableExists($this->getTable())) return $this;
+        if (!$this->installTable()) return $this;
         Db::delete($this->getTable(), compact('key'));
         return $this;
     }
 
     /**
-     * return true if the table was created
+     * return true if the table exists or is installed
      */
     public function installTable(): bool
     {
-        try {
-            if (Db::tableExists($this->getTable())) return false;
-            Db::execute($this->getTableSql());
-
-        } catch (\Exception $e) { \Tk\Log::error($e->__toString());}
-        return true;
+        if (Db::tableExists($this->getTable())) return true;
+        return false !== Db::execute($this->getTableSql());
     }
 
-    public function getTableSql(): string
+    protected function getTableSql(): string
     {
         return <<<SQL
             CREATE TABLE IF NOT EXISTS {$this->getTable()} (

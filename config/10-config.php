@@ -20,7 +20,7 @@ return function (Config $config)
 
     // Session Defaults
     $config->set('session.db_enable',         false);
-    $config->set('session.db_table',          '_session');
+    //$config->set('session.db_table',          '_session');
     $config->set('session.db_id_col',         'session_id');
     $config->set('session.db_data_col',       'data');
     $config->set('session.db_lifetime_col',   'lifetime');
