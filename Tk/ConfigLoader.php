@@ -12,13 +12,15 @@ use Symfony\Component\Routing\Loader\Configurator\CollectionConfigurator;
  *
  * Files are executed from the lowest first to the highest last.
  * EG:
- *  o 10-config.php
+ *  o 10-config.php (run first)
  *  o 50-config.php
- *  o 100-config.php (same as the project root /src/config/config.php file)
+ *  o 100-config.php (ran last, same as the site root /config.php file)
  *
  * The route files are named with the same structure 50-routes.php and the site project is executed last.
  *
  * @todo implement a caching strategy for this ???
+ *       Be sure to store it somewhere that a user cannot read,
+ *       a serialized string in a php file in the cache folder could be an option
  */
 class ConfigLoader
 {
