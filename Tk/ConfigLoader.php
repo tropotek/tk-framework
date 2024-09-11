@@ -17,6 +17,8 @@ use Symfony\Component\Routing\Loader\Configurator\CollectionConfigurator;
  *  o 100-config.php (same as the project root /src/config/config.php file)
  *
  * The route files are named with the same structure 50-routes.php and the site project is executed last.
+ *
+ * @todo implement a caching strategy for this ???
  */
 class ConfigLoader
 {
@@ -55,6 +57,8 @@ class ConfigLoader
         foreach ($list as $path) {
             $this->load($path, $config);
         }
+        // load site config
+        $this->load($config->getBasePath() . '/config.php', $config);
     }
 
     /**
@@ -99,10 +103,13 @@ class ConfigLoader
             $regex = new \RegexIterator($it, $reg, \RegexIterator::GET_MATCH);
             foreach($regex as $v) {
                 $priority = $v[2] ?? '100';
-                $list[$priority][] = $v[0];
+                if (!isset($list[$priority]) || !in_array($v[0], $list[$priority])) {
+                    $list[$priority][] = $v[0];
+                }
             }
         }
         ksort($list);
+
         // Flatten the array
         $result = [];
         array_walk_recursive($list,function($v) use (&$result){ $result[] = $v; });
@@ -114,6 +121,7 @@ class ConfigLoader
      */
     public function load(string $path, mixed $object = null): void
     {
+        if (!is_file($path)) return;
         $callback = include $path;
         if (is_callable($callback) && $object) {
             $callback($object);

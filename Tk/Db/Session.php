@@ -54,8 +54,7 @@ class Session implements \SessionHandlerInterface
             CREATE TABLE IF NOT EXISTS $table (
                 session_id VARCHAR(128) NOT NULL PRIMARY KEY,
                 data BLOB NOT NULL,
-                -- expiry DATETIME NOT NULL,
-                expiry TIMESTAMP NOT NULL,
+                expiry DATETIME NOT NULL,
                 modified TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
             );
