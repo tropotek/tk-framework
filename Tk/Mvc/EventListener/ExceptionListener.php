@@ -8,11 +8,9 @@ use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Tk\Traits\SystemTrait;
 
 class ExceptionListener implements EventSubscriberInterface
 {
-    use SystemTrait;
 
     protected mixed $controller;
     protected bool $debug;

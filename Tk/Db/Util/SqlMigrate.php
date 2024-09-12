@@ -4,7 +4,6 @@ namespace Tk\Db\Util;
 use Tk\Config;
 use Tk\FileUtil;
 use Tk\Log;
-use Tk\Traits\SystemTrait;
 use Tk\Db;
 
 /**
@@ -29,8 +28,6 @@ use Tk\Db;
  */
 class SqlMigrate
 {
-    use SystemTrait;
-
 
     protected \PDO             $db;
     protected string           $table      = '';
@@ -141,13 +138,13 @@ class SqlMigrate
         try {
             $this->install();
 
-            $file = $this->getConfig()->getBasePath() . $this->toRelative($file);
+            $file = Config::instance()->getBasePath() . $this->toRelative($file);
             if (!is_readable($file)) return false;
             if ($this->hasPath($this->toRelative($file))) return false;
 
             if (!$this->backupFile) {   // only run once per session.
                 $dump = new SqlBackup($this->getDb());
-                $this->backupFile = $dump->save($this->getConfig()->getTempPath());
+                $this->backupFile = $dump->save(Config::instance()->getTempPath());
             }
 
             if (preg_match('/\.php$/i', basename($file))) {  // Include .php files
@@ -174,7 +171,7 @@ class SqlMigrate
 
                 $error = $stm->errorInfo();
                 if ($error[0] != "00000") {
-                    throw new \Tk\Db\Exception("Query $i failed: " . $error[2], 0, null, $sql);
+                    throw new \Tk\Db\Exception("Query $i failed: " . $error[2], 0, $sql);
                 }
                 $this->insertPath($file);
                 return true;
@@ -286,7 +283,7 @@ SQL;
 
     private function toRelative(string $path): string
     {
-        return rtrim(str_replace($this->getConfig()->getBasePath(), '', $path), '/');
+        return rtrim(str_replace(Config::instance()->getBasePath(), '', $path), '/');
     }
 
     /**

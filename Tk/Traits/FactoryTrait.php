@@ -1,8 +1,11 @@
 <?php
 namespace Tk\Traits;
 
-use Tk\Factory;
+use Bs\Factory;
 
+/**
+ * @deprecated Use Factory::instance()
+ */
 trait FactoryTrait
 {
     public function getFactory(): Factory

@@ -1,16 +1,15 @@
 <?php
 namespace Tk\Mvc;
 
+use Bs\Factory;
 use Symfony\Component\HttpKernel\HttpKernel;
-use Tk\Traits\SystemTrait;
 
 class FrontController extends HttpKernel
 {
-    use SystemTrait;
 
     public function __construct()
     {
-        $factory = $this->getSystem()->getFactory();
+        $factory = Factory::instance();
         parent::__construct(
             $factory->getEventDispatcher(),
             $factory->getControllerResolver(),

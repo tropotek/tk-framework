@@ -4,18 +4,17 @@ namespace Tk\Mvc;
 
 use Symfony\Component\HttpFoundation\Request;
 use Tk\Exception;
-use Tk\Traits\SystemTrait;
+use Tk\System;
 
 /**
  * This controller os used to execute a php route
  */
 class PhpController
 {
-    use SystemTrait;
 
     public function doDefault(Request $request): string
     {
-        $path = $this->makePath($request->attributes->get('path'));
+        $path = System::makePath($request->attributes->get('path'));
         if (!is_file($path)) {
             throw new Exception("File not found {$path}");
         }

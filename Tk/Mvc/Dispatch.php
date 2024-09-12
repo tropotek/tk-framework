@@ -1,12 +1,12 @@
 <?php
 namespace Tk\Mvc;
 
+use Bs\Factory;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Tk\Config;
 use Tk\Mvc\EventListener\ShutdownHandler;
 use Tk\Mvc\EventListener\StartupHandler;
-use Tk\Traits\ConfigTrait;
-use Tk\Traits\FactoryTrait;
-use Tk\Traits\SystemTrait;
+use Tk\System;
 
 /**
  * This object sets up the EventDispatcher and
@@ -17,7 +17,6 @@ use Tk\Traits\SystemTrait;
  */
 class Dispatch
 {
-    use SystemTrait;
 
     protected ?EventDispatcherInterface $dispatcher = null;
 
@@ -31,7 +30,7 @@ class Dispatch
     private function init()
     {
         $this->commonInit();
-        if ($this->getSystem()->isCli()) {
+        if (System::isCli()) {
             $this->cliInit();
         } else {
             $this->httpInit();
@@ -43,9 +42,9 @@ class Dispatch
      */
     protected function commonInit()
     {
-        if ($this->getConfig()->isDev()) {
+        if (Config::instance()->isDev()) {
             $this->getDispatcher()->addSubscriber(new StartupHandler());
-            $this->getDispatcher()->addSubscriber(new ShutdownHandler($this->getConfig()->get('script.start.time')));
+            $this->getDispatcher()->addSubscriber(new ShutdownHandler(Config::instance()->get('script.start.time')));
         }
     }
 
@@ -55,12 +54,12 @@ class Dispatch
     protected function httpInit()
     {
         $this->getDispatcher()->addSubscriber(new \Symfony\Component\HttpKernel\EventListener\RouterListener(
-            $this->getFactory()->getRouteMatcher(),
-            $this->getFactory()->getRequestStack()
+            Factory::instance()->getRouteMatcher(),
+            Factory::instance()->getRequestStack()
         ));
 
         $this->getDispatcher()->addSubscriber(new \Tk\Mvc\EventListener\LogExceptionListener(
-            $this->getConfig()->isDebug()
+            Config::instance()->isDebug()
         ));
 
         $this->getDispatcher()->addSubscriber(new \Tk\Mvc\EventListener\ViewHandler());

@@ -1,56 +1,56 @@
 <?php
 namespace Tk\Db\Util;
 
-use Symfony\Component\HttpFoundation\Request;
-use Tk\Traits\SystemTrait;
+use JetBrains\PhpStorm\NoReturn;
+use Tk\Config;
 use Tk\Uri;
 use Tk\Db;
 
 /**
- * @todo The saved sql file should also be encoded with a secret key
+ * @todo The saved sql file should also be encoded with the secret key
  */
 class Mirror
 {
-    use SystemTrait;
 
-    public function doDefault(Request $request)
+    public function doDefault(): string
     {
 //        if (!$this->getConfig()->isDebug()) {
 //            throw new \Tk\Exception('Only available for live sites.', 500);
 //        }
 
-        if (strtolower($request->getScheme()) != Uri::SCHEME_HTTP_SSL) {
+        if (strtolower($_SERVER['REQUEST_SCHEME'] ?? 'http') != Uri::SCHEME_HTTP_SSL) {
             throw new \Tk\Exception('Only available over SSL connections.', 500);
         }
-        if (!$this->getConfig()->get('db.mirror.secret', false)) {
+        if (!Config::instance()->get('db.mirror.secret', false)) {
             throw new \Tk\Exception('Access Disabled');
         }
-        if ($this->getConfig()->get('db.mirror.secret', null) !== $request->request->get('secret')) {
+        if (Config::instance()->get('db.mirror.secret', null) !== ($_POST['secret'] ?? '')) {
             throw new \Tk\Exception('Invalid access key.', 500);
         }
 
-        if ($request->request->get('action') == 'db') {
-            $this->doDbBackup($request);
-        } elseif ($request->request->get('action') == 'file') {
-            $this->doDataBackup($request);
+        $action = trim($_POST['action']);
+        if ($action == 'db') {
+            $this->doDbBackup();
+        } elseif ($action == 'file') {
+            $this->doDataBackup();
         }
 
         return 'Invalid access request.';
     }
 
-    public function doDbBackup(Request $request)
+    #[NoReturn] public function doDbBackup(): void
     {
 
         $dbBackup = new SqlBackup(Db::getPdo());
-        $exclude = [$this->getConfig()->get('session.db_table')];
+        $exclude = [Config::instance()->get('session.db_table')];
 
-        $path = $this->getConfig()->getTempPath() . '/db_mirror.sql';
+        $path = Config::instance()->getTempPath() . '/db_mirror.sql';
         $dbBackup->save($path, ['exclude' => $exclude]);
 
         if (is_file($path . '.gz'))
             @unlink($path . '.gz');
 
-        $command = sprintf('gzip ' . $path);
+        $command = sprintf('gzip %s', $path);
         exec($command, $out, $ret);
         if ($ret != 0) {
             throw new \Tk\Db\Exception(implode("\n", $out));
@@ -67,7 +67,7 @@ class Mirror
         exit;
     }
 
-    protected function _fileOutput($filename)
+    protected function _fileOutput($filename): void
     {
         $filesize = filesize($filename);
         $chunksize = 4096;
@@ -89,18 +89,18 @@ class Mirror
         }
     }
 
-    public function doDataBackup(Request $request)
+    #[NoReturn] public function doDataBackup(): void
     {
 //        if (!$this->getConfig()->isDebug()) {
 //            throw new \Tk\Exception('Only available for live sites.');
 //        }
 
-        $srcFile = $this->getConfig()->getBasePath() . '/src-'.\Tk\Date::create()->format(\Tk\Date::FORMAT_ISO_DATE).'-data.tgz';
+        $srcFile = Config::instance()->getBasePath() . '/src-'.\Tk\Date::create()->format(\Tk\Date::FORMAT_ISO_DATE).'-data.tgz';
         if (is_file($srcFile)) unlink($srcFile);
         $cmd = sprintf('cd %s && tar zcf %s %s',
-            $this->getConfig()->getBasePath(),
+            Config::instance()->getBasePath(),
             escapeshellarg(basename($srcFile)),
-            basename($this->getConfig()->getDataPath())
+            basename(Config::instance()->getDataPath())
         );
         //Log::info($cmd);
         system($cmd);

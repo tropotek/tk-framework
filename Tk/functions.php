@@ -1,25 +1,5 @@
 <?php
 
-/**
- * Returns the client IP address.
- *
- * This method can read the client IP address from the "X-Forwarded-For" header
- * when trusted proxies were set via "setTrustedProxies()". The "X-Forwarded-For"
- * header value is a comma+space separated list of IP addresses, the left-most
- * being the original client, and each successive proxy that passed the request
- * adding the IP address where it received the request from.
- */
-function get_client_ip(): string
-{
-    $ip = $_SERVER['HTTP_CLIENT_IP'] ?? ($_SERVER['HTTP_X_FORWARDED_FOR'] ?? ($_SERVER['REMOTE_ADDR'] ?? ''));
-
-    if (substr_count($ip, ':') > 1) {   // is ip 6
-        if (!filter_var($ip, \FILTER_VALIDATE_IP, \FILTER_FLAG_IPV6)) $ip = '';
-    } else {
-        if (!filter_var($ip, \FILTER_VALIDATE_IP, \FILTER_FLAG_IPV4)) $ip = '';
-    }
-    return $ip;
-}
 
 /**
  * returns $s escaped for HTML output

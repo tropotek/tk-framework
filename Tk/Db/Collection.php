@@ -1,7 +1,6 @@
 <?php
 namespace Tk\Db;
 
-use Tk\Traits\SystemTrait;
 use Tk\Db;
 
 /**
@@ -16,8 +15,6 @@ use Tk\Db;
  */
 class Collection extends \Tk\Collection
 {
-    use SystemTrait;
-
 
     protected string $table = '';
 

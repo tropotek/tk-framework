@@ -2,21 +2,15 @@
 namespace Tk;
 
 use Tk\Traits\SingletonTrait;
-use Tk\Traits\SystemTrait;
 
 /**
- * This will hold all the systems configuration params.
+ * This can hold all the systems configuration params.
  * All data in the config object is recreated each session.
- *
- * Query this when looking for a system configuration value.
- *
  * NOTE: No objects should be saved in the Config storage, only primitive types.
  */
 class Config extends Collection
 {
     use SingletonTrait;
-    Use SystemTrait;
-
 
     protected function __construct()
     {
@@ -24,8 +18,25 @@ class Config extends Collection
         parent::__construct();
 
         $this->set('hostname', $_SERVER['HTTP_HOST'] ?? $_SERVER['HTTP_X_FORWARDED_HOST'] ?? 'localhost');
-        $this->set('base.path', $this->getSystem()->discoverBasePath() ?? '');
-        $this->set('base.url', $this->getSystem()->discoverBaseUrl() ?? '');
+        $this->set('base.path', System::discoverBasePath() ?? '');
+        $this->set('base.url', system::discoverBaseUrl() ?? '');
+
+        // default system paths
+        $this->set('path.data',       '/data');
+        $this->set('path.cache',      '/data/cache');
+        $this->set('path.temp',       '/data/tmp');
+        $this->set('path.src',        '/src');
+        $this->set('path.config',     '/src/config');
+        $this->set('path.vendor',     '/vendor');
+        $this->set('path.vendor.org', '/vendor/ttek');
+        $this->set('path.template',   '/html');
+
+        $this->set('php.date.timezone', 'Australia/Melbourne');
+
+        $this->set('debug',           false);
+        $this->set('env.type',        'prod');
+        $this->set('log.logLevel',    \Psr\Log\LogLevel::ERROR);
+        $this->set('log.enableNoLog', true);
     }
 
     /**
@@ -57,42 +68,42 @@ class Config extends Collection
 
     public function getDataPath(): string
     {
-        return $this->getSystem()->makePath($this->get('path.data'));
+        return System::makePath($this->get('path.data'));
     }
 
     public function getDataUrl(): string
     {
-        return $this->getSystem()->makeUrl($this->get('path.data'));
+        return System::makeUrl($this->get('path.data'));
     }
 
     public function getTempPath(): string
     {
-        return $this->getSystem()->makePath($this->get('path.temp'));
+        return System::makePath($this->get('path.temp'));
     }
 
     public function getTempUrl(): string
     {
-        return $this->getSystem()->makeUrl($this->get('path.temp'));
+        return System::makeUrl($this->get('path.temp'));
     }
 
     public function getCachePath(): string
     {
-        return $this->getSystem()->makePath($this->get('path.cache'));
+        return System::makePath($this->get('path.cache'));
     }
 
     public function getCacheUrl(): string
     {
-        return $this->getSystem()->makeUrl($this->get('path.cache'));
+        return System::makeUrl($this->get('path.cache'));
     }
 
     public function getTemplatePath(): string
     {
-        return $this->getSystem()->makePath($this->get('path.template'));
+        return System::makePath($this->get('path.template'));
     }
 
     public function getTemplateUrl(): string
     {
-        return $this->getSystem()->makeUrl($this->get('path.template'));
+        return System::makeUrl($this->get('path.template'));
     }
 
     public function isDebug(): bool

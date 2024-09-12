@@ -129,7 +129,6 @@ namespace Tk\Debug {
 }
 namespace { // global code
     use Tk\Debug\VarDump;
-    use Tk\Factory;
     use Tk\Log;
 
     /**

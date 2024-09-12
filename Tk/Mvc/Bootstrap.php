@@ -1,44 +1,60 @@
 <?php
 namespace Tk\Mvc;
 
+use Bs\Factory;
 use Dom\Template;
+use Tk\Config;
 use Tk\DataMap\Db\TextEncrypt;
+use Tk\System;
 use Tk\Traits\SingletonTrait;
-use Tk\Traits\SystemTrait;
 use Tk\Db;
 
 class Bootstrap
 {
     use SingletonTrait;
-    use SystemTrait;
 
     public function init(): void
     {
+        $config = Config::instance();
+
         // Apply all php config settings to php
-        foreach ($this->getConfig()->getGroup('php', true) as $k => $v) {
+        foreach ($config->getGroup('php', true) as $k => $v) {
             @ini_set($k, $v);
         }
 
+        // make app directories if not exists
+        \Tk\FileUtil::mkdir(System::makePath($config->get('path.temp')), true);
+        \Tk\FileUtil::mkdir(System::makePath($config->get('path.cache')), true);
+
+
+        // Setup default migration paths
+        // todo: cache this as it will not change often/ever
+        $vendorPath = $config->getBasePath() . $config->get('path.vendor.org');
+        $libPaths = scandir($vendorPath);
+        array_shift($libPaths);
+        array_shift($libPaths);
+        $migratePaths = [$config->getBasePath() . '/src/config/sql'] +
+            array_map(fn($path) => $vendorPath . '/' . $path . '/config/sql' , $libPaths);
+        $config->set('db.migrate.paths', $migratePaths);
+
         Db::connect(
-            $this->getConfig()->get('db.mysql', ''),
-            $this->getConfig()->get('db.mysql.options', []),
+            $config->get('db.mysql', ''),
+            $config->get('db.mysql.options', []),
         );
-        if ($this->getConfig()->get('php.date.timezone')) {
-            DB::setTimezone($this->getConfig()->get('php.date.timezone'));
+        if ($config->get('php.date.timezone')) {
+            DB::setTimezone($config->get('php.date.timezone'));
         }
 
-        $this->getFactory()->initLogger();
+        Factory::instance()->initLogger();
 
         // Init tk error handler
         \Tk\ErrorHandler::instance();
 
         \Tk\Debug\VarDump::instance();
 
-        TextEncrypt::$encryptKey = $this->getConfig()->get('system.encrypt', '');
-        // TODO remove when done
-        \Tk\DataMap\Db\TextEncrypt::$encryptKey = $this->getConfig()->get('system.encrypt', '');
+        TextEncrypt::$encryptKey = $config->get('system.encrypt', '');
 
-        if ($this->getConfig()->isDev()) {
+        if ($config->isDev()) {
             // Allow self-signed certs in file_get_contents in dev environment
             stream_context_set_default(["ssl" => [
                 "verify_peer" => false,
@@ -46,7 +62,7 @@ class Bootstrap
             ]]);
         }
 
-        if ($this->getSystem()->isCli()) {
+        if (System::isCli()) {
             $this->cliInit();
         } else {
             $this->httpInit();
@@ -55,33 +71,35 @@ class Bootstrap
 
     protected function httpInit(): void
     {
+        $config = Config::instance();
+
         /**
          * This makes our life easier when dealing with paths. Everything is relative
          * to the application root now.
          */
-        chdir($this->getConfig()->getBasePath());
+        chdir($config->getBasePath());
 
-        \Tk\Uri::$SITE_HOSTNAME = $this->getConfig()->getHostname();
-        \Tk\Uri::$BASE_URL = $this->getConfig()->getBaseUrl();
-        if ($this->getConfig()->isDebug()) {
+        \Tk\Uri::$SITE_HOSTNAME = $config->getHostname();
+        \Tk\Uri::$BASE_URL = $config->getBaseUrl();
+        if ($config->isDebug()) {
             Template::$ENABLE_TRACER = true;
         }
 
         // init session
-        $this->getFactory()->initSession();
+        Factory::instance()->initSession();
 
         // init the Request
-        $this->getFactory()->getRequest();
+        Factory::instance()->getRequest();
 
         // Setup EventDispatcher and subscribe events, loads routes
-        $this->getFactory()->initEventDispatcher();
+        Factory::instance()->initEventDispatcher();
 
     }
 
     protected function cliInit(): void
     {
         // Setup EventDispatcher and subscribe events, loads routes
-        $this->getFactory()->initEventDispatcher();
+        Factory::instance()->initEventDispatcher();
     }
 
 }

@@ -6,6 +6,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Tk\Console\Console;
 use Tk\Db\Util\SqlBackup;
+use Tk\System;
 
 /**
  * Executes the dev.php script
@@ -30,7 +31,7 @@ class Debug extends Console
         }
 
         try {
-            $devFile = $this->getSystem()->makePath($this->getConfig()->get('debug.script'));
+            $devFile = System::makePath($this->getConfig()->get('debug.script'));
             if (is_file($devFile)) {
                 $this->writeComment('Setup dev environment: ' . $this->getConfig()->get('debug.script'));
                 include($devFile);

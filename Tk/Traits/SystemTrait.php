@@ -3,10 +3,14 @@ namespace Tk\Traits;
 
 use Tk\Config;
 use Tk\Cookie;
-use Tk\Factory;
-use Tk\Registry;
+use Bs\Factory;
+use Bs\Registry;
 use Tk\System;
 
+/**
+ *
+ * @deprecated System is now all static methods
+ */
 trait SystemTrait
 {
     /**
@@ -43,12 +47,12 @@ trait SystemTrait
 
     public function makePath(string $path): string
     {
-        return $this->getSystem()->makePath($path);
+        return System::makePath($path);
     }
 
     public function makeUrl(string $path): string
     {
-        return $this->getSystem()->makeUrl($path);
+        return System::makeUrl($path);
     }
 
     // Helper Functions

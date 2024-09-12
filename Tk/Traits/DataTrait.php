@@ -1,8 +1,6 @@
 <?php
 namespace Tk\Traits;
 
-use Tk\Exception;
-
 trait DataTrait
 {
     protected array $_data = [];

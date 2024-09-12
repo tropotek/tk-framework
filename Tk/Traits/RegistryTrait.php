@@ -1,8 +1,11 @@
 <?php
 namespace Tk\Traits;
 
-use Tk\Registry;
+use Bs\Registry;
 
+/**
+ * @deprecated use Registry::instance()
+ */
 trait RegistryTrait
 {
 

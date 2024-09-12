@@ -1,11 +1,8 @@
 <?php
 namespace Tk;
 
-use Tk\Traits\SystemTrait;
-
 class Image
 {
-    use SystemTrait;
 
     const URI_PIXEL_TRANSPARENT = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
@@ -76,7 +73,7 @@ class Image
     {
         $fontSize = $size*0.5;
         $config = Config::instance();
-        $font = $config->makePath($config->get('path.vendor.org') . '/tk-framework/assets/font/OpenSans-Semibold.ttf');
+        $font = System::makePath($config->get('path.vendor.org') . '/tk-framework/assets/font/OpenSans-Semibold.ttf');
         $color = $bgColor->getTextColor();
 
         $text = strtoupper($text);

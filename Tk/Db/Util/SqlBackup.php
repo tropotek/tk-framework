@@ -1,9 +1,9 @@
 <?php
 namespace Tk\Db\Util;
 
+use Tk\Config;
 use Tk\Db\Exception;
 use Tk\FileUtil;
-use Tk\Traits\SystemTrait;
 use Tk\Db;
 
 /**
@@ -14,7 +14,6 @@ use Tk\Db;
  */
 class SqlBackup
 {
-    use SystemTrait;
 
     private \PDO $db;
 
@@ -47,7 +46,7 @@ class SqlBackup
             $sqlFile = $regs[1];
         }
 
-        $dsn = Db::parseDsn($this->getConfig()->get('db.mysql'));
+        $dsn = Db::parseDsn(Config::instance()->get('db.mysql'));
 
         // In short, the new MariaDB version adds this line to the beginning of the dump file:
         //  /*!999999\- enable the sandbox mode */
@@ -63,9 +62,16 @@ class SqlBackup
         fclose($f);
 
         // todo: add the db port to the command
-        $command = sprintf('mysql %s -h %s -u %s -p%s < %s', $dsn['dbName'], $dsn['host'], $dsn['user'], $dsn['pass'], escapeshellarg($sqlFile));
-
+        $command = sprintf('mysql %s --port=%s -h %s -u %s -p%s < %s',
+            escapeshellarg($dsn['dbName']),
+            $dsn['port'] ?? 0,
+            escapeshellarg($dsn['host']),
+            escapeshellarg($dsn['user']),
+            escapeshellarg($dsn['pass']),
+            escapeshellarg($sqlFile)
+        );
         exec($command, $out, $ret);
+
         if ($ret != 0) throw new Exception(implode("\n", $out));
     }
 
@@ -78,7 +84,7 @@ class SqlBackup
     public function save(string $path = '', array $options = []): string
     {
         $sqlFile = $path;
-        $dsn = Db::parseDsn($this->getConfig()->get('db.mysql'));
+        $dsn = Db::parseDsn(Config::instance()->get('db.mysql'));
 
         if (!preg_match('/\.sql$/', $sqlFile)) {
             $path = rtrim($path, '/');
@@ -91,8 +97,8 @@ class SqlBackup
         }
 
         $exclude = $exclude ?? [];
-        if (!in_array($this->getConfig()->get('session.db_table', ''), $exclude)) {
-            $exclude[] = $this->getConfig()->get('session.db_table');
+        if (!in_array(Config::instance()->get('session.db_table', ''), $exclude)) {
+            $exclude[] = Config::instance()->get('session.db_table');
         }
         // Exclude all views
         $sql = "SHOW FULL TABLES IN `{$dsn['dbName']}` WHERE TABLE_TYPE LIKE 'VIEW';";
@@ -106,9 +112,15 @@ class SqlBackup
         foreach ($exclude as $tbl) {
             $excludeParams[] = "--ignore-table={$dsn['dbName']}.$tbl";
         }
-        $command = sprintf('mysqldump --skip-triggers --max_allowed_packet=1G --single-transaction --quick --lock-tables=false %s --opt -h %s -u %s -p%s %s > %s',
-            implode(' ', $excludeParams), $dsn['host'], $dsn['user'], $dsn['pass'], $dsn['dbName'], escapeshellarg($sqlFile));
-
+        $command = sprintf('mysqldump --skip-triggers --max_allowed_packet=1G --single-transaction --quick --lock-tables=false %s --opt --port=%s -h %s -u %s -p%s %s > %s',
+            implode(' ', $excludeParams),
+            $dsn['port'] ?? 0,
+            escapeshellarg($dsn['host']),
+            escapeshellarg($dsn['user']),
+            escapeshellarg($dsn['pass']),
+            escapeshellarg($dsn['dbName']),
+            escapeshellarg($sqlFile)
+        );
         exec($command, $out, $ret);
 
         if ($ret != 0) throw new Exception(implode("\n", $out));
@@ -123,11 +135,11 @@ class SqlBackup
      */
     public function dump(array $options = []): string
     {
-        $dsn = Db::parseDsn($this->getConfig()->get('db.mysql'));
+        $dsn = Db::parseDsn(Config::instance()->get('db.mysql'));
 
         $exclude = $exclude ?? [];
-        if (!in_array($this->getConfig()->get('session.db_table', ''), $exclude)) {
-            $exclude[] = $this->getConfig()->get('session.db_table');
+        if (!in_array(Config::instance()->get('session.db_table', ''), $exclude)) {
+            $exclude[] = Config::instance()->get('session.db_table');
         }
         // Exclude all views
         $sql = "SHOW FULL TABLES IN `{$dsn['dbName']}` WHERE TABLE_TYPE LIKE 'VIEW';";
@@ -141,8 +153,14 @@ class SqlBackup
         foreach ($exclude as $tbl) {
             $excludeParams[] = "--ignore-table={$dsn['dbName']}.$tbl";
         }
-        $command = sprintf('mysqldump --max_allowed_packet=1G --single-transaction --quick --lock-tables=false %s --opt -h %s -u %s -p%s %s',
-            implode(' ', $excludeParams), $dsn['host'], $dsn['user'], $dsn['pass'], $dsn['dbName']);
+        $command = sprintf('mysqldump --max_allowed_packet=1G --single-transaction --quick --lock-tables=false %s --opt --port=%s -h %s -u %s -p%s %s',
+            implode(' ', $excludeParams),
+            escapeshellarg($dsn['host']),
+            $dsn['port'] ?? 0,
+            escapeshellarg($dsn['user']),
+            escapeshellarg($dsn['pass']),
+            escapeshellarg($dsn['dbName'])
+        );
 
         exec($command, $out, $ret);
 

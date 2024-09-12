@@ -1,11 +1,8 @@
 <?php
 namespace Tk;
 
-use Tk\Traits\SystemTrait;
-
 class Cookie
 {
-    use SystemTrait;
 
     /**
      * This is the cookie name that will be stored on the users browser, we can
@@ -45,8 +42,8 @@ class Cookie
         bool $httponly   = true,
         string $samesite = self::SAMESITE_STRICT
     ) {
-        $this->path = $path ?? $this->getConfig()->getBaseUrl();
-        $this->domain = $domain ?? $this->getConfig()->getHostname();
+        $this->path = $path ?? Config::instance()->getBaseUrl();
+        $this->domain = $domain ?? Config::instance()->getHostname();
         $this->secure = $secure;
         $this->httponly = $httponly;
         $this->samesite = $samesite;

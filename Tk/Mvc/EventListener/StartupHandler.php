@@ -1,18 +1,19 @@
 <?php
 namespace Tk\Mvc\EventListener;
 
+use Bs\Registry;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Tk\Config;
 use Tk\Log;
-use Tk\Traits\SystemTrait;
+use Tk\System;
 
 class StartupHandler implements EventSubscriberInterface
 {
-    use SystemTrait;
 
     public static string $SCRIPT_START  =  '---------------------- Start ----------------------';
     public static string $SCRIPT_END    =  '--------------------- Shutdown --------------------';
@@ -36,15 +37,15 @@ class StartupHandler implements EventSubscriberInterface
         self::$SCRIPT_CALLED = true;
         $this->info(self::$SCRIPT_START);
 
-        $siteName = $this->getSystem()->getRegistry()?->getSiteName() ?? implode(' ', $_SERVER['argv']);
-        if ($this->getSystem()->getComposerJson()) {
-            $siteName .= sprintf(' [%s]', $this->getSystem()->getComposerJson()['name']);
+        $siteName = Registry::instance()?->getSiteName() ?? implode(' ', $_SERVER['argv']);
+        if (System::getComposerJson()) {
+            $siteName .= sprintf(' [%s]', System::getComposerJson()['name']);
         }
-        if ($this->getSystem()->getVersion()) {
-            $siteName .= sprintf(' [v%s]', $this->getSystem()->getVersion());
+        if (System::getVersion()) {
+            $siteName .= sprintf(' [v%s]', System::getVersion());
         }
-        if ($this->getConfig()->isDev()) {
-            $siteName .= ' {DEBUG}';
+        if (Config::instance()->isDev()) {
+            $siteName .= ' {Dev}';
         }
         $this->info('- Project: ' . trim($siteName));
 
@@ -64,7 +65,7 @@ class StartupHandler implements EventSubscriberInterface
             }
         } else {
             $this->debug('- CLI: ' . implode(' ', $_SERVER['argv']));
-            $this->debug('- Path: ' . $this->getConfig()->getBasePath());
+            $this->debug('- Path: ' . Config::instance()->getBasePath());
         }
         $this->debug('- PHP: ' . \PHP_VERSION);
         $this->info(self::$SCRIPT_LINE);

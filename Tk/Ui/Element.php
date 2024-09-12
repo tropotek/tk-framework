@@ -1,7 +1,6 @@
 <?php
 namespace Tk\Ui;
 
-use Tk\Traits\SystemTrait;
 use Tk\Ui\Traits\AttributesTrait;
 
 /**
@@ -10,7 +9,6 @@ use Tk\Ui\Traits\AttributesTrait;
 abstract class Element
 {
     use AttributesTrait;
-    use SystemTrait;
 
     /**
      * Return any html string representing this element.

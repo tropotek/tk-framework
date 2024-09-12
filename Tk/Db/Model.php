@@ -3,13 +3,11 @@ namespace Tk\Db;
 
 use Tk\ObjectUtil;
 use Tk\Traits\DataTrait;
-use Tk\Traits\SystemTrait;
 use Tk\DataMap\DataMap;
 use Tk\Db;
 
 abstract class Model
 {
-    use SystemTrait;
     use DataTrait;
 
     /**

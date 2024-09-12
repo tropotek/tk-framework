@@ -5,12 +5,9 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ViewEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Tk\Traits\SystemTrait;
 
 class ViewHandler implements EventSubscriberInterface
 {
-    use SystemTrait;
-
 
     public function onView(ViewEvent $event): void
     {

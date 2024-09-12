@@ -558,7 +558,6 @@ use {db-namespace}\{classname}Map;
 use Dom\Template;
 use Bs\Table\ManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Tk\Traits\SystemTrait;
 use Tk\Db\Mapper\Result;
 use Tk\Form\Field;
 use Tk\Table\Cell;
@@ -568,7 +567,6 @@ use Tk\Uri;
 
 class {classname} extends ManagerInterface
 {
-    use SystemTrait;
 
     public function initCells(): void
     {

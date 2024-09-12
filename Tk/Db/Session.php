@@ -2,6 +2,7 @@
 namespace Tk\Db;
 
 use Tk\Date;
+use Tk\System;
 use Tk\Traits\SingletonTrait;
 use Tk\Db;
 
@@ -120,7 +121,7 @@ class Session implements \SessionHandlerInterface
     public function open(string $path, string $name): bool
     {
         $this->installTable();
-        $_SESSION[self::SID_IP]    = get_client_ip();
+        $_SESSION[self::SID_IP]    = System::getClientIp();
         $_SESSION[self::SID_AGENT] = $_SERVER['HTTP_USER_AGENT'] ?? '';
         return true;
     }

@@ -56,8 +56,8 @@ This is the default setup if you do not want to override any of the system objec
 ```php
 <?php
    \Tk\Config::instance();
-   \Tk\Factory::instance();
-   $system = \Tk\System::instance();
+   \Bs\Factory::instance();
+   $system = \Bs\System::instance();
    
    // ...
    echo get_class($system->getConfig());    // 'Tk\Config'

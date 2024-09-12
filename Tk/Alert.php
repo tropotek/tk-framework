@@ -1,12 +1,8 @@
 <?php
-
 namespace Tk;
-
-use Tk\Traits\SystemTrait;
 
 class Alert
 {
-    use SystemTrait;
 
     const SID = 'tk-alerts';
 
