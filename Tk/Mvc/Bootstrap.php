@@ -5,13 +5,15 @@ use Bs\Factory;
 use Dom\Template;
 use Tk\Config;
 use Tk\DataMap\Db\TextEncrypt;
+use Tk\Debug\VarDump;
+use Tk\ErrorHandler;
+use Tk\FileUtil;
 use Tk\System;
-use Tk\Traits\SingletonTrait;
 use Tk\Db;
+use Tk\Uri;
 
 class Bootstrap
 {
-    use SingletonTrait;
 
     public function init(): void
     {
@@ -23,8 +25,8 @@ class Bootstrap
         }
 
         // make app directories if not exists
-        \Tk\FileUtil::mkdir(System::makePath($config->get('path.temp')), true);
-        \Tk\FileUtil::mkdir(System::makePath($config->get('path.cache')), true);
+        FileUtil::mkdir(System::makePath($config->get('path.temp')), true);
+        FileUtil::mkdir(System::makePath($config->get('path.cache')), true);
 
 
         // Setup default migration paths
@@ -48,9 +50,9 @@ class Bootstrap
         Factory::instance()->initLogger();
 
         // Init tk error handler
-        \Tk\ErrorHandler::instance();
+        ErrorHandler::instance();
 
-        \Tk\Debug\VarDump::instance();
+        VarDump::instance();
 
         TextEncrypt::$encryptKey = $config->get('system.encrypt', '');
 
@@ -79,8 +81,8 @@ class Bootstrap
          */
         chdir($config->getBasePath());
 
-        \Tk\Uri::$SITE_HOSTNAME = $config->getHostname();
-        \Tk\Uri::$BASE_URL = $config->getBaseUrl();
+        Uri::$SITE_HOSTNAME = $config->getHostname();
+        Uri::$BASE_URL = $config->getBaseUrl();
         if ($config->isDebug()) {
             Template::$ENABLE_TRACER = true;
         }

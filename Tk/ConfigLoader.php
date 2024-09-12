@@ -36,9 +36,9 @@ class ConfigLoader
         $libPaths = scandir($vendorPath);
         array_shift($libPaths);
         array_shift($libPaths);
-        $this->searchPaths = [
-            $basePath . '/src/config'
-        ] + array_map(fn($path) => $vendorPath . '/' . $path . '/config' , $libPaths);
+
+        $this->searchPaths = array_map(fn($path) => $vendorPath . '/' . $path . '/config' , $libPaths);
+        array_unshift($this->searchPaths, $basePath . '/src/config');
     }
 
     public static function create(): ConfigLoader

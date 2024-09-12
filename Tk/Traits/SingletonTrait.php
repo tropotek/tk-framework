@@ -1,18 +1,22 @@
 <?php
 namespace Tk\Traits;
 
+/**
+ * @deprecated
+ */
 trait SingletonTrait
 {
-    private static mixed $_INSTANCE = null;
+    protected static mixed $_instance = null;
 
     /**
      * Gets an instance of this object, if none exists one is created
      */
     public static function instance(): static
     {
-        if (self::$_INSTANCE == null) {
-            self::$_INSTANCE = new static();
+        print_r('HELLLL NOOOOOOOOOOOOOOO!!!');
+        if (is_null(self::$_instance)) {
+            self::$_instance = new static();
         }
-        return self::$_INSTANCE;
+        return self::$_instance;
     }
 }

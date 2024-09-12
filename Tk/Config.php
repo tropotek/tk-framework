@@ -1,8 +1,6 @@
 <?php
 namespace Tk;
 
-use Tk\Traits\SingletonTrait;
-
 /**
  * This can hold all the systems configuration params.
  * All data in the config object is recreated each session.
@@ -10,7 +8,7 @@ use Tk\Traits\SingletonTrait;
  */
 class Config extends Collection
 {
-    use SingletonTrait;
+    protected static mixed $_instance = null;
 
     protected function __construct()
     {
@@ -44,11 +42,11 @@ class Config extends Collection
      */
     public static function instance(): static
     {
-        if (self::$_INSTANCE == null) {
-            self::$_INSTANCE = new static();
-            ConfigLoader::create()->loadConfigs(self::$_INSTANCE);
+        if (is_null(self::$_instance)) {
+            self::$_instance = new static();
+            ConfigLoader::create()->loadConfigs(self::$_instance);
         }
-        return self::$_INSTANCE;
+        return self::$_instance;
     }
 
     public function getHostname(): string

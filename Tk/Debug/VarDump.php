@@ -1,16 +1,12 @@
 <?php
 namespace Tk\Debug {
-    use Psr\Log\LoggerInterface;
-    use Psr\Log\NullLogger;
-    use Tk\Traits\SingletonTrait;
 
     /**
      * Class VarDum, used by the vd(), vdd() functions.
      */
     class VarDump
     {
-        use SingletonTrait;
-
+        protected static mixed $_instance = null;
         protected string $basePath = '';
 
 
@@ -21,12 +17,11 @@ namespace Tk\Debug {
 
         public static function instance(string $basePath = ''): VarDump
         {
-            if (static::$_INSTANCE == null) {
-                if (!$basePath)
-                    $basePath = dirname(__DIR__, 3);
-                static::$_INSTANCE = new static($basePath);
+            if (is_null(static::$_instance)) {
+                if (!$basePath) $basePath = dirname(__DIR__, 3);
+                static::$_instance = new static($basePath);
             }
-            return static::$_INSTANCE;
+            return static::$_instance;
         }
 
         public function getBasePath(): string

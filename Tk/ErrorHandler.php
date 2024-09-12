@@ -1,10 +1,6 @@
 <?php
 namespace Tk;
 
-use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
-use Tk\Traits\SingletonTrait;
-
 /**
  * To set this up just call ErrorHandler::instance($logger) at the earliest possible convenience.
  *
@@ -13,8 +9,7 @@ use Tk\Traits\SingletonTrait;
  */
 class ErrorHandler
 {
-    use SingletonTrait;
-
+    protected static mixed $_instance = null;
 
     public function __construct()
     {
@@ -23,10 +18,10 @@ class ErrorHandler
 
     public static function instance(): ErrorHandler
     {
-        if (static::$_INSTANCE == null) {
-            static::$_INSTANCE = new static();
+        if (is_null(static::$_instance)) {
+            static::$_instance = new static();
         }
-        return static::$_INSTANCE;
+        return static::$_instance;
     }
 
     /**

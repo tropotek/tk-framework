@@ -2,7 +2,6 @@
 namespace Tk;
 
 use Tk\Logger\Handler;
-use Tk\Traits\SingletonTrait;
 
 /**
  * A basic log interface to help with logging through the PSR interface,
@@ -13,13 +12,13 @@ use Tk\Traits\SingletonTrait;
  */
 class Log
 {
-    use SingletonTrait;
-
     /**
      * use this in your query to disable logging for a request
      * Handy for API calls to reduce clutter in a log
      */
     const NO_LOG = 'nolog';
+
+    protected static mixed $_instance = null;
 
     private Handler $logger;
 
@@ -31,10 +30,10 @@ class Log
 
     public static function instance(): Log
     {
-        if (!self::$_INSTANCE) {
-            self::$_INSTANCE = new static();
+        if (is_null(self::$_instance)) {
+            self::$_instance = new static();
         }
-        return self::$_INSTANCE;
+        return self::$_instance;
     }
 
     public static function addHandler(\Psr\Log\LoggerInterface $logger): void

@@ -3,7 +3,6 @@ namespace Tk\Db;
 
 use Tk\Date;
 use Tk\System;
-use Tk\Traits\SingletonTrait;
 use Tk\Db;
 
 /**
@@ -13,10 +12,10 @@ use Tk\Db;
  */
 class Session implements \SessionHandlerInterface
 {
-    use SingletonTrait;
-
     const SID_IP    = '_user.ip';
     const SID_AGENT = '_user.agent';
+
+    protected static mixed $_instance = null;
 
     public static int    $DATA_TTL_DAYS = 15;
     public static string $DB_TABLE      = '_session';
@@ -36,10 +35,10 @@ class Session implements \SessionHandlerInterface
 
     public static function instance(array $options = []): static
     {
-        if (self::$_INSTANCE == null) {
-            self::$_INSTANCE = new static($options);
+        if (is_null(self::$_instance)) {
+            self::$_instance = new static($options);
         }
-        return self::$_INSTANCE;
+        return self::$_instance;
     }
 
     /**
