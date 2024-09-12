@@ -4,6 +4,9 @@ namespace Tk\Traits;
 
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
+/**
+ * @deprecated
+ */
 trait EventDispatcherTrait
 {
 

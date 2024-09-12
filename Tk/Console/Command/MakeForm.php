@@ -8,7 +8,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class MakeForm extends MakeInterface
 {
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('make-form')
             ->setAliases(array('mf'))

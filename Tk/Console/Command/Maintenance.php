@@ -1,6 +1,7 @@
 <?php
 namespace Tk\Console\Command;
 
+use Bs\Registry;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -9,9 +10,9 @@ use Tk\Console\Console;
 class Maintenance extends Console
 {
 
-    protected function configure()
+    protected function configure(): void
     {
-        $enabled = $this->getRegistry()->isMaintenanceMode();
+        $enabled = Registry::instance()->isMaintenanceMode();
 
         $this->setName('maintenance')
             ->setAliases(['maint'])
@@ -27,7 +28,7 @@ class Maintenance extends Console
         } else {
             $this->writeInfo('Maintenance mode disabled.');
         }
-        $this->getRegistry()->setMaintenanceMode($mode);
+        Registry::instance()->setMaintenanceMode($mode);
 
         return Command::SUCCESS;
     }

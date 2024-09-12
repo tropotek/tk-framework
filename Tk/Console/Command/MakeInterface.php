@@ -18,7 +18,7 @@ class MakeInterface extends Console
     protected string $basePath = '';
 
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->addArgument('table', InputArgument::REQUIRED, 'The name of the table to generate the class file from.')
             ->addOption('overwrite', 'o', InputOption::VALUE_NONE, 'Overwrite existing class files.')
@@ -28,9 +28,6 @@ class MakeInterface extends Console
             ->addOption('basepath', 'B', InputOption::VALUE_OPTIONAL, 'A base src path to save the file (Default: {sitePath}/src)', '');
     }
 
-    /**
-     * @throws \Exception
-     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if (!$this->getConfig()->isDev()) {
@@ -50,10 +47,7 @@ class MakeInterface extends Console
         return Command::SUCCESS;
     }
 
-    /**
-     * @throws \Exception
-     */
-    protected function makeAll()
+    protected function makeAll(): void
     {
         $this->makeModel();
         $this->makeMapper();
@@ -63,10 +57,7 @@ class MakeInterface extends Console
         $this->makeEdit();
     }
 
-    /**
-     * @throws \Exception
-     */
-    protected function makeModel()
+    protected function makeModel(): void
     {
         $file = $this->getBasePath() . '/' . str_replace('\\', '/', $this->getGen()->getDbNamespace()) . '/' . $this->getGen()->getClassName() . '.php';
         $code = $this->getGen()->makeModel($this->getInput()->getOptions());
@@ -74,10 +65,7 @@ class MakeInterface extends Console
         $this->writeComment('Writing Model: ' . $file);
     }
 
-    /**
-     * @throws \Exception
-     */
-    protected function makeMapper()
+    protected function makeMapper(): void
     {
         $file = $this->getBasePath() . '/' . str_replace('\\', '/', $this->getGen()->getDbNamespace()) . '/' . $this->getGen()->getClassName() . 'Map.php';
         $code = $this->getGen()->makeMapper($this->getInput()->getOptions());
@@ -85,10 +73,7 @@ class MakeInterface extends Console
         $this->writeComment('Writing Mapper: ' . $file);
     }
 
-    /**
-     * @throws \Exception
-     */
-    protected function makeForm()
+    protected function makeForm(): void
     {
         $file = $this->getBasePath() . '/' . str_replace('\\', '/', $this->getGen()->getFormNamespace()) . '/' . $this->getGen()->getClassName() . '.php';
         $code = $this->getGen()->makeForm($this->getInput()->getOptions());
@@ -96,10 +81,7 @@ class MakeInterface extends Console
         $this->writeComment('Writing Form: ' . $file);
     }
 
-    /**
-     * @throws \Exception
-     */
-    protected function makeEdit()
+    protected function makeEdit(): void
     {
         $file = $this->getBasePath() . '/' . str_replace('\\', '/', $this->getGen()->getControllerNamespace()) . '/' . $this->getGen()->getClassName() . '/Edit.php';
         $code = $this->getGen()->makeEdit($this->getInput()->getOptions());
@@ -107,10 +89,7 @@ class MakeInterface extends Console
         $this->writeComment('Writing Edit Form: ' . $file);
     }
 
-    /**
-     * @throws \Exception
-     */
-    protected function makeTable()
+    protected function makeTable(): void
     {
         $file = $this->getBasePath() . '/' . str_replace('\\', '/', $this->getGen()->getTableNamespace()) . '/' . $this->getGen()->getClassName() . '.php';
         $code = $this->getGen()->makeTable($this->getInput()->getOptions());
@@ -118,10 +97,7 @@ class MakeInterface extends Console
         $this->writeComment('Writing Table: ' . $file);
     }
 
-    /**
-     * @throws \Exception
-     */
-    protected function makeManager()
+    protected function makeManager(): void
     {
         $file = $this->getBasePath() . '/' . str_replace('\\', '/', $this->getGen()->getControllerNamespace()) . '/' . $this->getGen()->getClassName() . '/Manager.php';
         $code = $this->getGen()->makeManager($this->getInput()->getOptions());

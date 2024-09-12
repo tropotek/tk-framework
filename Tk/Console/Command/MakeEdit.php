@@ -8,7 +8,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class MakeEdit extends MakeInterface
 {
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('make-edit')
             ->setAliases(array('me'))

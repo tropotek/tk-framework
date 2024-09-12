@@ -28,13 +28,13 @@ class Filesystem implements Iface
     public function store(string $key, mixed $data, int $ttl = 0): bool
     {
         if (!FileUtil::mkdir($this->getCachePath())) {
-            throw new \Tk\Cache\Exception('Cannot create path: ' . $this->getCachePath());
+            throw new \Tk\Exception('Cannot create path: ' . $this->getCachePath());
         }
 
         // Opening the file in read/write mode
         $h = fopen($this->getFileName($key), 'a+');
         if (!$h) {
-            throw new \Tk\Cache\Exception('Could not write to cache');
+            throw new \Tk\Exception('Could not write to cache');
         }
         flock($h, \LOCK_EX); // exclusive lock, will get released when the file is closed
         fseek($h, 0); // go to the start of the file
@@ -45,7 +45,7 @@ class Filesystem implements Iface
         // Serializing along with the TTL
         $data = serialize($data);
         if (fwrite($h, $data) === false) {
-            throw new \Tk\Cache\Exception('Could not write to cache');
+            throw new \Tk\Exception('Could not write to cache');
         }
         fclose($h);
         return true;

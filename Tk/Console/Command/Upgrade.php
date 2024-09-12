@@ -1,16 +1,17 @@
 <?php
 namespace Tk\Console\Command;
 
+use Bs\Registry;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Tk\Console\Console;
-use Tk\Console\Exception;
+use Tk\Exception;
 
 class Upgrade extends Console
 {
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('upgrade')
             ->setAliases(['ug'])
@@ -23,10 +24,10 @@ class Upgrade extends Console
             $this->writeError('Error: Only run this command in a live environment.');
             return Command::FAILURE;
         }
-        $currentMode = $this->getRegistry()->isMaintenanceMode();
+        $currentMode = Registry::instance()->isMaintenanceMode();
 
         try {
-            $this->getRegistry()->setMaintenanceMode();
+            Registry::instance()->setMaintenanceMode();
 
             // TODO: create a backup of the database before executing this.....
 
@@ -50,7 +51,7 @@ class Upgrade extends Console
             $output = [];
             foreach ($cmdList as $i => $cmd) {
                 unset($output);
-                if (preg_match('/^git log /', $cmd)) {      // find tag version
+                if (str_starts_with($cmd, 'git log ')) {      // find tag version
                     exec($cmd . ' 2>&1', $output, $ret);
                     foreach ($output as $line) {
                         if (preg_match('/\((tag\: )*([0-9\.]+)\)/', $line, $regs)) {
@@ -66,7 +67,7 @@ class Upgrade extends Console
                         $cmd = str_replace('{tag}', $tag, $cmd);
                     }
                     $this->writeInfo($cmd);
-                    if (preg_match('/^composer /', $cmd)) {
+                    if (str_starts_with($cmd, 'composer ')) {
                         system($cmd);
                     } else {
                         exec($cmd . ' 2>&1', $output, $ret);
@@ -82,7 +83,7 @@ class Upgrade extends Console
             $this->writeError($e->getMessage());
             return Command::FAILURE;
         } finally {
-            $this->getRegistry()->setMaintenanceMode($currentMode);
+            Registry::instance()->setMaintenanceMode($currentMode);
         }
 
         return Command::SUCCESS;

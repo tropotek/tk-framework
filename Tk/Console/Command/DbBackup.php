@@ -13,7 +13,7 @@ use Tk\Db;
 class DbBackup extends Console
 {
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('dbbackup')
             ->setDescription('Call this to dump a copy of the Database sql to stdout or a file if an argument is given')

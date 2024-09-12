@@ -8,7 +8,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class MakeManager extends MakeInterface
 {
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('make-manager')
             ->setAliases(array('mg'))
@@ -16,9 +16,6 @@ class MakeManager extends MakeInterface
         parent::configure();
     }
 
-    /**
-     * @throws \Exception
-     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         parent::execute($input, $output);

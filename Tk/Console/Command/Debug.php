@@ -17,7 +17,7 @@ use Tk\System;
 class Debug extends Console
 {
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('debug')
             ->setDescription('(Debug) Setup the App for the development environment');

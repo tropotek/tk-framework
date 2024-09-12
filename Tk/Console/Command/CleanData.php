@@ -6,11 +6,12 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Tk\Console\Console;
+use Tk\Db;
 
 class CleanData extends Console
 {
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('clean-data')
             ->setAliases(['cd'])
@@ -31,10 +32,7 @@ class CleanData extends Console
         return Command::SUCCESS;
     }
 
-    /**
-     * @throws \Exception
-     */
-    protected function deleteEmptyFolders(string $path)
+    protected function deleteEmptyFolders(string $path): void
     {
         // Recursively Remove any empty folders older than 1 hour
         if (is_dir($path)) {
@@ -52,7 +50,7 @@ class CleanData extends Console
         }
     }
 
-    protected function deleteOldFiles(string $path, \DateTime $validDate)
+    protected function deleteOldFiles(string $path, \DateTime $validDate): void
     {
         // clean up temp files older than $validDate
         if (is_dir($path)) {
@@ -78,7 +76,7 @@ class CleanData extends Console
      * This is just to ensure we do not waste space on defunct session data
      * @throws \Tk\Db\Exception
      */
-    protected function deleteOldSessions()
+    protected function deleteOldSessions(): void
     {
         $this->write('   - Cleaning obsolete sessions.');
         if ($this->getConfig()->get('session.db_enable', false)) {

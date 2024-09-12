@@ -8,6 +8,9 @@ use Tk\Db\Exception;
  */
 class Db
 {
+    const TABLES = 'BASE TABLE';
+    const VIEWS  = 'VIEW';
+
     public static bool $LOG = true;
 
     private static ?\PDO          $pdo           = null;
@@ -596,9 +599,17 @@ class Db
         return $stm->fetchAll(\PDO::FETCH_COLUMN, 0);
     }
 
-    public static function getTableList(): array
+    /**
+     * set the $type to restrict list (self::TABLES or self::VIEWS)
+     * (default) returns both
+     */
+    public static function getTableList(?string $type = null): array
     {
-        $stm = self::$pdo->prepare("SHOW TABLES");
+        $query = "SHOW TABLES";
+        if (!is_null($type) && in_array($type, [self::TABLES, self::VIEWS])) {
+            $query = "SHOW FULL TABLES WHERE Table_type = '$type'";
+        }
+        $stm = self::$pdo->prepare($query);
         $stm->execute();
         return $stm->fetchAll(\PDO::FETCH_COLUMN, 0);
     }
