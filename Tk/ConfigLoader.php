@@ -38,7 +38,6 @@ class ConfigLoader
         array_shift($libPaths);
 
         $this->searchPaths = array_map(fn($path) => $vendorPath . '/' . $path . '/config' , $libPaths);
-        array_unshift($this->searchPaths, $basePath . '/src/config');
     }
 
     public static function create(): ConfigLoader
@@ -59,7 +58,8 @@ class ConfigLoader
         foreach ($list as $path) {
             $this->load($path, $config);
         }
-        // load site config
+        // load site configs
+        $this->load($config->getBasePath() . '/src/config/config.php', $config);
         $this->load($config->getBasePath() . '/config.php', $config);
     }
 
