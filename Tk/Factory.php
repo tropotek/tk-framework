@@ -82,6 +82,10 @@ class Factory extends Collection
                 \Tk\Db\Session::instance();
             }
             session_start();
+
+            $_SESSION[\Tk\Db\Session::SID_IP]    = get_client_ip();
+            $_SESSION[\Tk\Db\Session::SID_AGENT] = $_SERVER['HTTP_USER_AGENT'] ?? '';
+
             $this->set('session', null);
         }
         return $this->get('session');
