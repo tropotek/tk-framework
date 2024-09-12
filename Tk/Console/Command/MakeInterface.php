@@ -32,7 +32,7 @@ class MakeInterface extends Console
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        if (!$this->getConfig()->isDebug()) {
+        if (!$this->getConfig()->isDev()) {
             throw new \Exception('Error: Only run this command in a debug environment.');
         }
 

@@ -22,8 +22,8 @@ class CleanData extends Console
         try {
             $this->deleteEmptyFolders($this->getConfig()->getDataPath());
             $this->deleteOldFiles($this->getConfig()->getTempPath(), \Tk\Date::create()->sub(new \DateInterval('P7D')));
-            if (!$this->getConfig()->isDebug())
-                $this->deleteOldSessions();
+
+            if (!($this->getConfig()->isDev() || $this->getConfig()->isDebug())) $this->deleteOldSessions();
         } catch (\Exception $e) {
             $this->writeError($e->getMessage());
             return Command::FAILURE;

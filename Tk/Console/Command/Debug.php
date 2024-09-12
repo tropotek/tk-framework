@@ -7,6 +7,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Tk\Console\Console;
 use Tk\Db\Util\SqlBackup;
 
+/**
+ * Executes the dev.php script
+ *
+ *
+ * @experimental Need to see if this is really needed, thinking not at this point
+ */
 class Debug extends Console
 {
 

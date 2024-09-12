@@ -43,7 +43,7 @@ class Dispatch
      */
     protected function commonInit()
     {
-        if ($this->getConfig()->isDebug()) {
+        if ($this->getConfig()->isDev()) {
             $this->getDispatcher()->addSubscriber(new StartupHandler());
             $this->getDispatcher()->addSubscriber(new ShutdownHandler($this->getConfig()->get('script.start.time')));
         }

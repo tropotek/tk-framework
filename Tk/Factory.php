@@ -263,7 +263,7 @@ class Factory extends Collection
             $app->add(new Command\Maintenance());
             $app->add(new Command\DbBackup());
             $app->add(new Command\Migrate());
-            if ($this->getConfig()->isDebug()) {
+            if ($this->getConfig()->isDev()) {
                 $app->add(new Command\Debug());
                 $app->add(new Command\Mirror());
                 $app->add(new Command\MakeModel());

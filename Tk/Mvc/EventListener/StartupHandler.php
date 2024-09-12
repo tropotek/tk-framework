@@ -43,7 +43,7 @@ class StartupHandler implements EventSubscriberInterface
         if ($this->getSystem()->getVersion()) {
             $siteName .= sprintf(' [v%s]', $this->getSystem()->getVersion());
         }
-        if ($this->getConfig()->isDebug()) {
+        if ($this->getConfig()->isDev()) {
             $siteName .= ' {DEBUG}';
         }
         $this->info('- Project: ' . trim($siteName));

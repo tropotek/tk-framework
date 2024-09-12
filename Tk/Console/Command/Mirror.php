@@ -28,8 +28,8 @@ class Mirror extends Console
     {
         try {
             $config = $this->getConfig();
-            if (!$config->isDebug()) {
-                $this->writeError('Only run this command in a debug environment.');
+            if (!$config->isDev()) {
+                $this->writeError('Only run this command in a dev environment.');
                 return Command::FAILURE;
             }
             if (!$this->getConfig()->get('db.mirror.secret', false)) {

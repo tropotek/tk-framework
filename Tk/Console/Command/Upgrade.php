@@ -19,7 +19,7 @@ class Upgrade extends Console
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        if ($this->getConfig()->isDebug()) {
+        if ($this->getConfig()->isDev()) {
             $this->writeError('Error: Only run this command in a live environment.');
             return Command::FAILURE;
         }
@@ -39,7 +39,7 @@ class Upgrade extends Console
                 'composer update'
             ];
 
-            if ($this->getConfig()->isDebug()) {        // For testing
+            if ($this->getConfig()->isDev()) {        // For testing
                 array_unshift($cmdList, 'ci');
                 $cmdList[] = 'git reset --hard';
                 $cmdList[] = 'git checkout master';
