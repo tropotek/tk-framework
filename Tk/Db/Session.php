@@ -14,8 +14,11 @@ class Session implements \SessionHandlerInterface
 {
     use SingletonTrait;
 
+    const SID_IP    = '_user.ip';
+    const SID_AGENT = '_user.agent';
+
     public static int    $DATA_TTL_DAYS = 15;
-    public static string $DB_TABLE = '_session';
+    public static string $DB_TABLE      = '_session';
 
 
     public function __construct(array $options = [])
@@ -117,6 +120,8 @@ class Session implements \SessionHandlerInterface
     public function open(string $path, string $name): bool
     {
         $this->installTable();
+        $_SESSION[self::SID_IP]    = get_client_ip();
+        $_SESSION[self::SID_AGENT] = $_SERVER['HTTP_USER_AGENT'] ?? '';
         return true;
     }
 
