@@ -6,7 +6,7 @@ namespace Tk;
  * This is a curly braces style template parser.
  *
  * Note: Strings will replace all '{paramName}' curly params in the template
- *       However blocks can be use for repeating or choice elements '{blockName}...{/blockName}'
+ *       However blocks can be used for repeating or choice elements '{blockName}...{/blockName}'
  *
  * Template Example:
  * <code>
@@ -38,44 +38,41 @@ namespace Tk;
  * Data Example 1: Using nested arrays for repeating blocks
  *
  * <code>
- *
- *   $tpl->parse(array(
+ *   $tpl->parse([
  *     'headTitle' => 'This is the Head Title.',
  *     'pageTitle' => 'This is the main page title.',
- *
- *     'rowBlock' => array(
- *       array(
- *         'dataBlock' => array(
- *           array('dataValue' => 'dataValue1.1'),
- *           array('dataValue' => 'dataValue1.2'),
- *           array('dataValue' => 'dataValue1.3')
- *         )
- *       ),
- *       array(
- *         'dataBlock' => array(
- *           array('dataValue' => 'dataValue2.1'),
- *           array('dataValue' => 'dataValue2.2'),
- *           array('dataValue' => 'dataValue2.3')
- *         )
- *       ),
- *       array(
- *         'dataBlock' => array(
- *           array('dataValue' => 'dataValue3.1'),
- *           array('dataValue' => 'dataValue3.2'),
- *           array('dataValue' => 'dataValue3.3')
- *         )
- *       )
- *     ),
- *     'listBlock' => array(
- *         array('linkUrl' => 'link1.html', 'linkText' => 'Link 1'),
- *         array('linkUrl' => 'link2.html', 'linkText' => 'Link 2'),
- *         array('linkUrl' => 'link3.html', 'linkText' => 'Link 3'),
- *         array('linkUrl' => 'link4.html', 'linkText' => 'Link 4')
- *       )
- *     ),
- *     'dynamicData' => function ($curlyTemplate) use ($message) { return 'Some String...'; }   // <---- must return a string...
+ *     'rowBlock' => [
+ *       [
+ *         'dataBlock' => [
+ *           ['dataValue' => 'dataValue1.1'],
+ *           ['dataValue' => 'dataValue1.2'],
+ *           ['dataValue' => 'dataValue1.3'],
+ *         ]
+ *       ],
+ *       [
+ *         'dataBlock' => [
+ *           ['dataValue' => 'dataValue2.1'],
+ *           ['dataValue' => 'dataValue2.2'],
+ *           ['dataValue' => 'dataValue2.3'],
+ *         ]
+ *       ],
+ *       [
+ *         'dataBlock' => [
+ *           ['dataValue' => 'dataValue3.1'],
+ *           ['dataValue' => 'dataValue3.2'],
+ *           ['dataValue' => 'dataValue3.3'],
+ *         ]
+ *       ],
+ *     ],
+ *     'listBlock' => [
+ *         ['linkUrl' => 'link1.html', 'linkText' => 'Link 1']
+ *         ['linkUrl' => 'link2.html', 'linkText' => 'Link 2']
+ *         ['linkUrl' => 'link3.html', 'linkText' => 'Link 3']
+ *         ['linkUrl' => 'link4.html', 'linkText' => 'Link 4']
+ *       ]
+ *     ],
+ *     'dynamicData' => function ($curlyTemplate) use ($message) { return 'Some String...'; }
  *   );
- *
  * </code>
  *
  * Data Example 2: Use boolean values to show/hide blocks
@@ -94,9 +91,7 @@ namespace Tk;
 class CurlyTemplate
 {
     protected string $ld = '{';
-
     protected string $rd = '}';
-
     protected string $template = '';
 
 
@@ -115,8 +110,6 @@ class CurlyTemplate
      *
      * This is a mutable object and parse() can be called multiple times with
      * different data collections without issue.
-     *
-     * @throws Exception
      */
     function parse(array $data = []): string
     {
@@ -128,7 +121,6 @@ class CurlyTemplate
     /**
      * Parse a block and replace all curly variable with their
      * appropriate data value from the data array
-     * @throws Exception
      */
     protected function parseBlock(string $str, array $data): string
     {
@@ -143,9 +135,6 @@ class CurlyTemplate
         return $str;
     }
 
-    /**
-     * @throws Exception
-     */
     private function parseRecursive(string $template, ?array $data = null): string
     {
         $ld = preg_quote($this->ld);
