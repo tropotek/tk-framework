@@ -1,5 +1,4 @@
 <?php
-
 namespace Tk\Logger;
 
 use Psr\Log\LogLevel;

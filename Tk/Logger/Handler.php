@@ -1,7 +1,7 @@
 <?php
-
 namespace Tk\Logger;
 
+use Tk\Config;
 use Tk\Log;
 
 final class Handler extends LoggerInterface
@@ -21,7 +21,7 @@ final class Handler extends LoggerInterface
         $this->noLogEnabled = $b;
     }
 
-    public function log($level, $message, array $context = array())
+    public function log($level, $message, array $context = array()): void
     {
         if ($this->noLogEnabled) {
             // No log when using nolog in query param

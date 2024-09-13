@@ -1,6 +1,7 @@
 
 ## Introduction
 
+TODO: move this to the Bs lib
 
 Some notes about creating the new Tk4 symfony based framework.
 

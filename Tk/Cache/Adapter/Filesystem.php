@@ -12,11 +12,6 @@ use Tk\FileUtil;
  */
 class Filesystem implements Iface
 {
-    public static int $DIR_MASK = 0777;
-
-    /**
-     * @var string
-     */
     protected string $cachePath = '';
 
 
@@ -25,6 +20,9 @@ class Filesystem implements Iface
         $this->cachePath = $cachePath;
     }
 
+    /**
+     * @param int $ttl Time to live in seconds
+     */
     public function store(string $key, mixed $data, int $ttl = 0): bool
     {
         if (!FileUtil::mkdir($this->getCachePath())) {
@@ -96,7 +94,7 @@ class Filesystem implements Iface
         return \Tk\FileUtil::rmdir($this->getCachePath());
     }
 
-    private function getFileName(string $key): string
+    protected function getFileName(string $key): string
     {
         return $this->getCachePath() . '/' . $key;
     }
