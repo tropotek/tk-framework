@@ -39,6 +39,6 @@ class Button extends Link
         $html = <<<HTML
 <button type="button" var="element"><i choice="icon-l"></i> <span var="text"></span> <i choice="iconR"></i></button>
 HTML;
-        return $this->getFactory()->loadTemplate($html);
+        return Template::load($html);
     }
 }

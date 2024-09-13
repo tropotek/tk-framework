@@ -28,7 +28,6 @@ class Bootstrap
         FileUtil::mkdir(System::makePath($config->get('path.temp')), true);
         FileUtil::mkdir(System::makePath($config->get('path.cache')), true);
 
-
         // Setup default migration paths
         // todo: cache this as it will not change often/ever
         $vendorPath = $config->getBasePath() . $config->get('path.vendor.org');

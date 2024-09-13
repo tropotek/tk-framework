@@ -76,6 +76,8 @@ class ConfigLoader
         foreach ($list as $path) {
             $this->load($path, $routes);
         }
+        // load site routes
+        $this->load(Config::instance()->getBasePath() . '/src/config/routes.php', $routes);
     }
 
     /**
