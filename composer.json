@@ -36,7 +36,6 @@
     "ext-json": "*",
     "ext-pdo": "*",
     "ext-fileinfo": "*",
-    "ext-json": "*",
     "ext-curl": "*",
 
     "phpmailer/phpmailer": "~6.0"
