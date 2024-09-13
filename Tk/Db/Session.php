@@ -17,7 +17,7 @@ class Session implements \SessionHandlerInterface
 
     protected static mixed $_instance = null;
 
-    public static int    $DATA_TTL_DAYS = 15;
+    public static int    $DATA_TTL_DAYS = 5;
     public static string $DB_TABLE      = '_session';
 
 
@@ -37,8 +37,15 @@ class Session implements \SessionHandlerInterface
     {
         if (is_null(self::$_instance)) {
             self::$_instance = new static($options);
+            self::$_instance->clearExpired();
         }
         return self::$_instance;
+    }
+
+    public function clearExpired(): bool
+    {
+        $table = self::$DB_TABLE;
+        return false !== Db::execute("DELETE FROM $table WHERE expiry < NOW()");
     }
 
     /**
@@ -161,16 +168,14 @@ class Session implements \SessionHandlerInterface
     }
 
     /**
-     * Rubbish Collection
+     * Sessions that have not updated for the last max_lifetime seconds will be removed.
      */
     public function gc(int $max_lifetime): false|int
     {
         $table = self::$DB_TABLE;
-        $expire = new \DateTime();
-        $expire->modify("-$max_lifetime seconds");
         return Db::execute("
-            DELETE FROM $table WHERE expiry < :expire",
-            compact('expire')
+            DELETE FROM $table WHERE UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(modified) > :max_lifetime",
+            compact('max_lifetime')
         );
     }
 
