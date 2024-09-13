@@ -1,8 +1,6 @@
 <?php
 namespace Tk;
 
-use Symfony\Component\HttpFoundation\RedirectResponse;
-
 /**
  * Where:
  *
@@ -758,14 +756,6 @@ class Uri implements \IteratorAggregate
         session_write_close();
         header("Location: {$this->toString()}", true, $code);
         exit();
-    }
-
-    /**
-     * return this from your controller to redirect
-     */
-    public function getRedirectResponse(): RedirectResponse
-    {
-        return new RedirectResponse($this->toString());
     }
 
 }

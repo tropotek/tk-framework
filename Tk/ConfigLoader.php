@@ -1,8 +1,6 @@
 <?php
 namespace Tk;
 
-use Symfony\Component\Routing\Loader\Configurator\CollectionConfigurator;
-
 /**
  * The configLoader class finds all config and routes file in the project and ttek libs.
  * Files can be loaded in a priority order by naming the file {priority}-config.php expected values
@@ -61,23 +59,6 @@ class ConfigLoader
         // load site configs
         $this->load($config->getBasePath() . '/src/config/config.php', $config);
         $this->load($config->getBasePath() . '/config.php', $config);
-    }
-
-    /**
-     * Load all route files in order of priority
-     *
-     * The site rout file can omit the priority value and just be named rout.php as it will always
-     * be executed last.
-     *
-     */
-    public function loadRoutes(?CollectionConfigurator $routes = null): void
-    {
-        $list = $this->findFiles('routes.php');
-        foreach ($list as $path) {
-            $this->load($path, $routes);
-        }
-        // load site routes
-        $this->load(Config::instance()->getBasePath() . '/src/config/routes.php', $routes);
     }
 
     /**

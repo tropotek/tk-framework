@@ -41,14 +41,6 @@
 
     "ttek/tk-installers": "~8.0.0",
     "phpmailer/phpmailer": "~6.0",
-
-    "symfony/http-foundation": "^6.2",
-    "symfony/routing": "^6.2",
-    "symfony/http-kernel": "^6.2",
-    "symfony/event-dispatcher": "^6.2",
-    "symfony/console": "^6.2",
-    "symfony/lock": "^6.2",
-    "sensiolabs/ansi-to-html": "~1.0"
   },
   "extra": {
     "branch-alias": {
