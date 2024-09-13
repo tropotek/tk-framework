@@ -1,8 +1,7 @@
 <?php
-namespace Tk\Db\Util;
+namespace Tk\Db;
 
 use Tk\Config;
-use Tk\Db\Exception;
 use Tk\FileUtil;
 use Tk\Db;
 
@@ -12,7 +11,7 @@ use Tk\Db;
  * @note: This file uses SLI commands to back up and restore the database
  * @see https://raw.githubusercontent.com/kakhavk/database-dump-utility/master/SqlDump.php
  */
-class SqlBackup
+class DbBackup
 {
 
     private \PDO $db;
