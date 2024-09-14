@@ -30,13 +30,16 @@ class Db
      * Create a Mysql SQL driver object from a dsn:
      *   - 'hostname[:port]/username/password/dbname'
      */
-	public static function connect(string $dsn, array $options = []): \Pdo
+	public static function connect(string $dsn, array $options = []): \PDO
     {
 		assert(!empty($dsn), "no DSN for database connection");
 
         [$host, $port, $user, $pass, self::$dbName] = array_values(self::parseDsn($dsn));
-
-        $pdoDsn = sprintf('mysql:host=%s;port=%s;charset=utf8mb4;dbname=%s', $host, $port, self::$dbName);
+        $dbName = '';
+        if (!empty(self::$dbName)) {
+            $dbName = sprintf(';dbname=%s', self::$dbName);
+        }
+        $pdoDsn = sprintf('mysql:host=%s;port=%s;charset=utf8mb4%s', $host, $port, $dbName);
         self::$pdo = new \PDO($pdoDsn, $user, $pass, $options);
         self::$pdo->setAttribute(\PDO::ATTR_STATEMENT_CLASS, [DbStatement::class]);
         self::$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
@@ -96,7 +99,29 @@ class Db
         return $dsnArray;
     }
 
-    public static function getPdo(): \PDO
+    /**
+     * return a dsn string from an array of options:
+     *
+     * $options = [
+     *       'host' => 'localhost',
+     *       'port' => 0,
+     *       'user' => 'username',
+     *       'pass' => 'password',
+     *       'dbName' => 'database-name',
+     * ]
+     */
+    public static function toDsn(array $options): string
+    {
+        return sprintf('%s:%s/%s/%s/%s',
+            $options['host'] ?? 'localhost',
+            $options['port'] ?? 3306,
+            $options['user'] ?? '',
+            $options['pass'] ?? '',
+            $options['dbName'] ?? '',
+        );
+    }
+
+    public static function getPdo(): ?\PDO
     {
         return self::$pdo;
     }
@@ -597,6 +622,12 @@ class Db
         $stm = self::$pdo->prepare("SHOW DATABASES");
         $stm->execute();
         return $stm->fetchAll(\PDO::FETCH_COLUMN, 0);
+    }
+
+    public static function databaseExists(string $dbName): bool
+    {
+        $val = self::queryVal("SHOW DATABASES LIKE :dbName", compact('dbName'));
+        return $val == $dbName;
     }
 
     /**

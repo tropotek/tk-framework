@@ -14,23 +14,17 @@ use Tk\Db;
 class DbBackup
 {
 
-    private \PDO $db;
-
-
-    public function __construct(\PDO $db)
-    {
-        $this->db = $db;
-    }
-
-    protected function getDb(): \PDO
-    {
-        return $this->db;
-    }
-
     /**
-     * Restore an sql file
+     * Restore a sql file
+     * $options = [
+     *       'host' => 'localhost',
+     *       'port' => 0,
+     *       'user' => 'username',
+     *       'pass' => 'password',
+     *       'dbName' => 'database-name',
+     * ]
      */
-    public function restore(string $sqlFile, array $options = []): void
+    public static function restore(string $sqlFile, array $options = []): void
     {
         if (!is_readable($sqlFile)) return;
 
@@ -44,8 +38,6 @@ class DbBackup
 
             $sqlFile = $regs[1];
         }
-
-        $dsn = Db::parseDsn(Config::instance()->get('db.mysql'));
 
         // In short, the new MariaDB version adds this line to the beginning of the dump file:
         //  /*!999999\- enable the sandbox mode */
@@ -62,11 +54,11 @@ class DbBackup
 
         // todo: add the db port to the command
         $command = sprintf('mysql %s --port=%s -h %s -u %s -p%s < %s',
-            escapeshellarg($dsn['dbName']),
-            $dsn['port'] ?? 0,
-            escapeshellarg($dsn['host']),
-            escapeshellarg($dsn['user']),
-            escapeshellarg($dsn['pass']),
+            escapeshellarg($options['dbName']),
+            $options['port'] ?? 0,
+            escapeshellarg($options['host']),
+            escapeshellarg($options['user']),
+            escapeshellarg($options['pass']),
             escapeshellarg($sqlFile)
         );
         exec($command, $out, $ret);
@@ -79,11 +71,17 @@ class DbBackup
      *
      * If no file is supplied then the default file name is used: {DbName}_2016-01-01-12-00-00.sql
      * if the path does not already contain a .sql file extension
+     * $options = [
+     *       'host' => 'localhost',
+     *       'port' => 0,
+     *       'user' => 'username',
+     *       'pass' => 'password',
+     *       'dbName' => 'db_name',
+     * ]
      */
-    public function save(string $path = '', array $options = []): string
+    public static function save(string $path = '', array $options = []): string
     {
         $sqlFile = $path;
-        $dsn = Db::parseDsn(Config::instance()->get('db.mysql'));
 
         if (!preg_match('/\.sql$/', $sqlFile)) {
             $path = rtrim($path, '/');
@@ -91,7 +89,7 @@ class DbBackup
 
             if (!is_writable($path)) throw new Exception('Cannot access path: ' . $path);
 
-            $file = $dsn['dbName'] . "_" . date("Y-m-d-H-i-s").".sql";
+            $file = $options['dbName'] . "_" . date("Y-m-d-H-i-s").".sql";
             $sqlFile = $path.'/'.$file;
         }
 
@@ -100,8 +98,11 @@ class DbBackup
             $exclude[] = Config::instance()->get('session.db_table');
         }
         // Exclude all views
-        $sql = "SHOW FULL TABLES IN `{$dsn['dbName']}` WHERE TABLE_TYPE LIKE 'VIEW';";
-        $result = $this->getDb()->query($sql);
+        if (is_null(Db::getPdo())) {
+            Db::connect(Db::toDsn($options));
+        }
+        $sql = "SHOW FULL TABLES IN `{$options['dbName']}` WHERE TABLE_TYPE LIKE 'VIEW'";
+        $result = Db::getPdo()->query($sql);
         while ($row = $result->fetch(\PDO::FETCH_ASSOC)) {
             $v = array_shift($row);
             $exclude[] = $v;
@@ -109,15 +110,15 @@ class DbBackup
 
         $excludeParams = [];
         foreach ($exclude as $tbl) {
-            $excludeParams[] = "--ignore-table={$dsn['dbName']}.$tbl";
+            $excludeParams[] = "--ignore-table={$options['dbName']}.$tbl";
         }
         $command = sprintf('mysqldump --skip-triggers --max_allowed_packet=1G --single-transaction --quick --lock-tables=false %s --opt --port=%s -h %s -u %s -p%s %s > %s',
             implode(' ', $excludeParams),
-            $dsn['port'] ?? 0,
-            escapeshellarg($dsn['host']),
-            escapeshellarg($dsn['user']),
-            escapeshellarg($dsn['pass']),
-            escapeshellarg($dsn['dbName']),
+            $options['port'] ?? 0,
+            escapeshellarg($options['host']),
+            escapeshellarg($options['user']),
+            escapeshellarg($options['pass']),
+            escapeshellarg($options['dbName']),
             escapeshellarg($sqlFile)
         );
         exec($command, $out, $ret);
@@ -132,17 +133,18 @@ class DbBackup
      * @throws Exception
      * @note: This could have memory issues with large databases, use SqlBackup:save() in those cases
      */
-    public function dump(array $options = []): string
+    public static function dump(array $options = []): string
     {
-        $dsn = Db::parseDsn(Config::instance()->get('db.mysql'));
-
         $exclude = $exclude ?? [];
         if (!in_array(Config::instance()->get('session.db_table', ''), $exclude)) {
             $exclude[] = Config::instance()->get('session.db_table');
         }
         // Exclude all views
-        $sql = "SHOW FULL TABLES IN `{$dsn['dbName']}` WHERE TABLE_TYPE LIKE 'VIEW';";
-        $result = $this->getDb()->query($sql);
+        if (is_null(Db::getPdo())) {
+            Db::connect(Db::toDsn($options));
+        }
+        $sql = "SHOW FULL TABLES IN `{$options['dbName']}` WHERE TABLE_TYPE LIKE 'VIEW'";
+        $result = Db::getPdo()->query($sql);
         while ($row = $result->fetch(\PDO::FETCH_ASSOC)) {
             $v = array_shift($row);
             $exclude[] = $v;
@@ -150,15 +152,15 @@ class DbBackup
 
         $excludeParams = [];
         foreach ($exclude as $tbl) {
-            $excludeParams[] = "--ignore-table={$dsn['dbName']}.$tbl";
+            $excludeParams[] = "--ignore-table={$options['dbName']}.$tbl";
         }
         $command = sprintf('mysqldump --max_allowed_packet=1G --single-transaction --quick --lock-tables=false %s --opt --port=%s -h %s -u %s -p%s %s',
             implode(' ', $excludeParams),
-            escapeshellarg($dsn['host']),
-            $dsn['port'] ?? 0,
-            escapeshellarg($dsn['user']),
-            escapeshellarg($dsn['pass']),
-            escapeshellarg($dsn['dbName'])
+            escapeshellarg($options['host']),
+            $options['port'] ?? 0,
+            escapeshellarg($options['user']),
+            escapeshellarg($options['pass']),
+            escapeshellarg($options['dbName'])
         );
 
         exec($command, $out, $ret);
