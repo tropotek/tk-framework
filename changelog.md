@@ -1,5 +1,13 @@
 #CHANGELOG#
 
+Ver 8.0.40 [2024-09-14]:
+-------------------------------
+  - fix db session expiry
+  - Merge branch '8.0' of https://github.com/tropotek/tk-framework into 8.0
+  - Move Factory update System and registry
+  - Update user config location
+
+
 Ver 8.0.38 [2024-09-10]:
 -------------------------------
   - Use hash in place of secret ID
