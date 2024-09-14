@@ -8,7 +8,7 @@ use Tk\Db;
 /**
  * A utility to back up and restore a DB in PHP.
  *
- * @note: This file uses SLI commands to back up and restore the database
+ * @note: This file uses CLI commands to back up and restore the database
  * @see https://raw.githubusercontent.com/kakhavk/database-dump-utility/master/SqlDump.php
  */
 class DbBackup
@@ -52,7 +52,6 @@ class DbBackup
         }
         fclose($f);
 
-        // todo: add the db port to the command
         $command = sprintf('mysql %s --port=%s -h %s -u %s -p%s < %s',
             escapeshellarg($options['dbName']),
             $options['port'] ?? 0,
@@ -93,7 +92,7 @@ class DbBackup
             $sqlFile = $path.'/'.$file;
         }
 
-        $exclude = $exclude ?? [];
+        $exclude = $options['exclude'] ?? [];
         if (!in_array(Config::instance()->get('session.db_table', ''), $exclude)) {
             $exclude[] = Config::instance()->get('session.db_table');
         }
@@ -112,6 +111,7 @@ class DbBackup
         foreach ($exclude as $tbl) {
             $excludeParams[] = "--ignore-table={$options['dbName']}.$tbl";
         }
+
         $command = sprintf('mysqldump --skip-triggers --max_allowed_packet=1G --single-transaction --quick --lock-tables=false %s --opt --port=%s -h %s -u %s -p%s %s > %s',
             implode(' ', $excludeParams),
             $options['port'] ?? 0,
@@ -131,11 +131,11 @@ class DbBackup
 
     /**
      * @throws Exception
-     * @note: This could have memory issues with large databases, use SqlBackup:save() in those cases
+     * @note: This could have memory issues with large databases, use SqlBackup::save() in those cases
      */
     public static function dump(array $options = []): string
     {
-        $exclude = $exclude ?? [];
+        $exclude = $options['exclude'] ?? [];
         if (!in_array(Config::instance()->get('session.db_table', ''), $exclude)) {
             $exclude[] = Config::instance()->get('session.db_table');
         }
@@ -156,13 +156,12 @@ class DbBackup
         }
         $command = sprintf('mysqldump --max_allowed_packet=1G --single-transaction --quick --lock-tables=false %s --opt --port=%s -h %s -u %s -p%s %s',
             implode(' ', $excludeParams),
-            escapeshellarg($options['host']),
             $options['port'] ?? 0,
+            escapeshellarg($options['host']),
             escapeshellarg($options['user']),
             escapeshellarg($options['pass']),
             escapeshellarg($options['dbName'])
         );
-
         exec($command, $out, $ret);
 
         if ($ret != 0) throw new Exception(implode("\n", $out));
