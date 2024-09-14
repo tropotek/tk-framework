@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 8.0.42 [2024-09-14]:
+-------------------------------
+  - add email exception listener
+
+
 Ver 8.0.40 [2024-09-14]:
 -------------------------------
   - fix db session expiry
