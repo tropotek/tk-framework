@@ -17,7 +17,7 @@ class Session implements \SessionHandlerInterface
 
     protected static mixed $_instance = null;
 
-    public static int    $DATA_TTL_DAYS = 5;
+    public static int    $DATA_TTL_MINS = 60*3;
     public static string $DB_TABLE      = '_session';
 
 
@@ -127,8 +127,6 @@ class Session implements \SessionHandlerInterface
     public function open(string $path, string $name): bool
     {
         $this->installTable();
-        $_SESSION[self::SID_IP]    = System::getClientIp();
-        $_SESSION[self::SID_AGENT] = $_SERVER['HTTP_USER_AGENT'] ?? '';
         return true;
     }
 
@@ -153,7 +151,7 @@ class Session implements \SessionHandlerInterface
         // Create time stamp
         $table = self::$DB_TABLE;
         $time = new \DateTimeImmutable();
-        $expiry = $time->modify("+" . self::$DATA_TTL_DAYS . " days")->format(Date::FORMAT_ISO_DATETIME);
+        $expiry = $time->modify("+" . self::$DATA_TTL_MINS . " minutes")->format(Date::FORMAT_ISO_DATETIME);
         return (false !== Db::execute("
             INSERT INTO $table (session_id, data, expiry)
             VALUES (:id, :data, :expiry)

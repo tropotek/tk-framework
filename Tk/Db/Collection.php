@@ -154,7 +154,7 @@ class Collection extends \Tk\Collection
         return $value;
     }
 
-    protected function encodeValue(mixed $value): string
+    protected function encodeValue(mixed $value): ?string
     {
         if (is_array($value) || is_object($value)) {
             $value = '___JSON:' . json_encode($value);

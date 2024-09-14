@@ -754,7 +754,8 @@ class Uri implements \IteratorAggregate
             \Tk\Log::debug($msg);
         }
 
-        /*CLOSE THE SESSION WITH USER DATA*/
+        /** CLOSE THE SESSION WITH USER DATA */
+        /** todo: look into why this is here? is it needed, seems odd? */
         session_write_close();
         header("Location: {$this->toString()}", true, $code);
         exit();
