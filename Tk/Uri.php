@@ -742,15 +742,17 @@ class Uri implements \IteratorAggregate
                 break;
         }
 
-        $arr = debug_backtrace();
-        $arr = $arr[0];
-        $msg = sprintf('%s REDIRECT `%s` called from %s:%s',
-            $code,
-            $this->toString(),
-            str_replace(Config::instance()->getBasePath(), '', $arr['file']),
-            $arr['line']
-        );
-        \Tk\Log::notice($msg);
+        if(Config::instance()->isDev()) {
+            $arr = debug_backtrace();
+            $arr = $arr[0];
+            $msg = sprintf('%s REDIRECT `%s` called from %s:%s',
+                $code,
+                $this->toString(),
+                str_replace(Config::instance()->getBasePath(), '', $arr['file']),
+                $arr['line']
+            );
+            \Tk\Log::debug($msg);
+        }
 
         /*CLOSE THE SESSION WITH USER DATA*/
         session_write_close();
