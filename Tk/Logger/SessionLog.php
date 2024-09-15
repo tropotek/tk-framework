@@ -12,7 +12,7 @@ class SessionLog extends LoggerInterface
 
     public function log($level, $message, array $context = array()): void
     {
-        if (self::RFC_5424_LEVELS[$level] > $this->level) return;
+        if (!$this->canLog($level)) return;
         if (session_status() !== \PHP_SESSION_ACTIVE) return;
 
         $log = $_SESSION[self::$SID] ?? [];

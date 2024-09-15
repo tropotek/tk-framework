@@ -8,7 +8,7 @@ final class Handler extends LoggerInterface
 {
 
     public    bool  $noLogEnabled = true;
-    private array $handlers     = [];
+    private   array $handlers     = [];
 
 
     public function addHandler(\Psr\Log\LoggerInterface $logger): void
@@ -32,7 +32,6 @@ final class Handler extends LoggerInterface
         }
 
         foreach ($this->handlers as $logger) {
-            //$logger->log($level, $this->getCallerLine(2) . $message, $context);
             $logger->log($level, $message, $context);
         }
     }

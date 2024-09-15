@@ -87,10 +87,15 @@ class Session implements \SessionHandlerInterface
     /**
      * expires cache and returns a value from session cache
      */
-    function get(string $name): mixed
+    function get(string $name, mixed $default = null): mixed
     {
         $this->expire();
-        return $_SESSION['cache'][$name]['data'] ?? null;
+        return $_SESSION['cache'][$name]['data'] ?? $default;
+    }
+
+    public function has(string $name): bool
+    {
+        return array_key_exists($name, $_SESSION['cache'] ?? []);
     }
 
     /**
