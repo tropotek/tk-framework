@@ -49,7 +49,7 @@ class DbTable extends AdapterInterface
                 return new Result(Result::SUCCESS, $username);
             }
         } catch (\Exception $e) {
-            \Tk\Log::warning($e->__toString());
+            \Tk\Log::notice($e->__toString());
         }
         return new Result(Result::FAILURE_IDENTITY_NOT_FOUND, $username, 'Invalid username or password.');
     }

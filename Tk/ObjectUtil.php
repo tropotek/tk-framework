@@ -56,7 +56,7 @@ class ObjectUtil
                 }
             }
         } catch (\ReflectionException $e) {
-            Log::warning($e->__toString());
+            Log::notice($e->__toString());
         }
         return null;
     }
@@ -79,7 +79,7 @@ class ObjectUtil
                 }
             }
         } catch (\ReflectionException $e) {
-            Log::warning($e->__toString());
+            Log::notice($e->__toString());
         }
         return $value;
     }
@@ -117,7 +117,7 @@ class ObjectUtil
             $rc = new \ReflectionClass($class);
             $file = $rc->getFileName();
         } catch (\ReflectionException $e) {
-            Log::warning($e->__toString());
+            Log::notice($e->__toString());
         }
         return $file;
     }
@@ -128,7 +128,6 @@ class ObjectUtil
     public static function classUses(object|string $obj, string $trait): bool
     {
         $arr = class_uses($obj);
-        vd($arr, $trait);
         foreach ($arr as $v) {
             if ($v == $trait) return true;
         }
@@ -161,7 +160,7 @@ class ObjectUtil
                 }
             }
         } catch (\ReflectionException $e) {
-            Log::warning($e->__toString());
+            Log::notice($e->__toString());
         }
         return $retList;
     }

@@ -133,7 +133,7 @@ class Date
             $date = new \DateTime($time, $timezone);
             $date->setTimezone($timezone);
         } catch (\Exception $e) {
-            Log::error($e->getMessage());
+            Log::debug($e->getMessage());
         }
         return $date ?? new \DateTime();
     }
@@ -164,7 +164,7 @@ class Date
                 $date->setTimezone($timezone);
             }
         } catch (\Exception $e) {
-            Log::error($e->getMessage());
+            Log::debug($e->getMessage());
         }
         return $date ?: new \DateTime();
     }

@@ -23,7 +23,7 @@ class NullAuth extends AdapterInterface
         try {
             return new Result(Result::SUCCESS, $username);
         } catch (\Exception $e) {
-            \Tk\Log::warning($e->getMessage());
+            \Tk\Log::notice($e->getMessage());
         }
         return new Result(Result::FAILURE_CREDENTIAL_INVALID, '', 'Invalid credentials.');
     }

@@ -40,7 +40,7 @@ class Currency
     public static function getInstance(string $currencyCode = 'AUD'): Currency
     {
         if (!array_key_exists($currencyCode, self::$CURRENCY_LIST)) {
-            Log::warning('Invalid Currency code: '.$currencyCode.', using default: ' . self::$DEFAULT);
+            Log::notice('Invalid Currency code: '.$currencyCode.', using default: ' . self::$DEFAULT);
             $currencyCode = self::$DEFAULT;
         }
         if (!isset(self::$_INSTANCE[$currencyCode])) {

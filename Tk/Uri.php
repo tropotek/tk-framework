@@ -711,7 +711,7 @@ class Uri implements \IteratorAggregate
     {
         if ($this->isApplicationScheme()) return;
         if (headers_sent()) {
-            \Tk\Log::error('Invalid URL Redirect, Headers Already Sent.');
+            \Tk\Log::warning('Invalid URL Redirect, Headers Already Sent.');
             exit();
         }
         switch ($code) {

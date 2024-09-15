@@ -55,7 +55,7 @@ class Ldap extends AdapterInterface
                 return new Result(Result::SUCCESS, $username);
             }
         } catch (\Exception $e) {
-            \Tk\Log::warning($e->getMessage());
+            \Tk\Log::notice($e->getMessage());
         }
 
         return new Result(Result::FAILURE_CREDENTIAL_INVALID, $username, '0001 Invalid username or password.');

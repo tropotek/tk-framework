@@ -41,7 +41,7 @@ class Money
         //if (!preg_match("/^(\$)?(\-)?[0-9]+((\.)[0-9]{1,{$digits}})?$/", $amount)) {
         $amt = str_replace([$thousandthSep, $currency->getSymbol(), $currency->getLocal()], '', $amount);
         if (!preg_match("/(\-)?[0-9]+((\.)[0-9]{1,{$digits}})?$/", $amt)) {
-            Log::warning('Cannot parse amount string: ' . $amount);
+            Log::notice('Cannot parse amount string: ' . $amount);
             return static::create();
         }
         $amt = floatval($amt);

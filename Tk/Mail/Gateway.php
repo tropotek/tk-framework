@@ -138,7 +138,7 @@ class Gateway
                 // Set debug recipient and sender
                 $testEmail = $this->params['system.debug.email'] ?? 'debug@'.$this->host;
                 if ($testEmail == 'debug@'.$this->host) {
-                    Log::warning("No debug email found. Add \$config['system.debug.email'] = 'email@example.com' to your config.php");
+                    Log::notice("No debug email found. Add \$config['system.debug.email'] = 'email@example.com' to your config.php");
                 }
 
                 if (is_array($testEmail)) {

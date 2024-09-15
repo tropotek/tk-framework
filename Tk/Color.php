@@ -147,7 +147,7 @@ class Color
                 $red = 0;
                 $green = 0;
                 $blue = 0;
-                //\Tk\Log::warning($e->__toString());
+                \Tk\Log::notice($e->__toString());
             }
         }
         // Assign color values

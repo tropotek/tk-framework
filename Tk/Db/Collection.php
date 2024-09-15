@@ -49,7 +49,7 @@ class Collection extends \Tk\Collection
             foreach ($rows as $row) {
                 $this->set($row->key, $this->encodeValue($row->value));
             }
-        } catch (\Exception $e) { \Tk\Log::error($e->__toString());}
+        } catch (\Exception $e) { \Tk\Log::notice($e->__toString());}
         return $this;
     }
 
@@ -65,7 +65,7 @@ class Collection extends \Tk\Collection
             foreach ($this->del as $k => $v) {
                 $this->dbDelete($k);
             }
-        } catch (\Exception $e) { \Tk\Log::error($e->__toString());}
+        } catch (\Exception $e) { \Tk\Log::notice($e->__toString());}
         return $this;
     }
 
