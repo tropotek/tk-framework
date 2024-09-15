@@ -3,24 +3,17 @@ namespace Tk\DataMap\Form;
 
 use Tk\DataMap\DataTypeInterface;
 
-/**
- * map a string type from a form to an object property
- */
 class Text extends DataTypeInterface
 {
 
-    public function getPropertyValue(array $array): mixed
+    public function getPropertyValue(array $array): string
     {
-        $value = parent::getPropertyValue($array);
-        if (!is_null($value)) $value = strval($value);
-        return $value;
+        return strval(parent::getPropertyValue($array));
     }
 
-    public function getColumnValue(object $object): mixed
+    public function getColumnValue(object $object): string
     {
-        $value = parent::getColumnValue($object);
-        if (!is_null($value)) $value = strval($value);
-        return $value;
+        return strval(parent::getColumnValue($object));
     }
 
 }

@@ -19,13 +19,37 @@ abstract class Model
 
 
     /**
-     * Magic method called by DbStatement to map a row to an object
-     * In this case we use a DataMap to load the object with PHP values
+     * Magic method to map an array to an object
      */
-    public function __map(array $row): void
+    public function __map(array $row, ?DataMap $map = null): void
     {
-        $map = static::getDataMap();
+        if (is_null($map)) {
+            $map = static::getDataMap();
+        }
         $map->loadObject($this, $row);
+    }
+
+	/**
+	 * load properties of this object from database
+	 */
+    public function reload(): void
+    {
+        $map = $this->getDataMap();
+        $priKey = $map->getPrimaryKey()?->getProperty();
+        if (is_null($priKey)) return;
+        $id = $this->$priKey;
+
+        if ($id && method_exists($this, 'get')) {
+            $obj = static::get($id);
+        } elseif ($id && method_exists($this, 'find')) {
+            $obj = static::find($id);
+        } else {
+            $obj = new static();
+        }
+        if (is_null($obj)) return;
+		foreach (get_object_vars($obj) as $prop => $val) {
+			$this->$prop = $val;
+		}
     }
 
     /**
@@ -39,8 +63,8 @@ abstract class Model
      */
     public static function getDataMap(): DataMap
     {
-        $map = self::$_MAPS[static::class] ?? null;
-        if (!is_null($map)) return $map;
+        $name = static::class;
+        if (self::hasMap($name)) return self::getMap($name);
 
         // autogen table/view name from class
         $table = strtolower(preg_replace('/(?<!^)[A-Z]+|(?<!^|\d)[\d]+/', '_$0', ObjectUtil::basename(static::class)));
@@ -63,7 +87,7 @@ abstract class Model
         foreach ($t_meta+$roCols as $meta) {
             if (!property_exists(static::class, $meta->name_camel)) continue;
 
-            $type = DataMap::makeType($meta);
+            $type = DataMap::makeDbType($meta);
             if ($meta->is_primary_key) {
                 $type->setFlag(DataMap::PRI);
             }
@@ -73,32 +97,50 @@ abstract class Model
             $map->addType($type);
         }
 
-        self::$_MAPS[static::class] = $map;
+        self::setMap($name, $map);
         return $map;
     }
 
-	/**
-	 * load properties of this object from database
-	 * necessary to set properties if using views
-	 */
-    public function reload(): void
+    public static function getFormMap(): DataMap
     {
-        $map = $this->getDataMap();
-        $priKey = $map->getPrimaryKey()?->getProperty();
-        if (is_null($priKey)) return;
-        $id = $this->$priKey;
+        $name = 'form_'. static::class;
+        if (self::hasMap($name)) return self::getMap($name);
 
-        if ($id && method_exists($this, 'get')) {
-            $obj = static::get($id);
-        } elseif ($id && method_exists($this, 'find')) {
-            $obj = static::find($id);
-        } else {
-            $obj = new static();
+        $map = new DataMap();
+        $primaryId = self::getDataMap()->getPrimaryKey()->getProperty();
+
+        $reflect = new \ReflectionClass(static::class);
+        $props = $reflect->getProperties(\ReflectionProperty::IS_PUBLIC | \ReflectionProperty::IS_PROTECTED);
+        foreach ($props as $prop) {
+            if (str_starts_with($prop->getName(), '_') || $prop->isReadOnly() || $prop->isStatic()) continue;
+            $type = DataMap::makeFormType($prop->getType()->getName(), $prop->getName());
+            if ($primaryId == $prop->getName()) {
+                $type->setFlag(DataMap::PRI);
+            }
+            if ($prop->isReadOnly()) {
+                $type->setAccess(DataMap::READ);
+            }
+            $map->addType($type);
         }
-        if (is_null($obj)) return;
-		foreach (get_object_vars($obj) as $prop => $val) {
-			$this->$prop = $val;
-		}
+        self::setMap($name, $map);
+        return $map;
+    }
+
+
+
+    public static function getMap(string $name): ?DataMap
+    {
+        return self::$_MAPS[$name] ?? null;
+    }
+
+    public static function setMap(string $name, DataMap $map): void
+    {
+        self::$_MAPS[$name] = $map;
+    }
+
+    public static function hasMap(string $name): bool
+    {
+        return array_key_exists($name, self::$_MAPS);
     }
 
 }

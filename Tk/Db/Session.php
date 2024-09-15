@@ -77,6 +77,7 @@ class Session implements \SessionHandlerInterface
      */
     function set(string $name, mixed $data, int $timeout_seconds = 60): void
     {
+        $this->expire();
         if (!isset($_SESSION['cache'])) $_SESSION['cache'] = [];
         $_SESSION['cache'][$name] = [
             'timeout'      => ($timeout_seconds > 0) ? (time() + $timeout_seconds) : 0,
@@ -95,6 +96,7 @@ class Session implements \SessionHandlerInterface
 
     public function has(string $name): bool
     {
+        $this->expire();
         return array_key_exists($name, $_SESSION['cache'] ?? []);
     }
 
@@ -113,6 +115,7 @@ class Session implements \SessionHandlerInterface
      */
     function remove(string $name): void
     {
+        $this->expire();
         unset($_SESSION['cache'][$name]);
     }
 

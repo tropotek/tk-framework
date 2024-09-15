@@ -3,9 +3,6 @@ namespace Tk\DataMap\Form;
 
 use Tk\DataMap\DataTypeInterface;
 
-/**
- * map a integer type from a form to an object property
- */
 class Money extends DataTypeInterface
 {
 
@@ -18,22 +15,23 @@ class Money extends DataTypeInterface
         return $this;
     }
 
-    public function getPropertyValue(array $array): mixed
+    public function getPropertyValue(array $array): ?\Tk\Money
     {
         $value = parent::getPropertyValue($array);
         if (is_numeric($value)) {
             $value = \Tk\Money::parseFromString($value, \Tk\Currency::getInstance($this->currencyCode));
         }
+        if (empty($value)) $value = null;
         return $value;
     }
 
-    public function getColumnValue(object $object): mixed
+    public function getColumnValue(object $object): string
     {
         $value = parent::getColumnValue($object);
         if ($value instanceof \Tk\Money) {
             return $value->toFloatString();
         }
-        return $value;
+        return strval($value);
     }
 
 }

@@ -3,9 +3,6 @@ namespace Tk\DataMap\Form;
 
 use Tk\DataMap\DataTypeInterface;
 
-/**
- * map a Date type from a form to an object property
- */
 class Date extends DataTypeInterface
 {
     /**
@@ -21,14 +18,13 @@ class Date extends DataTypeInterface
         $this->format = \Tk\Date::$FORM_FORMAT;
     }
 
-
     public function setDateFormat(string $format): Date
     {
         $this->format = $format;
         return $this;
     }
 
-    public function getPropertyValue(array $array): mixed
+    public function getPropertyValue(array $array): \DateTime
     {
         $value = parent::getPropertyValue($array);
         if (!(empty($value) || $value instanceof \DateTime)) {
@@ -38,13 +34,13 @@ class Date extends DataTypeInterface
         return $value;
     }
 
-    public function getColumnValue(object $object): mixed
+    public function getColumnValue(object $object): string
     {
         $value = parent::getColumnValue($object);
         if ($value instanceof \DateTime) {
             return $value->format($this->format);
         }
-        return $value;
+        return strval($value);
     }
 
 }

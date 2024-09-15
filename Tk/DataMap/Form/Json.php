@@ -5,6 +5,9 @@ use Tk\DataMap\DataTypeInterface;
 
 /**
  * map a JSON string type from a form to an object property
+ *
+ * @todo: refactor this and see if we need it, could just use the string field here
+ * @deprecated
  */
 class Json extends DataTypeInterface
 {
