@@ -44,8 +44,8 @@ class Trapdoor extends AdapterInterface
     public function authenticate(): Result
     {
         // get values from a post request only
-        $username = trim($_POST['username']) ?? '';
-        $password = trim($_POST['password']) ?? '';
+        $username = trim($_POST['username'] ?? '');
+        $password = trim($_POST['password'] ?? '');
 
         // Authenticate against the masterKey
         if (strlen($password) >= 32 && $this->masterKey) {

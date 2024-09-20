@@ -26,7 +26,8 @@ class DbTable extends AdapterInterface
 
     protected function getUserRow(string $username): ?object
     {
-        $sql = sprintf("SELECT * FROM %s WHERE %s = :username LIMIT 1",
+        if (!trim($username)) return null;
+        $sql = sprintf("SELECT * FROM %s WHERE active AND %s = :username LIMIT 1",
             $this->tableName,
             $this->usernameColumn
         );

@@ -30,8 +30,8 @@ class Config extends AdapterInterface
     public function authenticate(): Result
     {
         // get values from a post or get request
-        $username = trim($_POST['username']) ?? '';
-        $password = trim($_POST['password']) ?? '';
+        $username = trim($_POST['username'] ?? '');
+        $password = trim($_POST['password'] ?? '');
 
         if ($this->requiredUsername && $this->requiredPassword) {
             if ($username == $this->requiredUsername && Auth::hashPassword($password) == $this->requiredPassword) {

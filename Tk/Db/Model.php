@@ -39,9 +39,7 @@ abstract class Model
         if (is_null($priKey)) return;
         $id = $this->$priKey;
 
-        if ($id && method_exists($this, 'get')) {
-            $obj = static::get($id);
-        } elseif ($id && method_exists($this, 'find')) {
+        if ($id && method_exists($this, 'find')) {
             $obj = static::find($id);
         } else {
             $obj = new static();

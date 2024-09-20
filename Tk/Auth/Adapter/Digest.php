@@ -38,8 +38,8 @@ class Digest extends AdapterInterface
     public function authenticate(): Result
     {
         // get values from a post request only
-        $username = trim($_POST['username']) ?? '';
-        $password = trim($_POST['password']) ?? '';
+        $username = trim($_POST['username'] ?? '');
+        $password = trim($_POST['password'] ?? '');
 
         if (false === ($fileHandle = @fopen($this->file, 'r'))) {
             return new Result(Result::FAILURE, $username, 'System authentication error.');

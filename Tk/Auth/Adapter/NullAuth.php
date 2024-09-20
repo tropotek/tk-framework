@@ -15,7 +15,7 @@ class NullAuth extends AdapterInterface
     public function authenticate(): Result
     {
         // get values from a post or get request
-        $username = $_REQUEST['username'];
+        $username = $_REQUEST['username'] ?? '';
 
         if (!$username) {
             return new Result(Result::FAILURE_CREDENTIAL_INVALID, $username, 'Invalid username or password.');
