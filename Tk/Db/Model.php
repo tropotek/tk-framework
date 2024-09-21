@@ -50,6 +50,11 @@ abstract class Model
 		}
     }
 
+    public static function getTableName(): string
+    {
+        return strtolower(preg_replace('/(?<!^)[A-Z]+|(?<!^|\d)[\d]+/', '_$0', ObjectUtil::basename(static::class)));
+    }
+
     /**
      * Auto generate a DataMap for this object.
      *
@@ -65,7 +70,7 @@ abstract class Model
         if (self::hasMap($name)) return self::getMap($name);
 
         // autogen table/view name from class
-        $table = strtolower(preg_replace('/(?<!^)[A-Z]+|(?<!^|\d)[\d]+/', '_$0', ObjectUtil::basename(static::class)));
+        $table = self::getTableName();
         $view = "v_{$table}";
 
         Db::$LOG = false;   // disable cache of last statement
