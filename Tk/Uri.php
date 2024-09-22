@@ -15,7 +15,7 @@ namespace Tk;
  * </code>
  *
  * If the static $BASE_URL is set this will be prepended to all relative paths
- * when creating a URI
+ * when creating a URI `Uri::create('/home.html')->toString()` => '/site/base/path/home.html'
  */
 class Uri implements \IteratorAggregate
 {
@@ -54,22 +54,14 @@ class Uri implements \IteratorAggregate
      */
     protected string $spec = '';
 
-
-    protected string $scheme = 'http';
-
-    protected int $port = 80;
-
+    protected string $scheme   = 'http';
+    protected string $host     = '';
+    protected int    $port     = 80;
     protected string $username = '';
-
     protected string $password = '';
-
-    protected string $host = '';
-
-    protected string $path = '';
-
+    protected string $path     = '';
     protected string $fragment = '';
-
-    protected array $query = [];
+    protected array  $query    = [];
 
 
     /**
@@ -86,24 +78,8 @@ class Uri implements \IteratorAggregate
                 }
             }
         }
-        $this->spec = $spec;
-        if (!$this->isApplicationScheme()) {
-            $spec = trim(urldecode($spec));
-            if ($spec && self::$BASE_URL) {
-                $p = parse_url($spec);
-                if (!preg_match('/^\/\//', $spec) && !isset($p['scheme'])) {
-                    if (self::$BASE_URL) {
-                        if (preg_match('/^' . preg_quote(self::$BASE_URL, '/') . '/', $spec)) {
-                            $spec = preg_replace('/^' . preg_quote(self::$BASE_URL, '/') . '/', '', $spec);
-                        }
-                        $spec = trim($spec, '/');
-                        $spec = self::$BASE_URL . '/' . $spec;
-                    }
-                }
-            }
-            $this->spec = $spec;
-        }
-        $this->init();
+
+        $this->init($spec);
         $this->set($queryParams);
     }
 
@@ -128,74 +104,49 @@ class Uri implements \IteratorAggregate
 
     public function __unserialize($data)
     {
-        $this->spec = $data['spec'];
-        $this->init();
+        $this->init($data['spec']);
     }
 
     /**
-     * Initialise the uri object
+     * Initialize the uri object
      */
-    private function init()
+    private function init(string $spec): void
     {
-        $spec = $this->spec;
-
-        if ($this->isApplicationScheme()) {
+        if (self::isApplicationScheme($spec)) {
+            $this->spec = $spec;
             return;
         }
 
-        $this->scheme = $_SERVER['REQUEST_SCHEME'] ?? self::SCHEME_HTTP_SSL;
-        $host = self::$SITE_HOSTNAME;
-
-        // build spec into URL format
-        if (preg_match('/^\/\//', $spec)) {
-            $spec = $this->scheme . ':' . $spec;
-        }
-        if (preg_match('/^www\./i', $spec)) {
-            $spec = 'http://' . $spec;
-        }
-        if (!preg_match('/^([a-z]{3,8}:\/\/)/i', $spec)) {
-            if ($spec && $spec[0] != '/') {
-                $spec = '/'.$spec;
-            }
-            $spec =  $this->scheme.'://'.$host.$spec;
+        // Prepend base url if this is a local path url
+        if (
+            !empty(trim(self::$BASE_URL, '/')) &&
+            str_starts_with($spec, '/') &&              // spec starts with a path
+            !str_starts_with($spec, '//') &&            // ignore urls without scheme
+            !str_starts_with($spec, self::$BASE_URL)    // ignore urls with base path
+        ) {
+            $spec = self::$BASE_URL . '/' . trim($spec, '/');
         }
 
-        $components = parse_url($spec);
-        if ($components) {
-            if (array_key_exists('scheme', $components)) {
-                $this->setScheme($components['scheme']);
-            }
-            if (array_key_exists('host', $components)) {
-                $this->setHost($components['host']);
-            }
-            if (array_key_exists('port', $components)) {
-                $this->setPort($components['port']);
-            }
-            if (array_key_exists('user', $components)) {
-                $this->setUsername($components['user']);
-            }
-            if (array_key_exists('pass', $components)) {
-                $this->setPassword($components['pass']);
-            }
-            if (array_key_exists('path', $components)) {
-                $this->setPath($components['path']);
-            }
-            if (array_key_exists('query', $components)) {
-                $components['query'] = html_entity_decode($components['query']);
-                parse_str($components['query'], $this->query);
-            }
-            if (array_key_exists('fragment', $components)) {
-                $this->setFragment($components['fragment']);
-            }
+        $this->spec = $spec;
+        $com = parse_url($this->spec);
+        if ($com) {
+            $this->scheme   = $com['scheme'] ?? $_SERVER['REQUEST_SCHEME'] ?? self::SCHEME_HTTP_SSL;
+            $this->host     = $com['host'] ?? self::$SITE_HOSTNAME;
+            $this->port     = $com['port'] ?? 80;
+            $this->username = $com['user'] ?? '';
+            $this->password = $com['pass'] ?? '';
+            $this->fragment = $com['fragment'] ?? '';
+            $this->path     = $com['path'] ?? '';
+            parse_str($com['query'] ?? '', $this->query);
         }
     }
 
     /**
      * returns true if the uri is a link/URL and not a data/script type uri
      */
-    public function isApplicationScheme(): bool
+    public static function isApplicationScheme(string $spec): bool
     {
-        return preg_match('/^(#|javascript|mailto|data)/i', $this->spec);
+        return (bool)preg_match('/^(#|javascript|mailto|data|ftp|telnet|ssh|tcp):/i', $spec);
     }
 
     /**
@@ -251,7 +202,7 @@ class Uri implements \IteratorAggregate
     public function dirname(): Uri
     {
         $uri = clone $this;
-        if ($this->isApplicationScheme()) return $uri;
+        if (self::isApplicationScheme($uri->spec)) return $uri;
         $uri->spec = dirname($uri->getPath());
         $uri->setPath(dirname($uri->getPath()));
         return $uri;
@@ -430,7 +381,7 @@ class Uri implements \IteratorAggregate
         if ($this->getPassword()) {
             $str .= ':' . $this->getPassword();
         }
-        return $str;
+        return $str . (!empty($str) ? '@' : '');
     }
 
     /**
@@ -464,8 +415,7 @@ class Uri implements \IteratorAggregate
                 $query .= urlencode($field) . '=' . urlencode($value) . '&';
             }
         }
-        $query = substr($query, 0, -1);
-        return $query;
+        return substr($query, 0, -1);
     }
 
     /**
@@ -613,7 +563,7 @@ class Uri implements \IteratorAggregate
      */
     public function toString(bool $showHost = true, bool $showScheme = true, bool $relativePath = false): ?string
     {
-        if ($this->isApplicationScheme()) {
+        if (self::isApplicationScheme($this->spec)) {
             return $this->spec;
         }
         $uri = '';
@@ -709,7 +659,7 @@ class Uri implements \IteratorAggregate
      */
     public function redirect(int $code = 302)
     {
-        if ($this->isApplicationScheme()) return;
+        if (self::isApplicationScheme($this->spec)) return;
         if (headers_sent()) {
             \Tk\Log::warning('Invalid URL Redirect, Headers Already Sent.');
             exit();
