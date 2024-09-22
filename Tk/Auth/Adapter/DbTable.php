@@ -32,7 +32,6 @@ class DbTable extends AdapterInterface
             $this->tableName,
             $this->usernameColumn
         );
-        vd($sql);
         return Db::queryOne($sql, compact('username'));
     }
 
