@@ -1,6 +1,7 @@
 <?php
 namespace Tk\Auth\Adapter;
 
+use Au\Auth;
 use Tk\Auth\Result;
 use Tk\Db;
 
@@ -31,6 +32,7 @@ class DbTable extends AdapterInterface
             $this->tableName,
             $this->usernameColumn
         );
+        vd($sql);
         return Db::queryOne($sql, compact('username'));
     }
 

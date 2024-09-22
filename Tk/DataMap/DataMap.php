@@ -50,7 +50,7 @@ class DataMap
             if ($type->hasAccess($access)) {
                 $type->loadObject($object, $srcArray);
             } else {
-                if ($object instanceof DbModel) {
+                if ($object instanceof Model) {
                     if (property_exists($object, $key)) continue;
                     $object->$key = $value;
                 }
@@ -109,7 +109,6 @@ class DataMap
         }
         return null;
     }
-
 
 
     public static function makeDbType(\stdClass $meta): DataTypeInterface
