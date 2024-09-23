@@ -49,74 +49,82 @@ class Config extends Collection
         return self::$_instance;
     }
 
-    public function getHostname(): string
+    public static function getHostname(): string
     {
-        return $this->get('hostname', '');
+        return self::instance()->get('hostname', '');
     }
 
-    public function getBasePath(): string
+    public static function getBasePath(): string
     {
-        return $this->get('base.path', '');
+        return self::instance()->get('base.path', '');
     }
 
-    public function getBaseUrl(): string
+    public static function getBaseUrl(): string
     {
-        return $this->get('base.url', '');
+        return self::instance()->get('base.url', '');
     }
 
-    public function getDataPath(): string
+    public static function getDataPath(): string
     {
-        return System::makePath($this->get('path.data'));
+        return self::instance()->get('path.data', '');
     }
 
-    public function getDataUrl(): string
+    public static function getTempPath(): string
     {
-        return System::makeUrl($this->get('path.data'));
+        return self::instance()->get('path.temp', '');
     }
 
-    public function getTempPath(): string
+    public static function getCachePath(): string
     {
-        return System::makePath($this->get('path.temp'));
+        return self::instance()->get('path.cache', '');
     }
 
-    public function getTempUrl(): string
+    public static function getTemplatePath(): string
     {
-        return System::makeUrl($this->get('path.temp'));
+        return self::instance()->get('path.template', '');
     }
 
-    public function getCachePath(): string
+    public static function isDebug(): bool
     {
-        return System::makePath($this->get('path.cache'));
+        return self::instance()->get('debug', false);
     }
 
-    public function getCacheUrl(): string
+    public static function isProd(): bool
     {
-        return System::makeUrl($this->get('path.cache'));
+        return self::instance()->get('env.type', 'dev') == 'prod';
     }
 
-    public function getTemplatePath(): string
+    public static function isDev(): bool
     {
-        return System::makePath($this->get('path.template'));
+        return self::instance()->get('env.type', 'dev') == 'dev';
     }
 
-    public function getTemplateUrl(): string
+
+    /**
+     * Create a full filepath to a resource using the relative path
+     * This method will strip the trailing slash.
+     * If no DIRECTORY_SEPARATOR is at the beginning of the $path one will be prepended
+     */
+    public static function makePath(string $path): string
     {
-        return System::makeUrl($this->get('path.template'));
+        $path = FileUtil::getRealPath($path);
+        $path = rtrim($path, DIRECTORY_SEPARATOR);
+        $path = str_replace(self::getBasePath(), '', $path); // Prevent recurring
+        return self::getBasePath() . $path;
     }
 
-    public function isDebug(): bool
+    /**
+     * Create a full path URL from a relative path
+     * This method will strip the trailing slash.
+     * If a full URL is supplied only the path is returned
+     */
+    public static function makeUrl(string $path): string
     {
-        return $this->get('debug', false);
-    }
-
-    public function isProd(): bool
-    {
-        return $this->get('env.type', 'dev') == 'prod';
-    }
-
-    public function isDev(): bool
-    {
-        return $this->get('env.type', 'dev') == 'dev';
+        $path = FileUtil::getRealPath($path);
+        $path = rtrim($path, DIRECTORY_SEPARATOR);
+        $path = parse_url($path, \PHP_URL_PATH);
+        $path = str_replace(self::getbaseUrl(), '', $path); // Prevent recurring
+        return self::getbaseUrl() . $path;
     }
 
     /**
@@ -127,11 +135,11 @@ class Config extends Collection
      *
      * Set $truncateKeys to true to remove the $prefixName portion from the found keys.
      */
-    public function getGroup(string $prefixName, bool $truncateKeys = false): array
+    public static function getGroup(string $prefixName, bool $truncateKeys = false): array
     {
         $prefixName = rtrim($prefixName, '.');
         $regex = '/^' . $prefixName . '\./';
-        $found = Collection::findByRegex($this->all(), $regex);
+        $found = Collection::findByRegex(self::instance()->all(), $regex);
         if ($truncateKeys) {
             foreach ($found as $k => $v) {
                 $found[str_replace($prefixName.'.', '', $k)] = $v;

@@ -17,6 +17,22 @@ class System
     }
 
     /**
+     * Attempt to locate .htaccess and find a RewriteBase parameter to use
+     */
+    public static function discoverBaseUrl(): string
+    {
+        $path = '/';
+        $htaccessFile = self::discoverBasePath() . '/.htaccess';
+        if (is_file($htaccessFile)) {
+            $htaccess = file_get_contents($htaccessFile);
+            if ($htaccess && preg_match('/\s+RewriteBase (\/.*)\s+/i', $htaccess, $regs)) {
+                $path = $regs[1] ?? '';
+            }
+        }
+        return rtrim($path, '/');
+    }
+
+    /**
      * Returns the client IP address.
      *
      * This method can read the client IP address from the "X-Forwarded-For" header
@@ -35,47 +51,6 @@ class System
             if (!filter_var($ip, \FILTER_VALIDATE_IP, \FILTER_FLAG_IPV4)) $ip = '';
         }
         return $ip;
-    }
-
-    /**
-     * Attempt to locate .htaccess and find a RewriteBase parameter to use
-     */
-    public static function discoverBaseUrl(): string
-    {
-        $path = '';
-        $htaccessFile = self::discoverBasePath() . '/.htaccess';
-        if (is_file($htaccessFile)) {
-            $htaccess = file_get_contents($htaccessFile);
-            if ($htaccess && preg_match('/\s+RewriteBase (\/.*)\s+/i', $htaccess, $regs)) {
-                $path = $regs[1] ?? '';
-            }
-        }
-        return rtrim($path, '/');
-    }
-
-    /**
-     * Create a full filepath to a resource using the relative path     *
-     * This method will strip the trailing slash.
-     * If no DIRECTORY_SEPARATOR is at the beginning of the $path one will be prepended
-     */
-    public static function makePath(string $path): string
-    {
-        $path = rtrim($path, DIRECTORY_SEPARATOR);
-        $path = str_replace(Config::instance()->getBasePath(), '', $path); // Prevent recurring
-        return Config::instance()->getBasePath() . $path;
-    }
-
-    /**
-     * Create a full path URL from a relative path
-     * This method will strip the trailing slash.
-     * If a full URL is supplied only the path is returned
-     */
-    public static function makeUrl(string $path): string
-    {
-        $path = rtrim($path, '/');
-        $path = parse_url($path, \PHP_URL_PATH);
-        $path = str_replace(Config::instance()->getbaseUrl(), '', $path); // Prevent recurring
-        return Config::instance()->getbaseUrl() . $path;
     }
 
     /**
@@ -113,8 +88,8 @@ class System
         static $composer = null;
         if (!$composer) {
             $composer = [];
-            if (is_file(Config::instance()->getBasePath() . '/composer.json')) {
-                $composer = json_decode(file_get_contents(Config::instance()->getBasePath() . '/composer.json'), true);
+            if (is_file(Config::makePath('/composer.json'))) {
+                $composer = json_decode(file_get_contents(Config::makePath('/composer.json')), true);
             }
         }
         return $composer;
@@ -129,10 +104,10 @@ class System
         static $version = null;
         if (!$version) {
             $version = '1.0.0';
-            if (is_file(Config::instance()->getBasePath() . '/version')) {
-                $version = file_get_contents(Config::instance()->getBasePath() . '/version');
-            } else if (is_file(Config::instance()->getBasePath() . '/version.md')) {
-                $version = file_get_contents(Config::instance()->getBasePath() . '/version.md');
+            if (is_file(Config::makePath('/version'))) {
+                $version = file_get_contents(Config::makePath('/version'));
+            } else if (is_file(Config::makePath('/version.md'))) {
+                $version = file_get_contents(Config::makePath('/version.md'));
             }
         }
         return $version;

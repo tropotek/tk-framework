@@ -43,9 +43,8 @@ final class Handler extends LoggerInterface
         $caller = array_shift($bt);
         $str = '';
         if ($caller) {
-            $config = Config::instance();
             $line = $caller['line'];
-            $file = str_replace($config->getBasePath(), '', $caller['file']);
+            $file = str_replace(Config::getBasePath(), '', $caller['file']);
             $str = sprintf('[%s:%s] ', $file, $line);
         }
         return $str;

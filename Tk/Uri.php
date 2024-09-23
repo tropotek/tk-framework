@@ -692,13 +692,13 @@ class Uri implements \IteratorAggregate
                 break;
         }
 
-        if(Config::instance()->isDev()) {
+        if(Config::isDev()) {
             $arr = debug_backtrace();
             $arr = $arr[0];
             $msg = sprintf('%s REDIRECT `%s` called from %s:%s',
                 $code,
                 $this->toString(),
-                str_replace(Config::instance()->getBasePath(), '', $arr['file']),
+                str_replace(Config::getBasePath(), '', $arr['file']),
                 $arr['line']
             );
             \Tk\Log::debug($msg);

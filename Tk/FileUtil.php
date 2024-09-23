@@ -35,6 +35,30 @@ class FileUtil
     }
 
     /**
+     * realpath() does not work on files/paths that do not exist, this method will.
+     * It replaces (consecutive) occurrences of / and \\ with
+     * whatever is in DIRECTORY_SEPARATOR, and processes ./ and ../ as expected
+     */
+    public static function getRealPath(string $path): string
+    {
+        $start = str_starts_with($path, '/') ? '/' : '';
+        $end = str_ends_with($path, '/') ? '/' : '';
+
+        $path = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $path);
+        $parts = array_filter(explode(DIRECTORY_SEPARATOR, $path), 'strlen');
+        $absolutes = array();
+        foreach ($parts as $part) {
+            if ('.' == $part) continue;
+            if ('..' == $part) {
+                array_pop($absolutes);
+            } else {
+                $absolutes[] = $part;
+            }
+        }
+        return $start . implode(DIRECTORY_SEPARATOR, $absolutes) . $end;
+    }
+
+    /**
      * Most of the time the system mkdir calls want to check if the dir exists if not
      * create it and all parent folders if they do not exist.
      *
@@ -297,7 +321,7 @@ class FileUtil
 
     public static function getMimeArray(): array
     {
-        $mimeFile = self::$CACHE_MIME_FILE ?: Config::instance()->getCachePath() . '/mime.types';
+        $mimeFile = self::$CACHE_MIME_FILE ?: Config::makePath(Config::getCachePath() . '/mime.types');
         $mimeFileContents = null;
 
         // Update Cache

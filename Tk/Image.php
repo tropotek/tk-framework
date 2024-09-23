@@ -72,8 +72,8 @@ class Image
     public static function createAvatar(string $text, Color $bgColor, int $size = 128): Image
     {
         $fontSize = $size*0.5;
-        $config = Config::instance();
-        $font = System::makePath($config->get('path.vendor.org') . '/tk-framework/assets/font/OpenSans-Semibold.ttf');
+
+        $font = Config::makePath(Config::instance()->get('path.vendor.org') . '/tk-framework/assets/font/OpenSans-Semibold.ttf');
         $color = $bgColor->getTextColor();
 
         $text = strtoupper($text);

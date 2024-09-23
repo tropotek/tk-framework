@@ -42,8 +42,8 @@ class Cookie
         bool $httponly   = true,
         string $samesite = self::SAMESITE_STRICT
     ) {
-        $this->path = $path ?? Config::instance()->getBaseUrl();
-        $this->domain = $domain ?? Config::instance()->getHostname();
+        $this->path = $path ?? Config::getBaseUrl();
+        $this->domain = $domain ?? Config::getHostname();
         $this->secure = $secure;
         $this->httponly = $httponly;
         $this->samesite = $samesite;
