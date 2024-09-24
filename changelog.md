@@ -1,5 +1,14 @@
 #CHANGELOG#
 
+Ver 8.0.48 [2024-09-25]:
+-------------------------------
+  - cleanup config methods
+  - Added guest token system
+  - refactor user reg and Uri init
+  - implement new auth and user system
+  - refactor MVC objects
+
+
 Ver 8.0.46 [2024-09-16]:
 -------------------------------
   - refactor form mapping and csrf token
