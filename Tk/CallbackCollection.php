@@ -13,8 +13,7 @@ class CallbackCollection
      * array[$priority][] = callable;
      */
     private array $callbackList = [];
-
-    private bool $enabled = true;
+    private bool  $enabled      = true;
 
 
     public static function create(): CallbackCollection

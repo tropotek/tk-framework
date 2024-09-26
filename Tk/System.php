@@ -81,6 +81,15 @@ class System
     }
 
     /**
+     * Is this request a HTMX request
+     * @see https://htmx.org/docs/#request-headers
+     */
+    public static function isHtmx(): bool
+    {
+        return $_SERVER['HTTP_HX_REQUEST'] ?? false;
+    }
+
+    /**
      * Get the composer.json as an array
      */
     public static function getComposerJson(): array

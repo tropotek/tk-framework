@@ -110,6 +110,28 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
+     * convert an array of dot keys (ie: 'auth.user.enable') to a multidimensional array
+     */
+    public static function dotToMulti(array $array): array
+    {
+        $new = [];
+        foreach ($array as $k => $v) {
+            self::assignArrayByPath($new, $k, $v);
+        }
+        return $new;
+    }
+
+    /**
+     * set an array item using a path string 'one.two.three' => $arr['one']['two']['three'] = $value;
+     */
+    public static function assignArrayByPath(&$arr, $path, $value, $separator='.'): void
+    {
+        $keys = explode($separator, $path);
+        foreach ($keys as $key) $arr = &$arr[$key];
+        $arr = $value;
+    }
+
+    /**
      * Add a list of items to the collection
      */
     public function replace(array $items): static
@@ -129,7 +151,6 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
     public function prepend(string $key, mixed $value, ?string $refKey = null): mixed
     {
         if (!$refKey || !$this->has($refKey)) {
-            //$this->_data = array_merge([$key => $value], $this->_data);
             $this->_data = [$key => $value] + $this->_data;
         } else {
             $a = [];
