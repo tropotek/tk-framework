@@ -94,6 +94,9 @@ abstract class Model
             if ($meta->is_primary_key) {
                 $type->setFlag(DataMap::PRI);
             }
+            if ($meta->Extra == 'VIRTUAL GENERATED') {
+                $type->setAccess(DataMap::READ);
+            }
             if ($roCols[$meta->name] ?? false) {
                 $type->setAccess(DataMap::READ);
             }
@@ -128,8 +131,6 @@ abstract class Model
         self::setMap($name, $map);
         return $map;
     }
-
-
 
     public static function getMap(string $name): ?DataMap
     {

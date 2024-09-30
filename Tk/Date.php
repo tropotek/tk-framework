@@ -429,4 +429,31 @@ class Date
         }
         return 'Now';
     }
+
+    /**
+     * convert number of hours to minutes
+     */
+	public static function hours_to_minutes(int $hours): int
+	{
+		return $hours * 60;
+	}
+
+    /**
+     * convert number of days to minutes
+     */
+	public static function days_to_minutes(int $days): int
+	{
+		return $days * 60 * 24;
+	}
+
+    /**
+     * convert a date to a number of minutes, with optional offset in days
+     */
+	public static function date_to_minutes(string $date, int $offset=0): int
+	{
+		$now = new \DateTime();
+		$diff = $now->diff(new \DateTime($date));
+
+		return self::days_to_minutes($diff->days + $offset);
+	}
 }
