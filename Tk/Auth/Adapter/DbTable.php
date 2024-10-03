@@ -1,7 +1,7 @@
 <?php
 namespace Tk\Auth\Adapter;
 
-use Au\Auth;
+use Bs\Auth;
 use Tk\Auth\Result;
 use Tk\Db;
 
