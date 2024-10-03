@@ -37,6 +37,7 @@
     "ext-fileinfo": "*",
     "ext-curl": "*",
 
+    "psr/log": "^2.0",
     "phpmailer/phpmailer": "~6.0"
   },
   "extra": {
