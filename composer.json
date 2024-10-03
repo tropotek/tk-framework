@@ -32,7 +32,6 @@
   },
   "require": {
     "php": "^8.2",
-    "psr/log": "^1.0",
     "ext-json": "*",
     "ext-pdo": "*",
     "ext-fileinfo": "*",
