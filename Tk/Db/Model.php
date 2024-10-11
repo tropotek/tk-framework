@@ -72,7 +72,7 @@ abstract class Model
         if (self::hasMap($name)) return self::getMap($name);
 
         // autogen table/view name from class
-        $table = self::getTableName();
+        $table = static::getTableName();
         $view = "v_{$table}";
 
         Db::$LOG = false;   // disable cache of last statement
@@ -90,7 +90,7 @@ abstract class Model
 
         // autogenerate a data map from DB and object metadata
         foreach ($t_meta+$roCols as $meta) {
-            if (!property_exists(static::class, $meta->name_camel)) continue;
+            if (!property_exists($name, $meta->name_camel)) continue;
 
             $type = DataMap::makeDbType($meta);
             if ($meta->is_primary_key) {
@@ -115,7 +115,7 @@ abstract class Model
         if (self::hasMap($name)) return self::getMap($name);
 
         $map = new DataMap();
-        $primaryId = self::getDataMap()->getPrimaryKey()->getProperty();
+        $primaryId = static::getDataMap()->getPrimaryKey()->getProperty();
 
         $reflect = new \ReflectionClass(static::class);
         $props = $reflect->getProperties(\ReflectionProperty::IS_PUBLIC | \ReflectionProperty::IS_PROTECTED);

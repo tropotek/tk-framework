@@ -13,14 +13,14 @@ use Tk\Db\Model;
  */
 class DataMap
 {
-    public const PRI    = 'pri';    // DB primary key flag
+    const string PRI    = 'pri';    // DB primary key flag
 
     // Data type IO flags
     // READ => property will be read into the object
     // WRITE => object property will be written to teh storage array
     // READ|WRITE => (default) property will be read into the object and written to the storage array
-    public const READ       = 0x01;      // For view/table reads only
-    public const WRITE      = 0x02;      // For table writes only
+    const int READ       = 0x01;      // For view/table reads only
+    const int WRITE      = 0x02;      // For table writes only
 
     /**
      * A list of types indexed by property name

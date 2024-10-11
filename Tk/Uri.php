@@ -123,7 +123,7 @@ class Uri
             $this->password = $com['pass'] ?? '';
             $this->fragment = $com['fragment'] ?? '';
             $this->path     = $com['path'] ?? '';
-            parse_str($com['query'] ?? '', $this->query);
+            parse_str(html_entity_decode($com['query'] ?? ''), $this->query);
         }
     }
 
