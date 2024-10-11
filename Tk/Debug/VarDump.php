@@ -15,11 +15,11 @@ namespace Tk\Debug {
             $this->basePath = $basePath;
         }
 
-        public static function instance(string $basePath = ''): VarDump
+        public static function instance(string $basePath = ''): self
         {
             if (is_null(static::$_instance)) {
                 if (!$basePath) $basePath = dirname(__DIR__, 3);
-                static::$_instance = new static($basePath);
+                static::$_instance = new self($basePath);
             }
             return static::$_instance;
         }
@@ -29,7 +29,7 @@ namespace Tk\Debug {
             return $this->basePath;
         }
 
-        public function setBasePath(string $basePath): VarDump
+        public function setBasePath(string $basePath): self
         {
             $this->basePath = $basePath;
             return $this;
@@ -72,7 +72,7 @@ namespace Tk\Debug {
         /**
          * return a var dump string from an array of arguments
          */
-        public static function varToString($var, int $depth = 5, int $nest = 0): string
+        public static function varToString(mixed $var, int $depth = 5, int $nest = 0): string
         {
             $pad = str_repeat('  ', $nest * 2 + 1);
 

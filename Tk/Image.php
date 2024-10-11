@@ -3,34 +3,21 @@ namespace Tk;
 
 class Image
 {
-
     const URI_PIXEL_TRANSPARENT = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-
     const URI_PIXEL_WHITE = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=';
-
     const URI_PIXEL_BLACK = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
 
-
-    private string $currentMem = '16M';
-
-    /**
-     * @var null|resource
-     */
-    private $image = null;
-
-    private string $filename = '';
-
-    private array $originalInfo = [];
-
-    private int $width = 0;
-
-    private int $height = 0;
+    private string    $currentMem = '16M';
+    private ?\GdImage $image = null;
+    private string    $filename = '';
+    private array     $originalInfo = [];
+    private int       $width = 0;
+    private int       $height = 0;
 
 
     public function __construct(?string $filename = null)
     {
-        if ($filename)
-            $this->load($filename);
+        if ($filename) $this->load($filename);
     }
 
     public function __destruct()
@@ -41,21 +28,21 @@ class Image
         $this->memReset();
     }
 
-    public static function create(string $filename): Image
+    public static function create(string $filename): self
     {
-        return new Image($filename);
+        return new self($filename);
     }
 
-    public static function createBlankPng(int $width = 256, int $height = 256, ?Color $bgcolour = null): Image
+    public static function createBlankPng(int $width = 256, int $height = 256, ?Color $bgColor = null): self
     {
-        $obj = new Image();
+        $obj = new self();
         $obj->image = imagecreatetruecolor($width, $height);
         imagealphablending($obj->image, false);
         imageantialias($obj->image, true);
         $transparent = imagecolorallocatealpha($obj->image, 0, 0, 0, 127);
         imagefill($obj->image, 0, 0, $transparent);
-        if ($bgcolour) {
-            $c = imagecolorallocate($obj->image, $bgcolour->getRed(), $bgcolour->getGreen(), $bgcolour->getBlue());
+        if ($bgColor) {
+            $c = imagecolorallocate($obj->image, $bgColor->getRed(), $bgColor->getGreen(), $bgColor->getBlue());
             imagefill($obj->image, 0, 0, $c);
         }
 
@@ -69,7 +56,7 @@ class Image
         return $obj;
     }
 
-    public static function createAvatar(string $text, Color $bgColor, int $size = 128): Image
+    public static function createAvatar(string $text, Color $bgColor, int $size = 128): self
     {
         $fontSize = $size*0.5;
 
@@ -88,8 +75,8 @@ class Image
         $img = self::createBlankPng($size, $size, $bgColor);
         $textBoundingBox = imagettfbbox($fontSize, 0, $font, $initials);
 
-        $y = abs(ceil(($size - $textBoundingBox[5]) / 2));
-        $x = abs(ceil(($size - $textBoundingBox[2]) / 2));
+        $y = intval(abs(ceil(($size - $textBoundingBox[5]) / 2)));
+        $x = intval(abs(ceil(($size - $textBoundingBox[2]) / 2)));
 
         $c = imagecolorallocate($img->image, $color->getRed(), $color->getGreen(), $color->getBlue());
         imagettftext($img->image, $fontSize, 0, $x, $y, $c, $font, $initials);
@@ -100,7 +87,7 @@ class Image
     /**
      * Load an image
      */
-    public function load(string $filename): Image
+    public function load(string $filename): self
     {
         // Require GD library
         if (!extension_loaded('gd')) {
@@ -121,12 +108,10 @@ class Image
                 break;
             case 'image/png':
                 $this->image = imagecreatefrompng($this->filename);
-                //imagealphablending($this->image, false);
                 imagesavealpha($this->image, true);
                 break;
             default:
                 throw new Exception('Invalid image: ' . $this->filename);
-                break;
         }
 
         $this->originalInfo = [
@@ -159,7 +144,7 @@ class Image
      *
      * @param int $quality Value from 1 - 100
      */
-    public function save(?string $filename = null, int $quality = 90): Image
+    public function save(?string $filename = null, int $quality = 90): self
     {
         // Determine format via file extension (fall back to original format)
         $format = 'png';
@@ -180,7 +165,7 @@ class Image
                 $result = imagejpeg($this->image, $filename, $quality);
                 break;
             case 'png':
-                $quality = $this->keepWithin(floor($quality/10), 0, 9);
+                $quality = $this->keepWithin(intval(floor($quality/10)), 0, 9);
                 $result = imagepng($this->image, $filename, $quality);
                 break;
             default:
@@ -196,7 +181,7 @@ class Image
     /**
      * Stream the image to the output buffer
      */
-    public function stream(int $quality = 90): Image
+    public function stream(int $quality = 90): self
     {
         $format = 'png';
 
@@ -219,7 +204,7 @@ class Image
                 break;
             case 'png' :
                 header('Content-Type: image/png');
-                $quality = $this->keepWithin(floor($quality/10), 0, 9);
+                $quality = $this->keepWithin(intval(floor($quality/10)), 0, 9);
                 imagepng($this->image, null, $quality);
                 break;
         }
@@ -242,10 +227,7 @@ class Image
         return $this->originalInfo;
     }
 
-    /**
-     * @return null|resource
-     */
-    public function getImage()
+    public function getImage(): ?\GdImage
     {
         return $this->image;
     }
@@ -283,7 +265,7 @@ class Image
      *
      * @param string $direction 'x' or 'y'
      */
-    public function flip(string $direction): Image
+    public function flip(string $direction): self
     {
         $new = imagecreatetruecolor($this->width, $this->height);
         imagealphablending($new, false);
@@ -308,7 +290,7 @@ class Image
      * @param int $angle 0 - 360 (required)
      * @param string $bg_color hex color for the background
      */
-    public function rotate(int $angle, string $bg_color = '#000000'): Image
+    public function rotate(int $angle, string $bg_color = '#000000'): self
     {
         $rgb = Color::hex2Rgb($bg_color);
         $bg_color = imagecolorallocate($this->image, $rgb['r'], $rgb['g'], $rgb['b']);
@@ -338,7 +320,7 @@ class Image
      * Rotates and/or flips an image automatically so the orientation will
      * be correct (based on exif 'Orientation')
      */
-    public function autoOrient(): Image
+    public function autoOrient(): self
     {
         $angle = 0;
         $flip = false;
@@ -391,7 +373,7 @@ class Image
     /**
      * Resize an image to the specified dimensions
      */
-    public function resize(int $width, int $height): Image
+    public function resize(int $width, int $height): self
     {
 
         $new = imagecreatetruecolor($width, $height);
@@ -409,7 +391,7 @@ class Image
     /**
      * Fit to width (proportionally resize to specified width)
      */
-    public function fitToWidth(int $width): Image
+    public function fitToWidth(int $width): self
     {
         $aspect_ratio = $this->height / $this->width;
         $height = $width * $aspect_ratio;
@@ -419,7 +401,7 @@ class Image
     /**
      * Fit to height (proportionally resize to specified height)
      */
-    public function fitToHeight(int $height): Image
+    public function fitToHeight(int $height): self
     {
         $aspect_ratio = $this->height / $this->width;
         $width = $height / $aspect_ratio;
@@ -429,7 +411,7 @@ class Image
     /**
      * Best fit (proportionally resize to fit in specified width/height)
      */
-    public function bestFit(int $maxWidth, int $maxHeight): Image
+    public function bestFit(int $maxWidth, int $maxHeight): self
     {
         // If it already fits, there's nothing to do
         if ($this->width <= $maxWidth && $this->height <= $maxHeight)
@@ -459,7 +441,7 @@ class Image
     /**
      * Crop an image
      */
-    public function crop(int $x1, int $y1, int $x2, int $y2): Image
+    public function crop(int $x1, int $y1, int $x2, int $y2): self
     {
         // Determine crop size
         if ($x2 < $x1)
@@ -486,7 +468,7 @@ class Image
      *
      * @param int|null $size the size in pixels of the resulting image (width and height are the same) (optional)
      */
-    public function squareCrop(?int $size = null): Image
+    public function squareCrop(?int $size = null): self
     {
         // Calculate measurements
         if ($this->width > $this->height) {
@@ -514,7 +496,7 @@ class Image
     /**
      * Desaturate (grayscale)
      */
-    public function desaturate(): Image
+    public function desaturate(): self
     {
         imagefilter($this->image, \IMG_FILTER_GRAYSCALE);
         return $this;
@@ -523,7 +505,7 @@ class Image
     /**
      * Invert
      */
-    public function invert(): Image
+    public function invert(): self
     {
         imagefilter($this->image, \IMG_FILTER_NEGATE);
         return $this;
@@ -534,7 +516,7 @@ class Image
      *
      * @param int $level min = -100, max, 100 (required)
      */
-    public function brightness(int $level): Image
+    public function brightness(int $level): self
     {
         imagefilter($this->image, \IMG_FILTER_BRIGHTNESS, $this->keepWithin($level, -255, 255));
         return $this;
@@ -545,7 +527,7 @@ class Image
      *
      * @param int $level min = -100, max, 100 (required)
      */
-    public function contrast(int $level): Image
+    public function contrast(int $level): self
     {
         imagefilter($this->image, \IMG_FILTER_CONTRAST, $this->keepWithin($level, -100, 100));
         return $this;
@@ -557,10 +539,10 @@ class Image
      * @param string $color    any valid hex color (required)
      * @param float $opacity  0 - 1 (required)
      */
-    public function colorize(string $color, float $opacity): Image
+    public function colorize(string $color, float $opacity): self
     {
         $rgb = Color::hex2Rgb($color);
-        $alpha = $this->keepWithin(127 - (127 * $opacity), 0, 127);
+        $alpha = $this->keepWithin(intval(127 - (127 * $opacity)), 0, 127);
         imagefilter($this->image, \IMG_FILTER_COLORIZE, $this->keepWithin($rgb['r'], 0, 255), $this->keepWithin($rgb['g'], 0, 255), $this->keepWithin($rgb['b'], 0, 255), $alpha);
         return $this;
     }
@@ -568,7 +550,7 @@ class Image
     /**
      * Edge Detect
      */
-    public function edges(): Image
+    public function edges(): self
     {
         imagefilter($this->image, \IMG_FILTER_EDGEDETECT);
         return $this;
@@ -577,7 +559,7 @@ class Image
     /**
      * Emboss
      */
-    public function emboss(): Image
+    public function emboss(): self
     {
         imagefilter($this->image, \IMG_FILTER_EMBOSS);
         return $this;
@@ -586,7 +568,7 @@ class Image
     /**
      * Mean Remove
      */
-    public function meanRemove(): Image
+    public function meanRemove(): self
     {
         imagefilter($this->image, \IMG_FILTER_MEAN_REMOVAL);
         return $this;
@@ -598,7 +580,7 @@ class Image
      * @param string $type  'selective' or 'gaussian' (default = selective)
      * @param int $passes   the number of times to apply the filter
      */
-    public function blur(string $type = 'selective', int $passes = 1): Image
+    public function blur(string $type = 'selective', int $passes = 1): self
     {
         switch (strtolower($type)) {
             case 'gaussian':
@@ -618,7 +600,7 @@ class Image
     /**
      * Sketch
      */
-    public function sketch(): Image
+    public function sketch(): self
     {
         imagefilter($this->image, \IMG_FILTER_MEAN_REMOVAL);
         return $this;
@@ -629,7 +611,7 @@ class Image
      *
      * @param int $level  min = -10, max = 10
      */
-    public function smooth(int $level): Image
+    public function smooth(int $level): self
     {
         imagefilter($this->image, \IMG_FILTER_SMOOTH, $this->keepWithin($level, -10, 10));
         return $this;
@@ -640,7 +622,7 @@ class Image
      *
      * @param int $block_size   the size in pixels of each resulting block (default = 10)
      */
-    public function pixelate(int $block_size = 10): Image
+    public function pixelate(int $block_size = 10): self
     {
         imagefilter($this->image, \IMG_FILTER_PIXELATE, $block_size, true);
         return $this;
@@ -649,7 +631,7 @@ class Image
     /**
      * Sepia
      */
-    public function sepia(): Image
+    public function sepia(): self
     {
         imagefilter($this->image, \IMG_FILTER_GRAYSCALE);
         imagefilter($this->image, \IMG_FILTER_COLORIZE, 100, 50, 0);
@@ -665,10 +647,8 @@ class Image
      * @param int $opacity overlay opacity (0 - 1)
      * @param int $xOffset horizontal offset in pixels
      * @param int $yOffset vertical offset in pixels
-     * @return $this
-     * @throws \Tk\Exception
      */
-    public function overlay(string $overlayFile, string $position = 'center', int $opacity = 1, int $xOffset = 0, int $yOffset = 0): Image
+    public function overlay(string $overlayFile, string $position = 'center', int $opacity = 1, int $xOffset = 0, int $yOffset = 0): self
     {
         // Load overlay image
         $overlay = new self($overlayFile);
@@ -724,15 +704,14 @@ class Image
      *
      * @param string $text the text to add (required)
      * @param string $fontFile the font to use (required)
-     * @param string $fontSize font size in points
+     * @param float  $fontSize font size in points
      * @param string $color font color in hex
      * @param string $position 'center', 'top', 'left', 'bottom', 'right', 'top left',
      *                         'top right', 'bottom left', 'bottom right'
      * @param int $xOffset horizontal offset in pixels
      * @param int $yOffset vertical offset in pixels
-     * @throws Exception
      */
-    public function text(string $text, string $fontFile, string $fontSize = '12', string $color = '#000000', string $position = 'center', int $xOffset = 0, int $yOffset = 0): Image
+    public function text(string $text, string $fontFile, float $fontSize = 12, string $color = '#000000', string $position = 'center', int $xOffset = 0, int $yOffset = 0): self
     {
         // todo - this method could be improved to support the text angle
         $angle = 0;
@@ -748,7 +727,6 @@ class Image
 
         // Determine position
         switch (strtolower($position)) {
-
             case 'top left':
                 $x = 0 + $xOffset;
                 $y = 0 + $yOffset + $box_height;
@@ -799,7 +777,7 @@ class Image
      * @param array $imageList and array of up to 4 image paths to time on this image
      * @param int $padding The padding between the images in pixels
      */
-    public function makeTileMontage(array $imageList, int $padding = 10): Image
+    public function makeTileMontage(array $imageList, int $padding = 10): self
     {
         $thumbW = ($this->getWidth()-$padding*3)/2;
         foreach ($imageList as $i => $path) {
@@ -828,23 +806,13 @@ class Image
 
     /**
      * Same as PHP's imagecopymerge() function, except preserves alpha-transparency in 24-bit PNGs
-     * @param resource $dst_im
-     * @param resource $src_im
-     * @param int $dst_x
-     * @param int $dst_y
-     * @param int $src_x
-     * @param int $src_y
-     * @param int $src_w
-     * @param int $src_h
      * @param int $pct The two images will be merged according to pct
      *      which can range from 0 to 100. When pct = 0,
      *      no action is taken, when 100 this function behaves identically
      *      to imagecopy for pallet images, while it
      *      implements alpha transparency for true colour images.
-     *
-     * @return bool
      */
-    private function imagecopymergeAlpha($dst_im, $src_im, int $dst_x, int $dst_y, int $src_x, int $src_y, int $src_w, int $src_h, int $pct): bool
+    private function imagecopymergeAlpha(\GdImage $dst_im, \GdImage $src_im, int $dst_x, int $dst_y, int $src_x, int $src_y, int $src_w, int $src_h, int $pct): bool
     {
         $cut = imagecreatetruecolor($src_w, $src_h);
         imagecopy($cut, $dst_im, 0, 0, $dst_x, $dst_y, $src_w, $src_h);
@@ -855,10 +823,6 @@ class Image
     /**
      * Ensures $value is always within $min and $max range.
      * If lower, $min is returned. If higher, $max is returned.
-     * @param int $value
-     * @param int $min
-     * @param int $max
-     * @return int
      */
     private function keepWithin(int $value, int $min, int $max): int
     {
@@ -872,7 +836,6 @@ class Image
 
     /**
      * Use this to set the memory allocation for image resizing
-     *
      */
     private function memAlloc(): bool
     {
@@ -908,9 +871,8 @@ class Image
 
     /**
      * Reset the memory allocation back to the default value
-     *
      */
-    private function memReset()
+    private function memReset(): void
     {
         ini_set('memory_limit', $this->currentMem);
     }

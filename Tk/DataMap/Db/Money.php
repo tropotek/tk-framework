@@ -21,7 +21,7 @@ class Money extends DataTypeInterface
     {
         $value = parent::getPropertyValue($array);
         if (is_numeric($value)) {
-            $value = \Tk\Money::create((int)$value, \Tk\Currency::getInstance($this->currencyCode));
+            $value = \Tk\Money::create((int)$value, \Tk\Currency::instance($this->currencyCode));
         }
         return $value;
     }

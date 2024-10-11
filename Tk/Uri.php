@@ -17,26 +17,12 @@ namespace Tk;
  * If the static $BASE_URL is set this will be prepended to all relative paths
  * when creating a URI `Uri::create('/home.html')->toString()` => '/site/base/path/home.html'
  */
-class Uri implements \IteratorAggregate
+class Uri
 {
 
     const SCHEME_HTTP = 'http';
     const SCHEME_HTTP_SSL = 'https';
     const SCHEME_FTP = 'ftp';
-
-    private const DEFAULT_PORTS = [
-        'http'  => 80,
-        'https' => 443,
-        'ftp' => 21,
-        'gopher' => 70,
-        'nntp' => 119,
-        'news' => 119,
-        'telnet' => 23,
-        'tn3270' => 23,
-        'imap' => 143,
-        'pop' => 110,
-        'ldap' => 389,
-    ];
 
     /**
      * Set this in your bootstrap code if you are not using the root path for your site path
@@ -93,7 +79,7 @@ class Uri implements \IteratorAggregate
     public static function create(string|Uri|null $spec = null, array $queryParams = []): Uri
     {
         if ($spec instanceof Uri) return clone $spec;
-        return new static($spec, $queryParams);
+        return new self($spec, $queryParams);
     }
 
 
@@ -102,7 +88,7 @@ class Uri implements \IteratorAggregate
         return ['spec' => $this->spec];
     }
 
-    public function __unserialize($data)
+    public function __unserialize(array $data)
     {
         $this->init($data['spec']);
     }
@@ -267,14 +253,6 @@ class Uri implements \IteratorAggregate
             unset($this->query[$field]);
         }
         return $this;
-    }
-
-    /**
-     * IteratorAggregate for iterating over the query params
-     */
-    public function getIterator(): \ArrayIterator
-    {
-        return new \ArrayIterator($this->query);
     }
 
     public function setFragment(string $fragment): Uri
@@ -657,7 +635,7 @@ class Uri implements \IteratorAggregate
      * @see http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
      * @see http://edoceo.com/creo/php-redirect.php
      */
-    public function redirect(int $code = 302)
+    public function redirect(int $code = 302): void
     {
         if (self::isApplicationScheme($this->spec)) return;
         if (headers_sent()) {

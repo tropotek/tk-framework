@@ -6,7 +6,7 @@ namespace Tk;
  */
 class FileUtil
 {
-    public static $DIR_MASK = 0777;
+    public static int $DIR_MASK = 0777;
 
     /**
      * Default location of the mime.types remote file
@@ -45,7 +45,7 @@ class FileUtil
         $end = str_ends_with($path, '/') ? '/' : '';
 
         $path = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $path);
-        $parts = array_filter(explode(DIRECTORY_SEPARATOR, $path), 'strlen');
+        $parts = array_filter(explode(DIRECTORY_SEPARATOR, $path), fn($f) => strlen($f) > 0);
         $absolutes = array();
         foreach ($parts as $part) {
             if ('.' == $part) continue;
@@ -211,10 +211,7 @@ class FileUtil
         return $maxUpload;
     }
 
-    /**
-     *
-     */
-    public static function copyDir(string $src, string $dst)
+    public static function copyDir(string $src, string $dst): void
     {
         $dir = opendir($src);
         if (!file_exists($dst)) {
@@ -266,14 +263,15 @@ class FileUtil
             }
             return false;
         }
+        return true;
     }
 
     /**
      * Remove all empty folders from a path.
      *
-     * @param callable|null $onDelete Add a callable here if you want to perfom an action before deletion.
+     * @param callable|null $onDelete Add a callable here if you want to perform an action before deletion.
      */
-    public static function removeEmptyFolders(string $path, ?callable $onDelete = null)
+    public static function removeEmptyFolders(string $path, ?callable $onDelete = null): void
     {
         if(substr($path,-1)!= DIRECTORY_SEPARATOR){
             $path .= DIRECTORY_SEPARATOR;

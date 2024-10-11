@@ -22,10 +22,10 @@ class EventDispatcher implements PsrEventDispatcherInterface
     /**
      * Gets an instance of this object, if none exists one is created
      */
-    public static function instance(): static
+    public static function instance(): self
     {
         if (is_null(self::$_instance)) {
-            self::$_instance = new static();
+            self::$_instance = new self();
         }
         return self::$_instance;
     }

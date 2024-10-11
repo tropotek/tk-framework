@@ -13,7 +13,7 @@ class Filter extends \Tk\Collection
     protected string $where     = '';
 
 
-    public static function create(null|array|Filter $params, string $orderBy = '', ?int $limit = null, ?int $offset = null): static
+    public static function create(null|array|Filter $params, string $orderBy = '', ?int $limit = null, ?int $offset = null): self
     {
         if ($params instanceof Filter) return $params;
         $obj = new self();
@@ -24,9 +24,9 @@ class Filter extends \Tk\Collection
         return $obj;
     }
 
-    public static function createFromTable(null|array|Filter $params, Table $table): static
+    public static function createFromTable(null|array|Filter $params, Table $table): self
     {
-        return static::create($params, $table->getOrderBy(), $table->getLimit(), $table->getOffset());
+        return self::create($params, $table->getOrderBy(), $table->getLimit(), $table->getOffset());
     }
 
     public function getWhere(): string
@@ -36,19 +36,19 @@ class Filter extends \Tk\Collection
         return rtrim($where, 'OR');
     }
 
-    public function setWhere(string $where): static
+    public function setWhere(string $where): self
     {
         $this->where = $where;
         return $this;
     }
 
-    public function prependWhere(string $where, ...$args): static
+    public function prependWhere(string $where, mixed ...$args): self
     {
         $this->where = vsprintf($where, $args) . $this->where;
         return $this;
     }
 
-    public function appendWhere(string $where, ...$args): static
+    public function appendWhere(string $where, mixed ...$args): self
     {
         $this->where .= vsprintf($where, $args);
         return $this;
@@ -69,7 +69,7 @@ class Filter extends \Tk\Collection
         return $this->offset;
     }
 
-    public function resetLimits(): static
+    public function resetLimits(): self
     {
         $this->limit = 0;
         $this->offset = 0;

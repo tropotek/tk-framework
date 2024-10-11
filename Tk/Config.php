@@ -16,8 +16,8 @@ class Config extends Collection
         parent::__construct();
 
         $this->set('hostname', $_SERVER['HTTP_HOST'] ?? $_SERVER['HTTP_X_FORWARDED_HOST'] ?? 'localhost');
-        $this->set('base.path', System::discoverBasePath() ?? '');
-        $this->set('base.url', system::discoverBaseUrl() ?? '');
+        $this->set('base.path', System::discoverBasePath());
+        $this->set('base.url', System::discoverBaseUrl());
 
         // default system paths
         $this->set('path.data',       '/data');
@@ -40,10 +40,10 @@ class Config extends Collection
     /**
      * Gets an instance of this object, if none exists one is created
      */
-    public static function instance(): static
+    public static function instance(): self
     {
         if (is_null(self::$_instance)) {
-            self::$_instance = new static();
+            self::$_instance = new self();
             ConfigLoader::create()->loadConfigs(self::$_instance);
         }
         return self::$_instance;

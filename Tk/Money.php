@@ -18,7 +18,7 @@ class Money
     {
         $this->amount = $amount;
         if (!$currency) {
-            $currency = Currency::getInstance(Currency::$DEFAULT);
+            $currency = Currency::instance(Currency::$DEFAULT);
         }
         $this->setCurrency($currency);
     }
@@ -26,7 +26,7 @@ class Money
     public static function create(int|Money $amount = 0, ?Currency $currency = null): Money
     {
         if ($amount instanceof Money) return $amount;
-        return new static($amount, $currency);
+        return new self($amount, $currency);
     }
 
     /**
@@ -35,17 +35,17 @@ class Money
     public static function parseFromString(string $amount, ?Currency $currency = null, string $thousandthSep = ','): Money
     {
         if (!$currency) {
-            $currency = Currency::getInstance(Currency::$DEFAULT);
+            $currency = Currency::instance(Currency::$DEFAULT);
         }
         $digits = $currency->getFractionDigits();
-        //if (!preg_match("/^(\$)?(\-)?[0-9]+((\.)[0-9]{1,{$digits}})?$/", $amount)) {
         $amt = str_replace([$thousandthSep, $currency->getSymbol(), $currency->getLocal()], '', $amount);
         if (!preg_match("/(\-)?[0-9]+((\.)[0-9]{1,{$digits}})?$/", $amt)) {
             Log::notice('Cannot parse amount string: ' . $amount);
             return static::create();
         }
         $amt = floatval($amt);
-        return static::create($amt * 100, $currency);
+        $amt = intval($amt * 100);
+        return static::create($amt, $currency);
     }
 
     public function __serialize(): array
@@ -56,7 +56,7 @@ class Money
     public function __unserialize(array $data)
     {
         $this->amount = $data['amount'];
-        $this->setCurrency(Currency::getInstance($data['currencyCode']));
+        $this->setCurrency(Currency::instance($data['currencyCode']));
     }
 
     protected function setCurrency(Currency $currency): Money
@@ -106,7 +106,7 @@ class Money
         if ($denominator == 0) {
             throw new Exception('Divide by zero exception.');
         }
-        return static::create($this->getAmount() / $denominator);
+        return static::create(intval($this->getAmount() / $denominator));
     }
 
     /**

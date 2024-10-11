@@ -57,11 +57,11 @@ class Gateway
                 throw new Exception('Invalid DKIM private key value.');
             }
 
-            $this->mailer->DKIM_domain         = $this->params['mail.dkim.domain'] ?? '';
-            $this->mailer->DKIM_private        = $this->params['mail.dkim.private'] ?? '';
-            $this->mailer->DKIM_private_string = $this->params['mail.dkim.private_string'] ?? '';
-            $this->mailer->DKIM_passphrase     = $this->params['mail.dkim.passphrase'] ?? '';
-            $this->mailer->DKIM_selector       = $this->params['mail.dkim.selector'] ?? 'default';
+            $this->mailer->DKIM_domain         = strval($this->params['mail.dkim.domain']);
+            $this->mailer->DKIM_private        = strval($this->params['mail.dkim.private'] ?? '');
+            $this->mailer->DKIM_private_string = strval($this->params['mail.dkim.private_string'] ?? '');
+            $this->mailer->DKIM_passphrase     = strval($this->params['mail.dkim.passphrase'] ?? '');
+            $this->mailer->DKIM_selector       = strval($this->params['mail.dkim.selector'] ?? 'default');
         }
 
         if (isset($_SERVER['HTTP_HOST'])) {
@@ -164,8 +164,8 @@ class Gateway
                 }
             } else {        // Send live emails
                 $email = $message->getFrom();
-                if (!$email) $email = 'noreply@' . $this->host;
                 list($e, $n) = Message::splitEmail($email);
+                if (empty($e)) $e = 'noreply@' . $this->host;
                 $this->mailer->setFrom($e, $n);
 
                 if ($message->getReplyTo()) {

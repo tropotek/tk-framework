@@ -100,9 +100,9 @@ class CurlyTemplate
         $this->template = $template;
     }
 
-    static function create(string $template): CurlyTemplate
+    static function create(string $template): self
     {
-        return new static($template);
+        return new self($template);
     }
 
     /**
@@ -173,7 +173,7 @@ class CurlyTemplate
     /**
      *  Set the left/right variable delimiters
      */
-    public function setDelimiters(string $ld = '{', string $rd = '}'): CurlyTemplate
+    public function setDelimiters(string $ld = '{', string $rd = '}'): self
     {
         $this->ld = $ld;
         $this->rd = $rd;

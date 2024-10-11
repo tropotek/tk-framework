@@ -38,8 +38,8 @@ class Filesystem implements Iface
         fseek($h, 0); // go to the start of the file
         // truncate the file
         ftruncate($h, 0);
-        fwrite($h,time()+$ttl);
-        fseek($h,strlen(time()));
+        fwrite($h, strval(time()+$ttl));
+        fseek($h, strlen(strval(time())));
         // Serializing along with the TTL
         $data = serialize($data);
         if (fwrite($h, $data) === false) {
@@ -61,14 +61,14 @@ class Filesystem implements Iface
         }
         // Getting a shared lock
         flock($h, \LOCK_SH);
-        $ttl = fread($h, strlen(time()));
+        $ttl = fread($h, strlen(strval(time())));
         if (time() > $ttl) {
             // Unlinking when the file was expired
             fclose($h);
             unlink($filename);
             return false;
         }
-        $data = file_get_contents($filename, false, null, strlen(time()));
+        $data = file_get_contents($filename, false, null, strlen(strval(time())));
         fclose($h);
 
         $data = @unserialize($data);

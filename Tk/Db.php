@@ -185,7 +185,7 @@ class Db
     public static function rollback(): bool
     {
         if (--self::$transactions) {
-            self::execute('ROLLBACK TO trans' . self::$transactions + 1);
+            self::execute('ROLLBACK TO trans' . (self::$transactions + 1));
             return true;
         }
         return self::$pdo->rollback();
@@ -692,7 +692,7 @@ class Db
     /**
      * sanitize a table/Db name for queries
      */
-    public static function escapeTable($table): string
+    public static function escapeTable(string $table): string
     {
         return preg_replace('/[^a-z0-9_]/i', '', $table);
     }

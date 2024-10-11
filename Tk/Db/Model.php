@@ -40,8 +40,10 @@ abstract class Model
         $id = $this->$priKey;
 
         if ($id && method_exists($this, 'find')) {
+            /** @phpstan-ignore-next-line */
             $obj = static::find($id);
         } else {
+            /** @phpstan-ignore-next-line */
             $obj = new static();
         }
         if (is_null($obj)) return;
@@ -118,7 +120,8 @@ abstract class Model
         $reflect = new \ReflectionClass(static::class);
         $props = $reflect->getProperties(\ReflectionProperty::IS_PUBLIC | \ReflectionProperty::IS_PROTECTED);
         foreach ($props as $prop) {
-            if (str_starts_with($prop->getName(), '_') || $prop->isReadOnly() || $prop->isStatic()) continue;
+            if (str_starts_with($prop->getName(), '_') || $prop->isStatic()) continue;
+            /** @phpstan-ignore-next-line */
             $type = DataMap::makeFormType($prop->getType()->getName(), $prop->getName());
             if ($primaryId == $prop->getName()) {
                 $type->setFlag(DataMap::PRI);

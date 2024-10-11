@@ -2,13 +2,10 @@
 namespace Tk\Db;
 
 use Tk\Date;
-use Tk\System;
 use Tk\Db;
 
 /**
  * A basic DB session handler
- *
- * @todo allow for db/session params to be sent as options in the constructor
  */
 class Session implements \SessionHandlerInterface
 {
@@ -21,7 +18,7 @@ class Session implements \SessionHandlerInterface
     public static string $DB_TABLE      = '_session';
 
 
-    public function __construct(array $options = [])
+    public function __construct()
     {
         // Set handler to override SESSION
         session_set_save_handler($this);
@@ -33,10 +30,10 @@ class Session implements \SessionHandlerInterface
         session_write_close();
     }
 
-    public static function instance(array $options = []): static
+    public static function instance(): self
     {
         if (is_null(self::$_instance)) {
-            self::$_instance = new static($options);
+            self::$_instance = new self();
             self::$_instance->clearExpired();
         }
         return self::$_instance;

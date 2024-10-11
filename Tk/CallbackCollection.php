@@ -16,7 +16,7 @@ class CallbackCollection
     private bool  $enabled      = true;
 
 
-    public static function create(): CallbackCollection
+    public static function create(): self
     {
         return new self();
     }
@@ -29,7 +29,7 @@ class CallbackCollection
      *
      * @see https://www.php.net/manual/en/language.types.callable.php
      */
-    public function append(callable $callable, int $priority=self::DEFAULT_PRIORITY): CallbackCollection
+    public function append(callable $callable, int $priority=self::DEFAULT_PRIORITY): self
     {
         $this->callbackList[$priority][] = $callable;
         return $this;
@@ -40,9 +40,8 @@ class CallbackCollection
      *    closure: function (\Dom\Template $fieldGroup, \Tk\Form\Renderer\FieldGroup $element) { }
      *    string: '\Tk\Db\Model::method'
      */
-    public function prepend(callable $callable, int $priority = self::DEFAULT_PRIORITY): CallbackCollection
+    public function prepend(callable $callable, int $priority = self::DEFAULT_PRIORITY): self
     {
-        if (!$callable) return $this;
         if (!isset($this->callbackList[$priority]))
             $this->callbackList[$priority] = [];
         $this->callbackList[$priority] = [$callable] + $this->callbackList[$priority];
@@ -52,7 +51,7 @@ class CallbackCollection
     /**
      * Clear a priority queue or an item in the queue
      */
-    public function remove(int $priority = self::DEFAULT_PRIORITY, ?int $index = null): CallbackCollection
+    public function remove(int $priority = self::DEFAULT_PRIORITY, ?int $index = null): self
     {
         if ($index === null) {
             if (isset($this->callbackList[$priority]))
@@ -67,7 +66,7 @@ class CallbackCollection
     /**
      * Remove a callable if you have the callback handle available
      */
-    public function removeCallable(callable $callable): CallbackCollection
+    public function removeCallable(callable $callable): self
     {
         foreach ($this->callbackList as $priority => $list) {
             foreach ($list as $i => $c2) {
@@ -79,7 +78,7 @@ class CallbackCollection
         return $this;
     }
 
-    public function execute(...$args): mixed
+    public function execute(mixed ...$args): mixed
     {
         if (!$this->isEnabled()) return null;
         $this->orderList();
@@ -97,7 +96,7 @@ class CallbackCollection
     /**
      * Return an array of all results from all callables that return non-null values
      */
-    public function executeAll(...$args): array
+    public function executeAll(mixed ...$args): array
     {
         if (!$this->isEnabled()) return [];
         $this->orderList();
@@ -115,7 +114,7 @@ class CallbackCollection
     /**
      * Reset the CallbackCollection queue
      */
-    public function reset(): CallbackCollection
+    public function reset(): self
     {
         $this->callbackList = [];
         return $this;
@@ -139,7 +138,7 @@ class CallbackCollection
         return $this->enabled;
     }
 
-    public function setEnabled(bool $enabled): CallbackCollection
+    public function setEnabled(bool $enabled): self
     {
         $this->enabled = $enabled;
         return $this;
@@ -150,7 +149,7 @@ class CallbackCollection
      */
     protected function orderList(): bool
     {
-        return ksort($this->callbackList, \SORT_REGULAR);
+        return ksort($this->callbackList);
     }
 
 }

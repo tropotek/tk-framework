@@ -113,10 +113,8 @@ class Date
 
     /**
      * Create a DateTime object with system timezone
-     *
-     * @param null|\DateTimeZone|string $timezone
      */
-    public static function create(string $time = 'now', $timezone = null): \DateTime
+    public static function create(string|int $time = 'now', \DateTimeZone|string|null $timezone = null): \DateTime
     {
         try {
             if (is_string($timezone)) {
@@ -140,11 +138,8 @@ class Date
 
     /**
      * Create a date from a string returned from a form field
-     *
-     * @param null|\DateTimeZone|string $timezone
-     * @throws \Exception
      */
-    public static function createFormDate(string $dateStr, $timezone = null, string $format = ''): \DateTime
+    public static function createFormDate(string $dateStr, \DateTimeZone|string|null $timezone = null, string $format = ''): ?\DateTime
     {
         try {
             if ($timezone && is_string($timezone)) {
@@ -163,10 +158,11 @@ class Date
             if ($date) {
                 $date->setTimezone($timezone);
             }
+            return $date ?: new \DateTime();
         } catch (\Exception $e) {
             Log::debug($e->getMessage());
         }
-        return $date ?: new \DateTime();
+        return null;
     }
 
 
@@ -186,7 +182,7 @@ class Date
     /**
      * Is the supplied year a leap year
      */
-    public static function isLeapYear(int $y): int
+    public static function isLeapYear(int $y): bool
     {
         if ($y % 4 != 0) {
             return false;
@@ -194,9 +190,8 @@ class Date
             return true;
         } else if ($y % 100 == 0) {
             return false;
-        } else {
-            return true;
         }
+        return true;
     }
 
     /**
@@ -204,7 +199,6 @@ class Date
      * TODO: Add more description and examples
      *
      * @param string $frequency ['weekly', 'fortnightly', 'monthly']
-     * @throws \Exception
      */
     public static function getPeriodDates(string $frequency, \DateTime $dateStart, ?\DateTime $dateEnd = null): array
     {
@@ -236,9 +230,6 @@ class Date
     /**
      * Get the financial year of this date
      * list($start, $end) = Tk\Date::getFinancialYear($date);
-     *
-     * @return \DateTime[]|array
-     * @throws \Exception
      */
     public static function getFinancialYear(\DateTime $date = null): array
     {
@@ -257,7 +248,6 @@ class Date
 
     /**
      * Set the time of a date object to 23:59:59
-     * @throws \Exception
      */
     public static function ceil(?\DateTime $date = null): \DateTime
     {
@@ -267,7 +257,6 @@ class Date
 
     /**
      * Set the time of a date object to 00:00:00
-     * @throws \Exception
      */
     public static function floor(?\DateTime $date = null): \DateTime
     {
@@ -277,7 +266,6 @@ class Date
 
     /**
      * Get the first day of this dates month
-     * @throws \Exception
      */
     public static function getMonthStart(?\DateTime $date = null): \DateTime
     {
@@ -287,19 +275,17 @@ class Date
 
     /**
      * Get the last day of this dates month
-     * @throws \Exception
      */
     public static function getMonthEnd(?\DateTime $date = null): \DateTime
     {
         if (!$date) $date = self::create();
-        $lastDay = self::getMonthDays($date->format('n'), $date->format('Y'));
-        return new \DateTime($date->format('Y-m-'.$lastDay.' 23:59:59'), $date->getTimezone());
+        $l = self::getMonthDays(intval($date->format('n')), intval($date->format('Y')));
+        return new \DateTime($date->format('Y-m-'.$l.' 23:59:59'), $date->getTimezone());
     }
 
 
     /**
      * Get the first day of this dates month
-     * @throws \Exception
      */
     public static function getYearStart(\DateTime $date = null): \DateTime
     {
@@ -309,12 +295,8 @@ class Date
 
     /**
      * Get the last day of this dates month
-     *
-     * @param \DateTime $date
-     * @return \DateTime
-     * @throws \Exception
      */
-    public static function getYearEnd(\DateTime $date = null)
+    public static function getYearEnd(?\DateTime $date = null): \DateTime
     {
         if (!$date) $date = self::create();
         return new \DateTime($date->format('Y-12-31 23:59:59'), $date->getTimezone());
@@ -326,7 +308,7 @@ class Date
      */
     public static function dayDiff(\DateTime $from, \DateTime $to): int
     {
-        return ceil(($from->getTimestamp() - $to->getTimestamp()) / self::DAY);
+        return intval(ceil(($from->getTimestamp() - $to->getTimestamp()) / self::DAY));
     }
 
     /**
@@ -334,7 +316,7 @@ class Date
      */
     public static function hourDiff(\DateTime $from, \DateTime $to): int
     {
-        return ceil(($from->getTimestamp() - $to->getTimestamp()) / self::HOUR);
+        return intval(ceil(($from->getTimestamp() - $to->getTimestamp()) / self::HOUR));
     }
 
     /**
@@ -397,7 +379,6 @@ class Date
      * ago that date was.... eg: 2 days ago, 3 minutes ago.
      *
      * Note: Only works for dates in the past...
-     * @throws Exception
      */
     public static function toRelativeString(\DateTime $date = null): string
     {
@@ -433,7 +414,7 @@ class Date
     /**
      * convert number of hours to minutes
      */
-	public static function hours_to_minutes(int $hours): int
+	public static function hoursToMinutes(int $hours): int
 	{
 		return $hours * 60;
 	}
@@ -441,19 +422,33 @@ class Date
     /**
      * convert number of days to minutes
      */
-	public static function days_to_minutes(int $days): int
+	public static function daysToMinutes(int $days): int
 	{
 		return $days * 60 * 24;
 	}
 
     /**
-     * convert a date to a number of minutes, with optional offset in days
+     * convert number of minutes to minutes
      */
-	public static function date_to_minutes(string $date, int $offset=0): int
+	public static function minutesToSeconds(int $minutes): int
 	{
-		$now = new \DateTime();
-		$diff = $now->diff(new \DateTime($date));
-
-		return self::days_to_minutes($diff->days + $offset);
+		return $minutes * 60;
 	}
+
+    /**
+     * convert number of hours to seconds
+     */
+	public static function hoursToSeconds(int $hours): int
+	{
+		return $hours * 60 * 60;
+	}
+
+    /**
+     * convert number of days to seconds
+     */
+	public static function daysToSeconds(int $days): int
+	{
+		return $days * 60 * 60 * 24;
+	}
+
 }

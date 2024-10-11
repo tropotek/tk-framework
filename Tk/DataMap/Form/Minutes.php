@@ -16,7 +16,7 @@ class Minutes extends DataTypeInterface
     {
         $value = parent::getPropertyValue($array);
         if ($value !== null && preg_match('/^([0-9]+):([0-9]+)$/', $value, $regs)) {
-            $value = (int)($regs[1] * 60) + (int)$regs[2];
+            $value = (int)(intval($regs[1] ?? 1) * 60) + (int)$regs[2];
         }
         return $value;
     }

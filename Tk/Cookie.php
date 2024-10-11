@@ -16,9 +16,9 @@ class Cookie
     const BROWSER_ID = '___bid';
 
     /**
-     *  30 days in seconds
+     *  default cookie expire
      */
-    const DAYS_30_SEC = 60*60*24*30;
+    const DAYS_30 = 30;
 
     const SAMESITE_NONE   = 'None';
     const SAMESITE_LAX    = 'Lax';
@@ -68,7 +68,7 @@ class Cookie
     protected function getCfg(?int $expires = null): array
     {
         return [
-            'expires' => $expires ?? time() + self::DAYS_30_SEC,
+            'expires' => $expires ?? time() + Date::daysToSeconds(self::DAYS_30),
             'path' => $this->path,
             'domain' => $this->domain,
             'secure' => $this->secure,
@@ -80,7 +80,7 @@ class Cookie
     public function set(string $key, string $value, ?int $expires = null): bool
     {
         if (headers_sent()) return false;
-        $expires = $expires ?? time() + self::DAYS_30_SEC;
+        $expires = $expires ?? time() + Date::daysToSeconds(self::DAYS_30);
         if (@setcookie($key, $value, $this->getCfg($expires))) {
             $_COOKIE[$key] = $value;
             return true;
@@ -101,7 +101,7 @@ class Cookie
 
     public function getBrowserId(): string
     {
-        $id = trim($this->get(self::BROWSER_ID)) ?? '';
+        $id = trim($this->get(self::BROWSER_ID, ''));
         if (!preg_match('/[0-9A-F]{32}/i', $id)) {
             $id = md5(
                 time().

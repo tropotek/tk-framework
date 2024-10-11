@@ -2,6 +2,7 @@
 namespace Tk;
 
 use Tk\Logger\Handler;
+use Tk\Logger\LoggerInterface;
 
 /**
  * A basic log interface to help with logging through the PSR interface,
@@ -20,35 +21,35 @@ class Log
 
     protected static mixed $_instance = null;
 
-    private Handler $logger;
+    private Handler $handler;
 
 
     public function __construct()
     {
-        $this->logger = new Handler();
+        $this->handler = new Handler();
     }
 
-    public static function instance(): Log
+    public static function instance(): self
     {
         if (is_null(self::$_instance)) {
-            self::$_instance = new static();
+            self::$_instance = new self();
         }
         return self::$_instance;
     }
 
-    public static function addHandler(\Psr\Log\LoggerInterface $logger): void
-    {
-        self::instance()->getLogger()->addHandler($logger);
-    }
-
     public static function setEnableNoLog(bool $b): void
     {
-        self::instance()->getLogger()->noLogEnabled = $b;
+        self::getHandler()->noLogEnabled = $b;
     }
 
-    public static function getLogger(): \Psr\Log\LoggerInterface|Handler
+    public static function addLogger(LoggerInterface $logger): void
     {
-        return self::instance()->logger;
+        self::getHandler()->addLogger($logger);
+    }
+
+    public static function getHandler(): Handler
+    {
+        return self::instance()->handler;
     }
 
     /**
@@ -56,7 +57,7 @@ class Log
      */
     public static function emergency(string $message, array $context = []): void
     {
-        self::instance()->getLogger()->emergency($message, $context);
+        self::getHandler()->emergency($message, $context);
     }
 
     /**
@@ -67,7 +68,7 @@ class Log
      */
     public static function alert(string $message, array $context = []): void
     {
-        self::instance()->getLogger()->alert($message, $context);
+        self::getHandler()->alert($message, $context);
     }
 
     /**
@@ -77,7 +78,7 @@ class Log
      */
     public static function critical(string $message, array $context = []): void
     {
-        self::instance()->getLogger()->critical($message, $context);
+        self::getHandler()->critical($message, $context);
     }
 
     /**
@@ -86,7 +87,7 @@ class Log
      */
     public static function error(string $message, array $context = []): void
     {
-        self::instance()->getLogger()->error($message, $context);
+        self::getHandler()->error($message, $context);
     }
 
     /**
@@ -97,7 +98,7 @@ class Log
      */
     public static function warning(string $message, array $context = []): void
     {
-        self::instance()->getLogger()->warning($message, $context);
+        self::getHandler()->warning($message, $context);
     }
 
     /**
@@ -105,7 +106,7 @@ class Log
      */
     public static function notice(string $message, array $context = []): void
     {
-        self::instance()->getLogger()->notice($message, $context);
+        self::getHandler()->notice($message, $context);
     }
 
     /**
@@ -115,7 +116,7 @@ class Log
      */
     public static function info(string $message, array $context = []): void
     {
-        self::instance()->getLogger()->info($message, $context);
+        self::getHandler()->info($message, $context);
     }
 
     /**
@@ -123,7 +124,7 @@ class Log
      */
     public static function debug(string $message, array $context = []): void
     {
-        self::instance()->getLogger()->debug($message, $context);
+        self::getHandler()->debug($message, $context);
     }
 
 }

@@ -86,7 +86,7 @@ class CurlyMessage extends Message
         $this->set('bccEmailList', self::listToStr($this->getBcc()));
         $this->set('date', Date::create()->format(Date::FORMAT_LONG_DATETIME));
 
-        $this->getOnParse()?->execute($this);
+        $this->getOnParse()->execute($this);
 
         return $this->template->parse($this->getCollection()->all());
     }

@@ -16,20 +16,18 @@ class ErrorHandler
         set_error_handler([$this, 'errorHandler']);
     }
 
-    public static function instance(): ErrorHandler
+    public static function instance(): self
     {
         if (is_null(static::$_instance)) {
-            static::$_instance = new static();
+            static::$_instance = new self();
         }
         return static::$_instance;
     }
 
     /**
      * A custom Exception thrower to turn PHP errors into exceptions.
-     *
-     * @throws Exception
      */
-    public function errorHandler(string $errno, string $errstr, string $errfile, string $errline, array $errcontext = []): bool
+    public function errorHandler(int $errno, string $errstr, string $errfile, int $errline, array $errcontext = []): bool
     {
         $e = null;
         switch($errno)
@@ -62,6 +60,3 @@ class ErrorHandler
     }
 
 }
-
-
-

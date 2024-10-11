@@ -71,7 +71,7 @@ class Str
     /**
      * Convert to snake Case so "testFuncName" would convert to "test_func_name"
      */
-    public static function toSnake(string $str, $ch = '_'): string
+    public static function toSnake(string $str, string $ch = '_'): string
     {
         return strtolower(preg_replace('/(?<!^)[A-Z]+|(?<!^|\d)[\d]+/', $ch.'$0', $str));
     }
@@ -153,7 +153,7 @@ class Str
     /**
      * Generate a random string
      */
-    public static function random($length): string
+    public static function random(int $length): string
     {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $randomString = '';

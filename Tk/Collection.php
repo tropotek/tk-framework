@@ -3,6 +3,9 @@ namespace Tk;
 
 /**
  * @see http://git.snooey.net/Mirrors/php-slim/
+ *
+ * @implements \IteratorAggregate<mixed,mixed>
+ * @implements \ArrayAccess<mixed,mixed>
  */
 class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
 {
@@ -124,7 +127,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * set an array item using a path string 'one.two.three' => $arr['one']['two']['three'] = $value;
      */
-    public static function assignArrayByPath(&$arr, $path, $value, $separator='.'): void
+    public static function assignArrayByPath(array &$arr, string $path, mixed $value, string $separator='.'): void
     {
         $keys = explode($separator, $path);
         foreach ($keys as $key) $arr = &$arr[$key];
@@ -209,7 +212,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * @interface \ArrayAccess
      */
-    public function offsetExists($offset): bool
+    public function offsetExists(mixed $offset): bool
     {
         return $this->has($offset);
     }
@@ -217,7 +220,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * @interface \ArrayAccess
      */
-    public function offsetGet($offset): mixed
+    public function offsetGet(mixed $offset): mixed
     {
         return $this->get($offset);
     }
@@ -225,7 +228,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * @interface \ArrayAccess
      */
-    public function offsetSet($offset, $value): void
+    public function offsetSet(mixed $offset, mixed $value): void
     {
         $this->set($offset, $value);
     }
@@ -233,7 +236,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * @interface \ArrayAccess
      */
-    public function offsetUnset($offset): void
+    public function offsetUnset(mixed $offset): void
     {
         $this->remove($offset);
     }
@@ -249,7 +252,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * @interface IteratorAggregate
      */
-    public function getIterator(): \ArrayIterator
+    public function getIterator(): \Traversable
     {
         return new \ArrayIterator($this->_data);
     }

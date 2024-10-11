@@ -99,7 +99,7 @@ class Collection extends \Tk\Collection
         return count($rows) > 0;
     }
 
-    protected function dbSet(string $key, $value): static
+    protected function dbSet(string $key, string|array|object $value): static
     {
         if (!$this->installTable()) return $this;
         $value = $this->encodeValue($value);
@@ -154,12 +154,12 @@ class Collection extends \Tk\Collection
         return $value;
     }
 
-    protected function encodeValue(mixed $value): ?string
+    protected function encodeValue(mixed $value): string
     {
         if (is_array($value) || is_object($value)) {
             $value = '___JSON:' . json_encode($value);
         }
-        return $value;
+        return $value ?? '';
     }
 
 }

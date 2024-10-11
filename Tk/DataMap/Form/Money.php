@@ -19,7 +19,7 @@ class Money extends DataTypeInterface
     {
         $value = parent::getPropertyValue($array);
         if (is_numeric($value)) {
-            $value = \Tk\Money::parseFromString($value, \Tk\Currency::getInstance($this->currencyCode));
+            $value = \Tk\Money::parseFromString($value, \Tk\Currency::instance($this->currencyCode));
         }
         if (empty($value)) $value = null;
         return $value;

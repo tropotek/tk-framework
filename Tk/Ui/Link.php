@@ -106,7 +106,7 @@ class Link extends DomElement
         $html = <<<HTML
 <a var="element"><i choice="icon-l"></i><span var="text"></span><i choice="iconR"></i></a>
 HTML;
-        return $this->getFactory()->loadTemplate($html);
+        return Template::load($html);
     }
 
 }

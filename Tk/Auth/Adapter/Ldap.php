@@ -28,11 +28,6 @@ class Ldap extends AdapterInterface
         $this->setTls($tls);
     }
 
-    /**
-     * Authenticate the user
-     *
-     * @return Result
-     */
     public function authenticate(): Result
     {
         // get values from a post request only
@@ -61,25 +56,18 @@ class Ldap extends AdapterInterface
         return new Result(Result::FAILURE_CREDENTIAL_INVALID, $username, '0001 Invalid username or password.');
     }
 
-    /**
-     * @param array|string $filter
-     * @return array|false|null
-     */
-    public function ldapSearch($filter)
+    public function ldapSearch(array|string $filter): array
     {
         $ldapData = null;
         if ($this->ldap) {
             $sr = @ldap_search($this->getLdap(), $this->getBaseDn(), $filter);
             $ldapData = @ldap_get_entries($this->getLdap(), $sr);
         }
-        return $ldapData;
+        if (is_array($ldapData)) return $ldapData;
+        return [];
     }
 
-
-    /**
-     * @return null|resource
-     */
-    public function getLdap()
+    public function getLdap(): Connection
     {
         return $this->ldap;
     }
@@ -89,7 +77,7 @@ class Ldap extends AdapterInterface
         return $this->host;
     }
 
-    public function setHost(string $host): Ldap
+    public function setHost(string $host): self
     {
         $this->host = $host;
         return $this;
@@ -100,7 +88,7 @@ class Ldap extends AdapterInterface
         return $this->port;
     }
 
-    public function setPort(int $port): Ldap
+    public function setPort(int $port): self
     {
         $this->port = $port;
         return $this;
@@ -111,7 +99,7 @@ class Ldap extends AdapterInterface
         return $this->tls;
     }
 
-    public function setTls(bool $tls): Ldap
+    public function setTls(bool $tls): self
     {
         $this->tls = $tls;
         return $this;
@@ -122,7 +110,7 @@ class Ldap extends AdapterInterface
         return $this->baseDn;
     }
 
-    public function setBaseDn(string $baseDn): Ldap
+    public function setBaseDn(string $baseDn): self
     {
         $this->baseDn = $baseDn;
         return $this;

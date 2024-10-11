@@ -41,7 +41,7 @@ abstract class LoggerInterface extends LogLevel implements \Psr\Log\LoggerInterf
         $this->level = $level;
     }
 
-    protected function canLog($level): bool
+    protected function canLog(string $level): bool
     {
         return self::RFC_5424_LEVELS[$level] <= self::RFC_5424_LEVELS[$this->level];
     }
@@ -50,7 +50,7 @@ abstract class LoggerInterface extends LogLevel implements \Psr\Log\LoggerInterf
     {
         // FORMAT = "[%datetime%]%post% %level_name%: %message% %context% %extra%\n";
         $mem = sprintf('[%9s]', \Tk\FileUtil::bytes2String(memory_get_usage(false)));
-        $now = \DateTime::createFromFormat('U.u', microtime(true));
+        $now = \DateTime::createFromFormat('U.u', strval(microtime(true)));
 
         return sprintf('[%s]%s %s %s',
             $now->format("H:i:s.u"),

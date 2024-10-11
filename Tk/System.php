@@ -45,7 +45,7 @@ class System
         }
 
         // Does the baseUrl have anything in common with the request_uri?
-        $requestUri = $_SERVER['REQUEST_URI'];
+        $requestUri = $_SERVER['REQUEST_URI'] ?? '';
         if ('' !== $requestUri && '/' !== $requestUri[0]) {
             $requestUri = '/'.$requestUri;
         }

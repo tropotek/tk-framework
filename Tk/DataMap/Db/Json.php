@@ -34,7 +34,7 @@ class Json extends DataTypeInterface
         // Fixes bug where json_encode returns an array object instead of a string for empty arrays
         if ($this->associative && is_array($value) && !count($value)) return '';
         if (!is_null($value)) {
-            $value = json_encode($value, JSON_UNESCAPED_SLASHES) ?? '';
+            $value = strval(json_encode($value, JSON_UNESCAPED_SLASHES));
         }
         return $value;
     }

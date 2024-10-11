@@ -44,7 +44,7 @@ class Alert
     }
 
 
-    protected static function saveAlert($type, $data): void
+    protected static function saveAlert(string $type, string $data): void
     {
         $_SESSION[self::SID][$type][] = $data;
     }
