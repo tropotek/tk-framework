@@ -21,7 +21,7 @@ final class Handler extends LoggerInterface
         $this->noLogEnabled = $b;
     }
 
-    public function log($level, $message, array $context = array()): void
+    public function log(mixed $level, string|\Stringable $message, array $context = array()): void
     {
         if ($this->noLogEnabled) {
             // No log when using 'nolog' in query param

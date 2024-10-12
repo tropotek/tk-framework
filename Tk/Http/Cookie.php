@@ -1,5 +1,8 @@
 <?php
-namespace Tk;
+namespace Tk\Http;
+
+use Tk\Config;
+use Tk\Date;
 
 class Cookie
 {
@@ -13,25 +16,21 @@ class Cookie
      *   $cookie->getBrowserId();
      * ```
      */
-    const BROWSER_ID = '___bid';
+    const string BROWSER_ID = '___bid';
 
     /**
      *  default cookie expire
      */
-    const DAYS_30 = 30;
+    const int DAYS_30 = 30;
 
-    const SAMESITE_NONE   = 'None';
-    const SAMESITE_LAX    = 'Lax';
-    const SAMESITE_STRICT = 'Strict';
+    const string SAMESITE_NONE   = 'None';
+    const string SAMESITE_LAX    = 'Lax';
+    const string SAMESITE_STRICT = 'Strict';
 
-    protected string $path = '/';
-
-    protected string $domain = '';
-
-    protected bool $secure = true;
-
-    protected bool $httponly = true;
-
+    protected string $path     = '/';
+    protected string $domain   = '';
+    protected bool   $secure   = true;
+    protected bool   $httponly = true;
     protected string $samesite = self::SAMESITE_STRICT;
 
 

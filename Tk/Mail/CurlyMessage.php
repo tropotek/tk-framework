@@ -24,6 +24,11 @@ class CurlyMessage extends Message
         $this->set('content', '');
     }
 
+    public static function create(string $body = '', string $subject = '', string $to = '', string $from = ''): self
+    {
+        return new self($body, $subject, $to, $from);
+    }
+
     /**
      * Set the content. this should be the contents of the email
      * not to be confused with the message template.
@@ -90,7 +95,6 @@ class CurlyMessage extends Message
 
         return $this->template->parse($this->getCollection()->all());
     }
-
 
     /**
      * Return an array of curly template params and descriptions

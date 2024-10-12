@@ -60,7 +60,7 @@ class Message
         return $this->getBody();
     }
 
-    public function setSubject(string $subject): self
+    public function setSubject(string $subject): static
     {
         $this->subject = $subject;
         return $this;
@@ -71,7 +71,7 @@ class Message
         return $this->subject;
     }
 
-    public function addHeader(string $header, string $value = ''): self
+    public function addHeader(string $header, string $value = ''): static
     {
         if (str_contains($header, ':')) {
             $this->headerList[] = explode(':', $header, 2);
@@ -86,13 +86,13 @@ class Message
         return $this->headerList;
     }
 
-    public function setHeaderList(array $array = []): self
+    public function setHeaderList(array $array = []): static
     {
         $this->headerList = $array;
         return $this;
     }
 
-    public function setFrom(string $email): self
+    public function setFrom(string $email): static
     {
         $this->from = trim($email);
         return $this;
@@ -103,7 +103,7 @@ class Message
         return $this->from;
     }
 
-    public function setReplyTo(string $email): self
+    public function setReplyTo(string $email): static
     {
         $this->replyTo = trim($email);
         return $this;
@@ -114,7 +114,7 @@ class Message
         return $this->replyTo;
     }
 
-    public function addTo(string $email): self
+    public function addTo(string $email): static
     {
         return $this->addAddress($email, $this->to);
     }
@@ -129,7 +129,7 @@ class Message
         return (count($this->getTo()) > 0);
     }
 
-    public function addCc(string $email): self
+    public function addCc(string $email): static
     {
         return $this->addAddress($email, $this->cc);
     }
@@ -139,7 +139,7 @@ class Message
         return $this->cc;
     }
 
-    public function addBcc(string $email): self
+    public function addBcc(string $email): static
     {
         return $this->addAddress($email, $this->bcc);
     }
@@ -158,7 +158,7 @@ class Message
      * Add a recipient address to the message
      * Only for internal usage
      */
-    private function addAddress(string $email, array &$arr): self
+    private function addAddress(string $email, array &$arr): static
     {
         if ($email) {
             $list = self::strToList($email);
@@ -182,7 +182,7 @@ class Message
      *  o stringAttachments
      *
      */
-    public function reset(): self
+    public function reset(): static
     {
         $this->to = [];
         $this->cc = [];
@@ -193,7 +193,7 @@ class Message
     /**
      * Is this message a html message
      */
-    public function setHtml(bool $b = true): self
+    public function setHtml(bool $b = true): static
     {
         $this->html = $b;
         return $this;
@@ -276,7 +276,7 @@ class Message
      * Returns false if the file could not be found
      * or accessed.
      */
-    public function addAttachment(string $path, string $name = '', string $type = 'application/octet-stream'): self
+    public function addAttachment(string $path, string $name = '', string $type = 'application/octet-stream'): static
     {
         $encoding = 'base64';
         if (!is_readable($path)) {
@@ -300,7 +300,7 @@ class Message
         return $this->attachmentList;
     }
 
-    public function setAttachmentList(array $array = []): self
+    public function setAttachmentList(array $array = []): static
     {
         $this->attachmentList = $array;
         return $this;
@@ -316,7 +316,12 @@ class Message
      * @param string $encoding File encoding
      * @param string $type File extension (MIME) type.
      */
-    public function addStringAttachment(string $data, string $name, string $encoding = 'base64', string $type = 'application/octet-stream'): self
+    public function addStringAttachment(
+        string $data,
+        string $name,
+        string $encoding = 'base64',
+        string $type = 'application/octet-stream'
+    ): static
     {
         $obj = new \stdClass();
         $obj->name = $name;
