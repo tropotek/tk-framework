@@ -206,14 +206,24 @@ class Uri
     /**
      * Add a field to the query string
      */
-    public function set(string|array $field, ?string $value = null): Uri
+    public function set(string|array $field, null|string|int|float|bool $value = null): Uri
     {
         if (is_array($field)) {
-            $this->query = $this->query + $field;
+            foreach ($field as $k => $v) {
+                if ($v === null) {
+                    $field[$k] = $k;
+                } elseif (is_bool($v)) {
+                    $field[$k] = $v ? 'y' : 'n';
+                } else {
+                    $field[$k] = strval($v);
+                }
+            }
+            $this->query = array_merge($this->query, $field);
             return $this;
         }
-        if ($value === null)  $value = $field;
-        $this->query[$field] = $value;
+        if ($value === null) $value = $field;
+        if (is_bool($value)) $value = $value ? 'y' : 'n';
+        $this->query[$field] = strval($value);
         return $this;
     }
 

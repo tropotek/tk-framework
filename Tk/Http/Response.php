@@ -194,9 +194,10 @@ class Response
      */
     public function __toString(): string
     {
+        $headers = array_map(fn($k, $v): string => sprintf('%s: %s', $k, $v), array_keys($this->headers), array_values($this->headers));
         return
             sprintf('HTTP/%s %s %s', $this->version, $this->statusCode, $this->statusText) . "\r\n".
-            implode("\r\n", $this->headers) . "\r\n".
+            implode("\r\n", $headers) . "\r\n".
             $this->getContent();
     }
 
@@ -284,28 +285,30 @@ class Response
             $this->setLastModified(new \DateTime());
         }
 
-
         // headers (without cookies)
-        foreach ($this->headers as $name => $values) {
+        foreach ($this->headers as $name => $value) {
             if (strtolower($name) == 'status') continue;
 
-            // As recommended by RFC 8297, PHP automatically copies headers from previous 103 responses, we need to deal with that if headers changed
-            $previousValues = $this->sentHeaders[$name] ?? null;
-            if ($previousValues === $values) {
-                // Header already sent in a previous response, it will be automatically copied in this response by PHP
-                continue;
-            }
+            header($name.': '.$value, true, $this->statusCode);
 
-            $replace = 0 === strcasecmp($name, 'Content-Type');
-            if (null !== $previousValues && array_diff($previousValues, $values)) {
-                header_remove($name);
-                $previousValues = null;
-            }
 
-            $newValues = null === $previousValues ? $values : array_diff($values, $previousValues);
-            foreach ($newValues as $value) {
-                header($name.': '.$value, $replace, $this->statusCode);
-            }
+//            // As recommended by RFC 8297, PHP automatically copies headers from previous 103 responses, we need to deal with that if headers changed
+//            $previousValues = $this->sentHeaders[$name] ?? null;
+//            if ($previousValues === $values) {
+//                // Header already sent in a previous response, it will be automatically copied in this response by PHP
+//                continue;
+//            }
+//
+//            $replace = 0 === strcasecmp($name, 'Content-Type');
+//            if (null !== $previousValues && array_diff($previousValues, $values)) {
+//                header_remove($name);
+//                $previousValues = null;
+//            }
+//
+//            $newValues = null === $previousValues ? $values : array_diff($values, $previousValues);
+//            foreach ($newValues as $value) {
+//                header($name.': '.$value, $replace, $this->statusCode);
+//            }
 
 //            if ($informationalResponse) {
 //                $this->sentHeaders[$name] = $values;
@@ -323,10 +326,10 @@ class Response
 //            return $this;
 //        }
 
-        $statusCode ??= $this->statusCode;
+//        $statusCode ??= $this->statusCode;
 
         // status
-        header(sprintf('HTTP/%s %s %s', $this->version, $statusCode, $this->statusText), true, $statusCode);
+        header(sprintf('HTTP/%s %s %s', $this->version, $this->statusCode, $this->statusText), true, $this->statusCode);
 
         return $this;
     }
