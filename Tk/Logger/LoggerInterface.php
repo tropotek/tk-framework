@@ -60,42 +60,42 @@ abstract class LoggerInterface extends LogLevel implements \Psr\Log\LoggerInterf
         );
     }
 
-    public function emergency(string|\Stringable $message, array $context = array()): void
+    public function emergency($message, array $context = array()): void
     {
         $this->log(self::EMERGENCY, $message, $context);
     }
 
-    public function alert(string|\Stringable $message, array $context = array()): void
+    public function alert($message, array $context = array()): void
     {
         $this->log(self::ALERT, $message, $context);
     }
 
-    public function critical(string|\Stringable $message, array $context = array()): void
+    public function critical($message, array $context = array()): void
     {
         $this->log(self::CRITICAL, $message, $context);
     }
 
-    public function error(string|\Stringable $message, array $context = array()): void
+    public function error($message, array $context = array()): void
     {
         $this->log(self::ERROR, $message, $context);
     }
 
-    public function warning(string|\Stringable $message, array $context = array()): void
+    public function warning($message, array $context = array()): void
     {
         $this->log(self::WARNING, $message, $context);
     }
 
-    public function notice(string|\Stringable $message, array $context = array()): void
+    public function notice($message, array $context = array()): void
     {
         $this->log(self::NOTICE, $message, $context);
     }
 
-    public function info(string|\Stringable $message, array $context = array()): void
+    public function info($message, array $context = array()): void
     {
         $this->log(self::INFO, $message, $context);
     }
 
-    public function debug(string|\Stringable $message, array $context = array()): void
+    public function debug($message, array $context = array()): void
     {
         $this->log(self::DEBUG, $message, $context);
     }
