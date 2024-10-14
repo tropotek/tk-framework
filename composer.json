@@ -1,46 +1,47 @@
 {
-    "name": "ttek/tk-framework",
-    "type": "library",
-    "description": "Tropotek Framework",
-    "keywords":  [
-        "Tk",
-        "framework",
-        "tropotek"
-    ],
-    "time": "2024-10-14",
-    "license": "MIT",
-    "authors":  [
-         {
-            "name": "Michael Mifsud",
-            "homepage": "http://www.tropotek.com/"
-        }
-    ],
-    "funding":  [
-         {
-            "type": "Paypal",
-            "url": "https://www.paypal.me/tropotek"
-        }
-    ],
-    "autoload":  {
-        "psr-4":  {
-            "Tk\\": "Tk/"
-        },
-        "files":  [
-            "Tk/Exception.php",
-            "Tk/functions.php"
-        ]
-    },
-    "require":  {
-        "php": "^8.2",
-        "ext-json": "*",
-        "ext-pdo": "*",
-        "ext-fileinfo": "*",
-        "ext-curl": "*",
-        "phpmailer/phpmailer": "~6.0"
-    },
-    "extra":  {
-        "branch-alias":  {
-            "dev-master": "8.0.x-dev"
-        }
+  "name": "ttek/tk-framework",
+  "type": "library",
+  "description": "Tropotek Framework",
+  "keywords": [
+    "Tk",
+    "framework",
+    "tropotek"
+  ],
+  "time": "2024-10-01",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Michael Mifsud",
+      "homepage": "http://www.tropotek.com/"
     }
+  ],
+  "funding": [
+    {
+      "type": "Paypal",
+      "url": "https://www.paypal.me/tropotek"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Tk\\": "Tk/"
+    },
+    "files": [
+      "Tk/Exception.php",
+      "Tk/functions.php"
+    ]
+  },
+  "require": {
+    "php": "^8.2",
+    "ext-json": "*",
+    "ext-pdo": "*",
+    "ext-fileinfo": "*",
+    "ext-curl": "*",
+
+    "phpmailer/phpmailer": "~6.0"
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "8.0.x-dev"
+    }
+  }
 }
