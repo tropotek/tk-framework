@@ -1,5 +1,17 @@
 #CHANGELOG#
 
+Ver 8.0.50 [2024-10-14]:
+-------------------------------
+  - main src cleanup
+  - fix secret edit page
+  - phpstan lvl6 compliance
+  - Added event dispatcher to Tk libs
+  - Update discover baseUrl code
+  - refactor Auth classes
+  - Added browser notification system
+  - Added microsoft and google SSO OAuth
+
+
 Ver 8.0.48 [2024-09-25]:
 -------------------------------
   - cleanup config methods
