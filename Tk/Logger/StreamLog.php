@@ -13,7 +13,7 @@ class StreamLog extends LoggerInterface
         $this->filepath = $filepath;
     }
 
-    public function log(mixed $level, mixed $message, array $context = []): void
+    public function log($level, $message, array $context = []): void
     {
         if (!$this->canLog($level)) return;
         if (!is_file($this->filepath)) {

@@ -10,7 +10,7 @@ class SessionLog extends LoggerInterface
     public static int    $MAX_LINES = 100;
 
 
-    public function log(mixed $level, string|\Stringable $message, array $context = array()): void
+    public function log($level, $message, array $context = array()): void
     {
         if (!$this->canLog($level)) return;
         if (session_status() !== \PHP_SESSION_ACTIVE) return;
