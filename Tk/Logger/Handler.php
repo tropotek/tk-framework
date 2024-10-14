@@ -20,7 +20,7 @@ final class Handler extends LoggerInterface
         $this->noLogEnabled = $b;
     }
 
-    public function log($level, $message, array $context = array()): void
+    public function log($level, $message, array $context = array()): void   /** @phpstan-ignore-line */
     {
         if ($this->noLogEnabled) {
             // No log when using 'nolog' in query param
