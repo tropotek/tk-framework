@@ -88,7 +88,7 @@ function sanitize_filename(string|null $filename): string
 	$filename = trim($filename, ' ._-'); // avoids ".", ".." or ".hiddenFiles"
 
 	$ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION)); // lowercase extension
-	// maximise filename length to 255 bytes http://serverfault.com/a/9548/44086
+	// maximize filename length to 255 bytes http://serverfault.com/a/9548/44086
 	$encoding = mb_detect_encoding($filename);
 	if (is_string($encoding)) {
 		$filename = mb_strcut(pathinfo($filename, PATHINFO_FILENAME), 0, 255 - ($ext ? strlen($ext) + 1 : 0), $encoding) . ($ext ? '.' . $ext : '');
@@ -98,3 +98,18 @@ function sanitize_filename(string|null $filename): string
 
 	return $filename ?: uniqid("upload_");
 }
+
+if (!function_exists('getallheaders')) {
+    function getallheaders(): array
+    {
+        $headers = [];
+        foreach ($_SERVER as $name => $value) {
+            if (str_starts_with($name, 'HTTP_')) {
+                $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
+            }
+        }
+        return $headers;
+    }
+}
+
+

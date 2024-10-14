@@ -144,6 +144,9 @@ class Response
         511 => 'Network Authentication Required',                             // RFC6585
     ];
 
+    public const string DISPOSITION_ATTACHMENT = 'attachment';  // default
+    public const string DISPOSITION_INLINE     = 'inline';
+
     public array $headers = [];
 
     protected string $content    = '';
@@ -374,7 +377,14 @@ class Response
      */
     final public function getDate(): ?\DateTimeImmutable
     {
-        return $this->headers['Date'] ?? null;
+        if (!isset($this->headers['Date'])) return null;
+
+        $value = $this->headers['Date'];
+        if (false === $date = \DateTimeImmutable::createFromFormat(\DATE_RFC2822, $value)) {
+            throw new \RuntimeException(sprintf('The "Date" HTTP header is not parseable (%s).', $value));
+        }
+
+        return $date;
     }
 
     /**
@@ -406,7 +416,14 @@ class Response
      */
     final public function getExpires(): ?\DateTimeImmutable
     {
-        return $this->headers['Expires'] ?? null;
+        if (!isset($this->headers['Expires'])) return null;
+
+        $value = $this->headers['Expires'];
+        if (false === $date = \DateTimeImmutable::createFromFormat(\DATE_RFC2822, $value)) {
+            throw new \RuntimeException(sprintf('The "Expires" HTTP header is not parseable (%s).', $value));
+        }
+
+        return $date;
     }
 
     /**
@@ -434,7 +451,14 @@ class Response
      */
     final public function getLastModified(): ?\DateTimeImmutable
     {
-        return $this->headers['Last-Modified'] ?? null;
+        if (!isset($this->headers['Last-Modified'])) return null;
+
+        $value = $this->headers['Last-Modified'];
+        if (false === $date = \DateTimeImmutable::createFromFormat(\DATE_RFC2822, $value)) {
+            throw new \RuntimeException(sprintf('The "Last-Modified" HTTP header is not parseable (%s).', $value));
+        }
+
+        return $date;
     }
 
     /**
@@ -452,6 +476,35 @@ class Response
         $date = \DateTimeImmutable::createFromInterface($date);
         $date = $date->setTimezone(new \DateTimeZone('UTC'));
         $this->headers['Last-Modified'] = $date->format('D, d M Y H:i:s').' GMT';
+
+        return $this;
+    }
+
+    /**
+     * Returns the literal value of the ETag HTTP header.
+     */
+    final public function getEtag(): ?string
+    {
+        return $this->headers['ETag'] ?? null;
+    }
+
+    /**
+     * Sets the ETag value.
+     *
+     * @param string|null $etag The ETag unique identifier or null to remove the header
+     * @param bool        $weak Whether you want a weak ETag or not
+     */
+    public function setEtag(?string $etag = null, bool $weak = false): static
+    {
+        if (null === $etag) {
+            unset($this->headers['Etag']);
+        } else {
+            if (!str_starts_with($etag, '"')) {
+                $etag = '"'.$etag.'"';
+            }
+
+            $this->headers['ETag'] = (true === $weak ? 'W/' : '') . $etag ;
+        }
 
         return $this;
     }
@@ -581,6 +634,184 @@ class Response
             sprintf('HTTP/%s %s %s', $this->version, $this->statusCode, $this->statusText) . "\r\n".
             implode("\r\n", $headers) . "\r\n".
             $this->getContent();
+    }
+
+    /**
+     * Generates an HTTP Content-Disposition field-value.
+     *
+     * @param string $disposition      One of "inline" or "attachment"
+     * @param string $filename         A unicode string
+     * @param string $filenameFallback A string containing only ASCII characters that
+     *                                 is semantically equivalent to $filename. If the filename is already ASCII,
+     *                                 it can be omitted, or just copied from $filename
+     * @see RFC 6266
+     */
+    public static function makeDisposition(string $disposition, string $filename, string $filenameFallback = ''): string
+    {
+        if (!\in_array($disposition, [self::DISPOSITION_ATTACHMENT, self::DISPOSITION_INLINE])) {
+            throw new \InvalidArgumentException(sprintf('The disposition must be either "%s" or "%s".', self::DISPOSITION_ATTACHMENT, self::DISPOSITION_INLINE));
+        }
+
+        if ('' === $filenameFallback) {
+            $filenameFallback = $filename;
+        }
+
+        // filenameFallback is not ASCII.
+        if (!preg_match('/^[\x20-\x7e]*$/', $filenameFallback)) {
+            throw new \InvalidArgumentException('The filename fallback must only contain ASCII characters.');
+        }
+
+        // percent characters aren't safe in fallback.
+        if (str_contains($filenameFallback, '%')) {
+            throw new \InvalidArgumentException('The filename fallback cannot contain the "%" character.');
+        }
+
+        // path separators aren't allowed in either.
+        if (str_contains($filename, '/') || str_contains($filename, '\\') || str_contains($filenameFallback, '/') || str_contains($filenameFallback, '\\')) {
+            throw new \InvalidArgumentException('The filename and the fallback cannot contain the "/" and "\\" characters.');
+        }
+
+        $params = ['filename' => $filenameFallback];
+        if ($filename !== $filenameFallback) {
+            $params['filename*'] = "utf-8''" . rawurlencode($filename);
+        }
+
+        return $disposition . '; ' . self::headerToString($params, ';');
+    }
+
+    /**
+     * Joins an associative array into a string for use in an HTTP header.
+     *
+     * The key and value of each entry are joined with '=', and all entries
+     * are joined with the specified separator and an additional space (for
+     * readability). Values are quoted if necessary.
+     *
+     * Example:
+     *
+     *     HeaderUtils::toString(['foo' => 'abc', 'bar' => true, 'baz' => 'a b c'], ',')
+     *     // => 'foo=abc, bar, baz="a b c"'
+     */
+    public static function headerToString(array $assoc, string $separator): string
+    {
+        $parts = [];
+        foreach ($assoc as $name => $value) {
+            if (true === $value) {
+                $parts[] = $name;
+            } else {
+                $parts[] = $name.'='.self::headerQuote($value);
+            }
+        }
+
+        return implode($separator.' ', $parts);
+    }
+
+    /**
+     * Encodes a string as a quoted string, if necessary.
+     *
+     * If a string contains characters not allowed by the "token" construct in
+     * the HTTP specification, it is backslash-escaped and enclosed in quotes
+     * to match the "quoted-string" construct.
+     */
+    public static function headerQuote(string $s): string
+    {
+        if (preg_match('/^[a-z0-9!#$%&\'*.^_`|~-]+$/i', $s)) {
+            return $s;
+        }
+
+        return '"' . addcslashes($s, '"\\"') . '"';
+    }
+
+    /**
+     * Decodes a quoted string.
+     *
+     * If passed an unquoted string that matches the "token" construct (as
+     * defined in the HTTP specification), it is passed through verbatim.
+     */
+    public static function headerUnquote(string $s): string
+    {
+        return preg_replace('/\\\\(.)|"/', '$1', $s);
+    }
+
+    /**
+     * Splits an HTTP header by one or more separators.
+     *
+     * Example:
+     *     HeaderUtils::split('da, en-gb;q=0.8', ',;')
+     *     // => ['da'], ['en-gb', 'q=0.8']]
+     *
+     * @param string $separators List of characters to split on, ordered by precedence, e.g. ',', ';=', or ',;='
+     * @return array Nested array with as many levels as there are characters in $separators
+     */
+    public static function headerSplit(string $header, string $separators): array
+    {
+        if ('' === $separators) {
+            throw new \InvalidArgumentException('At least one separator must be specified.');
+        }
+
+        $quotedSeparators = preg_quote($separators, '/');
+
+        preg_match_all('
+            /
+                (?!\s)
+                    (?:
+                        # quoted-string
+                        "(?:[^"\\\\]|\\\\.)*(?:"|\\\\|$)
+                    |
+                        # token
+                        [^"'.$quotedSeparators.']+
+                    )+
+                (?<!\s)
+            |
+                # separator
+                \s*
+                (?<separator>['.$quotedSeparators.'])
+                \s*
+            /x', trim($header), $matches, \PREG_SET_ORDER);
+
+        return self::headerGroupParts($matches, $separators);
+    }
+
+    private static function headerGroupParts(array $matches, string $separators, bool $first = true): array
+    {
+        $separator = $separators[0];
+        $separators = substr($separators, 1) ?: '';
+        $i = 0;
+
+        if ('' === $separators && !$first) {
+            $parts = [''];
+
+            foreach ($matches as $match) {
+                if (!$i && isset($match['separator'])) {
+                    $i = 1;
+                    $parts[1] = '';
+                } else {
+                    $parts[$i] .= self::headerUnquote($match[0]);
+                }
+            }
+
+            return $parts;
+        }
+
+        $parts = [];
+        $partMatches = [];
+
+        foreach ($matches as $match) {
+            if (($match['separator'] ?? null) === $separator) {
+                ++$i;
+            } else {
+                $partMatches[$i][] = $match;
+            }
+        }
+
+        foreach ($partMatches as $matches) {
+            if ('' === $separators && '' !== $unquoted = self::headerUnquote($matches[0][0])) {
+                $parts[] = $unquoted;
+            } elseif ($groupedParts = self::headerGroupParts($matches, $separators, false)) {
+                $parts[] = $groupedParts;
+            }
+        }
+
+        return $parts;
     }
 
 }
