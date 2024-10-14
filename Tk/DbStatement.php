@@ -37,6 +37,8 @@ class DbStatement extends \PDOStatement
     }
 
     /**
+     * Note the DB log for capturing the last executed query is disabled for this method
+     *
      * @template T of object
      * @param class-string<T> $classname
      * @return T|null|false
@@ -47,6 +49,8 @@ class DbStatement extends \PDOStatement
             throw new Db\Exception("class name '{$classname}' does not exist");
         }
 
+        Db::$LOG = false;
+
         $obj = new $classname;
 
         // use PDO mapping if class is not a DbModel object
@@ -56,6 +60,9 @@ class DbStatement extends \PDOStatement
         if ($row === false) return false;
 
         $obj->__map($row);
+
+        Db::$LOG = true;
+
         return $obj;
     }
 

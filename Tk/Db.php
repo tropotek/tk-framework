@@ -8,8 +8,8 @@ use Tk\Db\Exception;
  */
 class Db
 {
-    const TABLES = 'BASE TABLE';
-    const VIEWS  = 'VIEW';
+    const string TABLES = 'BASE TABLE';
+    const string VIEWS  = 'VIEW';
 
     public static bool $LOG = true;
 
