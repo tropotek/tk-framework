@@ -3,8 +3,6 @@ namespace Tk\Http;
 
 /**
  * Response represents an HTTP response.
- *
- * @todo: run testing on this object to confirm it works as required
  */
 class Response
 {
@@ -146,26 +144,6 @@ class Response
         511 => 'Network Authentication Required',                             // RFC6585
     ];
 
-    /**
-     * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
-     */
-//    private const array HTTP_RESPONSE_CACHE_CONTROL_DIRECTIVES = [
-//        'must_revalidate'  => false,
-//        'no_cache'         => false,
-//        'no_store'         => false,
-//        'no_transform'     => false,
-//        'public'           => false,
-//        'private'          => false,
-//        'proxy_revalidate' => false,
-//        'max_age'          => true,
-//        's_maxage'         => true,
-//        'stale_if_error'   => true,         // RFC5861
-//        'stale_while_revalidate' => true,   // RFC5861
-//        'immutable'        => false,
-//        'last_modified'    => true,
-//        'etag'             => true,
-//    ];
-
     public array $headers = [];
 
     protected string $content    = '';
@@ -184,24 +162,6 @@ class Response
     }
 
     /**
-     * Returns the Response as an HTTP string.
-     *
-     * The string representation of the Response is the same as the
-     * one that will be sent to the client only if the prepare() method
-     * has been called before.
-     *
-     * @see prepare()
-     */
-    public function __toString(): string
-    {
-        $headers = array_map(fn($k, $v): string => sprintf('%s: %s', $k, $v), array_keys($this->headers), array_values($this->headers));
-        return
-            sprintf('HTTP/%s %s %s', $this->version, $this->statusCode, $this->statusText) . "\r\n".
-            implode("\r\n", $headers) . "\r\n".
-            $this->getContent();
-    }
-
-    /**
      * Prepares the Response before it is sent to the client.
      *
      * This method tweaks the Response to ensure that it is
@@ -217,8 +177,6 @@ class Response
             // prevent PHP from sending the Content-Type header based on default_mimetype
             ini_set('default_mimetype', '');
         } else {
-            // Content-type based on the Request ???
-            // ...
 
             // Fix Content-Type
             $charset = $this->charset ?: 'UTF-8';
@@ -232,6 +190,14 @@ class Response
             // Fix Content-Length
             if (isset($this->headers['Transfer-Encoding'])) {
                 unset($this->headers['Transfer-Encoding']);
+            }
+
+            if (!isset($this->headers['Date'])) {
+                $this->setDate(new \DateTime());
+            }
+
+            if (!isset($this->headers['Cache-Control'])) {
+                $this->headers['Cache-Control'] = 'no-store, no-cache, must-revalidate';
             }
 
             $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
@@ -266,21 +232,6 @@ class Response
             return $this;
         }
 
-        $statusCode = \func_num_args() > 0 ? func_get_arg(0) : null;
-//        $informationalResponse = $statusCode >= 100 && $statusCode < 200;
-//        if ($informationalResponse && !\function_exists('headers_send')) {
-//            // skip informational responses if not supported by the SAPI
-//            return $this;
-//        }
-
-        if (!isset($this->headers['Date'])) {
-            $this->setDate(new \DateTime());
-        }
-        if (!isset($this->headers['Cache-Control'])) {
-            $this->headers['Cache-Control'] = 'no-store, no-cache, must-revalidate';
-            $this->headers['Pragma'] = 'no-cache';
-        }
-
         if (!$this->getLastModified()) {
             $this->setLastModified(new \DateTime());
         }
@@ -288,45 +239,8 @@ class Response
         // headers (without cookies)
         foreach ($this->headers as $name => $value) {
             if (strtolower($name) == 'status') continue;
-
             header($name.': '.$value, true, $this->statusCode);
-
-
-//            // As recommended by RFC 8297, PHP automatically copies headers from previous 103 responses, we need to deal with that if headers changed
-//            $previousValues = $this->sentHeaders[$name] ?? null;
-//            if ($previousValues === $values) {
-//                // Header already sent in a previous response, it will be automatically copied in this response by PHP
-//                continue;
-//            }
-//
-//            $replace = 0 === strcasecmp($name, 'Content-Type');
-//            if (null !== $previousValues && array_diff($previousValues, $values)) {
-//                header_remove($name);
-//                $previousValues = null;
-//            }
-//
-//            $newValues = null === $previousValues ? $values : array_diff($values, $previousValues);
-//            foreach ($newValues as $value) {
-//                header($name.': '.$value, $replace, $this->statusCode);
-//            }
-
-//            if ($informationalResponse) {
-//                $this->sentHeaders[$name] = $values;
-//            }
         }
-
-//        // cookies
-//        foreach ($this->headers->getCookies() as $cookie) {
-//            header('Set-Cookie: '.$cookie, false, $this->statusCode);
-//        }
-
-//        if ($informationalResponse) {
-//            headers_send($statusCode);
-//
-//            return $this;
-//        }
-
-//        $statusCode ??= $this->statusCode;
 
         // status
         header(sprintf('HTTP/%s %s %s', $this->version, $this->statusCode, $this->statusText), true, $this->statusCode);
@@ -351,10 +265,10 @@ class Response
      */
     public function send(bool $flush = true): static
     {
+        $this->prepare();
         $this->sendHeaders();
         $this->sendContent();
 
-        $flush = 1 <= \func_num_args() ? func_get_arg(0) : true;
         if (!$flush) {
             return $this;
         }
@@ -455,16 +369,6 @@ class Response
         return $this->charset;
     }
 
-
-    /**
-     * Returns true if the response includes headers that can be used to validate
-     * the response with the origin server using a conditional GET request.
-     */
-    final public function isValidateable(): bool
-    {
-        return isset($this->headers['Last-Modified']) || isset($this->headers['ETag']);
-    }
-
     /**
      * Returns the Date header as a DateTime instance.
      */
@@ -548,35 +452,6 @@ class Response
         $date = \DateTimeImmutable::createFromInterface($date);
         $date = $date->setTimezone(new \DateTimeZone('UTC'));
         $this->headers['Last-Modified'] = $date->format('D, d M Y H:i:s').' GMT';
-
-        return $this;
-    }
-
-    /**
-     * Returns the literal value of the ETag HTTP header.
-     */
-    final public function getEtag(): ?string
-    {
-        return $this->headers['ETag'] ?? null;
-    }
-
-    /**
-     * Sets the ETag value.
-     *
-     * @param string|null $etag The ETag unique identifier or null to remove the header
-     * @param bool        $weak Whether you want a weak ETag or not
-     */
-    public function setEtag(?string $etag = null, bool $weak = false): static
-    {
-        if (null === $etag) {
-            unset($this->headers['Etag']);
-        } else {
-            if (!str_starts_with($etag, '"')) {
-                $etag = '"'.$etag.'"';
-            }
-
-            $this->headers['ETag'] = (true === $weak ? 'W/' : '') . $etag ;
-        }
 
         return $this;
     }
@@ -690,6 +565,22 @@ class Response
                 ob_end_clean();
             }
         }
+    }
+
+    /**
+     * Returns the Response as an HTTP string.
+     *
+     * The string representation of the Response is the same as the
+     * one that will be sent to the client only if the prepare() method
+     * has been called before.
+     */
+    public function __toString(): string
+    {
+        $headers = array_map(fn($k, $v): string => sprintf('%s: %s', $k, $v), array_keys($this->headers), array_values($this->headers));
+        return
+            sprintf('HTTP/%s %s %s', $this->version, $this->statusCode, $this->statusText) . "\r\n".
+            implode("\r\n", $headers) . "\r\n".
+            $this->getContent();
     }
 
 }

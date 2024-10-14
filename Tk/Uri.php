@@ -20,9 +20,9 @@ namespace Tk;
 class Uri
 {
 
-    const SCHEME_HTTP = 'http';
-    const SCHEME_HTTP_SSL = 'https';
-    const SCHEME_FTP = 'ftp';
+    const string SCHEME_HTTP     = 'http';
+    const string SCHEME_HTTP_SSL = 'https';
+    const string SCHEME_FTP      = 'ftp';
 
     /**
      * Set this in your bootstrap code if you are not using the root path for your site path
@@ -692,9 +692,7 @@ class Uri
             \Tk\Log::debug($msg);
         }
 
-        /** CLOSE THE SESSION WITH USER DATA */
-        /** todo: look into why this is here? is it needed, seems odd? */
-        session_write_close();
+        //session_write_close();
         header("Location: {$this->toString()}", true, $code);
         exit();
     }
