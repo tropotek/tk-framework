@@ -1,7 +1,6 @@
 <?php
 namespace Tk\Logger;
 
-use Tk\Config;
 use Tk\Log;
 
 final class Handler extends LoggerInterface
