@@ -686,8 +686,8 @@ class Uri
             $msg = sprintf('%s REDIRECT `%s` called from %s:%s',
                 $code,
                 $this->toString(),
-                str_replace(Config::getBasePath(), '', $arr['file']),
-                $arr['line']
+                str_replace(Config::getBasePath(), '', $arr['file'] ?? ''),
+                $arr['line'] ?? 0
             );
             \Tk\Log::debug($msg);
         }

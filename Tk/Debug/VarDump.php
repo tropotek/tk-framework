@@ -62,7 +62,7 @@ namespace Tk\Debug {
             foreach ($args as $a) {
                 $type = gettype($a);
                 if ($type == 'object') {
-                    $type = str_replace("\0", '', get_class($a));
+                    $type = str_replace("\0", '', strval(get_class($a)));
                 }
                 $arr[] = $type;
             }
@@ -134,10 +134,10 @@ namespace { // global code
     {
         $vd = VarDump::instance();
         $line = current(debug_backtrace());
-        $path = str_replace($vd->getBasePath(), '', $line['file']);
+        $path = str_replace($vd->getBasePath(), '', $line['file'] ?? '');
         $str = "\n";
         $str .= $vd->makeDump(func_get_args());
-        $str .= sprintf('vd(%s) %s [%s];', implode(', ', $vd->getTypeArray(func_get_args())), $path, $line['line']) . "\n";
+        $str .= sprintf('vd(%s) %s [%s];', implode(', ', $vd->getTypeArray(func_get_args())), $path, $line['line'] ?? 0) . "\n";
         Log::debug($str);
         return $str;
     }
@@ -150,10 +150,10 @@ namespace { // global code
     {
         $vd = VarDump::instance();
         $line = current(debug_backtrace());
-        $path = str_replace($vd->getBasePath(), '', $line['file']);
+        $path = str_replace($vd->getBasePath(), '', $line['file'] ?? '');
         $str = "\n";
         $str .= $vd->makeDump(func_get_args(), true);
-        $str .= sprintf('vdd(%s) %s [%s]', implode(', ', $vd->getTypeArray(func_get_args())), $path, $line['line']) . "\n";
+        $str .= sprintf('vdd(%s) %s [%s]', implode(', ', $vd->getTypeArray(func_get_args())), $path, $line['line'] ?? 0) . "\n";
         Log::debug($str);
         return $str;
     }

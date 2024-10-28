@@ -12,11 +12,11 @@ use Tk\Auth\Result;
 class Ldap extends AdapterInterface
 {
 
-    protected string $host      = '';
-    protected int $port         = 636;
-    protected bool $tls         = false;
-    protected string $baseDn    = '';
-    protected ?Connection $ldap = null;
+    protected string      $host   = '';
+    protected int         $port   = 636;
+    protected bool        $tls    = false;
+    protected string      $baseDn = '';
+    protected ?Connection $ldap   = null;
 
 
     public function __construct(string $host, string $baseDn, int $port = 636, bool $tls = false)
@@ -38,9 +38,14 @@ class Ldap extends AdapterInterface
             return new Result(Result::FAILURE_CREDENTIAL_INVALID, $username, '0000 Invalid username or password.');
         }
         try {
-            $this->ldap = @ldap_connect($this->getHost(), $this->getPort());
-            if ($this->isTls())
+            $ldap = @ldap_connect($this->getHost(), $this->getPort());
+            if ($ldap === false) {
+                throw new \Exception("Cannot connect to LDAP server");
+            }
+            $this->ldap = $ldap;
+            if ($this->isTls()) {
                 @ldap_start_tls($this->getLdap());
+            }
 
             $this->setBaseDn(sprintf($this->getBaseDn(), $username));
             // legacy check (remove in future versions)
@@ -59,15 +64,17 @@ class Ldap extends AdapterInterface
     public function ldapSearch(array|string $filter): array
     {
         $ldapData = null;
-        if ($this->ldap) {
+        if ($this->getLdap()) {
             $sr = @ldap_search($this->getLdap(), $this->getBaseDn(), $filter);
-            $ldapData = @ldap_get_entries($this->getLdap(), $sr);
+            if ($sr instanceof \LDAP\Result) {
+                $ldapData = @ldap_get_entries($this->getLdap(), $sr);
+            }
         }
         if (is_array($ldapData)) return $ldapData;
         return [];
     }
 
-    public function getLdap(): Connection
+    public function getLdap(): ?Connection
     {
         return $this->ldap;
     }

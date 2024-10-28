@@ -129,6 +129,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public static function assignArrayByPath(array &$arr, string $path, mixed $value, string $separator='.'): void
     {
+        if (empty($separator)) $separator = '.';
         $keys = explode($separator, $path);
         foreach ($keys as $key) $arr = &$arr[$key];
         $arr = $value;

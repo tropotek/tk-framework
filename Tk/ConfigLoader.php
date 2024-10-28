@@ -40,9 +40,11 @@ class ConfigLoader
 
         // Get all searchable paths
         $libPaths = scandir($vendorPath);
-        array_shift($libPaths);
-        array_shift($libPaths);
-        $this->searchPaths = array_map(fn($path) => $vendorPath . '/' . $path . '/config' , $libPaths);
+        if (is_array($libPaths)) {
+            array_shift($libPaths);
+            array_shift($libPaths);
+            $this->searchPaths = array_map(fn($path) => $vendorPath . '/' . $path . '/config', $libPaths);
+        }
     }
 
     public static function create(int $cacheTtl = 0): ConfigLoader

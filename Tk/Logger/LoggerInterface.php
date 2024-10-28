@@ -2,6 +2,7 @@
 namespace Tk\Logger;
 
 use Psr\Log\LogLevel;
+use Tk\DataMap\Db\DateTime;
 
 abstract class LoggerInterface extends LogLevel implements \Psr\Log\LoggerInterface
 {
@@ -51,9 +52,13 @@ abstract class LoggerInterface extends LogLevel implements \Psr\Log\LoggerInterf
         // FORMAT = "[%datetime%]%post% %level_name%: %message% %context% %extra%\n";
         $mem = sprintf('[%9s]', \Tk\FileUtil::bytes2String(memory_get_usage(false)));
         $now = \DateTime::createFromFormat('U.u', strval(microtime(true)));
+        $ts = '';
+        if ($now instanceof \DateTime) {
+            $ts = $now->format("H:i:s.u");
+        }
 
         return sprintf('[%s]%s %s %s',
-            $now->format("H:i:s.u"),
+            $ts,
             $mem,
             self::ABR[$level] ?? 'N/A',
             $message

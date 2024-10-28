@@ -84,7 +84,7 @@ class StackTrace {
             $class .= '::' . $line['function'] . '()';
         }
 
-        $path = str_replace(\Tk\Config::getBasePath(), '', $line['file']);
-        return sprintf('%s [%s]%s', $path, $line['line'], $class);
+        $path = str_replace(\Tk\Config::getBasePath(), '', $line['file'] ?? '');
+        return sprintf('%s [%s]%s', $path, $line['line'] ?? 0, $class);
     }
 }

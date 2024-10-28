@@ -124,11 +124,11 @@ class Date
                 $timezone = new \DateTimeZone(date_default_timezone_get());
             }
 
-            if (preg_match('/^[0-9]{1,11}$/', $time)) {
+            if (preg_match('/^[0-9]{1,11}$/', strval($time))) {
                 $time = '@'.$time;
             }
 
-            $date = new \DateTime($time, $timezone);
+            $date = new \DateTime(strval($time), $timezone);
             $date->setTimezone($timezone);
         } catch (\Exception $e) {
             Log::debug($e->getMessage());

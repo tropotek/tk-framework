@@ -54,7 +54,7 @@ abstract class Model
 
     public static function getTableName(): string
     {
-        return strtolower(preg_replace('/(?<!^)[A-Z]+|(?<!^|\d)[\d]+/', '_$0', ObjectUtil::basename(static::class)));
+        return strtolower(preg_replace('/(?<!^)[A-Z]+|(?<!^|\d)[\d]+/', '_$0', strval(ObjectUtil::basename(static::class))));
     }
 
     /**

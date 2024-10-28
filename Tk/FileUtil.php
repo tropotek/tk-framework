@@ -11,14 +11,14 @@ class FileUtil
     /**
      * Default location of the mime.types remote file
      */
-    public static string $MIME_TYPES_URL      = 'http://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types';
+    public static string $MIME_TYPES_URL = 'http://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types';
 
     /**
      * location to store the MIME cache file
      */
-    public static string $CACHE_MIME_FILE     = '';
+    public static string $CACHE_MIME_FILE = '';
 
-    public static int $CACHE_MIME_SEC      = 60 * 60 * 24 * 28;     // 28 day cache
+    public static int $CACHE_MIME_SEC = 60 * 60 * 24 * 28;     // 28 day cache
 
 
     /**
@@ -157,6 +157,9 @@ class FileUtil
         $space = $s["size"];
         if (is_dir($path) && is_readable($path)) {
             $dh = opendir($path);
+            if ($dh === false) {
+                return 0;
+            }
             while (($file = readdir($dh)) !== false) {
                 if ($file != "." and $file != "..") {
                     $space += self::diskSpace($path . "/" . $file);
@@ -203,8 +206,8 @@ class FileUtil
      */
     public static function getMaxUploadSize(): int
     {
-        $maxPost = self::string2Bytes(ini_get('post_max_size'));
-        $maxUpload = self::string2Bytes(ini_get('upload_max_filesize'));
+        $maxPost = self::string2Bytes(strval(ini_get('post_max_size')));
+        $maxUpload = self::string2Bytes(strval(ini_get('upload_max_filesize')));
         if ($maxPost < $maxUpload) {
             return $maxPost;
         }
@@ -214,6 +217,9 @@ class FileUtil
     public static function copyDir(string $src, string $dst): void
     {
         $dir = opendir($src);
+        if ($dir === false) {
+            throw new Exception("Failed to open directory: $src");
+        }
         if (!file_exists($dst)) {
             @mkdir($dst);
         }
@@ -273,21 +279,31 @@ class FileUtil
      */
     public static function removeEmptyFolders(string $path, ?callable $onDelete = null): void
     {
-        if(substr($path,-1)!= DIRECTORY_SEPARATOR){
+        if(substr($path,-1) != DIRECTORY_SEPARATOR) {
             $path .= DIRECTORY_SEPARATOR;
         }
         $d2 = ['.','..'];
-        $dirs = array_diff(glob($path.'*', GLOB_ONLYDIR),$d2);
-        foreach($dirs as $d){
+        $arr = glob($path.'*', GLOB_ONLYDIR);
+        if ($arr === false) {
+            return;
+        }
+        $dirs = array_diff($arr, $d2);
+        foreach($dirs as $d) {
             self::removeEmptyFolders($d);
         }
 
-        if(count(array_diff(glob($path.'*'),$d2))===0){
+        $arr2 = glob($path.'*');
+        if ($arr2 === false) {
+            return;
+        }
+        if(count(array_diff($arr2, $d2)) === 0) {
             $conf = null;
-            if (is_callable($onDelete))
+            if (is_callable($onDelete)) {
                 $conf = call_user_func_array($onDelete, array($path));
-            if ($conf === true || $conf === null)
+            }
+            if ($conf === true || $conf === null) {
                 rmdir($path);
+            }
         }
     }
 
@@ -303,11 +319,13 @@ class FileUtil
         }
         if (is_readable($filename)) {
             if (function_exists('mime_content_type')) {     // Deprecated function in PHP
-                return mime_content_type($filename);
+                return strval(mime_content_type($filename));
             }
             if (function_exists('finfo_open')) {
                 $finfo = finfo_open(FILEINFO_MIME);
-                $mimetype = current(explode(';', finfo_file($finfo, $filename)));
+                if ($finfo === false) return '';
+                $info = strval(finfo_file($finfo, $filename));
+                $mimetype = current(explode(';', $info));
                 finfo_close($finfo);
                 return $mimetype;
             }
@@ -339,7 +357,7 @@ class FileUtil
         }
 
         $s = [];
-        foreach(@explode("\n", $mimeFileContents) as $x) {
+        foreach(@explode("\n", strval($mimeFileContents)) as $x) {
             if (isset($x[0]) && $x[0] !== '#' && preg_match_all('#([^\s]+)#', $x, $out) && isset($out[1]) && ($c = count($out[1])) > 1)
                 for ($i = 1; $i < $c; $i++) {
                     $s[$out[1][$i]] = $out[1][0];

@@ -54,14 +54,8 @@ class Color
      *  - array: A 3-4 length array of red, green, blue, alpha decimal numbers (For static function calls self:Hsl2RGB())
      *
      * Each number has a range of [0-255] Except alpha which has a range of [0.0 - 1.0]
-     *
-     * @param int|array|Color|string $red If hex string or color object then the other params are ignored
-     * @param int $green
-     * @param int $blue
-     * @param float $alpha
-     * @return Color
      */
-    public static function create($red = 0, int $green = 0, int $blue = 0, float $alpha = 1.0): Color
+    public static function create(Color|array|int|string $red = 0, int $green = 0, int $blue = 0, float $alpha = 1.0): Color
     {
         $color = new self();
         $color->setColor($red, $green, $blue, $alpha);
@@ -70,12 +64,6 @@ class Color
 
     /**
      * Create a color object from HSL or HSV or HSB (Whatever you call it these days... ;-/ )
-     *
-     * @param float $hue
-     * @param float $saturation
-     * @param float $luminosity
-     * @param float $alpha
-     * @return Color
      */
     public static function createHsl(float $hue = 0.0, float $saturation = 0.0, float $luminosity = 0.0, float $alpha = 1.0): Color
     {
@@ -86,13 +74,6 @@ class Color
 
     /**
      * Create a color object form CYMK color values
-     *
-     * @param int $cyan
-     * @param int $yellow
-     * @param int $magenta
-     * @param int $key (alias for black)
-     * @param float $alpha
-     * @return Color
      */
     public static function createCymk(int $cyan = 0, int $yellow = 0, int $magenta = 0, int $key = 0, float $alpha = 1.0): Color
     {
@@ -101,9 +82,6 @@ class Color
         return $color;
     }
 
-    /**
-     *
-     */
     public static function createRandom(?int $seed = null, float $alpha = 1.0): Color
     {
         if (is_int($seed)) mt_srand($seed);
@@ -123,38 +101,37 @@ class Color
      *  - int: for the decimal red portion of the color
      *  - Color: A Color object to copy, in which case the other params are ignored
      *  - hex: a 3-6 digit HEX color value in which case the other params are ignored
-     *
-     *
-     * @param int|Color|string $red If hex string or color object then the other params are ignored
      */
-    public function setColor($red, int $green = 0, int $blue = 0, float $alpha = 1.0): Color
+    public function setColor(Color|array|int|string $red, int $green = 0, int $blue = 0, float $alpha = 1.0): Color
     {
         if ($red instanceof Color) {
             $alpha = $red->getAlpha();
-            $blue = $red->getBlue();
+            $blue  = $red->getBlue();
             $green = $red->getGreen();
-            $red = $red->getRed();  // Last to avoid over-writing $red
+            $red   = $red->getRed();  // Last to avoid over-writing $red
         } else if (is_array($red) && count($red) <= 4) {
-            $red = array_values($red);
-            $alpha = isset($red[3]) ? $red[3] : 1;
-            $blue = isset($red[2]) ? $red[2] : 0;
-            $green = isset($red[1]) ? $red[1] : 0;
-            $red = isset($red[0]) ? $red[0] : 0;
+            $red   = array_values($red);
+            $alpha = $red[3] ?? 1;
+            $blue  = $red[2] ?? 0;
+            $green = $red[1] ?? 0;
+            $red   = $red[0] ?? 0;
         } else if (is_string($red)) {
             try {
                 list($red, $green, $blue) = array_values(self::hex2Rgb($red));
             } catch (\Exception $e) {
-                $red = 0;
+                $red   = 0;
                 $green = 0;
-                $blue = 0;
+                $blue  = 0;
                 \Tk\Log::notice($e->__toString());
             }
         }
+
         // Assign color values
-        $this->red = (int)$red;
-        $this->green = (int)$green;
-        $this->blue = (int)$blue;
-        $this->alpha = (int)$alpha;
+        $this->red   = (int)$red;
+        $this->green = $green;
+        $this->blue  = $blue;
+        $this->alpha = $alpha;
+        
         return $this;
     }
 

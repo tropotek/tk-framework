@@ -39,10 +39,10 @@ class Image
         $obj->image = imagecreatetruecolor($width, $height);
         imagealphablending($obj->image, false);
         imageantialias($obj->image, true);
-        $transparent = imagecolorallocatealpha($obj->image, 0, 0, 0, 127);
+        $transparent = intval(imagecolorallocatealpha($obj->image, 0, 0, 0, 127));
         imagefill($obj->image, 0, 0, $transparent);
         if ($bgColor) {
-            $c = imagecolorallocate($obj->image, $bgColor->getRed(), $bgColor->getGreen(), $bgColor->getBlue());
+            $c = intval(imagecolorallocate($obj->image, $bgColor->getRed(), $bgColor->getGreen(), $bgColor->getBlue()));
             imagefill($obj->image, 0, 0, $c);
         }
 
@@ -74,11 +74,13 @@ class Image
 
         $img = self::createBlankPng($size, $size, $bgColor);
         $textBoundingBox = imagettfbbox($fontSize, 0, $font, $initials);
+        $x = $y = 0;
+        if (is_array($textBoundingBox)) {
+            $y = intval(abs(ceil(($size - $textBoundingBox[5]) / 2)));
+            $x = intval(abs(ceil(($size - $textBoundingBox[2]) / 2)));
+        }
 
-        $y = intval(abs(ceil(($size - $textBoundingBox[5]) / 2)));
-        $x = intval(abs(ceil(($size - $textBoundingBox[2]) / 2)));
-
-        $c = imagecolorallocate($img->image, $color->getRed(), $color->getGreen(), $color->getBlue());
+        $c = intval(imagecolorallocate($img->image, $color->getRed(), $color->getGreen(), $color->getBlue()));
         imagettftext($img->image, $fontSize, 0, $x, $y, $c, $font, $initials);
 
         return $img;
@@ -99,19 +101,30 @@ class Image
         $this->filename = $filename;
         $this->memAlloc();
         $info = getimagesize($this->filename);
+        if ($info === false) {
+            throw new Exception('Cannot load image file: ' . $this->filename);
+        }
+        $image = null;
         switch ($info['mime']) {
             case 'image/gif':
-                $this->image = imagecreatefromgif($this->filename);
+                $image = imagecreatefromgif($this->filename);
                 break;
             case 'image/jpeg':
-                $this->image = imagecreatefromjpeg($this->filename);
+                $image = imagecreatefromjpeg($this->filename);
                 break;
             case 'image/png':
-                $this->image = imagecreatefrompng($this->filename);
-                imagesavealpha($this->image, true);
+                $image = imagecreatefrompng($this->filename);
                 break;
             default:
                 throw new Exception('Invalid image: ' . $this->filename);
+        }
+
+        if (!($image instanceof \GdImage)) {
+            throw new Exception('Cannot load image file: ' . $this->filename);
+        }
+        $this->image = $image;
+        if ($info['mime'] == 'image/png') {
+            imagesavealpha($this->image, true);
         }
 
         $this->originalInfo = [
@@ -132,7 +145,7 @@ class Image
     {
         ob_start();
         $this->save(null, $quality);
-        $data = ob_get_contents();
+        $data = strval(ob_get_contents());
         ob_end_clean();
         return $data;
     }
@@ -293,8 +306,9 @@ class Image
     public function rotate(int $angle, string $bg_color = '#000000'): self
     {
         $rgb = Color::hex2Rgb($bg_color);
-        $bg_color = imagecolorallocate($this->image, $rgb['r'], $rgb['g'], $rgb['b']);
+        $bg_color = intval(imagecolorallocate($this->image, $rgb['r'], $rgb['g'], $rgb['b']));
         $new = imagerotate($this->image, $this->keepWithin($angle, -360, 360), $bg_color);
+        if ($new === false) return $this;
         $this->width = imagesx($new);
         $this->height = imagesy($new);
         $this->image = $new;
@@ -306,11 +320,14 @@ class Image
     {
         if (function_exists('exif_read_data')) {
             try {
-                return @exif_read_data($filename);
-            } catch(\Exception $e) {}
+                $arr = @exif_read_data($filename);
+                if (is_array($arr)) return $arr;
+            } catch(\Exception $e) {
+                Log::warning("error reading exif data for $filename");
+            }
         }
         // see http://php.net/manual/en/function.exif-read-data.php
-        if (preg_match('@\x12\x01\x03\x00\x01\x00\x00\x00(.)\x00\x00\x00@', file_get_contents($filename), $matches)) {
+        if (preg_match('@\x12\x01\x03\x00\x01\x00\x00\x00(.)\x00\x00\x00@', strval(file_get_contents($filename)), $matches)) {
             return ['Orientation' => ord($matches[1])];
         }
         return [];
@@ -405,7 +422,7 @@ class Image
     {
         $aspect_ratio = $this->height / $this->width;
         $width = $height / $aspect_ratio;
-        return $this->resize($width, $height);
+        return $this->resize(intval($width), $height);
     }
 
     /**
@@ -435,7 +452,7 @@ class Image
             $width = $height / $aspectRatio;
         }
 
-        return $this->resize($width, $height);
+        return $this->resize(intval($width), $height);
     }
 
     /**
@@ -716,7 +733,7 @@ class Image
         // todo - this method could be improved to support the text angle
         $angle = 0;
         $rgb = Color::hex2Rgb($color);
-        $color = imagecolorallocate($this->image, $rgb['r'], $rgb['g'], $rgb['b']);
+        $color = intval(imagecolorallocate($this->image, $rgb['r'], $rgb['g'], $rgb['b']));
 
         // Determine textbox size
         $box = imagettfbbox($fontSize, $angle, $fontFile, $text);

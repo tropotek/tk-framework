@@ -122,7 +122,7 @@ class Config extends Collection
     {
         $path = FileUtil::getRealPath($path);
         $path = rtrim($path, DIRECTORY_SEPARATOR);
-        $path = parse_url($path, \PHP_URL_PATH);
+        $path = strval(parse_url($path, \PHP_URL_PATH));
         $path = str_replace(self::getbaseUrl(), '', $path); // Prevent recurring
         return self::getbaseUrl() . $path;
     }

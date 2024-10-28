@@ -43,7 +43,7 @@ class Digest extends AdapterInterface
         }
         $id = $username . ':' . $this->realm;
         $idLength = strlen($id);
-        while ($line = trim(fgets($fileHandle))) {
+        while ($line = trim(strval(fgets($fileHandle)))) {
             if (substr($line, 0, $idLength) === $id) {
                 if ( $this->_secureStringCompare(substr($line, -32), hash('md5', sprintf('%s:%s:%s', $username, $this->realm, $password))) ) {
                     return new Result(Result::SUCCESS, $username);

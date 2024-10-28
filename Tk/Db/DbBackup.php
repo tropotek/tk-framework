@@ -4,6 +4,7 @@ namespace Tk\Db;
 use Tk\Config;
 use Tk\FileUtil;
 use Tk\Db;
+use Tk\Log;
 
 /**
  * A utility to back up and restore a DB in PHP.
@@ -44,11 +45,17 @@ class DbBackup
         // Replace "/*!999999\- enable the sandbox mode */" string on first line if exists
         // https://gorannikolovski.com/blog/mariadb-import-issue-error-at-line-1-unknown-command
         $f = fopen($sqlFile, 'r');
+        if ($f === false) {
+            throw new Exception("Cannot read file $sqlFile");
+        }
+
         $line = fgets($f);
-        if (str_contains($line, '/*!999999\- enable the sandbox mode */')) {
+        if (str_contains(strval($line), '/*!999999\- enable the sandbox mode */')) {
             $contents = file($sqlFile);
-            array_shift($contents);
-            file_put_contents($sqlFile, implode("\r\n", $contents));
+            if (is_array($contents)) {
+                array_shift($contents);
+                file_put_contents($sqlFile, implode("\r\n", $contents));
+            }
         }
         fclose($f);
 
@@ -102,9 +109,11 @@ class DbBackup
         }
         $sql = "SHOW FULL TABLES IN `{$options['dbName']}` WHERE TABLE_TYPE LIKE 'VIEW'";
         $result = Db::getPdo()->query($sql);
-        while ($row = $result->fetch(\PDO::FETCH_ASSOC)) {
-            $v = array_shift($row);
-            $exclude[] = $v;
+        if ($result !== false) {
+            while ($row = $result->fetch(\PDO::FETCH_ASSOC)) {
+                $v = array_shift($row);
+                $exclude[] = $v;
+            }
         }
 
         $excludeParams = [];
@@ -145,9 +154,11 @@ class DbBackup
         }
         $sql = "SHOW FULL TABLES IN `{$options['dbName']}` WHERE TABLE_TYPE LIKE 'VIEW'";
         $result = Db::getPdo()->query($sql);
-        while ($row = $result->fetch(\PDO::FETCH_ASSOC)) {
-            $v = array_shift($row);
-            $exclude[] = $v;
+        if ($result !== false) {
+            while ($row = $result->fetch(\PDO::FETCH_ASSOC)) {
+                $v = array_shift($row);
+                $exclude[] = $v;
+            }
         }
 
         $excludeParams = [];

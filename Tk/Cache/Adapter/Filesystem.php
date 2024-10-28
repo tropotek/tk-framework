@@ -68,7 +68,7 @@ class Filesystem implements Iface
             unlink($filename);
             return false;
         }
-        $data = file_get_contents($filename, false, null, strlen(strval(time())));
+        $data = strval(file_get_contents($filename, false, null, strlen(strval(time()))));
         fclose($h);
 
         $data = @unserialize($data);

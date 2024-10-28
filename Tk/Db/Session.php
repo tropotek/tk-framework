@@ -176,10 +176,12 @@ class Session implements \SessionHandlerInterface
     public function gc(int $max_lifetime): false|int
     {
         $table = self::$DB_TABLE;
-        return Db::execute("
+        $n = Db::execute("
             DELETE FROM $table WHERE UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(modified) > :max_lifetime",
             compact('max_lifetime')
         );
+        if (is_int($n)) return $n;
+        return false;
     }
 
 }

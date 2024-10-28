@@ -158,8 +158,9 @@ class System
         static $composer = null;
         if (!$composer) {
             $composer = [];
-            if (is_file(Config::makePath('/composer.json'))) {
-                $composer = json_decode(file_get_contents(Config::makePath('/composer.json')), true);
+            $json = file_get_contents(Config::makePath('/composer.json'));
+            if ($json !== false) {
+                $composer = json_decode($json, true);
             }
         }
         return $composer;

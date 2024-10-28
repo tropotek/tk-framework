@@ -112,10 +112,14 @@ class ObjectUtil
     {
         if (is_object($class)) $class = get_class($class);
 
+        if (!class_exists($class)) {
+            return '';
+        }
+
         $file = '';
         try {
             $rc = new \ReflectionClass($class);
-            $file = $rc->getFileName();
+            $file = strval($rc->getFileName());
         } catch (\ReflectionException $e) {
             Log::notice($e->__toString());
         }
@@ -128,10 +132,8 @@ class ObjectUtil
     public static function classUses(object|string $obj, string $trait): bool
     {
         $arr = class_uses($obj);
-        foreach ($arr as $v) {
-            if ($v == $trait) return true;
-        }
-        return false;
+        if ($arr === false) return false;
+        return in_array($trait, $arr);
     }
 
     /**

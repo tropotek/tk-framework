@@ -268,7 +268,7 @@ class Message
     public static function isValidEmail(string $email): bool
     {
         list($e, $n) = self::splitEmail($email);
-        return filter_var($e, FILTER_VALIDATE_EMAIL);
+        return boolval(filter_var($e, FILTER_VALIDATE_EMAIL));
     }
 
     /**
@@ -288,7 +288,7 @@ class Message
         if (!$name) {
             $name = basename($path);
         }
-        $data = file_get_contents($path);
+        $data = strval(file_get_contents($path));
         return $this->addStringAttachment($data, $name, $encoding, $type);
     }
 
