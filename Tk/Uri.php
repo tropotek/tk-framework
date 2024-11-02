@@ -1,6 +1,8 @@
 <?php
 namespace Tk;
 
+use Psr\Http\Message\UriInterface;
+
 /**
  * Where:
  *
