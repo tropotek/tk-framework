@@ -4,86 +4,80 @@ namespace Tk;
 use Psr\Http\Message\UriInterface;
 
 /**
- * Where:
- *
- * - __scheme__ defaults to http
- * - __host__ defaults to the current host
- * - __port__ defaults to 80
  *
  * <code>
- * echo Uri::create('/full/uri/path/index.html')->__toString();
- * // Result:
- * //  http://localhost/full/uri/path/index.html
+ *   echo Uri::create('/full/uri/path/index.html')->toString();
+ *   // Result:
+ *   //  http://localhost/full/uri/path/index.html
  * </code>
  *
- * If the static $BASE_URL is set this will be prepended to all relative paths
+ * If the static $BASE_PATH is set this will be prepended to all relative paths
  * when creating a URI `Uri::create('/home.html')->toString()` => '/site/base/path/home.html'
  */
-class Uri
+class Uri implements UriInterface
 {
 
-    const string SCHEME_HTTP     = 'http';
-    const string SCHEME_HTTP_SSL = 'https';
-    const string SCHEME_FTP      = 'ftp';
-
     /**
-     * Set this in your bootstrap code if you are not using the root path for your site path
+     * The sites base path from the web root, for relative URIs
+     * Set this in your apps bootstrap file
      */
-    public static string $BASE_URL = '';
+    public static string $BASE_PATH = '';
 
     /**
-     * The site hostname.
-     * NOTE: Be sure to set this in your boostrap code for CLI scripts
+     * The sites hostname for relative URIs
      */
-    public static string $SITE_HOSTNAME = 'localhost';
+    public static string $SITE_HOST = 'localhost';
 
     /**
-     * This is the supplied uri string
+     * Per RFC 3986(Scheme): scheme = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
+     */
+    const string SCHEME_REGEX_PATTERN = '/^(?:[a-z]+)(?:(?:[\+\.\-]*)(?:[a-z0-9]*))$/';
+
+    /**
+     * Per RFC 3986(Host): host = reg-name
+     */
+    const string HOST_REGEX_PATTERN = '(?:[\d\w\-\_]+)(?:(?:(?:\.)[\d\w\-\_]+)*)(?:(?:(?:\.)[a-z]+)*)';
+
+    /**
+     * Per RFC 3986(Host): host = IPv4address
+     */
+    const string IPV4_REGEX_PATTERN = '(?:\d{1,3})\.(?:\d{1,3})\.(?:\d{1,3})\.(?:\d{1,3})';
+
+    /**
+     * Per RFC 3986(Port): port = *DIGIT
+     */
+    const string PORT_REGEX_PATTERN = '/^(?:\d+)$/';
+
+    private array $matched = [
+        'http' => 80,
+        'https' => 443,
+        'ftp' => 21,
+        'telnet' => 23,
+        'ssh' => 22,
+        'smtp' => 25,
+    ];
+
+    /**
+     * The original uri string
      */
     protected string $spec = '';
 
-    protected string $scheme   = 'http';
-    protected string $host     = '';
-    protected int    $port     = 80;
-    protected string $username = '';
-    protected string $password = '';
-    protected string $path     = '';
-    protected string $fragment = '';
-    protected array  $query    = [];
+    private string $scheme = '';
+    private string $host = '';
+    private ?int $port = null;
+    private string $user = '';
+    private string $password = '';
+    private string $path = '';
+    private array $query = [];
+    private string $fragment = '';
 
 
-    /**
-     * Paths that do not start with a scheme section to the uri are prepended with the  self::$BASE_URL . '/' string
-     */
-    public function __construct(?string $spec = null, array $queryParams = [])
+    public function __construct(string $uri = '', array $queryParams = [])
     {
-        if ($spec === null) {   // Create an auto request uri.
-            $spec = '/';
-            if (isset($_SERVER['REQUEST_URI'])) {
-                $spec = $_SERVER['REQUEST_URI'];
-                if (!empty($_SERVER['QUERY_STRING']) && !str_contains($spec, '?')) {
-                    $spec .= '?' . $_SERVER['QUERY_STRING'];
-                }
-            }
-        }
-
-        $this->init($spec);
+        $this->spec = $uri;
+        $this->init($uri);
         $this->set($queryParams);
     }
-
-    /**
-     * A static factory method to facilitate inline calls
-     *
-     * <code>
-     *   \Tk\Uri::create('http://example.com/test');
-     * </code>
-     */
-    public static function create(string|Uri|null $spec = null, array $queryParams = []): Uri
-    {
-        if ($spec instanceof Uri) return clone $spec;
-        return new self($spec, $queryParams);
-    }
-
 
     public function __serialize()
     {
@@ -95,111 +89,58 @@ class Uri
         $this->init($data['spec']);
     }
 
-    /**
-     * Initialize the uri object
-     */
-    private function init(string $spec): void
+    public static function create(string|Uri|null $uri = null, array $queryParams = []): self
     {
-        if (self::isApplicationScheme($spec)) {
-            $this->spec = $spec;
-            return;
+        if ($uri instanceof Uri) return clone $uri;
+
+        // Build a request URI
+        if (is_null($uri)) {
+            $uri = '/';
+            if (isset($_SERVER['REQUEST_URI'])) {
+                $uri = $_SERVER['REQUEST_URI'];
+                if (!empty($_SERVER['QUERY_STRING']) && !str_contains($uri, '?')) {
+                    $uri .= '?' . $_SERVER['QUERY_STRING'];
+                }
+            }
         }
 
-        // Prepend base url if this is a local path url
+        // Prepend site base path if this is a relative Uri path only
         if (
-            !empty(trim(self::$BASE_URL, '/')) &&
-            str_starts_with($spec, '/') &&              // spec starts with a path
-            !str_starts_with($spec, '//') &&            // ignore urls without scheme
-            !str_starts_with($spec, self::$BASE_URL)    // ignore urls with base path
+            !empty(trim(self::$BASE_PATH, '/')) &&
+            str_starts_with($uri, '/') &&       // spec starts with a path
+            !str_starts_with($uri, '//')        // ignore urls without scheme
         ) {
-            $spec = self::$BASE_URL . '/' . trim($spec, '/');
+            if (str_starts_with($uri, self::$BASE_PATH)) {
+                $uri = substr($uri, strlen(self::$BASE_PATH));
+            }
+            $uri = ($_SERVER['REQUEST_SCHEME'] ?? 'https') . '://' .
+                self::$SITE_HOST .
+                self::$BASE_PATH . '/' .
+                trim($uri, '/');
         }
 
-        $this->spec = $spec;
-        $com = parse_url($this->spec);
-        if ($com) {
-            $this->scheme   = $com['scheme'] ?? $_SERVER['REQUEST_SCHEME'] ?? self::SCHEME_HTTP_SSL;
-            $this->host     = $com['host'] ?? self::$SITE_HOSTNAME;
-            $this->port     = $com['port'] ?? 80;
-            $this->username = $com['user'] ?? '';
-            $this->password = $com['pass'] ?? '';
-            $this->fragment = $com['fragment'] ?? '';
-            $this->path     = $com['path'] ?? '';
-            parse_str(html_entity_decode($com['query'] ?? ''), $this->query);
-        }
+        return new self($uri, $queryParams);
+    }
+
+    protected function init(string $uri): void
+    {
+        if (empty($uri) || self::isDataScheme($uri)) return;
+
+        $parsed = parse_url($uri);
+        $this->scheme = $parsed['scheme'] ?? '';
+        $this->host = $parsed['host'] ?? '';
+        $this->port = isset($parsed['port']) ? (int)$parsed['port'] : null;
+        $this->user = $parsed['user'] ?? '';
+        $this->password = $parsed['pass'] ?? '';
+        $this->path = $parsed['path'] ?? '';
+        $this->fragment = $parsed['fragment'] ?? '';
+        parse_str(html_entity_decode($parsed['query'] ?? ''), $this->query);
     }
 
     /**
-     * returns true if the uri is a link/URL and not a data/script type uri
+     * clear and reset the query string items
      */
-    public static function isApplicationScheme(string $spec): bool
-    {
-        return (bool)preg_match('/^(#|javascript|mailto|data|ftp|telnet|ssh|tcp):/i', $spec);
-    }
-
-    /**
-     * Compare 2 uris by path if $queryString is false
-     * or by complete uri if $queryString is true.
-     */
-    public function equals(Uri $uri, bool $queryString = false): bool
-    {
-        if (!$queryString && $this->getPath() == $uri->getPath()) {
-            return true;
-        }
-        if ($queryString && $this->toString() == $uri->toString()) {
-            return true;
-        }
-        return false;
-    }
-
-
-    public function getUsername(): string
-    {
-        return $this->username;
-    }
-
-    public function getPassword(): string
-    {
-        return $this->password;
-    }
-
-    /**
-     * Returns file extension for this pathname.
-     *
-     * At the last period ('.') in the pathname is used to delimit the file
-     * extension .If the pathname does not have a file extension null is
-     * returned.
-     *
-     */
-    public function getExtension(): string
-    {
-        return FileUtil::getExtension($this->getPath());
-    }
-
-    /**
-     * Get the basename of this uri with or without its extension.
-     */
-    public function basename(): string
-    {
-        return basename($this->getPath());
-    }
-
-    /**
-     * Get the basename of this uri with or without its extension.
-     */
-    public function dirname(): Uri
-    {
-        $uri = clone $this;
-        if (self::isApplicationScheme($uri->spec)) return $uri;
-        $uri->spec = dirname($uri->getPath());
-        $uri->setPath(dirname($uri->getPath()));
-        return $uri;
-    }
-
-    /**
-     * clear and reset the query string
-     */
-    public function reset(): Uri
+    public function reset(): self
     {
         $this->query = [];
         return $this;
@@ -208,7 +149,7 @@ class Uri
     /**
      * Add a field to the query string
      */
-    public function set(string|array $field, null|string|int|float|bool $value = null): Uri
+    public function set(string|array $field, null|string|int|float|bool $value = null): self
     {
         if (is_array($field)) {
             foreach ($field as $k => $v) {
@@ -234,10 +175,7 @@ class Uri
      */
     public function get(string $field): string
     {
-        if (isset($this->query[$field])) {
-            return $this->query[$field];
-        }
-        return '';
+        return $this->query[$field] ?? '';
     }
 
     /**
@@ -259,7 +197,7 @@ class Uri
     /**
      * Remove a field in the query string
      */
-    public function remove(string $field): Uri
+    public function remove(string $field): self
     {
         if ($this->has($field)) {
             unset($this->query[$field]);
@@ -267,132 +205,73 @@ class Uri
         return $this;
     }
 
-    public function setFragment(string $fragment): Uri
-    {
-        $this->fragment = urldecode($fragment);
-        return $this;
-    }
-
-    public function setPort(int $port): Uri
-    {
-        $port = (int)$port;
-        if ($port && ($port <= 0 || $port >= 65535)) {
-            \Tk\Log::alert('Invalid port, valid values are 1-65535.');
-            $port = null;
-        }
-        if ($port == 80) {
-            $port = null;
-        }
-        $this->port = $port;
-        return $this;
-    }
-
-    public function setScheme(string $scheme): Uri
-    {
-        $this->scheme = $scheme;
-        return $this;
-    }
-
-    public function setHost(string $host): Uri
-    {
-        $this->host = $host;
-        return $this;
-    }
-
-    public function setPath(string $path): Uri
-    {
-        $this->path = $path;
-        return $this;
-    }
-
-    public function setPassword(string $password): Uri
-    {
-        $this->password = $password;
-        return $this;
-    }
-
-    public function setUsername(string $username): Uri
-    {
-        $this->username = $username;
-        return $this;
-    }
-
     /**
-     * Retrieve the authority component of the URI.
-     *
-     * If no authority information is present, this method MUST return an empty
-     * string.
-     *
-     * The authority syntax of the URI is:
-     *
-     * <pre>
-     * [user-info@]host[:port]
-     * </pre>
-     *
-     * If the port component is not set or is the standard port for the current
-     * scheme, it SHOULD NOT be included.
-     *
-     * @see https://tools.ietf.org/html/rfc3986#section-3.2
-     * @return string The URI authority, in "[user-info@]host[:port]" format.
+     * returns true if the uri no-link|script|mailto|data type URI and not a link URL
      */
+    public static function isDataScheme(string $spec): bool
+    {
+        if ($spec === '#') return true;
+        return (bool)preg_match('/^(javascript|mailto|data):/', strtolower($spec));
+    }
+
+    public function getScheme(): string
+    {
+        return strtolower($this->scheme);
+    }
+
     public function getAuthority(): string
     {
-        $str = '';
-        if (!$this->getHost()) return $str;
-        $str .= $this->getUserInfo();
-        $str .= $this->getHost();
-        if ($this->getPort() && $this->getPort() != 80) {
-            $str .= ':' . $this->getPort();
-        }
-        return $str;
+        $authority = '';
+        $userInfo = $this->getUserInfo();
+        $host = $this->getHost();
+        $port = $this->getPort();
+
+        $userInfo .= empty($userInfo) || empty($host) ? '' : '@';
+        $authority .= empty($host) ? '' : $userInfo . $host;
+        $authority .= !is_null($port) ? ':' . $port : '';
+
+        return $authority;
     }
 
-    /**
-     * Retrieve the user information component of the URI.
-     *
-     * If no user information is present, this method MUST return an empty
-     * string.
-     *
-     * If a user is present in the URI, this will return that value;
-     * additionally, if the password is also present, it will be appended to the
-     * user value, with a colon (":") separating the values.
-     *
-     * The trailing "@" character is not part of the user information and MUST
-     * NOT be added.
-     *
-     * @return string The URI user information, in "username[:password]" format.
-     */
     public function getUserInfo(): string
     {
-        $str = '';
-        if ($this->getUsername()) {
-            $str .= $this->getUsername();
+        $userInfo = $this->user;
+        $userInfo .= empty($this->password) ? '' : ':' . $this->password;
+        return $userInfo;
+    }
+
+    public function getHost(): string
+    {
+        return strtolower($this->host);
+    }
+
+    public function getPort(): ?int
+    {
+        if (empty($this->scheme) && is_null($this->port)) return null;
+        if (($this->matched[$this->scheme] ?? null) === $this->port) {
+            return null;
         }
-        if ($this->getPassword()) {
-            $str .= ':' . $this->getPassword();
-        }
-        return $str . (!empty($str) ? '@' : '');
+        return $this->port;
+    }
+
+    public function getPath(): string
+    {
+        return empty($this->path) ? '/' : $this->path;
     }
 
     /**
-     * Retrieve the query string of the URI.
-     *
-     * If no query string is present, this method MUST return an empty string.
-     *
-     * The leading "?" character is not part of the query and MUST NOT be
-     * added.
-     *
-     * The value returned MUST be percent-encoded, but MUST NOT double-encode
-     * any characters. To determine what characters to encode, please refer to
-     * RFC 3986, Sections 2 and 3.4.
-     *
-     * As an example, if a value in a key/value pair of the query string should
-     * include an ampersand ("&") not intended as a delimiter between values,
-     * that value MUST be passed in encoded form (e.g., "%26") to the instance.
-     *
-     * @see https://tools.ietf.org/html/rfc3986#section-2
-     * @see https://tools.ietf.org/html/rfc3986#section-3.4
+     * If the $BASE_PATH is set the path is returned with the $BASE_PATH removed.
      */
+    public function getRelativePath(): string
+    {
+        $path = $this->getPath();
+        $path = urldecode($path);
+        if (preg_match('/^'.  preg_quote(self::$BASE_PATH, '/') . '/', $path)) {
+            $path = preg_replace('/^'.preg_quote(self::$BASE_PATH, '/').'/', '', $path);
+        }
+        return $path;
+    }
+
     public function getQuery(): string
     {
         $query = '';
@@ -408,184 +287,139 @@ class Uri
         return substr($query, 0, -1);
     }
 
-    /**
-     * Retrieve the fragment component of the URI.
-     *
-     * If no fragment is present, this method MUST return an empty string.
-     *
-     * The leading "#" character is not part of the fragment and MUST NOT be
-     * added.
-     *
-     * The value returned MUST be percent-encoded, but MUST NOT double-encode
-     * any characters. To determine what characters to encode, please refer to
-     * RFC 3986, Sections 2 and 3.5.
-     *
-     * @see https://tools.ietf.org/html/rfc3986#section-2
-     * @see https://tools.ietf.org/html/rfc3986#section-3.5
-     */
     public function getFragment(): string
     {
         return $this->fragment;
     }
 
-    /**
-     * Retrieve the scheme component of the URI.
-     *
-     * If no scheme is present, this method MUST return an empty string.
-     *
-     * The value returned MUST be normalized to lowercase, per RFC 3986
-     * Section 3.1.
-     *
-     * The trailing ":" character is not part of the scheme and MUST NOT be
-     * added.
-     *
-     * @see https://tools.ietf.org/html/rfc3986#section-3.1
-     */
-    public function getScheme(): string
+    public function __toString()
     {
-        return $this->scheme;
-    }
+        if ($this->isDataScheme($this->spec)) return $this->spec;
 
-    /**
-     * Retrieve the host component of the URI.
-     *
-     * If no host is present, this method MUST return an empty string.
-     *
-     * The value returned MUST be normalized to lowercase, per RFC 3986
-     * Section 3.2.2.
-     *
-     * @see http://tools.ietf.org/html/rfc3986#section-3.2.2
-     */
-    public function getHost(): string
-    {
-        return $this->host;
-    }
+        $fullUri = '';
+        $scheme = $this->getScheme();
+        $fullUri .= empty($scheme) ? '' : $this->scheme . ':';
 
-    /**
-     * Retrieve the path component of the URI.
-     *
-     * The path can either be empty or absolute (starting with a slash) or
-     * rootless (not starting with a slash). Implementations MUST support all
-     * three syntaxes.
-     *
-     * Normally, the empty path "" and absolute path "/" are considered equal as
-     * defined in RFC 7230 Section 2.7.3. But this method MUST NOT automatically
-     * do this normalization because in contexts with a trimmed base path, e.g.
-     * the front controller, this difference becomes significant. It's the task
-     * of the user to handle both "" and "/".
-     *
-     * The value returned MUST be percent-encoded, but MUST NOT double-encode
-     * any characters. To determine what characters to encode, please refer to
-     * RFC 3986, Sections 2 and 3.3.
-     *
-     * As an example, if the value should include a slash ("/") not intended as
-     * delimiter between path segments, that value MUST be passed in encoded
-     * form (e.g., "%2F") to the instance.
-     *
-     * @see https://tools.ietf.org/html/rfc3986#section-2
-     * @see https://tools.ietf.org/html/rfc3986#section-3.3
-     */
-    public function getPath(): string
-    {
-        return $this->path;
-    }
-
-    /**
-     * If the $BASE_URL is set the path is returned with the $BASE_URL removed.
-     */
-    public function getRelativePath(): string
-    {
+        $authority = $this->getAuthority();
+        $fullUri .= empty($authority) ? '' : '//' . $authority;
         $path = $this->getPath();
-        $path = urldecode($path);
-        if (preg_match('/^'.  preg_quote(self::$BASE_URL, '/') . '/', $path)) {
-            $path = preg_replace('/^'.preg_quote(self::$BASE_URL, '/').'/', '', $path);
-        }
-        return $path;
-    }
-
-    /**
-     * Retrieve the port component of the URI.
-     *
-     * If a port is present, and it is non-standard for the current scheme,
-     * this method MUST return it as an integer. If the port is the standard port
-     * used with the current scheme, this method SHOULD return null.
-     *
-     * If no port is present, and no scheme is present, this method MUST return
-     * a null value.
-     *
-     * If no port is present, but a scheme is present, this method MAY return
-     * the standard port for that scheme, but SHOULD return null.
-     */
-    public function getPort(): int
-    {
-        return $this->port;
-    }
-
-    /**
-     * Return a string representation of this object without the dev path
-     */
-    public function toRelativeString(bool $showHost = true, bool $showScheme = true): ?string
-    {
-        return $this->toString($showHost, $showScheme, true);
-    }
-
-    /**
-     * Return the string representation as a URI reference.
-     *
-     * Depending on which components of the URI are present, the resulting
-     * string is either a full URI or relative reference according to RFC 3986,
-     * Section 4.1. The method concatenates the various components of the URI,
-     * using the appropriate delimiters:
-     *
-     * - If a scheme is present, it MUST be suffixed by ":".
-     * - If an authority is present, it MUST be prefixed by "//".
-     * - The path can be concatenated without delimiters. But there are two
-     *   cases where the path has to be adjusted to make the URI reference
-     *   valid as PHP does not allow to throw an exception in __toString():
-     *     - If the path is rootless and an authority is present, the path MUST
-     *       be prefixed by "/".
-     *     - If the path is starting with more than one "/" and no authority is
-     *       present, the starting slashes MUST be reduced to one.
-     * - If a query is present, it MUST be prefixed by "?".
-     * - If a fragment is present, it MUST be prefixed by "#".
-     *
-     * @see http://tools.ietf.org/html/rfc3986#section-4.1
-     */
-    public function toString(bool $showHost = true, bool $showScheme = true, bool $relativePath = false): ?string
-    {
-        if (self::isApplicationScheme($this->spec)) {
-            return $this->spec;
-        }
-        $uri = '';
-        if ($showHost) {
-            if ($showScheme) {
-                if ($this->getScheme() != '') {
-                    $uri .= $this->getScheme() . '://';
-                }
-            } else {
-                $uri .= '//';
-            }
-            $uri .= $this->getAuthority();
-        }
-        if ($this->getPath() != '') {
-            if ($relativePath)
-                $uri .= $this->getRelativePath();
-            else
-                $uri .= $this->getPath();
-        }
+        $fullUri .= empty($path) ? '' : '/' . ltrim($path, '/');
         $query = $this->getQuery();
-        if ($query != '') {
-            $uri .= '?' . $query;
-        }
-        if ($this->getFragment() != '') {
-            $uri .= '#' . $this->getFragment();
-        }
-        return $uri;
+        $fullUri .= empty($query) ? '' : '?' . $query;
+        $fragment = $this->getFragment();
+        $fullUri .= empty($fragment) ? '' : '#' . $fragment;
+
+        return $fullUri;
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
-        return $this->toString();
+        return $this->__toString();
+    }
+
+    public function withScheme(string $scheme): self
+    {
+        if (!$this->validateScheme($scheme)) {
+            throw new \InvalidArgumentException(sprintf("Parameter 1 of %s require a valid URI scheme.", __METHOD__));
+        }
+
+        $q = clone $this;
+        $q->scheme = $scheme;
+
+        return $q;
+    }
+
+    public function withUserInfo(string $user, ?string $password = null): self
+    {
+        $q = clone $this;
+        $q->user = $user;
+        $q->password = is_null($password) ? '' : $password;
+
+        return $q;
+    }
+
+    public function withHost(string $host): self
+    {
+        if (!$this->validateHost($host)) {
+            throw new \InvalidArgumentException(sprintf("Parameter 1 of %s require a valid URI host.", __METHOD__));
+        }
+
+        $q = clone $this;
+        $q->host = $host;
+
+        return $q;
+    }
+
+    public function withPort(?int $port = null): self
+    {
+        if (!$this->validatePort($port)) {
+            throw new \InvalidArgumentException(sprintf("Parameter 1 of %s requires a valid URI port.", __METHOD__));
+        }
+
+        $q = clone $this;
+        $q->port = $port;
+
+        return $q;
+    }
+
+    public function withPath(string $path): self
+    {
+        if (!$this->validatePath($path)) {
+            throw new \InvalidArgumentException(sprintf("Parameter 1 of %s require a valid URI path.", __METHOD__));
+        }
+
+        $q = clone $this;
+        $q->path = $path;
+
+        return $q;
+    }
+
+    public function withQuery(string $query): self
+    {
+        if (empty($query)) {
+            throw new \InvalidArgumentException(sprintf("Parameter 1 of %s require a valid URI query string.", __METHOD__));
+        }
+
+        $q = clone $this;
+        parse_str(html_entity_decode($query), $q->query);
+
+        return $q;
+    }
+
+    public function withFragment(string $fragment): self
+    {
+        $q = clone $this;
+        $q->fragment = $fragment;
+
+        return $q;
+    }
+
+    protected function validateScheme(string $scheme): bool
+    {
+        return !(empty($scheme) || !preg_match(self::SCHEME_REGEX_PATTERN, $scheme));
+    }
+
+    protected function validateHost(string $host): bool
+    {
+        $full = '/(?(?='
+            . self::IPV4_REGEX_PATTERN
+            . ')'
+            . self::IPV4_REGEX_PATTERN
+            . '|'
+            . self::HOST_REGEX_PATTERN
+            . ')/';
+
+        return !(empty($host) || !preg_match($full, $host));
+    }
+
+    protected function validatePort(int $port): bool
+    {
+        return is_int($port) || !(empty($port) || !preg_match(self::PORT_REGEX_PATTERN, $port));
+    }
+
+    protected function validatePath(string $path): bool
+    {
+        return !(empty($path) || $path[0] !== '/');
     }
 
     /**
@@ -649,7 +483,8 @@ class Uri
      */
     public function redirect(int $code = 302): void
     {
-        if (self::isApplicationScheme($this->spec)) return;
+        if (self::isDataScheme($this->spec)) return;
+
         if (headers_sent()) {
             \Tk\Log::warning('Invalid URL Redirect, Headers Already Sent.');
             exit();
@@ -687,16 +522,14 @@ class Uri
             $arr = $arr[0];
             $msg = sprintf('%s REDIRECT `%s` called from %s:%s',
                 $code,
-                $this->toString(),
+                $this->__toString(),
                 str_replace(Config::getBasePath(), '', $arr['file'] ?? ''),
                 $arr['line'] ?? 0
             );
             \Tk\Log::debug($msg);
         }
 
-        //session_write_close();
-        header("Location: {$this->toString()}", true, $code);
+        header("Location: {$this->__toString()}", true, $code);
         exit();
     }
-
 }
