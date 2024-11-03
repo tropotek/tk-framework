@@ -1,5 +1,11 @@
 #CHANGELOG#
 
+Ver 8.0.52 [2024-11-03]:
+-------------------------------
+  - Update Uri to extend Psr\Http\Message\UriInterface
+  - phpstan lvl7
+
+
 Ver 8.0.50 [2024-10-14]:
 -------------------------------
   - main src cleanup
