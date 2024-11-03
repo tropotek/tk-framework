@@ -1,8 +1,5 @@
 <?php
-namespace Tk\Http;
-
-use Tk\Config;
-use Tk\Date;
+namespace Tk;
 
 class Cookie
 {
