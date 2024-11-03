@@ -1,5 +1,9 @@
 #CHANGELOG#
 
+Ver 8.0.54 [2024-11-04]:
+-------------------------------
+
+
 Ver 8.0.52 [2024-11-03]:
 -------------------------------
   - Update Uri to extend Psr\Http\Message\UriInterface
