@@ -9,12 +9,12 @@ use Tk\Db;
  */
 class Session implements \SessionHandlerInterface
 {
-    const SID_IP    = '_user.ip';
-    const SID_AGENT = '_user.agent';
+    const string SID_IP    = '_user.ip';
+    const string SID_AGENT = '_user.agent';
 
     protected static mixed $_instance = null;
 
-    public static int    $DATA_TTL_MINS = 60*3;
+    public static int    $DATA_TTL_MINS = 60*12;
     public static string $DB_TABLE      = '_session';
 
 
