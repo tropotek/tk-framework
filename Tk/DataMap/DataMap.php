@@ -64,7 +64,6 @@ class DataMap
      */
     public function loadArray(array &$array, object $srcObject, int $access = self::WRITE): DataMap
     {
-        vd($this);
         foreach ($this->propertyTypes as $type) {
             if (!$type->hasAccess($access)) continue;
             $type->loadArray($array, $srcObject);
