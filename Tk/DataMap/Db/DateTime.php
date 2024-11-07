@@ -9,8 +9,9 @@ use Tk\DataMap\DataTypeInterface;
  */
 class DateTime extends DataTypeInterface
 {
-    protected string $format   = 'Y-m-d H:i:s';
-    protected string $timezone = '';
+    protected string $format      = 'Y-m-d H:i:s';
+    protected string $timezone    = '';
+    protected bool   $isImmutable = false;
 
     public function __construct(string $property, string $key = '')
     {
@@ -23,9 +24,19 @@ class DateTime extends DataTypeInterface
     {
         $value = parent::getPropertyValue($array);
         if (is_string($value)) {
-            $v = \DateTime::createFromFormat($this->format, trim($value), $this->getTimeZone());
-            if ($v === false) throw new Exception(implode(", ", (\DateTime::getLastErrors()['errors'] ?? ['Unknown Date Error'])) .
-                " for date: '$value'");
+            if ($this->isImmutable) {
+                $v = \DateTimeImmutable::createFromFormat($this->format, trim($value), $this->getTimeZone());
+                if ($v === false) {
+                    throw new Exception(implode(", ", (\DateTimeImmutable::getLastErrors()['errors'] ?? ['Unknown Date Error'])) .
+                        " for date: '$value'");
+                }
+            } else {
+                $v = \DateTime::createFromFormat($this->format, trim($value), $this->getTimeZone());
+                if ($v === false) {
+                    throw new Exception(implode(", ", (\DateTime::getLastErrors()['errors'] ?? ['Unknown Date Error'])) .
+                        " for date: '$value'");
+                }
+            }
             $value = $v;
         }
         return $value;
@@ -34,7 +45,7 @@ class DateTime extends DataTypeInterface
     public function getColumnValue(object $object): mixed
     {
         $value = parent::getColumnValue($object);
-        if ($value instanceof \DateTime) {
+        if ($value instanceof \DateTimeInterface) {
             $value = $value->format($this->format);
         }
         return $value;
@@ -49,6 +60,12 @@ class DateTime extends DataTypeInterface
     public function setTimezone(string $timezone): DateTime
     {
         $this->timezone = $timezone;
+        return $this;
+    }
+
+    public function setImmutable(bool $isImmutable): DateTime
+    {
+        $this->isImmutable = $isImmutable;
         return $this;
     }
 

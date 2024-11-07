@@ -1,6 +1,7 @@
 <?php
 namespace Tk\Db;
 
+use Tk\DataMap\Db\DateTime;
 use Tk\ObjectUtil;
 use Tk\Traits\DataTrait;
 use Tk\DataMap\DataMap;
@@ -16,6 +17,11 @@ abstract class Model
      * @var DataMap[]|array
      */
     protected static array $_MAPS = [];
+
+    /**
+     * TODO: currently testing this it may be removed if not needed
+     */
+    const array FORCE_READ_ONLY = ['modified', 'created'];
 
 
     /**
@@ -83,14 +89,20 @@ abstract class Model
         if (!empty($view)) {
             $v_meta = Db::getTableInfo($view);
         }
-        $roCols = array_diff_key($v_meta, $t_meta);
         Db::$LOG = true;
+
+        $roCols = array_diff_key($v_meta, $t_meta);
 
         $map = new DataMap();
 
         // autogenerate a data map from DB and object metadata
         foreach ($t_meta+$roCols as $meta) {
             if (!property_exists($name, $meta->name_camel)) continue;
+            $prop = new \ReflectionProperty(static::class, $meta->name_camel);
+
+            if ($prop->getType()->getName() == 'Money') {
+                $meta->php_type = $prop->getType()->getName();
+            }
 
             $type = DataMap::makeDbType($meta);
             if ($meta->is_primary_key) {
@@ -99,9 +111,17 @@ abstract class Model
             if ($meta->Extra == 'VIRTUAL GENERATED') {
                 $type->setAccess(DataMap::READ);
             }
-            if ($roCols[$meta->name] ?? false) {
+            if (
+                $roCols[$meta->name] ?? false ||
+                in_array($meta->name_camel, self::FORCE_READ_ONLY)
+            ) {
                 $type->setAccess(DataMap::READ);
             }
+
+            if ($type instanceof DateTime && $prop->getType()->getName() == 'DateTimeImmutable') {
+                $type->setImmutable(true);
+            }
+
             $map->addType($type);
         }
 
@@ -126,9 +146,13 @@ abstract class Model
             if ($primaryId == $prop->getName()) {
                 $type->setFlag(DataMap::PRI);
             }
-            if ($prop->isReadOnly()) {
+            if (
+                $prop->isReadOnly() ||
+                in_array($prop->getName(), self::FORCE_READ_ONLY)
+            ) {
                 $type->setAccess(DataMap::READ);
             }
+
             $map->addType($type);
         }
         self::setMap($name, $map);

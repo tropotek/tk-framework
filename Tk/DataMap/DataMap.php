@@ -64,6 +64,7 @@ class DataMap
      */
     public function loadArray(array &$array, object $srcObject, int $access = self::WRITE): DataMap
     {
+        vd($this);
         foreach ($this->propertyTypes as $type) {
             if (!$type->hasAccess($access)) continue;
             $type->loadArray($array, $srcObject);
@@ -110,7 +111,6 @@ class DataMap
         return null;
     }
 
-
     public static function makeDbType(\stdClass $meta): DataTypeInterface
     {
         return match ($meta->php_type) {
@@ -122,6 +122,7 @@ class DataMap
             'date'  => new Db\Date($meta->name_camel, $meta->name),
             'time'  => new Db\Time($meta->name_camel, $meta->name),
             'year'  => new Db\Year($meta->name_camel, $meta->name),
+            'Money' => new Db\Money($meta->name_camel, $meta->name),
             default => new Db\Text($meta->name_camel, $meta->name),
         };
     }
