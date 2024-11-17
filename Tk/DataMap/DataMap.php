@@ -121,7 +121,7 @@ class DataMap
             'date'  => new Db\Date($meta->name_camel, $meta->name),
             'time'  => new Db\Time($meta->name_camel, $meta->name),
             'year'  => new Db\Year($meta->name_camel, $meta->name),
-            'Money' => new Db\Money($meta->name_camel, $meta->name),
+            'Tk\Money' => new Db\Money($meta->name_camel, $meta->name),
             default => new Db\Text($meta->name_camel, $meta->name),
         };
     }

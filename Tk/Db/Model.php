@@ -2,6 +2,7 @@
 namespace Tk\Db;
 
 use Tk\DataMap\Db\DateTime;
+use Tk\Money;
 use Tk\ObjectUtil;
 use Tk\Traits\DataTrait;
 use Tk\DataMap\DataMap;
@@ -19,7 +20,7 @@ abstract class Model
     protected static array $_MAPS = [];
 
     /**
-     * TODO: currently testing this it may be removed if not needed
+     * @todo: currently testing, may be removed in future
      */
     const array FORCE_READ_ONLY = ['modified', 'created'];
 
@@ -58,9 +59,42 @@ abstract class Model
 		}
     }
 
-    public static function getTableName(): string
+    /**
+     * Return the primary int id of a model
+     * Does not support models with a non integer ID type
+     */
+    public function getId(): int
+    {
+        $priKey = $this->getPrimaryKey();
+        if (empty($priKey)) return 0;
+        return intval($this->$priKey ?? 0);
+    }
+
+    public function getPrimaryKey(): string
+    {
+        $map = $this->getDataMap();
+        $priKey = $map->getPrimaryKey()?->getProperty();
+        if (is_null($priKey)) return '';
+        return $priKey;
+    }
+
+    /**
+     * return the DB table name for this object
+     */
+    public static function getDbTable(): string
     {
         return strtolower(preg_replace('/(?<!^)[A-Z]+|(?<!^|\d)[\d]+/', '_$0', strval(ObjectUtil::basename(static::class))));
+    }
+
+    /**
+     * return the DB view name it exists, empty if not
+     */
+    public static function getDbView(): string
+    {
+        $table = self::getDbTable();
+        $view = "v_{$table}";
+        if (Db::tableExists($view)) return $view;
+        return '';
     }
 
     /**
@@ -77,12 +111,12 @@ abstract class Model
         $name = static::class;
         if (self::hasMap($name)) return self::getMap($name);
 
-        // autogen table/view name from class
-        $table = static::getTableName();
-        $view = "v_{$table}";
-
         Db::$LOG = false;   // disable cache of last statement
-        if (!Db::tableExists($view)) $view = $table;
+
+        // autogen table/view name from class
+        $table = static::getDbTable();
+        $view = static::getDbView();
+        if (empty($view)) $view = $table;
 
         $v_meta = [];
         $t_meta = Db::getTableInfo($table);
@@ -100,7 +134,7 @@ abstract class Model
             if (!property_exists($name, $meta->name_camel)) continue;
             $prop = new \ReflectionProperty(static::class, $meta->name_camel);
 
-            if ($prop->getType()->getName() == 'Money') {
+            if ($prop->getType()->getName() == Money::class) {
                 $meta->php_type = $prop->getType()->getName();
             }
 

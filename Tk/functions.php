@@ -43,11 +43,11 @@ function data_attr(array $array): string
 
 /**
  * returns true if parameter is truthy or any of y, yes, 1, ok, true (case-insensitive)
- * returns false otherwise
+ * returns null if val is null or empty string
  */
-function truefalse(mixed $val): bool
+function truefalse(?string $val): ?bool
 {
-	$val = strval($val);
+    if (is_null($val) || $val === '') return null;
 	if (empty($val)) return false;
 	return boolval(preg_match('/^(y|yes|1|ok|true)$/i', $val));
 }
@@ -55,7 +55,7 @@ function truefalse(mixed $val): bool
 /**
  * replace accented characters with ASCII equivalents in a filename string
  */
-function sanitize_filename(string|null $filename): string
+function sanitize_filename(?string $filename): string
 {
 	if (empty($filename)) return '';
 
