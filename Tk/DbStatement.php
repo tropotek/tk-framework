@@ -49,8 +49,6 @@ class DbStatement extends \PDOStatement
             throw new Db\Exception("class name '{$classname}' does not exist");
         }
 
-        Db::$LOG = false;
-
         $obj = new $classname;
 
         // use PDO mapping if class is not a DbModel object
@@ -59,8 +57,8 @@ class DbStatement extends \PDOStatement
         $row = $this->fetch(\PDO::FETCH_ASSOC);
         if ($row === false) return false;
 
+        Db::$LOG = false;
         $obj->__map($row);
-
         Db::$LOG = true;
 
         return $obj;
