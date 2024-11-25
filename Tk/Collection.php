@@ -43,8 +43,6 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
 
     /**
      * prefix a string to all array keys
-     *
-     * @todo Delete if not used!!!
      */
     public static function prefixArrayKeys(array $array, string $prefix): array
     {
@@ -133,6 +131,27 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
         $keys = explode($separator, $path);
         foreach ($keys as $key) $arr = &$arr[$key];
         $arr = $value;
+    }
+
+    public static function toSelectList($array, $valueProp = 'id', $nameProp = 'name'): array
+    {
+        $obj = $array[key($array)] ?? null;
+        if (!is_object($obj)) return [];
+        if (!property_exists($obj, $valueProp)) {
+            throw new Exception("property '{$valueProp}' not found in class " . get_class($obj));
+        }
+        if (!property_exists($obj, $nameProp)) {
+            throw new Exception("property '{$nameProp}' not found in class " . get_class($obj));
+        }
+        return array_combine(
+            array_map(fn($r) => $r->$valueProp, $array),
+            array_map(fn($r) => $r->$nameProp, $array),
+        );
+    }
+
+    public static function listCombine(array $array): array
+    {
+        return array_combine($array, $array);
     }
 
     /**
