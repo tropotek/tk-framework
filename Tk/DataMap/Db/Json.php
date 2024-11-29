@@ -5,13 +5,14 @@ use Tk\DataMap\DataTypeInterface;
 
 /**
  * map a JSON string type from a DB field to an object property
+ * @see https://www.php.net/manual/en/function.json-decode.php
  */
 class Json extends DataTypeInterface
 {
     /**
      * if true then the returned value from json_decode will be an array
      */
-    protected ?bool $associative = null;
+    protected bool $associative = false;
 
     public function setAssociative(bool $b): Json
     {

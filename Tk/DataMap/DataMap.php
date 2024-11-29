@@ -113,27 +113,28 @@ class DataMap
     public static function makeDbType(\stdClass $meta): DataTypeInterface
     {
         return match ($meta->php_type) {
-            'bool'  => new Db\Boolean($meta->name_camel, $meta->name),
-            'int'   => new Db\Integer($meta->name_camel, $meta->name),
-            'float' => new Db\Decimal($meta->name_camel, $meta->name),
-            'json'  => new Db\Json($meta->name_camel, $meta->name),
+            default    => new Db\Text($meta->name_camel, $meta->name),
+            'bool'     => new Db\Boolean($meta->name_camel, $meta->name),
+            'int'      => new Db\Integer($meta->name_camel, $meta->name),
+            'float'    => new Db\Decimal($meta->name_camel, $meta->name),
+            'json'     => new Db\Json($meta->name_camel, $meta->name),
             'timestamp', 'datetime' => new Db\DateTime($meta->name_camel, $meta->name),
-            'date'  => new Db\Date($meta->name_camel, $meta->name),
-            'time'  => new Db\Time($meta->name_camel, $meta->name),
-            'year'  => new Db\Year($meta->name_camel, $meta->name),
+            'date'     => new Db\Date($meta->name_camel, $meta->name),
+            'time'     => new Db\Time($meta->name_camel, $meta->name),
+            'year'     => new Db\Year($meta->name_camel, $meta->name),
             'Tk\Money' => new Db\Money($meta->name_camel, $meta->name),
-            default => new Db\Text($meta->name_camel, $meta->name),
         };
     }
 
     public static function makeFormType(string $type, string $property): DataTypeInterface
     {
         return match ($type) {
-            default => new Form\Text($property),
-            'bool'  => new Form\Boolean($property),
-            'int'   => new Form\Integer($property),
-            'float' => new Form\Decimal($property),
-            'array' => new Form\ArrayType($property),
+            default    => new Form\Text($property),
+            'bool'     => new Form\Boolean($property),
+            'int'      => new Form\Integer($property),
+            'float'    => new Form\Decimal($property),
+            'array'    => new Form\ArrayType($property),
+            'percent'  => new Form\Percent($property),
             'Tk\Money' => new Form\Money($property),
             'DateTime' => new Form\Date($property),
         };

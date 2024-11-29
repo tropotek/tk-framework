@@ -133,20 +133,40 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
         $arr = $value;
     }
 
-    public static function toSelectList($array, $valueProp = 'id', $nameProp = 'name'): array
+    /**
+     * @param array<int,object> $array
+     * @return array<string,string>
+     * @throws Exception
+     */
+    public static function toSelectList(array $array, string|callable $valueProp = 'id', string|callable $nameProp = 'name'): array
     {
         $obj = $array[key($array)] ?? null;
         if (!is_object($obj)) return [];
-        if (!property_exists($obj, $valueProp)) {
-            throw new Exception("property '{$valueProp}' not found in class " . get_class($obj));
+        $names = [];
+        if (is_callable($nameProp)) {
+            foreach ($array as $obj) {
+                $names[] = call_user_func_array($nameProp, [$obj]);
+            }
+        } else {
+            if (!property_exists($obj, $nameProp)) {
+                throw new Exception("property '{$nameProp}' not found in class " . get_class($obj));
+            }
+            $names = array_map(fn($r) => $r->$nameProp, $array);
         }
-        if (!property_exists($obj, $nameProp)) {
-            throw new Exception("property '{$nameProp}' not found in class " . get_class($obj));
+
+        $values = [];
+        if (is_callable($valueProp)) {
+            foreach ($array as $obj) {
+                $values[] = call_user_func_array($valueProp, [$obj]);
+            }
+        } else {
+            if (!property_exists($obj, $valueProp)) {
+                throw new Exception("property '{$valueProp}' not found in class " . get_class($obj));
+            }
+            $values = array_map(fn($r) => $r->$valueProp, $array);
         }
-        return array_combine(
-            array_map(fn($r) => $r->$valueProp, $array),
-            array_map(fn($r) => $r->$nameProp, $array),
-        );
+
+        return array_combine($values, $names);
     }
 
     public static function listCombine(array $array): array
