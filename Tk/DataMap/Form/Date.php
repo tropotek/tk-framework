@@ -9,13 +9,13 @@ class Date extends DataTypeInterface
      * The date format received from the array/form
      * @default 'd/m/Y' => `31/12/2000`
      */
-    protected string $format = 'd/m/Y';
+    protected string $format = \Tk\Date::FORMAT_ISO_DATE;
 
 
     public function __construct(string $property)
     {
         parent::__construct($property);
-        $this->format = \Tk\Date::$FORM_FORMAT;
+        $this->format = \Tk\Date::FORMAT_ISO_DATE;
     }
 
     public function setDateFormat(string $format): Date

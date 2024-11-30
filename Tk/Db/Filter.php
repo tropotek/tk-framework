@@ -113,13 +113,12 @@ class Filter extends \Tk\Collection
 
         $sql = [];
         foreach ($orders as $order) {
-            $order = Str::toSnake($order);
+            $order = trim(Str::toSnake($order));
             if ($order[0] == '-') {     // descending
                 $col = substr($order, 1);
-                $sql[] = "$col DESC";
-            } else {
-                $sql[] = "$order";
+                $order = "$col DESC";
             }
+            $sql[] = trim($order);
         }
         return implode(', ', $sql);
     }
