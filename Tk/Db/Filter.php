@@ -13,7 +13,7 @@ class Filter extends \Tk\Collection
     protected string $where     = '';
 
 
-    public static function create(null|array|Filter $params, string $orderBy = '', ?int $limit = null, ?int $offset = null): self
+    public static function create(array|Filter $params = [], string $orderBy = '', ?int $limit = null, ?int $offset = null): self
     {
         if ($params instanceof Filter) return $params;
         $obj = new self();
