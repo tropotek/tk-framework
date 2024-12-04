@@ -13,13 +13,11 @@ class Boolean extends DataTypeInterface
     {
         $value = parent::getPropertyValue($array);
         if (!(is_null($value) || is_bool($value))) {
-            $value = (
-                $value == $this->getColumn() ||
-                $value == $this->getProperty() ||
-                strtolower($value) == 'yes' ||
-                strtolower($value) == 'true' ||
-                (int)$value == 1
-            );
+            if ($value == $this->getColumn() || $value == $this->getProperty()) {
+                $value = true;
+            } else {
+                $value = truefalse($value);
+            }
         }
         return $value;
     }

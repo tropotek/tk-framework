@@ -112,9 +112,9 @@ class Money
     /**
      * Multiplies the value of the money by an amount and returns a new instance.
      */
-    public function multiply(int $multiplier): Money
+    public function multiply(float $multiplier): Money
     {
-        return static::create((int)round($this->getAmount() * $multiplier), $this->getCurrency());
+        return static::create(intval(round($this->getAmount() * $multiplier)), $this->getCurrency());
     }
 
     /**

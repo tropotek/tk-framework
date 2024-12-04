@@ -30,10 +30,12 @@ abstract class Model
      */
     public function __map(array $row, ?DataMap $map = null): void
     {
+        Db::$LOG = false;
         if (is_null($map)) {
             $map = static::getDataMap();
         }
         $map->loadObject($this, $row);
+        Db::$LOG = true;
     }
 
 	/**
@@ -41,9 +43,13 @@ abstract class Model
 	 */
     public function reload(): void
     {
+        Db::$LOG = false;
         $map = $this->getDataMap();
         $priKey = $map->getPrimaryKey()?->getProperty();
-        if (is_null($priKey)) return;
+        if (is_null($priKey)) {
+            Db::$LOG = true;
+            return;
+        }
         $id = $this->$priKey;
 
         if ($id && method_exists($this, 'find')) {
@@ -53,10 +59,14 @@ abstract class Model
             /** @phpstan-ignore-next-line */
             $obj = new static();
         }
-        if (is_null($obj)) return;
+        if (is_null($obj)) {
+            Db::$LOG = true;
+            return;
+        }
 		foreach (get_object_vars($obj) as $prop => $val) {
 			$this->$prop = $val;
 		}
+        Db::$LOG = true;
     }
 
     /**
@@ -109,9 +119,10 @@ abstract class Model
     public static function getDataMap(): DataMap
     {
         $name = static::class;
-        if (self::hasMap($name)) return self::getMap($name);
-
-        Db::$LOG = false;   // disable cache of last statement
+        if (self::hasMap($name)) {
+            return self::getMap($name);
+        }
+        Db::$LOG = false;
 
         // autogen table/view name from class
         $table = static::getDbTable();
@@ -123,6 +134,7 @@ abstract class Model
         if (!empty($view)) {
             $v_meta = Db::getTableInfo($view);
         }
+
         Db::$LOG = true;
 
         $roCols = array_diff_key($v_meta, $t_meta);
@@ -168,6 +180,8 @@ abstract class Model
         $name = 'form_'. static::class;
         if (self::hasMap($name)) return self::getMap($name);
 
+        Db::$LOG = false;
+
         $map = new DataMap();
         $primaryId = static::getDataMap()->getPrimaryKey()->getProperty();
 
@@ -190,6 +204,9 @@ abstract class Model
             $map->addType($type);
         }
         self::setMap($name, $map);
+
+        Db::$LOG = true;
+
         return $map;
     }
 

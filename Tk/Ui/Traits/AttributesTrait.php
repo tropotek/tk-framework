@@ -2,8 +2,8 @@
 namespace Tk\Ui\Traits;
 
 /**
- * This Trait can be used with object representing a DOM Element node
- * so that attributes and css classes can be managed.
+ * Use with objects that represent a DOM Element node
+ * to manage attributes and css classes.
  *
  * $attrList Source:
  *   array('style' => 'color: #000;', 'id' => '234', 'class' => 'text-center');
@@ -13,10 +13,8 @@ namespace Tk\Ui\Traits;
  */
 trait AttributesTrait
 {
-
     protected array $_attrList = [];
     protected array $_cssList  = [];
-
 
     /**
      * NOTE: setting the 'class' attribute manually will overwrite
