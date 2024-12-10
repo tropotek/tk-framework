@@ -24,7 +24,7 @@ class Date extends DataTypeInterface
         return $this;
     }
 
-    public function getPropertyValue(array $array): \DateTime
+    public function getPropertyValue(array $array): ?\DateTime
     {
         $value = parent::getPropertyValue($array);
         if (!(empty($value) || $value instanceof \DateTime)) {

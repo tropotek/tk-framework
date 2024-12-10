@@ -9,7 +9,7 @@ use Tk\DataMap\DataTypeInterface;
 class Boolean extends DataTypeInterface
 {
 
-    public function getPropertyValue(array $array): bool
+    public function getPropertyValue(array $array): ?bool
     {
         $value = parent::getPropertyValue($array);
         if (!(is_null($value) || is_bool($value))) {
