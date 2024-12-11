@@ -11,4 +11,13 @@ class Date extends DateTime
         parent::__construct($property, $key);
         $this->format = \Tk\Date::FORMAT_ISO_DATE;
     }
+
+    public function getPropertyValue(array $array): mixed
+    {
+        $value = parent::getPropertyValue($array);
+        if ($value instanceof \DateTime) {
+            $value = new \DateTime($value->format('Y-m-d 00:00:00'), $value->getTimezone());
+        }
+        return $value;
+    }
 }
