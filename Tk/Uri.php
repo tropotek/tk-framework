@@ -60,15 +60,15 @@ class Uri implements UriInterface
     /**
      * The original uri string
      */
-    protected string $spec = '';
+    protected string $spec   = '';
 
-    private string $scheme = '';
-    private string $host = '';
-    private ?int $port = null;
-    private string $user = '';
+    private string $scheme   = '';
+    private string $host     = '';
+    private ?int   $port     = null;
+    private string $user     = '';
     private string $password = '';
-    private string $path = '';
-    private array $query = [];
+    private string $path     = '';
+    private array  $query    = [];
     private string $fragment = '';
 
 
@@ -206,12 +206,12 @@ class Uri implements UriInterface
     }
 
     /**
-     * returns true if the uri no-link|script|mailto|data type URI and not a link URL
+     * returns true if the uri no-link|script|tel|mailto|data type URI and not a link URL
      */
     public static function isDataScheme(string $spec): bool
     {
         if ($spec === '#') return true;
-        return (bool)preg_match('/^(javascript|mailto|data):/', strtolower($spec));
+        return (bool)preg_match('/^(javascript|script|mailto|tel|data):/', strtolower($spec));
     }
 
     public function getScheme(): string
@@ -303,6 +303,26 @@ class Uri implements UriInterface
         $authority = $this->getAuthority();
         $fullUri .= empty($authority) ? '' : '//' . $authority;
         $path = $this->getPath();
+        $fullUri .= empty($path) ? '' : '/' . ltrim($path, '/');
+        $query = $this->getQuery();
+        $fullUri .= empty($query) ? '' : '?' . $query;
+        $fragment = $this->getFragment();
+        $fullUri .= empty($fragment) ? '' : '#' . $fragment;
+
+        return $fullUri;
+    }
+
+    public function toRelativeString()
+    {
+        if ($this->isDataScheme($this->spec)) return $this->spec;
+
+        $fullUri = '';
+//        $scheme = $this->getScheme();
+//        $fullUri .= empty($scheme) ? '' : $this->scheme . ':';
+
+//        $authority = $this->getAuthority();
+//        $fullUri .= empty($authority) ? '' : '//' . $authority;
+        $path = $this->getRelativePath();
         $fullUri .= empty($path) ? '' : '/' . ltrim($path, '/');
         $query = $this->getQuery();
         $fullUri .= empty($query) ? '' : '?' . $query;
