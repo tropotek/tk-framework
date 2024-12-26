@@ -228,8 +228,8 @@ class Date
     }
 
     /**
-     * Get the financial year of this date
-     * list($start, $end) = Tk\Date::getFinancialYear($date);
+     * Get the financial year of supplied date
+     * [$start, $end] = Tk\Date::getFinancialYear($date);
      */
     public static function getFinancialYear(\DateTime $date = null): array
     {

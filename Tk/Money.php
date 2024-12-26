@@ -189,7 +189,7 @@ class Money
     /**
      * Return a formatted string representing the currency EG: '$200,000.00'
      */
-    public function toString(string $decSep = '.', string $thousandthSep = ''): string
+    public function toString(string $decSep = '.', string $thousandthSep = ','): string
     {
         return $this->getCurrency()->getSymbol() . $this->toFloatString($decSep, $thousandthSep);
     }
