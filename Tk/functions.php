@@ -45,7 +45,7 @@ function data_attr(array $array): string
  * returns true if parameter is truthy or any of y, yes, 1, ok, true (case-insensitive)
  * returns null if val is null or empty string
  */
-function truefalse(?string $val): ?bool
+function truefalse(null|bool|string $val): ?bool
 {
     if (is_null($val) || $val === '') return null;
 	if (empty($val)) return false;

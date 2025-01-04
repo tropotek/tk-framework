@@ -27,7 +27,7 @@ final class Handler extends LoggerInterface
             if (($_GET[Log::NO_LOG] ?? '') == Log::NO_LOG) return;
 
             // No logs for api calls (comment out when testing API`s)
-            if (str_contains($_SERVER['REQUEST_URI'] ?? '', '/api/')) return;
+            //if (str_contains($_SERVER['REQUEST_URI'] ?? '', '/api/')) return;
         }
 
         foreach ($this->loggers as $logger) {
