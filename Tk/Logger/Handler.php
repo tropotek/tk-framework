@@ -24,7 +24,7 @@ final class Handler extends LoggerInterface
     {
         if ($this->noLogEnabled) {
             // No log when using 'nolog' in query param
-            if (($_GET[Log::NO_LOG] ?? '') == Log::NO_LOG) return;
+            if (isset($_GET[Log::NO_LOG]) || isset($_POST[Log::NO_LOG])) return;
 
             // No logs for api calls (comment out when testing API`s)
             //if (str_contains($_SERVER['REQUEST_URI'] ?? '', '/api/')) return;
