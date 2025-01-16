@@ -14,9 +14,11 @@ use Tk\Log;
  */
 class DbBackup
 {
+    public static string $error = '';
 
     /**
      * Restore a sql file
+     *
      * $options = [
      *       'host' => 'localhost',
      *       'port' => 0,
@@ -25,9 +27,14 @@ class DbBackup
      *       'dbName' => 'database-name',
      * ]
      */
-    public static function restore(string $sqlFile, array $options = []): void
+    public static function restore(string $sqlFile, array $options = []): bool
     {
-        if (!is_readable($sqlFile)) return;
+        self::$error = '';
+
+        if (!is_readable($sqlFile)) {
+            self::$error = 'File not found: ' . $sqlFile;;
+            return false;
+        }
 
         // Un-compress file if required
         if (preg_match('/^(.+)\.gz$/', $sqlFile, $regs)) {
@@ -46,7 +53,8 @@ class DbBackup
         // https://gorannikolovski.com/blog/mariadb-import-issue-error-at-line-1-unknown-command
         $f = fopen($sqlFile, 'r');
         if ($f === false) {
-            throw new Exception("Cannot read file $sqlFile");
+            self::$error = 'Cannot open file ' . $sqlFile;
+            return false;
         }
 
         $line = fgets($f);
@@ -69,11 +77,61 @@ class DbBackup
         );
         exec($command, $out, $ret);
 
-        if ($ret != 0) throw new Exception(implode("\n", $out));
+        if ($ret != 0) {
+            self::$error = implode("\n", $out);
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @note: This saves the dump to a string in memory, use SqlBackup::save() for large databases
+     */
+    public static function dump(array $options = []): string
+    {
+        $exclude = $options['exclude'] ?? [];
+        if (!in_array(Config::instance()->get('session.db_table', ''), $exclude)) {
+            $exclude[] = Config::instance()->get('session.db_table');
+        }
+        // Exclude all views
+        if (is_null(Db::getPdo())) {
+            Db::connect(Db::toDsn($options));
+        }
+        $sql = "SHOW FULL TABLES IN `{$options['dbName']}` WHERE TABLE_TYPE LIKE 'VIEW'";
+        $result = Db::getPdo()->query($sql);
+        if ($result !== false) {
+            while ($row = $result->fetch(\PDO::FETCH_ASSOC)) {
+                $v = array_shift($row);
+                $exclude[] = $v;
+            }
+        }
+
+        $excludeParams = [];
+        foreach ($exclude as $tbl) {
+            $excludeParams[] = "--ignore-table={$options['dbName']}.$tbl";
+        }
+        $command = sprintf('mysqldump --max_allowed_packet=1G --single-transaction --quick --lock-tables=false %s --opt --port=%s -h %s -u %s -p%s %s',
+            implode(' ', $excludeParams),
+            $options['port'] ?? 0,
+            escapeshellarg($options['host']),
+            escapeshellarg($options['user']),
+            escapeshellarg($options['pass']),
+            escapeshellarg($options['dbName'])
+        );
+        exec($command, $out, $ret);
+
+        if ($ret != 0) {
+            self::$error = implode("\n", $out);
+            return '';
+        }
+
+        return implode("\n", $out);
     }
 
     /**
      * Save the sql to a path.
+     * Use this for large databases to avoid storing the SQL dump in memory.
      *
      * If no file is supplied then the default file name is used: {DbName}_2016-01-01-12-00-00.sql
      * if the path does not already contain a .sql file extension
@@ -85,7 +143,7 @@ class DbBackup
      *       'dbName' => 'db_name',
      * ]
      */
-    public static function save(string $path = '', array $options = []): string
+    public static function save(string $path = '', array $options = []): bool
     {
         $sqlFile = $path;
 
@@ -93,7 +151,10 @@ class DbBackup
             $path = rtrim($path, '/');
             FileUtil::mkdir($path);
 
-            if (!is_writable($path)) throw new Exception('Cannot access path: ' . $path);
+            if (!is_writable($path)) {
+                self::$error = "Cannot write to $path";
+                return false;
+            }
 
             $file = $options['dbName'] . "_" . date("Y-m-d-H-i-s").".sql";
             $sqlFile = $path.'/'.$file;
@@ -132,52 +193,15 @@ class DbBackup
         );
         exec($command, $out, $ret);
 
-        if ($ret != 0) throw new Exception(implode("\n", $out));
-        if(filesize($sqlFile) <= 0) throw new Exception('Size of file '.$sqlFile.' is ' . filesize($sqlFile));
-
-        return $sqlFile;
-    }
-
-    /**
-     * @throws Exception
-     * @note: This could have memory issues with large databases, use SqlBackup::save() in those cases
-     */
-    public static function dump(array $options = []): string
-    {
-        $exclude = $options['exclude'] ?? [];
-        if (!in_array(Config::instance()->get('session.db_table', ''), $exclude)) {
-            $exclude[] = Config::instance()->get('session.db_table');
+        if ($ret != 0) {
+            self::$error = implode("\n", $out);
+            return false;
         }
-        // Exclude all views
-        if (is_null(Db::getPdo())) {
-            Db::connect(Db::toDsn($options));
-        }
-        $sql = "SHOW FULL TABLES IN `{$options['dbName']}` WHERE TABLE_TYPE LIKE 'VIEW'";
-        $result = Db::getPdo()->query($sql);
-        if ($result !== false) {
-            while ($row = $result->fetch(\PDO::FETCH_ASSOC)) {
-                $v = array_shift($row);
-                $exclude[] = $v;
-            }
+        if (intval(filesize($sqlFile)) == 0) {
+            self::$error = 'File not found: ' . $sqlFile;
         }
 
-        $excludeParams = [];
-        foreach ($exclude as $tbl) {
-            $excludeParams[] = "--ignore-table={$options['dbName']}.$tbl";
-        }
-        $command = sprintf('mysqldump --max_allowed_packet=1G --single-transaction --quick --lock-tables=false %s --opt --port=%s -h %s -u %s -p%s %s',
-            implode(' ', $excludeParams),
-            $options['port'] ?? 0,
-            escapeshellarg($options['host']),
-            escapeshellarg($options['user']),
-            escapeshellarg($options['pass']),
-            escapeshellarg($options['dbName'])
-        );
-        exec($command, $out, $ret);
-
-        if ($ret != 0) throw new Exception(implode("\n", $out));
-
-        return implode("\n", $out);
+        return true;
     }
 
 }
