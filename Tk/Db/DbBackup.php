@@ -27,42 +27,42 @@ class DbBackup
      *       'dbName' => 'database-name',
      * ]
      */
-    public static function restore(string $sqlFile, array $options = []): bool
+    public static function restore(string $filename, array $options = []): bool
     {
         self::$error = '';
 
-        if (!is_readable($sqlFile)) {
-            self::$error = 'File not found: ' . $sqlFile;;
+        if (!is_readable($filename)) {
+            self::$error = 'File not found: ' . $filename;;
             return false;
         }
 
         // Un-compress file if required
-        if (preg_match('/^(.+)\.gz$/', $sqlFile, $regs)) {
+        if (preg_match('/^(.+)\.gz$/', $filename, $regs)) {
             if (is_file($regs[1])) @unlink($regs[1]);
 
-            $command = sprintf('gunzip %s', escapeshellarg($sqlFile));
+            $command = sprintf('gunzip %s', escapeshellarg($filename));
             exec($command, $out, $ret);
             if ($ret != 0) throw new Exception(implode("\n", $out));
 
-            $sqlFile = $regs[1];
+            $filename = $regs[1];
         }
 
         // In short, the new MariaDB version adds this line to the beginning of the dump file:
         //  /*!999999\- enable the sandbox mode */
         // Replace "/*!999999\- enable the sandbox mode */" string on first line if exists
         // https://gorannikolovski.com/blog/mariadb-import-issue-error-at-line-1-unknown-command
-        $f = fopen($sqlFile, 'r');
+        $f = fopen($filename, 'r');
         if ($f === false) {
-            self::$error = 'Cannot open file ' . $sqlFile;
+            self::$error = 'Cannot open file ' . $filename;
             return false;
         }
 
         $line = fgets($f);
         if (str_contains(strval($line), '/*!999999\- enable the sandbox mode */')) {
-            $contents = file($sqlFile);
+            $contents = file($filename);
             if (is_array($contents)) {
                 array_shift($contents);
-                file_put_contents($sqlFile, implode("\r\n", $contents));
+                file_put_contents($filename, implode("\r\n", $contents));
             }
         }
         fclose($f);
@@ -73,7 +73,7 @@ class DbBackup
             escapeshellarg($options['host']),
             escapeshellarg($options['user']),
             escapeshellarg($options['pass']),
-            escapeshellarg($sqlFile)
+            escapeshellarg($filename)
         );
         exec($command, $out, $ret);
 
@@ -143,23 +143,8 @@ class DbBackup
      *       'dbName' => 'db_name',
      * ]
      */
-    public static function save(string $path = '', array $options = []): bool
+    public static function save(string $filename = '', array $options = []): bool
     {
-        $sqlFile = $path;
-
-        if (!preg_match('/\.sql$/', $sqlFile)) {
-            $path = rtrim($path, '/');
-            FileUtil::mkdir($path);
-
-            if (!is_writable($path)) {
-                self::$error = "Cannot write to $path";
-                return false;
-            }
-
-            $file = $options['dbName'] . "_" . date("Y-m-d-H-i-s").".sql";
-            $sqlFile = $path.'/'.$file;
-        }
-
         $exclude = $options['exclude'] ?? [];
         if (!in_array(Config::instance()->get('session.db_table', ''), $exclude)) {
             $exclude[] = Config::instance()->get('session.db_table');
@@ -189,7 +174,7 @@ class DbBackup
             escapeshellarg($options['user']),
             escapeshellarg($options['pass']),
             escapeshellarg($options['dbName']),
-            escapeshellarg($sqlFile)
+            escapeshellarg($filename)
         );
         exec($command, $out, $ret);
 
@@ -197,8 +182,8 @@ class DbBackup
             self::$error = implode("\n", $out);
             return false;
         }
-        if (intval(filesize($sqlFile)) == 0) {
-            self::$error = 'File not found: ' . $sqlFile;
+        if (intval(filesize($filename)) == 0) {
+            self::$error = 'File not found: ' . $filename;
         }
 
         return true;
