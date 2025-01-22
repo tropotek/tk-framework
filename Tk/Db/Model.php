@@ -19,9 +19,6 @@ abstract class Model
      */
     protected static array $_MAPS = [];
 
-    /**
-     * @todo: currently testing, may be removed in future
-     */
     const array FORCE_READ_ONLY = ['modified', 'created'];
 
 
@@ -154,12 +151,12 @@ abstract class Model
             if ($meta->is_primary_key) {
                 $type->setFlag(DataMap::PRI);
             }
-            if ($meta->Extra == 'VIRTUAL GENERATED') {
-                $type->setAccess(DataMap::READ);
-            }
+
             if (
-                $roCols[$meta->name] ?? false ||
-                in_array($meta->name_camel, self::FORCE_READ_ONLY)
+                $meta->Extra == 'VIRTUAL GENERATED' ||              // virtual field
+                $prop->isReadOnly() ||                              // prop is readonly
+                ($roCols[$meta->name] ?? false) ||                  // col not in table
+                in_array($meta->name_camel, self::FORCE_READ_ONLY)  // tk system readonly props
             ) {
                 $type->setAccess(DataMap::READ);
             }

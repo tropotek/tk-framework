@@ -6,7 +6,7 @@ namespace Tk;
  */
 class CallbackCollection
 {
-    const DEFAULT_PRIORITY = 10;
+    const int DEFAULT_PRIORITY = 10;
 
     /**
      * A multidimensional array of callable functions

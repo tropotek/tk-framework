@@ -21,8 +21,8 @@ class Config extends Collection
 
         // default system paths
         $this->set('path.data',       '/data');
-        $this->set('path.cache',      '/data/cache');
-        $this->set('path.temp',       '/data/tmp');
+        $this->set('path.cache',      '/data/private/cache');
+        $this->set('path.temp',       '/data/private/tmp');
         $this->set('path.src',        '/src');
         $this->set('path.config',     '/src/config');
         $this->set('path.vendor',     '/vendor');

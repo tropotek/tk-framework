@@ -2,12 +2,15 @@
 namespace Tk\Mail;
 
 use PHPMailer\PHPMailer\PHPMailer;
+use Tk\CallbackCollection;
 use Tk\Log;
 use Tk\Uri;
 use Tk\Exception;
 
-class Gateway
+class Mailer
 {
+
+    protected static mixed $_instance = null;
 
     protected array  $params        = [];
     protected array  $validReferers = [];
@@ -15,13 +18,15 @@ class Gateway
     protected bool   $lastSent      = true;
     protected string $host          = 'localhost';
 
-    protected Message   $lastMessage;
-    protected PHPMailer $mailer;
+    protected Message            $lastMessage;
+    protected PHPMailer          $mailer;
+    protected CallbackCollection $callbackList;
 
 
     public function __construct(array $params)
     {
         $this->params = $params;
+        $this->callbackList = new CallbackCollection();
         $this->mailer = new PHPMailer();
 
         if (isset($this->params['mail.driver'])) {
@@ -75,6 +80,17 @@ class Gateway
             }
             $this->validReferers += $this->params['mail.validReferers'];
         }
+    }
+
+    public static function instance(?array $params = null): self
+    {
+        if (is_null(self::$_instance)) {
+            if (is_null($params)) {
+                throw new Exception('Mail gateway params not set.');
+            }
+            self::$_instance = new self($params);
+        }
+        return self::$_instance;
     }
 
     public function send(Message $message): bool
@@ -204,8 +220,8 @@ class Gateway
                 throw new Exception($this->mailer->ErrorInfo);
             }
 
-            // Dispatch Post Send Event
-            //$this->dispatcher?->dispatch($event, MailEvents::POST_SEND);
+            // execute callbacks after successful send
+            $this->callbackList->execute($message);
 
         } catch (\Exception $e) {
             $this->error[] = $e->getMessage();
@@ -237,16 +253,10 @@ class Gateway
         return $this->lastMessage;
     }
 
-//    public function getDispatcher(): EventDispatcher
-//    {
-//        return $this->dispatcher;
-//    }
-
-//    public function setDispatcher(EventDispatcher $dispatcher): static
-//    {
-//        $this->dispatcher = $dispatcher;
-//        return $this;
-//    }
+    public function getCallbackList(): CallbackCollection
+    {
+        return $this->callbackList;
+    }
 
     public function getMailer(): PHPMailer
     {
@@ -256,7 +266,7 @@ class Gateway
     /**
      * check_referer() breaks up the environmental variable
      * HTTP_REFERER by "/" and then checks to see if the second
-     * member of the array (from the explode) matches any of the
+     * member of the array (from the exploded) matches any of the
      * domains listed in the $referers array (declared at top)
      */
     private function checkReferer(array $referers): void
