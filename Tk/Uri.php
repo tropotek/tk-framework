@@ -317,11 +317,6 @@ class Uri implements UriInterface
         if ($this->isDataScheme($this->spec)) return $this->spec;
 
         $fullUri = '';
-//        $scheme = $this->getScheme();
-//        $fullUri .= empty($scheme) ? '' : $this->scheme . ':';
-
-//        $authority = $this->getAuthority();
-//        $fullUri .= empty($authority) ? '' : '//' . $authority;
         $path = $this->getRelativePath();
         $fullUri .= empty($path) ? '' : '/' . ltrim($path, '/');
         $query = $this->getQuery();
