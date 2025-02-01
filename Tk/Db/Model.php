@@ -72,17 +72,27 @@ abstract class Model
      */
     public function getId(): int
     {
-        $priKey = $this->getPrimaryKey();
+        $priKey = self::getPrimaryProperty();
         if (empty($priKey)) return 0;
         return intval($this->$priKey ?? 0);
     }
 
+    /**
+     * @deprecated use getPrimaryProperty()
+     */
     public function getPrimaryKey(): string
     {
-        $map = $this->getDataMap();
-        $priKey = $map->getPrimaryKey()?->getProperty();
-        if (is_null($priKey)) return '';
-        return $priKey;
+        return self::getPrimaryProperty();
+    }
+
+    public static function getPrimaryProperty(): string
+    {
+        return self::getDataMap()->getPrimaryKey()?->getProperty() ?? '';
+    }
+
+    public static function getPrimaryColumn(): string
+    {
+        return self::getDataMap()->getPrimaryKey()?->getColumn() ?? '';
     }
 
     /**
