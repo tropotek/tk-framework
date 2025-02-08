@@ -17,7 +17,7 @@ class Log
      * use this in your query to disable logging for a request
      * Handy for API calls to reduce clutter in a log
      */
-    const NO_LOG = 'nolog';
+    const string NO_LOG = 'nolog';
 
     protected static mixed $_instance = null;
 
@@ -42,9 +42,10 @@ class Log
         self::getHandler()->noLogEnabled = $b;
     }
 
-    public static function addLogger(LoggerInterface $logger): void
+    public static function addLogger(LoggerInterface $logger): LoggerInterface
     {
         self::getHandler()->addLogger($logger);
+        return $logger;
     }
 
     public static function getHandler(): Handler
