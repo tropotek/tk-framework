@@ -21,6 +21,22 @@ abstract class Model
 
     const array FORCE_READ_ONLY = ['modified', 'created'];
 
+    /**
+     * method trys to return an object from the fkey, fid values
+     * if no fkey is used the calling classname is used
+     */
+    public static function findDbModel(int $fid, ?string $fkey = null): ?static
+    {
+        if (is_null($fkey)) $fkey = static::class;
+        if ($fkey == self::class || !class_exists($fkey)) {
+            throw new \Tk\Exception("Invalid model class");
+        }
+        $model = null;
+        if (method_exists($fkey, 'find')) {
+            $model = $fkey::find($fid);
+        }
+        return $model;
+    }
 
     /**
      * Magic method to map an array to an object
