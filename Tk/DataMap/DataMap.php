@@ -110,6 +110,16 @@ class DataMap
         return null;
     }
 
+    public function getColumnNames(): array
+    {
+        return array_keys($this->columnTypes);
+    }
+
+    public function getPropertyNames(): array
+    {
+        return array_keys($this->propertyTypes);
+    }
+
     public static function makeDbType(\stdClass $meta): DataTypeInterface
     {
         return match ($meta->php_type) {

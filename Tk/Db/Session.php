@@ -68,67 +68,6 @@ class Session implements \SessionHandlerInterface
         SQL;
     }
 
-    /**
-     * save a named value to session cache with optional timeout (seconds)
-     * timeout = 0 means never expires
-     */
-    function set(string $name, mixed $data, int $timeout_seconds = 60): void
-    {
-        $this->expire();
-        if (!isset($_SESSION['cache'])) $_SESSION['cache'] = [];
-        $_SESSION['cache'][$name] = [
-            'timeout'      => ($timeout_seconds > 0) ? (time() + $timeout_seconds) : 0,
-            'data'         => $data,
-        ];
-    }
-
-    /**
-     * expires cache and returns a value from session cache
-     */
-    function get(string $name, mixed $default = null): mixed
-    {
-        $this->expire();
-        return $_SESSION['cache'][$name]['data'] ?? $default;
-    }
-
-    public function has(string $name): bool
-    {
-        $this->expire();
-        return array_key_exists($name, $_SESSION['cache'] ?? []);
-    }
-
-    /**
-     * get the value from the session then remove it
-     */
-    function once(string $name): mixed
-    {
-        $val = $this->get($name);
-        $this->remove($name);
-        return $val;
-    }
-
-    /**
-     * removes a session cache value
-     */
-    function remove(string $name): void
-    {
-        $this->expire();
-        unset($_SESSION['cache'][$name]);
-    }
-
-    /**
-     * removes expires values from session cache
-     */
-    function expire(): void
-    {
-        foreach (array_keys($_SESSION['cache'] ?? []) as $name) {
-            $timeout = $_SESSION['cache'][$name]['timeout'] ?? 0;
-            if ($timeout && $timeout < time()) {
-                unset($_SESSION['cache'][$name]);
-            }
-        }
-    }
-
     public function open(string $path, string $name): bool
     {
         $this->installTable();
@@ -184,4 +123,67 @@ class Session implements \SessionHandlerInterface
         return false;
     }
 
+
+    /**
+     * save a named value to session cache with optional timeout (seconds)
+     * timeout = 0 means never expires
+     */
+    public static function set(string $name, mixed $data, int $timeout_seconds = 60): void
+    {
+        self::expire();
+        if (!isset($_SESSION['cache'])) $_SESSION['cache'] = [];
+        $_SESSION['cache'][$name] = [
+            'timeout'      => ($timeout_seconds > 0) ? (time() + $timeout_seconds) : 0,
+            'data'         => $data,
+        ];
+    }
+
+    // session cache methods with timeout
+
+    /**
+     * expires cache and returns a value from session cache
+     */
+    public static function get(string $name, mixed $default = null): mixed
+    {
+        self::expire();
+        return $_SESSION['cache'][$name]['data'] ?? $default;
+    }
+
+    public static function has(string $name): bool
+    {
+        self::expire();
+        return array_key_exists($name, $_SESSION['cache'] ?? []);
+    }
+
+    /**
+     * get the value from the session then remove it
+     */
+    public static function once(string $name): mixed
+    {
+        $val = self::get($name);
+        self::remove($name);
+        return $val;
+    }
+
+    /**
+     * removes a session cache value
+     */
+    public static function remove(string $name): void
+    {
+        self::expire();
+        unset($_SESSION['cache'][$name]);
+    }
+
+    /**
+     * removes expires values from session cache
+     */
+    public static function expire(): void
+    {
+        foreach (array_keys($_SESSION['cache'] ?? []) as $name) {
+            $timeout = $_SESSION['cache'][$name]['timeout'] ?? 0;
+            if ($timeout && $timeout < time()) {
+                unset($_SESSION['cache'][$name]);
+            }
+        }
+    }
 }

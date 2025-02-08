@@ -122,6 +122,8 @@ abstract class Model
      * If the view table does not exist it is ignored
      *
      * Override this method if you need to create a custom DataMap with different table names
+     *
+     * @note Remember to check your queries are using the view if required.
      */
     public static function getDataMap(): DataMap
     {
