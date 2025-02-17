@@ -191,14 +191,14 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
         return $this;
     }
 
-    public function prepend(string $key, mixed $value, ?string $refKey = null): mixed
+    public function prepend(string $key, mixed $value, ?string $before = null): mixed
     {
-        if (!$refKey || !$this->has($refKey)) {
+        if (!$before || !$this->has($before)) {
             $this->_data = [$key => $value] + $this->_data;
         } else {
             $a = [];
             foreach ($this->_data as $k => $v) {
-                if ($k === $refKey) $a[$key] = $value;
+                if ($k === $before) $a[$key] = $value;
                 $a[$k] = $v;
             }
             $this->_data = $a;
@@ -206,15 +206,15 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
         return $value;
     }
 
-    public function append(string $key, mixed $value, ?string $refKey = null): mixed
+    public function append(string $key, mixed $value, ?string $after = null): mixed
     {
-        if (!$refKey || !$this->has($refKey)) {
+        if (!$after || !$this->has($after)) {
             $this->set($key, $value);
         } else {
             $a = [];
             foreach ($this->_data as $k => $v) {
                 $a[$k] = $v;
-                if ($k === $refKey) $a[$key] = $value;
+                if ($k === $after) $a[$key] = $value;
             }
             $this->_data = $a;
         }
