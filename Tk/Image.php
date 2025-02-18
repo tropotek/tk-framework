@@ -72,6 +72,9 @@ class Image
             $initials .= end($words)[0] ?? '';
         }
 
+        // TODO: make this a property sent to the function
+        $initials = $initials[0] ?? ''; // only use 1 initial
+
         $img = self::createBlankPng($size, $size, $bgColor);
         $textBoundingBox = imagettfbbox($fontSize, 0, $font, $initials);
         $x = $y = 0;
