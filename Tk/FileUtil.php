@@ -218,7 +218,7 @@ class FileUtil
      * Copy the contents of the src dir to the dst folder
      * set deep to false to only copy files
      */
-    public static function copyDir(string $src, string $dest, bool $deep = true): void
+    public static function copyDir(string $src, string $dest, bool $deep = true, ?callable $onCopy = null): void
     {
         $dir = opendir($src);
         if ($dir === false) {
@@ -234,7 +234,15 @@ class FileUtil
                         self::copyDir($src . '/' . $file,$dest . '/' . $file, $deep);
                     }
                 } else {
-                    copy($src . '/' . $file,$dest . '/' . $file);
+                    $copy = true;
+                    if (is_callable($onCopy)) {
+                        $b = call_user_func_array($onCopy, [$src . '/' . $file, $dest . '/' . $file]);
+                        if (is_bool($b)) {
+                            $copy = $b;
+                        }
+                    }
+
+                    if ($copy) copy($src . '/' . $file,$dest . '/' . $file);
                 }
             }
         }
