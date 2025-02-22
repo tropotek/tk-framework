@@ -17,7 +17,7 @@ class Filter extends \Tk\Collection
     {
         if ($params instanceof Filter) return $params;
         $obj = new self();
-        $obj->orderBy = preg_replace('/[^a-z0-9, _-]/', '', $orderBy);
+        $obj->orderBy = preg_replace('/[^a-z0-9, _-]/i', '', $orderBy);
         $obj->limit = $limit;
         $obj->offset = $offset;
         $obj->replace($params);

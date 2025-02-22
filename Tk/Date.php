@@ -200,7 +200,7 @@ class Date
      *
      * @param string $frequency ['weekly', 'fortnightly', 'monthly']
      */
-    public static function getPeriodDates(string $frequency, \DateTime $dateStart, ?\DateTime $dateEnd = null): array
+    public static function getPeriodDates(string $frequency, \DateTimeInterface $dateStart, ?\DateTimeInterface $dateEnd = null): array
     {
         //$start_date is string e.g 06-23-2016
         //$frequency is also string e.g weekly, fortnightly, monthly
@@ -231,7 +231,7 @@ class Date
      * Get the financial year of supplied date
      * [$start, $end] = Tk\Date::getFinancialYear($date);
      */
-    public static function getFinancialYear(\DateTime $date = null): array
+    public static function getFinancialYear(\DateTimeInterface $date = null): array
     {
         if (!$date) $date = self::create();
         $year = (int)$date->format('Y');
@@ -249,7 +249,7 @@ class Date
     /**
      * Set the time of a date object to 23:59:59
      */
-    public static function ceil(?\DateTime $date = null): \DateTime
+    public static function ceil(?\DateTimeInterface $date = null): \DateTime
     {
         if (!$date) $date = self::create();
         return new \DateTime($date->format('Y-m-d 23:59:59'), $date->getTimezone());
@@ -258,7 +258,7 @@ class Date
     /**
      * Set the time of a date object to 00:00:00
      */
-    public static function floor(?\DateTime $date = null): \DateTime
+    public static function floor(?\DateTimeInterface $date = null): \DateTime
     {
         if (!$date) $date = self::create();
         return new \DateTime($date->format('Y-m-d 00:00:00'), $date->getTimezone());
@@ -267,7 +267,7 @@ class Date
     /**
      * Get the first day of this dates month
      */
-    public static function getMonthStart(?\DateTime $date = null): \DateTime
+    public static function getMonthStart(?\DateTimeInterface $date = null): \DateTime
     {
         if (!$date) $date = self::create();
         return new \DateTime($date->format('Y-m-01 00:00:00'), $date->getTimezone());
@@ -276,7 +276,7 @@ class Date
     /**
      * Get the last day of this dates month
      */
-    public static function getMonthEnd(?\DateTime $date = null): \DateTime
+    public static function getMonthEnd(?\DateTimeInterface $date = null): \DateTime
     {
         if (!$date) $date = self::create();
         $l = self::getMonthDays(intval($date->format('n')), intval($date->format('Y')));
@@ -287,7 +287,7 @@ class Date
     /**
      * Get the first day of this dates month
      */
-    public static function getYearStart(\DateTime $date = null): \DateTime
+    public static function getYearStart(\DateTimeInterface $date = null): \DateTime
     {
         if (!$date) $date = self::create();
         return new \DateTime($date->format('Y-01-01 00:00:00'), $date->getTimezone());
@@ -296,7 +296,7 @@ class Date
     /**
      * Get the last day of this dates month
      */
-    public static function getYearEnd(?\DateTime $date = null): \DateTime
+    public static function getYearEnd(?\DateTimeInterface $date = null): \DateTime
     {
         if (!$date) $date = self::create();
         return new \DateTime($date->format('Y-12-31 23:59:59'), $date->getTimezone());
@@ -306,7 +306,7 @@ class Date
     /**
      * Returns the difference between this date and other in days.
      */
-    public static function dayDiff(\DateTime $from, \DateTime $to): int
+    public static function dayDiff(\DateTimeInterface $from, \DateTimeInterface $to): int
     {
         return intval(ceil(($from->getTimestamp() - $to->getTimestamp()) / self::DAY));
     }
@@ -314,7 +314,7 @@ class Date
     /**
      * Return the difference between this date and other in hours.
      */
-    public static function hourDiff(\DateTime $from, \DateTime $to): int
+    public static function hourDiff(\DateTimeInterface $from, \DateTimeInterface $to): int
     {
         return intval(ceil(($from->getTimestamp() - $to->getTimestamp()) / self::HOUR));
     }
@@ -323,7 +323,7 @@ class Date
      * Compares the value to another instance of date.
      * @return int Returns -1 if less than , 0 if equal to, 1 if greater than.
      */
-    public static function compareTo(\DateTime $from, \DateTime $to): int
+    public static function compareTo(\DateTimeInterface $from, \DateTimeInterface $to): int
     {
         $retVal = 1;
         if ($from->getTimestamp() < $to->getTimestamp()) {
@@ -337,7 +337,7 @@ class Date
     /**
      * Checks if the $from Date is greater than the $to Date
      */
-    public static function greaterThan(\DateTime $from, \DateTime $to): bool
+    public static function greaterThan(\DateTimeInterface $from, \DateTimeInterface $to): bool
     {
         return (self::compareTo($from, $to) > 0);
     }
@@ -345,7 +345,7 @@ class Date
     /**
      * Checks if the date value is greater than or equal the value of another instance of date.
      */
-    public static function greaterThanEqual(\DateTime $from, \DateTime $to): bool
+    public static function greaterThanEqual(\DateTimeInterface $from, \DateTimeInterface $to): bool
     {
         return (self::compareTo($from, $to) >= 0);
     }
@@ -353,7 +353,7 @@ class Date
     /**
      * Checks if the date value is less than the value of another instance of date.
      */
-    public static function lessThan(\DateTime $from, \DateTime $to): bool
+    public static function lessThan(\DateTimeInterface $from, \DateTimeInterface $to): bool
     {
         return (self::compareTo($from, $to) < 0);
     }
@@ -361,7 +361,7 @@ class Date
     /**
      * Checks if the date value is less than or equal the value of another instance of date.
      */
-    public static function lessThanEqual(\DateTime $from, \DateTime $to): bool
+    public static function lessThanEqual(\DateTimeInterface $from, \DateTimeInterface $to): bool
     {
         return (self::compareTo($from, $to) <= 0);
     }
@@ -369,7 +369,7 @@ class Date
     /**
      * Checks if the date is equal to the value of another instance of date.
      */
-    public static function equals(\DateTime $from, \DateTime $to): bool
+    public static function equals(\DateTimeInterface $from, \DateTimeInterface $to): bool
     {
         return (self::compareTo($from, $to) == 0);
     }
@@ -380,7 +380,7 @@ class Date
      *
      * Note: Only works for dates in the past...
      */
-    public static function toRelativeString(\DateTime $date = null): string
+    public static function toRelativeString(\DateTimeInterface $date = null): string
     {
 
         if ($date > new \DateTime()) throw new Exception('Date must be in the past.');
