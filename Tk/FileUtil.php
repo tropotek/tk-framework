@@ -214,22 +214,27 @@ class FileUtil
         return $maxUpload;
     }
 
-    public static function copyDir(string $src, string $dst): void
+    /**
+     * Copy the contents of the src dir to the dst folder
+     * set deep to false to only copy files
+     */
+    public static function copyDir(string $src, string $dest, bool $deep = true): void
     {
         $dir = opendir($src);
         if ($dir === false) {
             throw new Exception("Failed to open directory: $src");
         }
-        if (!file_exists($dst)) {
-            @mkdir($dst);
+        if (!file_exists($dest)) {
+            @mkdir($dest);
         }
-        while(false !== ( $file = readdir($dir)) ) {
-            if (( $file != '.' ) && ( $file != '..' )) {
-                if ( is_dir($src . '/' . $file) ) {
-                    self::copyDir($src . '/' . $file,$dst . '/' . $file);
-                }
-                else {
-                    copy($src . '/' . $file,$dst . '/' . $file);
+        while(false !== ($file = readdir($dir))) {
+            if (($file != '.') && ($file != '..')) {
+                if (is_dir($src . '/' . $file)) {
+                    if ($deep) {
+                        self::copyDir($src . '/' . $file,$dest . '/' . $file, $deep);
+                    }
+                } else {
+                    copy($src . '/' . $file,$dest . '/' . $file);
                 }
             }
         }
@@ -274,36 +279,27 @@ class FileUtil
 
     /**
      * Remove all empty folders from a path.
-     *
-     * @param callable|null $onDelete Add a callable here if you want to perform an action before deletion.
      */
-    public static function removeEmptyFolders(string $path, ?callable $onDelete = null): void
+    public static function removeEmptyFolders(string $path): void
     {
         if(substr($path,-1) != DIRECTORY_SEPARATOR) {
             $path .= DIRECTORY_SEPARATOR;
         }
-        $d2 = ['.','..'];
-        $arr = glob($path.'*', GLOB_ONLYDIR);
-        if ($arr === false) {
-            return;
-        }
-        $dirs = array_diff($arr, $d2);
+
+        $dirs = glob($path.'{.[!.],}*', GLOB_ONLYDIR|GLOB_BRACE);
+        if ($dirs === false) return;
+
         foreach($dirs as $d) {
             self::removeEmptyFolders($d);
         }
 
-        $arr2 = glob($path.'*');
+        $arr2 = glob($path.'{.[!.],}*', GLOB_BRACE);
         if ($arr2 === false) {
             return;
         }
-        if(count(array_diff($arr2, $d2)) === 0) {
-            $conf = null;
-            if (is_callable($onDelete)) {
-                $conf = call_user_func_array($onDelete, array($path));
-            }
-            if ($conf === true || $conf === null) {
-                rmdir($path);
-            }
+
+        if(count($arr2) == 0) {
+            rmdir($path);
         }
     }
 

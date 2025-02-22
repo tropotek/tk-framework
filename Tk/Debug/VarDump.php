@@ -72,7 +72,7 @@ namespace Tk\Debug {
         /**
          * return a var dump string from an array of arguments
          */
-        public static function varToString(mixed $var, int $depth = 5, int $nest = 0): string
+        public static function varToString(mixed $var, int $depth = 20, int $nest = 0): string
         {
             $pad = str_repeat('  ', $nest * 2 + 1);
 

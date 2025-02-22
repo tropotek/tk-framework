@@ -3,9 +3,9 @@ namespace Tk;
 
 class Image
 {
-    const URI_PIXEL_TRANSPARENT = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-    const URI_PIXEL_WHITE = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=';
-    const URI_PIXEL_BLACK = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
+    const string URI_PIXEL_TRANSPARENT = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+    const string URI_PIXEL_WHITE = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=';
+    const string URI_PIXEL_BLACK = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
 
     private string    $currentMem = '16M';
     private ?\GdImage $image = null;
@@ -25,7 +25,7 @@ class Image
         if ($this->image) {
             imagedestroy($this->image);
         }
-        $this->memReset();
+        //$this->memReset();
     }
 
     public static function create(string $filename): self
@@ -102,7 +102,7 @@ class Image
             throw new Exception('File Not Found: ' . $filename);
         }
         $this->filename = $filename;
-        $this->memAlloc();
+        //$this->memAlloc();
         $info = getimagesize($this->filename);
         if ($info === false) {
             throw new Exception('Cannot load image file: ' . $this->filename);

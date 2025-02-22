@@ -81,6 +81,11 @@ class Db
 		self::connect($dsn, $options);
 	}
 
+    public static function getDsn(): string
+    {
+        return self::$dsn;
+    }
+
     public static function parseDsn(string $dsn): array
     {
         $a = explode('/', $dsn);

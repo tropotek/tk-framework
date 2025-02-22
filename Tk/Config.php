@@ -113,6 +113,15 @@ class Config extends Collection
         return self::getBasePath() . $path;
     }
 
+    public static function makeDataPath(string $path, bool $isPrivate = false): string
+    {
+        $sysPath = self::getDataPath();
+        if ($isPrivate) {
+            $sysPath .= '/private';
+        }
+        return self::makePath($sysPath . $path);
+    }
+
     /**
      * Create a full path URL from a relative path
      * This method will strip the trailing slash.
@@ -125,6 +134,11 @@ class Config extends Collection
         $path = strval(parse_url($path, \PHP_URL_PATH));
         $path = str_replace(self::getbaseUrl(), '', $path); // Prevent recurring
         return self::getbaseUrl() . $path;
+    }
+
+    public static function makeDataUrl(string $path): string
+    {
+        return self::makeUrl(self::getDataPath() . $path);
     }
 
     /**
