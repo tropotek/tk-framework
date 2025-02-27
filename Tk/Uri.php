@@ -501,7 +501,7 @@ class Uri implements UriInterface
         if (self::isDataScheme($this->spec)) return;
 
         if (headers_sent()) {
-            \Tk\Log::warning('Invalid URL Redirect, Headers Already Sent.');
+            \Tk\Log::error('Invalid URL Redirect, Headers Already Sent: ' . $this->toString());
             exit();
         }
         switch ($code) {
@@ -532,17 +532,18 @@ class Uri implements UriInterface
                 break;
         }
 
-        if(Config::isDev()) {
-            $arr = debug_backtrace();
-            $arr = $arr[0];
-            $msg = sprintf('%s REDIRECT `%s` called from %s:%s',
-                $code,
-                $this->__toString(),
-                str_replace(Config::getBasePath(), '', $arr['file'] ?? ''),
-                $arr['line'] ?? 0
-            );
-            \Tk\Log::debug($msg);
-        }
+        // Node: Kept here for debugging
+//        if(Config::isDebug()) {
+//            $arr = debug_backtrace();
+//            $arr = $arr[0];
+//            $msg = sprintf('%s REDIRECT `%s` called from %s:%s',
+//                $code,
+//                $this->__toString(),
+//                str_replace(Config::getBasePath(), '', $arr['file'] ?? ''),
+//                $arr['line'] ?? 0
+//            );
+//            \Tk\Log::debug($msg);
+//        }
 
         header("Location: {$this->__toString()}", true, $code);
         exit();
