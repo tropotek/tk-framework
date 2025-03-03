@@ -13,6 +13,7 @@ class ArrayType extends DataTypeInterface
     {
         $value = parent::getPropertyValue($array);
         if (is_string($value)) $value = explode(',', $value);
+        if (is_null($value)) { $value = []; }
         return $value;
     }
 
