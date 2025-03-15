@@ -39,7 +39,7 @@ abstract class Model
     }
 
     /**
-     * Magic method to map an array to an object
+     * Magic method to map an array to an object using the dataMap
      */
     public function __map(array $row, ?DataMap $map = null): void
     {
@@ -49,6 +49,27 @@ abstract class Model
         }
         $map->loadObject($this, $row);
         Db::$LOG = true;
+    }
+
+    /**
+     * map an array of values to an object using the form data map
+     */
+    public function mapForm(array $values): static
+    {
+        $map = self::getFormMap();
+        $map->loadObject($this, $values);
+        return $this;
+    }
+
+    /**
+     * map this objects values to an array using the from data map
+     */
+    public function unmapForm(): array
+    {
+        $map = self::getFormMap();
+        $values = [];
+        $map->loadArray($values, $this);
+        return $values;
     }
 
 	/**
@@ -176,6 +197,8 @@ abstract class Model
             }
 
             $type = DataMap::makeDbType($meta);
+            $type->setNullable($prop->getType()->allowsNull());
+
             if ($meta->is_primary_key) {
                 $type->setFlag(DataMap::PRI);
             }
@@ -216,9 +239,12 @@ abstract class Model
             if (str_starts_with($prop->getName(), '_') || $prop->isStatic()) continue;
             /** @phpstan-ignore-next-line */
             $type = DataMap::makeFormType($prop->getType()->getName(), $prop->getName());
+            $type->setNullable($prop->getType()->allowsNull());
+
             if ($primaryId == $prop->getName()) {
                 $type->setFlag(DataMap::PRI);
             }
+
             if (
                 $prop->isReadOnly() ||
                 in_array($prop->getName(), self::FORCE_READ_ONLY)

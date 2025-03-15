@@ -1,12 +1,16 @@
 <?php
 namespace Tk\Db;
 
+use Tk\Db;
+
 class Exception extends \Tk\Exception
 {
     protected string $dump = '';
 
     public function __construct(string $message = "", int|string $code = 0, string $dump = '', array|object|null $args = null)
     {
+        parent::__construct($message, (int)$code);
+
         if ($dump) {
             $dump = explode("\n", $dump);
             foreach ($dump as $i => $s) {
@@ -16,19 +20,14 @@ class Exception extends \Tk\Exception
         }
         if (is_array($args)) {
             $dump .= "\n\nBind: \n" . print_r($args, true);
+        } else {
+            $stm = Db::getLastStatement();
+            if ($stm) {
+                $dump .= "\n\nBind: \n" . print_r($stm->getLastParams(), true);
+            }
         }
         $this->dump = $dump;
 
-        parent::__construct($message, (int)$code);
-    }
-
-    public function __toString(): string
-    {
-        $str = parent::__toString();
-        if ($this->dump != null) {
-            $str .= $this->dump . "\n\n";
-        }
-        return $str;
     }
 
 }

@@ -22,6 +22,7 @@ class Boolean extends DataTypeInterface
 
             $value = truefalse($value);
         }
+        if ($this->isNullable() && !is_bool($value) && empty($value)) return null;
 
         return $value;
     }

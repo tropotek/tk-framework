@@ -26,6 +26,11 @@ abstract class DataTypeInterface
      */
     protected int $access = 0;
 
+    /**
+     * Allows null values
+     */
+    protected bool $nullable = false;
+
 
     /**
      * @param string $property The object property to map the column to.
@@ -88,7 +93,7 @@ abstract class DataTypeInterface
     /**
      * Set the objects property from the supplied array values
      */
-    public function loadObject(object $object, array $srcArray): DataTypeInterface
+    public function loadObject(object $object, array $srcArray): static
     {
         $value = $this->getPropertyValue($srcArray);
         ObjectUtil::setPropertyValue($object, $this->getProperty(), $value);
@@ -98,7 +103,7 @@ abstract class DataTypeInterface
     /**
      * Set the array key/value from the object`s properties
      */
-    public function loadArray(array &$array, object $srcObject): DataTypeInterface
+    public function loadArray(array &$array, object $srcObject): static
     {
         $value = $this->getColumnValue($srcObject);
         $array[$this->getColumn()] = $value;
@@ -141,9 +146,20 @@ abstract class DataTypeInterface
         return in_array($name, $this->flags);
     }
 
-    public function setFlag(string $name): DataTypeInterface
+    public function setFlag(string $name): static
     {
         $this->flags[] = $name;
+        return $this;
+    }
+
+    public function isNullable(): bool
+    {
+        return $this->nullable;
+    }
+
+    public function setNullable(bool $nullable): static
+    {
+        $this->nullable = $nullable;
         return $this;
     }
 

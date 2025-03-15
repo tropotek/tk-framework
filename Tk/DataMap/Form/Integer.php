@@ -6,9 +6,10 @@ use Tk\DataMap\DataTypeInterface;
 class Integer extends DataTypeInterface
 {
 
-    public function getPropertyValue(array $array): int
+    public function getPropertyValue(array $array): ?int
     {
         $value = parent::getPropertyValue($array);
+        if ($this->isNullable() && !is_numeric($value) && empty($value)) return null;
         return intval($value);
     }
 

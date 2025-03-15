@@ -10,9 +10,10 @@ use Tk\DataMap\DataTypeInterface;
 class Percent extends DataTypeInterface
 {
 
-    public function getPropertyValue(array $array): float
+    public function getPropertyValue(array $array): ?float
     {
         $value = parent::getPropertyValue($array);
+        if ($this->isNullable() && !is_numeric($value) && empty($value)) return null;
         if (!empty($value) && $value >= 1) $value = (float)($value/100);
         return (float)$value;
     }

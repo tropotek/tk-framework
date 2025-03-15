@@ -184,4 +184,15 @@ class System
         return $version;
     }
 
+    public static function getReleaseDate(): \DateTime
+    {
+        $released = new \DateTime();
+        if (is_file(Config::makePath('/version'))) {
+            $released = Date::create(filemtime(Config::makePath('/version')));
+        } else if (is_file(Config::makePath('/version.md'))) {
+            $released = Date::create(filemtime(Config::makePath('/version.md')));
+        }
+        return $released;
+    }
+
 }

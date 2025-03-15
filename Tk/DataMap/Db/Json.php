@@ -14,7 +14,7 @@ class Json extends DataTypeInterface
      */
     protected bool $associative = false;
 
-    public function setAssociative(bool $b): Json
+    public function setAssociative(bool $b): static
     {
         $this->associative = $b;
         return $this;

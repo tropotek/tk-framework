@@ -8,12 +8,25 @@ use Tk\DataMap\DataTypeInterface;
  */
 class ArrayType extends DataTypeInterface
 {
+    /**
+     * if true then the returned array will have values as keys
+     */
+    protected bool $associative = false;
+
+    public function setAssociative(bool $b): static
+    {
+        $this->associative = $b;
+        return $this;
+    }
 
     public function getPropertyValue(array $array): mixed
     {
         $value = parent::getPropertyValue($array);
         if (is_string($value)) $value = explode(',', $value);
         if (is_null($value)) { $value = []; }
+        if ($this->associative) {
+            $value = array_combine($value, $value);
+        }
         return $value;
     }
 

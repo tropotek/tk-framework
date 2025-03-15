@@ -9,9 +9,10 @@ use Tk\DataMap\DataTypeInterface;
 class Decimal extends DataTypeInterface
 {
 
-    public function getPropertyValue(array $array): float
+    public function getPropertyValue(array $array): ?float
     {
         $value = parent::getPropertyValue($array);
+        if ($this->isNullable() && !is_numeric($value) && empty($value)) return null;
         return (float)$value;
     }
 

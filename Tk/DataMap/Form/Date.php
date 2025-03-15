@@ -27,10 +27,10 @@ class Date extends DataTypeInterface
     public function getPropertyValue(array $array): ?\DateTime
     {
         $value = parent::getPropertyValue($array);
-        if (!(empty($value) || $value instanceof \DateTime)) {
+        if ($this->isNullable() && empty($value)) return null;
+        if (!($value instanceof \DateTime)) {
             $value = \Tk\Date::createFormDate($value, null, $this->format);
         }
-        if (empty($value)) $value = null;
         return $value;
     }
 

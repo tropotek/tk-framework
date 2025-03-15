@@ -141,7 +141,7 @@ class Db
         return self::$lastQuery;
     }
 
-    public static function getLastStatement(): DbStatement
+    public static function getLastStatement(): ?DbStatement
     {
         return self::$lastStatement;
     }
@@ -247,7 +247,7 @@ class Db
 
             return $stm->rowCount();
         } catch (\Exception $e) {
-            throw new Exception($e->getMessage(), $e->getCode(), $query);
+            throw new Exception($e->getMessage(), $e->getCode(), $query, $params);
         }
     }
 
@@ -303,7 +303,7 @@ class Db
             $row = $stm->fetchMappedObject($classname);
             return (false === $row) ? null : $row;
         } catch (\Exception $e) {
-            throw new Exception($e->getMessage(), $e->getCode(), $query);
+            throw new Exception($e->getMessage(), $e->getCode(), $query, $params);
         }
 	}
 
@@ -325,7 +325,7 @@ class Db
 
             return $stm->fetchColumn();
         } catch (\Exception $e) {
-            throw new Exception($e->getMessage(), $e->getCode(), $query);
+            throw new Exception($e->getMessage(), $e->getCode(), $query, $params);
         }
 	}
 
