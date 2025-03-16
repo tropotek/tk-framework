@@ -56,7 +56,7 @@ abstract class Model
      */
     public function mapForm(array $values): static
     {
-        $map = self::getFormMap();
+        $map = static::getFormMap();
         $map->loadObject($this, $values);
         return $this;
     }
@@ -66,7 +66,7 @@ abstract class Model
      */
     public function unmapForm(): array
     {
-        $map = self::getFormMap();
+        $map = static::getFormMap();
         $values = [];
         $map->loadArray($values, $this);
         return $values;
