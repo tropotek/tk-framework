@@ -60,7 +60,7 @@ class Image
     {
         $fontSize = $size*0.5;
 
-        $font = Config::makePath(Config::instance()->get('path.vendor.org') . '/tk-framework/assets/font/OpenSans-Semibold.ttf');
+        $font = Config::makePath(Config::instance()->get('path.vendor.org') . '/tk-framework/assets/fonts/OpenSans-Semibold.ttf');
         $color = $bgColor->getTextColor();
 
         $text = strtoupper($text);
