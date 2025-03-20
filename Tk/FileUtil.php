@@ -6,6 +6,8 @@ namespace Tk;
  */
 class FileUtil
 {
+    CONST int BYTES_MB = 1024 * 1024;
+
     public static int $DIR_MASK = 0777;
 
     /**

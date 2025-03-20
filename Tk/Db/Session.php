@@ -175,7 +175,7 @@ class Session implements \SessionHandlerInterface
     }
 
     /**
-     * removes expires values from session cache
+     * removes expired values from session cache
      */
     public static function expire(): void
     {
