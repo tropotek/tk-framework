@@ -236,7 +236,7 @@ class Date
         if (!$date) $date = self::create();
         $year = (int)$date->format('Y');
         $month = (int)$date->format('n');
-        if ($month < 7) {
+        if ($month < 6) {
             $year--;
         }
         $start = new \DateTime($year.'-07-01 00:00:00', $date->getTimezone());
