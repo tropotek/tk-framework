@@ -43,7 +43,6 @@ class ErrorHandler
             case E_USER_ERROR:          $e = new UserErrorException        ($errstr, $errno); break;
             case E_USER_WARNING:        $e = new UserWarningException      ($errstr, $errno); break;
             case E_USER_NOTICE:         $e = new UserNoticeException       ($errstr, $errno); break;
-            case E_STRICT:              $e = new StrictException           ($errstr, $errno); break;
             case E_RECOVERABLE_ERROR:   $e = new RecoverableErrorException ($errstr, $errno); break;
             case E_DEPRECATED:          $e = new DeprecatedException       ($errstr, $errno); break;
             case E_USER_DEPRECATED:     $e = new UserDeprecatedException   ($errstr, $errno); break;

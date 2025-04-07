@@ -194,12 +194,12 @@ class Date
      * Get the financial year of supplied date
      * [$start, $end] = Tk\Date::getFinancialYear($date);
      */
-    public static function getFinancialYear(\DateTimeInterface $date = null): array
+    public static function getFinancialYear(?\DateTimeInterface $date = null): array
     {
         if (!$date) $date = self::create();
         $year = (int)$date->format('Y');
         $month = (int)$date->format('n');
-        if ($month < 7) {
+        if ($month < 6) {
             $year--;
         }
         $start = new \DateTime($year.'-07-01 00:00:00', $date->getTimezone());
@@ -250,7 +250,7 @@ class Date
     /**
      * Get the first day of this dates month
      */
-    public static function getYearStart(\DateTimeInterface $date = null): \DateTime
+    public static function getYearStart(?\DateTimeInterface $date = null): \DateTime
     {
         if (!$date) $date = self::create();
         return new \DateTime($date->format('Y-01-01 00:00:00'), $date->getTimezone());
@@ -343,7 +343,7 @@ class Date
      *
      * Note: Only works for dates in the past...
      */
-    public static function toRelativeString(\DateTimeInterface $date = null): string
+    public static function toRelativeString(?\DateTimeInterface $date = null): string
     {
 
         if ($date > new \DateTime()) throw new Exception('Date must be in the past.');
