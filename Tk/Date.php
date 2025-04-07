@@ -6,17 +6,17 @@ class Date
     /**
      * EG: 2009-12-31 24:59:59
      */
-    const FORMAT_ISO_DATETIME = 'Y-m-d H:i:s';
+    const string FORMAT_ISO_DATETIME = 'Y-m-d H:i:s';
 
     /**
      * EG: 2009-12-31
      */
-    const FORMAT_ISO_DATE = 'Y-m-d';
+    const string FORMAT_ISO_DATE = 'Y-m-d';
 
     /**
      * EG: 24:59:59
      */
-    const FORMAT_ISO_TIME = 'H:i:s';
+    const string FORMAT_ISO_TIME = 'H:i:s';
 
     /**
      * EG: 23 Apr 2009
@@ -208,7 +208,6 @@ class Date
         return [$start, $end];
     }
 
-
     /**
      * Set the time of a date object to 23:59:59
      */
@@ -246,7 +245,6 @@ class Date
         return new \DateTime($date->format('Y-m-'.$l.' 23:59:59'), $date->getTimezone());
     }
 
-
     /**
      * Get the first day of this dates month
      */
@@ -264,7 +262,6 @@ class Date
         if (!$date) $date = self::create();
         return new \DateTime($date->format('Y-12-31 23:59:59'), $date->getTimezone());
     }
-
 
     /**
      * Returns the difference between this date and other in days.
