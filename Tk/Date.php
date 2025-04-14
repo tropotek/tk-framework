@@ -3,98 +3,61 @@ namespace Tk;
 
 class Date
 {
-
     /**
      * EG: 2009-12-31 24:59:59
      */
-    const FORMAT_ISO_DATETIME = 'Y-m-d H:i:s';
+    const string FORMAT_ISO_DATETIME = 'Y-m-d H:i:s';
 
     /**
      * EG: 2009-12-31
      */
-    const FORMAT_ISO_DATE = 'Y-m-d';
+    const string FORMAT_ISO_DATE = 'Y-m-d';
 
     /**
      * EG: 24:59:59
      */
-    const FORMAT_ISO_TIME = 'H:i:s';
+    const string FORMAT_ISO_TIME = 'H:i:s';
 
     /**
-     * EG: Tuesday, 23 Apr 2009
+     * EG: 23 Apr 2009
      */
-    const FORMAT_LONG_DATE = 'l, j M Y';
+    const string FORMAT_LONG_DATE = 'j M Y';
 
     /**
-     * EG: Tuesday, 01 Jan 2009 12:59 PM
+     * EG: 01 Jan 2009 12:59 PM
      */
-    const FORMAT_LONG_DATETIME = 'l, j M Y h:i A';
+    const string FORMAT_LONG_DATETIME = 'j M Y h:i A';
 
     /**
      * EG: 23/09/2009 24:59:59
      */
-    const FORMAT_SHORT_DATETIME = 'd/m/Y H:i:s';
+    const string FORMAT_AU_DATETIME = 'd/m/Y H:i:s';
 
     /**
      * EG: 23/09/2009
      */
-    const FORMAT_SHORT_DATE = 'd/m/Y';
-
-    /**
-     * EG: 23 Apr 2009
-     */
-    const FORMAT_MED_DATE = 'j M Y';
-
-
-    /**
-     * EG: 2009-12-31 24:59:59
-     * @deprecated prefix with FORMAT_
-     */
-    const ISO_DATE = 'Y-m-d H:i:s';
-
-    /**
-     * EG: Tuesday, 23 Apr 2009
-     * @deprecated prefix with FORMAT_
-     */
-    const LONG_DATE = 'l, j M Y';
-
-    /**
-     * EG: Tuesday, 01 Jan 2009 12:59 PM
-     * @deprecated prefix with FORMAT_
-     */
-    const LONG_DATETIME = 'l, j M Y h:i A';
-
-    /**
-     * EG: 23/09/2009 24:59:59
-     * @deprecated prefix with FORMAT_
-     */
-    const SHORT_DATETIME = 'd/m/Y H:i:s';
-
-    /**
-     * EG: 23 Apr 2009
-     * @deprecated prefix with FORMAT_
-     */
-    const MED_DATE = 'j M Y';
+    const string FORMAT_AU_DATE = 'd/m/Y';
 
     /**
      * An hour in seconds (60*60)
      */
-    const HOUR = 3600;
+    const int HOUR = 3600;
 
     /**
      * A Day in seconds (HOUR*24)
      */
-    const DAY = 86400;
+    const int DAY = 86400;
 
     /**
      * A Week in seconds (DAY*7)
      */
-    const WEEK = 604800;
+    const int WEEK = 604800;
 
 
     /**
-     * Use this to format form dates, change it in the script bootstrap if required
+     * default AU format to create date objects from formats
      */
-    public static string $FORM_FORMAT = 'd/m/Y';
+    public static string $AU_FORMAT = 'd/m/Y';
 
     /**
      * Month end days.
@@ -149,7 +112,7 @@ class Date
                 $timezone = new \DateTimeZone(date_default_timezone_get());
             }
             if (!$format) {
-                $format = self::$FORM_FORMAT;
+                $format = self::$AU_FORMAT;
             }
             $date = \DateTime::createFromFormat($format, $dateStr);
             if (!$date && str_ends_with($dateStr, 'Z')) {   // could be ISO format of: 2020-11-23T01:20:27.164Z
@@ -231,12 +194,12 @@ class Date
      * Get the financial year of supplied date
      * [$start, $end] = Tk\Date::getFinancialYear($date);
      */
-    public static function getFinancialYear(\DateTimeInterface $date = null): array
+    public static function getFinancialYear(?\DateTimeInterface $date = null): array
     {
         if (!$date) $date = self::create();
         $year = (int)$date->format('Y');
         $month = (int)$date->format('n');
-        if ($month < 7) {
+        if ($month < 6) {
             $year--;
         }
         $start = new \DateTime($year.'-07-01 00:00:00', $date->getTimezone());
@@ -244,7 +207,6 @@ class Date
 
         return [$start, $end];
     }
-
 
     /**
      * Set the time of a date object to 23:59:59
@@ -283,11 +245,10 @@ class Date
         return new \DateTime($date->format('Y-m-'.$l.' 23:59:59'), $date->getTimezone());
     }
 
-
     /**
      * Get the first day of this dates month
      */
-    public static function getYearStart(\DateTimeInterface $date = null): \DateTime
+    public static function getYearStart(?\DateTimeInterface $date = null): \DateTime
     {
         if (!$date) $date = self::create();
         return new \DateTime($date->format('Y-01-01 00:00:00'), $date->getTimezone());
@@ -301,7 +262,6 @@ class Date
         if (!$date) $date = self::create();
         return new \DateTime($date->format('Y-12-31 23:59:59'), $date->getTimezone());
     }
-
 
     /**
      * Returns the difference between this date and other in days.
@@ -380,7 +340,7 @@ class Date
      *
      * Note: Only works for dates in the past...
      */
-    public static function toRelativeString(\DateTimeInterface $date = null): string
+    public static function toRelativeString(?\DateTimeInterface $date = null): string
     {
 
         if ($date > new \DateTime()) throw new Exception('Date must be in the past.');
