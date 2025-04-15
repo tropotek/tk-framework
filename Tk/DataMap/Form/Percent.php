@@ -21,7 +21,7 @@ class Percent extends DataTypeInterface
     public function getColumnValue(object $object): string
     {
         $value = parent::getColumnValue($object);
-        if ($value > 0 && $value < 1) $value = ($value*100);
+        if ($value >= 0 && $value <= 1) $value = ($value*100);
         return strval($value);
     }
 
