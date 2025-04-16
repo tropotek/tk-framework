@@ -64,7 +64,7 @@ class Db
 	/**
 	 * remembers current DSN and timezone, connects to database with passed DSN
 	 */
-	public static function push_dsn(string $dsn, array $options = []): void
+	public static function pushDsn(string $dsn, array $options = []): void
 	{
 		self::$dsn_stack[] = [self::$dsn, self::$options, self::$timezone];
 		self::connect($dsn, $options);
@@ -73,7 +73,7 @@ class Db
 	/**
 	 * pops DSN and timezone from stack and connects to database
 	 */
-	public static function pop_dsn(): void
+	public static function popDsn(): void
 	{
 		assert(count(self::$dsn_stack) > 0, "no pushed DSN to pop");
 		[$dsn, $options, $timezone] = array_pop(self::$dsn_stack);
