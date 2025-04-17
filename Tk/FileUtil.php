@@ -146,6 +146,7 @@ class FileUtil
      * It will return much larger numbers than you would have been seeing with
      * any of the other suggestions, but I think they are much more realistic
      *
+     * Get the total disk space usage of a directory
      */
     public static function diskSpace(string $path): int
     {

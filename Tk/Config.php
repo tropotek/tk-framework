@@ -105,7 +105,7 @@ class Config extends Collection
      * This method will strip the trailing slash.
      * If no DIRECTORY_SEPARATOR is at the beginning of the $path one will be prepended
      */
-    public static function makePath(string $path): string
+    public static function makePath(string $path = ''): string
     {
         $path = FileUtil::getRealPath($path);
         $path = rtrim($path, DIRECTORY_SEPARATOR);
@@ -113,7 +113,7 @@ class Config extends Collection
         return self::getBasePath() . $path;
     }
 
-    public static function makeDataPath(string $path, bool $isPrivate = false): string
+    public static function makeDataPath(string $path = '', bool $isPrivate = false): string
     {
         $sysPath = self::getDataPath();
         if ($isPrivate) {
