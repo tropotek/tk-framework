@@ -220,26 +220,29 @@ class Color
 
     /**
      * Get decimal Red
+     * @return int<0,255>
      */
     public function getRed(): int
     {
-        return $this->red;
+        return (int)max(min(255, $this->red), 0);
     }
 
     /**
      * Get decimal Green
+     * @return int<0,255>
      */
     public function getGreen(): int
     {
-        return $this->green;
+        return (int)max(min(255, $this->green), 0);
     }
 
     /**
      * Get decimal Blue
+     * @return int<0,255>
      */
     public function getBlue(): int
     {
-        return $this->blue;
+        return (int)max(min(255, $this->blue), 0);
     }
 
     /**
@@ -248,7 +251,7 @@ class Color
      */
     public function getAlpha(): float
     {
-        return $this->alpha;
+        return (float)max(min(1, $this->alpha), 0);
     }
 
 
@@ -390,7 +393,7 @@ class Color
     /**
      * Returns colored string for use in CLI scripts
      */
-    public static function getCliString(string $string, ?string $foregroundColor = null, string $backgroundColor = null): string
+    public static function getCliString(string $string, ?string $foregroundColor = null, ?string $backgroundColor = null): string
     {
         $cString = '';
         if (isset(self::$cliFgColorChart[$foregroundColor])) {  // Check if given foreground color found

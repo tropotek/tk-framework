@@ -7,12 +7,14 @@ class Image
     const string URI_PIXEL_WHITE = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=';
     const string URI_PIXEL_BLACK = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
 
-    private string    $currentMem = '16M';
+    //private string    $currentMem = '16M';
     private ?\GdImage $image = null;
     private string    $filename = '';
     private array     $originalInfo = [];
-    private int       $width = 0;
-    private int       $height = 0;
+    /** @var int<1,max> $width  */
+    private int       $width = 100;
+    /** @var int<1,max> $height  */
+    private int       $height = 100;
 
 
     public function __construct(?string $filename = null)
@@ -36,7 +38,7 @@ class Image
     public static function createBlankPng(int $width = 256, int $height = 256, ?Color $bgColor = null): self
     {
         $obj = new self();
-        $obj->image = imagecreatetruecolor($width, $height);
+        $obj->image = imagecreatetruecolor((int)max(1,$width), (int)max(1, $height));
         imagealphablending($obj->image, false);
         imageantialias($obj->image, true);
         $transparent = intval(imagecolorallocatealpha($obj->image, 0, 0, 0, 127));
@@ -138,8 +140,8 @@ class Image
             'mime' => $info['mime']
         ];
 
-        $this->width = $info[0];
-        $this->height = $info[1];
+        $this->width = max(1, $info[0]);
+        $this->height = max(1, $info[1]);
 
         return $this;
     }
@@ -395,6 +397,9 @@ class Image
      */
     public function resize(int $width, int $height): self
     {
+        if ($width < 1 || $height < 1) {
+            throw new Exception("Width and height must be at least 1");
+        }
 
         $new = imagecreatetruecolor($width, $height);
         imagealphablending($new, false);
@@ -415,7 +420,7 @@ class Image
     {
         $aspect_ratio = $this->height / $this->width;
         $height = $width * $aspect_ratio;
-        return $this->resize($width, $height);
+        return $this->resize($width, (int)$height);
     }
 
     /**
@@ -455,7 +460,7 @@ class Image
             $width = $height / $aspectRatio;
         }
 
-        return $this->resize(intval($width), $height);
+        return $this->resize(intval($width), (int)$height);
     }
 
     /**
@@ -468,8 +473,8 @@ class Image
             list($x1, $x2) = [$x2, $x1];
         if ($y2 < $y1)
             list($y1, $y2) = [$y2, $y1];
-        $cropWidth = $x2 - $x1;
-        $cropHeight = $y2 - $y1;
+        $cropWidth = max(1, $x2 - $x1);
+        $cropHeight = max(1, $y2 - $y1);
 
         $new = imagecreatetruecolor($cropWidth, $cropHeight);
         imagealphablending($new, false);
@@ -715,7 +720,7 @@ class Image
                 $y = ($this->height / 2) - ($overlay->height / 2) + $yOffset;
                 break;
         }
-        $this->imagecopymergeAlpha($this->image, $overlay->image, $x, $y, 0, 0, $overlay->width, $overlay->height, $opacity);
+        $this->imagecopymergeAlpha($this->image, $overlay->image, (int)$x, (int)$y, 0, 0, $overlay->width, $overlay->height, $opacity);
         return $this;
     }
 
@@ -834,6 +839,9 @@ class Image
      */
     private function imagecopymergeAlpha(\GdImage $dst_im, \GdImage $src_im, int $dst_x, int $dst_y, int $src_x, int $src_y, int $src_w, int $src_h, int $pct): bool
     {
+        if ($src_w < 1 || $src_h < 1) {
+            return false;
+        }
         $cut = imagecreatetruecolor($src_w, $src_h);
         imagecopy($cut, $dst_im, 0, 0, $dst_x, $dst_y, $src_w, $src_h);
         imagecopy($cut, $src_im, 0, 0, $src_x, $src_y, $src_w, $src_h);
@@ -857,44 +865,44 @@ class Image
     /**
      * Use this to set the memory allocation for image resizing
      */
-    private function memAlloc(): bool
-    {
-        $this->currentMem = ini_get('memory_limit');
-        $imageInfo = getimagesize($this->filename);
-        if (!isset($imageInfo['bits']) || !isset($imageInfo['channels'])) {
-            if (ini_set( 'memory_limit', '128M' ) === false) {
-                return false;
-            }
-            return true;
-        }
-        $MB = 1048576;  // number of bytes in 1M
-        $K64 = 65536;    // number of bytes in 64K
-        $TWEAKFACTOR = 3.5;  // Or whatever works for you
-        $memoryNeeded = round( ( $imageInfo[0] * $imageInfo[1]
-                                               * $imageInfo['bits']
-                                               * $imageInfo['channels'] / 8
-                                 + $K64
-                               ) * $TWEAKFACTOR
-                             );
-
-        $memoryLimit = intval(ini_get('memory_limit')) * $MB;
-        if (function_exists('memory_get_usage') && memory_get_usage() + $memoryNeeded > $memoryLimit) {
-            $newLimit = $memoryLimit + ceil((memory_get_usage() + $memoryNeeded - $memoryLimit) / $MB);
-            if (ini_set( 'memory_limit', $newLimit . 'M' ) === false) {
-                return false;
-            }
-            return true;
-        } else {
-            return false;
-        }
-    }
+//    private function memAlloc(): bool
+//    {
+//        $this->currentMem = ini_get('memory_limit');
+//        $imageInfo = getimagesize($this->filename);
+//        if (!isset($imageInfo['bits']) || !isset($imageInfo['channels'])) {
+//            if (ini_set( 'memory_limit', '128M' ) === false) {
+//                return false;
+//            }
+//            return true;
+//        }
+//        $MB = 1048576;  // number of bytes in 1M
+//        $K64 = 65536;    // number of bytes in 64K
+//        $TWEAKFACTOR = 3.5;  // Or whatever works for you
+//        $memoryNeeded = round( ( $imageInfo[0] * $imageInfo[1]
+//                                               * $imageInfo['bits']
+//                                               * $imageInfo['channels'] / 8
+//                                 + $K64
+//                               ) * $TWEAKFACTOR
+//                             );
+//
+//        $memoryLimit = intval(ini_get('memory_limit')) * $MB;
+//        if (function_exists('memory_get_usage') && memory_get_usage() + $memoryNeeded > $memoryLimit) {
+//            $newLimit = $memoryLimit + ceil((memory_get_usage() + $memoryNeeded - $memoryLimit) / $MB);
+//            if (ini_set( 'memory_limit', $newLimit . 'M' ) === false) {
+//                return false;
+//            }
+//            return true;
+//        } else {
+//            return false;
+//        }
+//    }
 
     /**
      * Reset the memory allocation back to the default value
      */
-    private function memReset(): void
-    {
-        ini_set('memory_limit', $this->currentMem);
-    }
+//    private function memReset(): void
+//    {
+//        ini_set('memory_limit', $this->currentMem);
+//    }
 }
 

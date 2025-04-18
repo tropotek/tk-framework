@@ -159,11 +159,10 @@ class Date
 
     /**
      * Use this function to find the next date
-     * TODO: Add more description and examples
      *
      * @param string $frequency ['weekly', 'fortnightly', 'monthly']
      */
-    public static function getPeriodDates(string $frequency, \DateTimeInterface $dateStart, ?\DateTimeInterface $dateEnd = null): array
+    public static function getPeriodDates(string $frequency, \DateTime|\DateTimeImmutable $dateStart, null|\DateTime|\DateTimeImmutable $dateEnd = null): array
     {
         //$start_date is string e.g 06-23-2016
         //$frequency is also string e.g weekly, fortnightly, monthly

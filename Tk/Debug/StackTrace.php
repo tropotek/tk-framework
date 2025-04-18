@@ -57,7 +57,7 @@ class StackTrace {
                         $o = 'Array['.count($o).']';
                     }
                     if ($o === null) $o = '{null}';
-                    if (is_string($o) || $o == '') $o = "'" . str_replace(["\n", "\r"], ' ', substr($o, 0, 32)) . "'";
+                    if (is_string($o) || $o == '') $o = "'" . str_replace(["\n", "\r"], ' ', substr((string)$o, 0, 32)) . "'";
                     $astr .= $o . ', ';
                 }
             }

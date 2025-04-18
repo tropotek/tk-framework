@@ -11,9 +11,13 @@ class Str
      * Strip tag attributes and their values from html
      * By default the $attrs contains tag events
      */
-    public static function stripAttrs(string $str, ?array $attrs = null): string
+    public static function stripAttrs(string $str, null|array|string $attrs = null): string
     {
-        if ($attrs === null)
+        if (is_string($attrs)) {
+            $attrs = explode(',', $attrs);
+        }
+
+        if ($attrs === null) {
             $attrs = ['onabort', 'onactivate', 'onafterprint', 'onafterupdate', 'onbeforeactivate', 'onbeforecopy',
                 'onbeforecut', 'onbeforedeactivate', 'onbeforeeditfocus', 'onbeforepaste', 'onbeforeprint', 'onbeforeunload',
                 'onbeforeupdate', 'onblur', 'onbounce', 'oncellchange', 'onchange', 'onclick', 'oncontextmenu',
@@ -25,9 +29,7 @@ class Str
                 'onmove', 'onmoveend', 'onmovestart', 'onpaste', 'onpropertychange', 'onreadystatechange', 'onreset',
                 'onresize', 'onresizeend', 'onresizestart', 'onrowexit', 'onrowsdelete', 'onrowsinserted', 'onscroll',
                 'onselect', 'onselectionchange', 'onselectstart', 'onstart', 'onstop', 'onsubmit', 'onunload'];
-
-        if (!is_array($attrs))
-            $attrs = explode(",", $attrs);
+        }
 
         foreach ($attrs as $at) {
             $reg = "/(<.*)( $at=\"([^\".]*)\")(.*>)/i";

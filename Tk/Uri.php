@@ -312,7 +312,7 @@ class Uri implements UriInterface
         return $fullUri;
     }
 
-    public function toRelativeString()
+    public function toRelativeString(): string
     {
         if ($this->isDataScheme($this->spec)) return $this->spec;
 
@@ -427,9 +427,10 @@ class Uri implements UriInterface
         return !(empty($host) || !preg_match($full, $host));
     }
 
-    protected function validatePort(int $port): bool
+    protected function validatePort(?int $port = null): bool
     {
-        return is_int($port) || !(empty($port) || !preg_match(self::PORT_REGEX_PATTERN, $port));
+        if (empty($port)) return true;
+        return (1 === preg_match(self::PORT_REGEX_PATTERN, (string)$port));
     }
 
     protected function validatePath(string $path): bool

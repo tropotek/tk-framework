@@ -12,7 +12,7 @@ class DbStatement extends \PDOStatement
     {
         try {
             // remove any params not in query
-            if (!is_null($params)) {
+            if (is_array($params)) {
                 $p = [];
                 foreach ($params as $k => $v) {
                     if (str_contains($this->queryString, ":$k")) $p[$k] = $v;

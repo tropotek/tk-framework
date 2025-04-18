@@ -1,6 +1,7 @@
 <?php
 namespace Tk\Db;
 
+use Tk\Config;
 use Tk\DataMap\Db\DateTime;
 use Tk\Money;
 use Tk\ObjectUtil;
@@ -192,8 +193,9 @@ abstract class Model
             if (!property_exists($name, $meta->name_camel)) continue;
             $prop = new \ReflectionProperty(static::class, $meta->name_camel);
 
-            if ($prop->getType()->getName() == Money::class) {
-                $meta->php_type = $prop->getType()->getName();
+            $typeName = (string)$prop->getType();
+            if ($typeName == Money::class) {
+                $meta->php_type = $typeName;
             }
 
             $type = DataMap::makeDbType($meta);
@@ -212,7 +214,7 @@ abstract class Model
                 $type->setAccess(DataMap::READ);
             }
 
-            if ($type instanceof DateTime && $prop->getType()->getName() == 'DateTimeImmutable') {
+            if ($type instanceof DateTime && $typeName == 'DateTimeImmutable') {
                 $type->setImmutable(true);
             }
 
@@ -237,8 +239,8 @@ abstract class Model
         $props = $reflect->getProperties(\ReflectionProperty::IS_PUBLIC | \ReflectionProperty::IS_PROTECTED);
         foreach ($props as $prop) {
             if (str_starts_with($prop->getName(), '_') || $prop->isStatic()) continue;
-            /** @phpstan-ignore-next-line */
-            $type = DataMap::makeFormType($prop->getType()->getName(), $prop->getName());
+            $typeName = (string)$prop->getType();
+            $type = DataMap::makeFormType($typeName, $prop->getName());
             $type->setNullable($prop->getType()->allowsNull());
 
             if ($primaryId == $prop->getName()) {
@@ -274,6 +276,14 @@ abstract class Model
     public static function hasMap(string $name): bool
     {
         return array_key_exists($name, self::$_MAPS);
+    }
+
+    public function getDataPath(): string
+    {
+        if (property_exists($this, 'dataPath')) {
+            return $this->dataPath;
+        }
+        return Config::instance()->get('path.data', '/data');
     }
 
 }

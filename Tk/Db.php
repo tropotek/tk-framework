@@ -198,6 +198,7 @@ class Db
 
     /**
      * substitute arrays for prepared statements items
+     * @param-out array $params
      */
     public static function prepareQuery(string &$query, array|object|null &$params = null): void
     {
@@ -536,8 +537,8 @@ class Db
         $total = 0;
         $cSql = $sql;   // query without limit/offset
         if (preg_match('/(.*)?(LIMIT\s([0-9]+)((\s+OFFSET\s)?|(,\s?)?)([0-9]+)?)+$/is', trim($sql), $match)) {
-            $cSql = trim($match[1] ?? '');
-            $limit = (int)($match[3] ?? 0);
+            $cSql = trim($match[1]);
+            $limit = (int)($match[3]);
             $offset = (int)($match[7] ?? 0);
         }
 

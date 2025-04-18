@@ -12,8 +12,8 @@ use Tk\Uri;
 class Link extends DomElement
 {
 
-    const ICON_LEFT = 'left';
-    const ICON_RIGHT = 'right';
+    const string ICON_LEFT = 'left';
+    const string ICON_RIGHT = 'right';
 
     protected string $text = '';
 
@@ -24,7 +24,7 @@ class Link extends DomElement
      */
     protected string $icon = '';
 
-    public function __construct(string $text = '', string|Uri $url = null)
+    public function __construct(string $text = '', null|string|Uri $url = null)
     {
         $this->setText($text);
         $this->setAttr('title', $text);
@@ -58,7 +58,7 @@ class Link extends DomElement
         return $this->icon;
     }
 
-    public function setIcon(string $icon, string $iconPosition = null): static
+    public function setIcon(string $icon, ?string $iconPosition = null): static
     {
         $this->icon = $icon;
         if ($iconPosition) $this->setIconPosition($iconPosition);

@@ -20,14 +20,14 @@ trait AttributesTrait
      * NOTE: setting the 'class' attribute manually will overwrite
      * any class values set using the setCss() functions
      */
-    public function setAttr(array|string $name, string $value = null): static
+    public function setAttr(array|string $name, null|string|int|float $value = null): static
     {
         if (is_array($name)) {
             $this->_attrList = $this->_attrList + $name;
         } else {
             $name = strip_tags(trim($name));
             //$this->_attrList[$name] = $this->escapeAttr($value ?? $name); // interferes with htmx urls
-            $this->_attrList[$name] = ($value ?? $name);
+            $this->_attrList[$name] = is_null($value) ? $name : (string)$value;
         }
         return $this;
     }

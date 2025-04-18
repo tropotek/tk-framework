@@ -48,7 +48,7 @@ function data_attr(array $array): string
 function truefalse(null|bool|string $val): ?bool
 {
     if (is_null($val) || $val === '') return null;
-	if (empty($val)) return false;
+	if (is_bool($val)) return $val;
 	return boolval(preg_match('/^(y|yes|1|ok|true)$/i', $val));
 }
 
