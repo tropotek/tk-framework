@@ -75,7 +75,7 @@ class Auth
      * The salt is usually a unique user hash.
      * Store this in the user table and compare against on login
      */
-    public static function hashPassword(string $pwd, string $salt = null, string $algo = 'md5'): string
+    public static function hashPassword(string $pwd, ?string $salt = null, string $algo = 'md5'): string
     {
         $str = $pwd;
         if ($salt) $str .= $salt;

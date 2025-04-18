@@ -131,7 +131,7 @@ class Color
         $this->green = $green;
         $this->blue  = $blue;
         $this->alpha = $alpha;
-        
+
         return $this;
     }
 
@@ -390,7 +390,7 @@ class Color
     /**
      * Returns colored string for use in CLI scripts
      */
-    public static function getCliString(string $string, string $foregroundColor = null, string $backgroundColor = null): string
+    public static function getCliString(string $string, ?string $foregroundColor = null, string $backgroundColor = null): string
     {
         $cString = '';
         if (isset(self::$cliFgColorChart[$foregroundColor])) {  // Check if given foreground color found
