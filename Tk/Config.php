@@ -20,6 +20,9 @@ class Config extends Collection
         $this->set('base.url', System::discoverBaseUrl());
 
         // default system paths
+        // NOTE: When changing the /data/private path
+        //       be sure to also deny access with .htaccess
+        //       or in your apache conf files
         $this->set('path.data',       '/data');
         $this->set('path.cache',      '/data/private/cache');
         $this->set('path.temp',       '/data/private/tmp');
