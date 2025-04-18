@@ -193,7 +193,15 @@ abstract class Model
             if (!property_exists($name, $meta->name_camel)) continue;
             $prop = new \ReflectionProperty(static::class, $meta->name_camel);
 
-            $typeName = (string)$prop->getType();
+            /**
+             * TODO: Looks like ReflectionType::getName() is deprecated
+             *       The API here is odd! Will re-visit this code when PHP gets its
+             *       reflection shit together.
+             */
+            //$typeName = (string)$prop->getType();
+            /** @phpstan-ignore-next-line  */
+            $typeName = $prop->getType()->getName();
+
             if ($typeName == Money::class) {
                 $meta->php_type = $typeName;
             }
@@ -239,7 +247,12 @@ abstract class Model
         $props = $reflect->getProperties(\ReflectionProperty::IS_PUBLIC | \ReflectionProperty::IS_PROTECTED);
         foreach ($props as $prop) {
             if (str_starts_with($prop->getName(), '_') || $prop->isStatic()) continue;
-            $typeName = (string)$prop->getType();
+
+            /** TODO: see above comment */
+            //$typeName = (string)$prop->getType();
+            /** @phpstan-ignore-next-line  */
+            $typeName = $prop->getType()->getName();
+
             $type = DataMap::makeFormType($typeName, $prop->getName());
             $type->setNullable($prop->getType()->allowsNull());
 
