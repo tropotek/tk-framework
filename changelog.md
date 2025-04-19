@@ -1,5 +1,29 @@
 #CHANGELOG#
 
+Ver 8.0.58 [2025-04-20]:
+-------------------------------
+  - Added migration cli cmd
+  - Merge branch '8.0' of https://github.com/tropotek/tk-framework into 8.0
+  - Added hx files componenet
+  - Added weight field calc
+  - Added Client component
+  - Added path case manager and filters
+  - Add final models and tables
+  - Added the bloody TOC code
+  - Added students and updated settings
+  - update all HTMX components
+  - fix template logging
+  - Added storage locations
+  - Fix breadcrumbs
+  - Added mail log system
+  - Fix migration error messages
+  - remove old Crumbs object
+  - Add checkSelect field and persistand form fields
+  - update form select options
+  - Updated table and action classes
+  - Added orderBy table cell
+
+
 Ver 8.0.56 [2024-11-08]:
 -------------------------------
   - Update date fields for objects
