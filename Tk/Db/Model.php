@@ -78,7 +78,7 @@ abstract class Model
     public function reload(): void
     {
         Db::$LOG = false;
-        $map = $this->getDataMap();
+        $map = static::getDataMap();
         $priKey = $map->getPrimaryKey()?->getProperty();
         if (is_null($priKey)) {
             Db::$LOG = true;
