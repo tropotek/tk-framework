@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 8.0.60 [2025-04-20]:
+-------------------------------
+  - Added qr-code reader/scanner
+
+
 Ver 8.0.58 [2025-04-20]:
 -------------------------------
   - Added migration cli cmd
