@@ -72,8 +72,35 @@ class Uri implements UriInterface
     private string $fragment = '';
 
 
-    public function __construct(string $uri = '', array $queryParams = [])
+    public function __construct(?string $uri = null, array $queryParams = [])
     {
+        // Build a request URI
+        if (is_null($uri)) {
+            $uri = '/';
+            if (isset($_SERVER['REQUEST_URI'])) {
+                $uri = $_SERVER['REQUEST_URI'];
+                if (!empty($_SERVER['QUERY_STRING']) && !str_contains($uri, '?')) {
+                    $uri .= '?' . $_SERVER['QUERY_STRING'];
+                }
+            }
+        }
+
+        // Prepend site base path if this is a relative Uri path only
+        if (
+            //!empty(trim(self::$BASE_PATH, '/')) &&
+            str_starts_with($uri, '/') &&       // spec starts with a path
+            !str_starts_with($uri, '//')        // ignore urls without scheme
+        ) {
+            if (str_starts_with($uri, self::$BASE_PATH)) {
+                $uri = substr($uri, strlen(self::$BASE_PATH));
+            }
+            $uri = ($_SERVER['REQUEST_SCHEME'] ?? 'https') . '://' .
+                self::$SITE_HOST .
+                self::$BASE_PATH . '/' .
+                trim($uri, '/');
+        }
+
+        // finalize the Uri
         $this->spec = $uri;
         $this->init($uri);
         $this->set($queryParams);
@@ -92,33 +119,6 @@ class Uri implements UriInterface
     public static function create(string|Uri|null $uri = null, array $queryParams = []): self
     {
         if ($uri instanceof Uri) return clone $uri;
-
-        // Build a request URI
-        if (is_null($uri)) {
-            $uri = '/';
-            if (isset($_SERVER['REQUEST_URI'])) {
-                $uri = $_SERVER['REQUEST_URI'];
-                if (!empty($_SERVER['QUERY_STRING']) && !str_contains($uri, '?')) {
-                    $uri .= '?' . $_SERVER['QUERY_STRING'];
-                }
-            }
-        }
-
-        // Prepend site base path if this is a relative Uri path only
-        if (
-            !empty(trim(self::$BASE_PATH, '/')) &&
-            str_starts_with($uri, '/') &&       // spec starts with a path
-            !str_starts_with($uri, '//')        // ignore urls without scheme
-        ) {
-            if (str_starts_with($uri, self::$BASE_PATH)) {
-                $uri = substr($uri, strlen(self::$BASE_PATH));
-            }
-            $uri = ($_SERVER['REQUEST_SCHEME'] ?? 'https') . '://' .
-                self::$SITE_HOST .
-                self::$BASE_PATH . '/' .
-                trim($uri, '/');
-        }
-
         return new self($uri, $queryParams);
     }
 
