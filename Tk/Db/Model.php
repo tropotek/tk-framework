@@ -32,11 +32,10 @@ abstract class Model
         if ($fkey == self::class || !class_exists($fkey)) {
             throw new \Tk\Exception("Invalid model class");
         }
-        $model = null;
         if (method_exists($fkey, 'find')) {
-            $model = $fkey::find($fid);
+            return $fkey::find($fid);
         }
-        return $model;
+        return null;
     }
 
     /**
@@ -91,6 +90,7 @@ abstract class Model
             /** @phpstan-ignore-next-line */
             $obj = static::find($id);
         } else {
+            // TODO: this could be a potential issue if the constructor requires params
             /** @phpstan-ignore-next-line */
             $obj = new static();
         }
@@ -110,7 +110,7 @@ abstract class Model
      */
     public function getId(): int
     {
-        $priKey = self::getPrimaryProperty();
+        $priKey = static::getPrimaryProperty();
         if (empty($priKey)) return 0;
         return intval($this->$priKey ?? 0);
     }
@@ -120,17 +120,17 @@ abstract class Model
      */
     public function getPrimaryKey(): string
     {
-        return self::getPrimaryProperty();
+        return static::getPrimaryProperty();
     }
 
     public static function getPrimaryProperty(): string
     {
-        return self::getDataMap()->getPrimaryKey()?->getProperty() ?? '';
+        return static::getDataMap()->getPrimaryKey()?->getProperty() ?? '';
     }
 
     public static function getPrimaryColumn(): string
     {
-        return self::getDataMap()->getPrimaryKey()?->getColumn() ?? '';
+        return static::getDataMap()->getPrimaryKey()?->getColumn() ?? '';
     }
 
     /**
@@ -146,7 +146,7 @@ abstract class Model
      */
     public static function getDbView(): string
     {
-        $table = self::getDbTable();
+        $table = static::getDbTable();
         $view = "v_{$table}";
         if (Db::tableExists($view)) return $view;
         return '';
@@ -166,8 +166,8 @@ abstract class Model
     public static function getDataMap(): DataMap
     {
         $name = static::class;
-        if (self::hasMap($name)) {
-            return self::getMap($name);
+        if (static::hasMap($name)) {
+            return static::getMap($name);
         }
         Db::$LOG = false;
 
@@ -229,14 +229,14 @@ abstract class Model
             $map->addType($type);
         }
 
-        self::setMap($name, $map);
+        static::setMap($name, $map);
         return $map;
     }
 
     public static function getFormMap(): DataMap
     {
         $name = 'form_'. static::class;
-        if (self::hasMap($name)) return self::getMap($name);
+        if (static::hasMap($name)) return static::getMap($name);
 
         Db::$LOG = false;
 
@@ -269,7 +269,7 @@ abstract class Model
 
             $map->addType($type);
         }
-        self::setMap($name, $map);
+        static::setMap($name, $map);
 
         Db::$LOG = true;
 

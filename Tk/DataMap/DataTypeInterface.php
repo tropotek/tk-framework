@@ -43,7 +43,7 @@ abstract class DataTypeInterface
         $this->column = $column ?: $property;
     }
 
-    public function setAccess(int $access): self
+    public function setAccess(int $access): static
     {
         $this->access = $access;
         return $this;

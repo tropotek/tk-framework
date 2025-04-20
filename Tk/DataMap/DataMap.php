@@ -41,7 +41,7 @@ class DataMap
      * If the property does not exist in the object the type`s value is added to
      * the object as a dynamic property. If DataMap::dynamicProperties is set to true.
      */
-    public function loadObject(object $object, array $srcArray, int $access = self::READ): DataMap
+    public function loadObject(object $object, array $srcArray, int $access = self::READ): self
     {
         foreach ($srcArray as $key => $value) {
             $type = $this->getTypeByColumn($key);
@@ -62,7 +62,7 @@ class DataMap
     /**
      * Using the DataMap load an array with the values from an object
      */
-    public function loadArray(array &$array, object $srcObject, int $access = self::WRITE): DataMap
+    public function loadArray(array &$array, object $srcObject, int $access = self::WRITE): self
     {
         foreach ($this->propertyTypes as $type) {
             if (!$type->hasAccess($access)) continue;
