@@ -145,10 +145,31 @@ class Mailer
             if (($this->params['env.type'] ?? '') == 'dev') {
 
                 //$this->mailer->SMTPDebug = 2;
+                $debugMsg  = 'To: ' . Message::listToStr($message->getTo()) . "\n";
+                $debugMsg .= 'From: ' . $message->getFrom() . "\n";
+                if ($message->getReplyTo()) {
+                    $debugMsg .= 'Reply-To: ' . $message->getReplyTo() . "\n";
+                }
+                if (count($message->getCc())) {
+                    $debugMsg .= 'Cc: ' . Message::listToStr($message->getCc()) . "\n";
+                }
+                if (count($message->getBcc())) {
+                    $debugMsg .= 'Bcc: ' . Message::listToStr($message->getBcc()) . "\n";
+                }
+                $this->mailer->Body =
+                    sprintf('<pre style="background-color: #EFEFEF; border: 1px solid #CCC;padding: 0.5em;">%s</pre>', $debugMsg) .
+                    $this->mailer->Body;
+
                 $message->addHeader('X-Debug-To', Message::listToStr($message->getTo()));
                 $message->addHeader('X-Debug-From', $message->getFrom());
                 if ($message->getReplyTo()) {
                     $message->addHeader('X-Debug-Reply-To', $message->getReplyTo());
+                }
+                if (count($message->getCc())) {
+                    $message->addHeader('X-Debug-Cc', Message::listToStr($message->getCc()));
+                }
+                if (count($message->getBcc())) {
+                    $message->addHeader('X-Debug-Bcc', Message::listToStr($message->getBcc()));
                 }
 
                 // Set debug recipient and sender
@@ -171,13 +192,6 @@ class Mailer
                 }
 
                 $this->mailer->setFrom($testEmail, 'Debug From');
-
-                if (count($message->getCc())) {
-                    $message->addHeader('X-Debug-Cc', Message::listToStr($message->getCc()));
-                }
-                if (count($message->getBcc())) {
-                    $message->addHeader('X-Debug-Bcc', Message::listToStr($message->getBcc()));
-                }
             } else {        // Send live emails
                 $email = $message->getFrom();
                 list($e, $n) = Message::splitEmail($email);
