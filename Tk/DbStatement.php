@@ -48,23 +48,27 @@ class DbStatement extends \PDOStatement
         if (!class_exists($classname)) {
             throw new Db\Exception("class name '{$classname}' does not exist");
         }
+
+        // disable DB query log for Db::countTotalRows() to work correctly
+        $olog = Db::$LOG;
         Db::$LOG = false;
         $obj = new $classname;
 
         // use PDO mapping if class is not a DbModel object
         if (!($obj instanceof Model)) {
-            Db::$LOG = true;
-            return $this->fetchObject($classname);
+            $obj = $this->fetchObject($classname);
+            Db::$LOG = $olog;
+            return $obj;
         }
 
         $row = $this->fetch(\PDO::FETCH_ASSOC);
         if ($row === false) {
-            Db::$LOG = true;
+            Db::$LOG = $olog;
             return false;
         }
 
         $obj->__map($row);
-        Db::$LOG = true;
+        Db::$LOG = $olog;
 
         return $obj;
     }

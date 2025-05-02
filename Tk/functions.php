@@ -53,6 +53,23 @@ function truefalse(null|bool|string $val): ?bool
 }
 
 /**
+ * summarizes multi-line string as <summary> and <detail> elements
+ */
+function summarize(?string $s, bool $nl2br=true, string $class=''): string
+{
+	if (empty($s)) return '';
+	$s = trim($s);
+	$lines = explode("\n", $s);
+	if (count($lines) === 1) return $s;
+	$summary = e(array_shift($lines));
+	$details = e(trim(implode("\n", $lines)));
+	if ($nl2br) {
+		$details = nl2br($details);
+	}
+	return sprintf("<details class=\"%s\"><summary>%s\n</summary>%s</details>", $class, $summary, $details);
+}
+
+/**
  * replace accented characters with ASCII equivalents in a filename string
  */
 function sanitize_filename(?string $filename): string

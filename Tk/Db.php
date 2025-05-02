@@ -131,14 +131,35 @@ class Db
         return self::$pdo;
     }
 
+    private static function setLastInsertId(int $id): void
+    {
+        if(self::$LOG) {
+            self::$lastId = $id;
+        }
+    }
+
     public static function getLastInsertId(): int
     {
         return self::$lastId;
     }
 
+    private static function setLastQuery(string $query): void
+    {
+        if(self::$LOG) {
+            self::$lastQuery = $query;
+        }
+    }
+
     public static function getLastQuery(): string
     {
         return self::$lastQuery;
+    }
+
+    private static function setLastStatement(DbStatement $stm): void
+    {
+        if(self::$LOG) {
+            self::$lastStatement = $stm;
+        }
     }
 
     public static function getLastStatement(): ?DbStatement
@@ -235,7 +256,7 @@ class Db
     {
         try {
             self::prepareQuery($query, $params);
-            self::$lastQuery = $query;
+            self::setLastQuery($query);
 
             /** @var DbStatement $stm */
             $stm = self::$pdo->prepare($query);
@@ -243,7 +264,7 @@ class Db
             self::setLastStatement($stm);
 
             if (!empty(self::$pdo->lastInsertId())) {
-                self::$lastId = intval(self::$pdo->lastInsertId());
+                self::setLastInsertId(intval(self::$pdo->lastInsertId()));
             }
 
             return $stm->rowCount();
@@ -263,7 +284,7 @@ class Db
     {
         try {
             self::prepareQuery($query, $params);
-            self::$lastQuery = $query;
+            self::setLastQuery($query);
 
             /** @var DbStatement $stm */
             $stm = self::$pdo->prepare($query);
@@ -293,7 +314,7 @@ class Db
 	{
         try {
             self::prepareQuery($query, $params);
-            self::$lastQuery = $query;
+            self::setLastQuery($query);
 
             /** @var DbStatement $stm */
             $stm = self::$pdo->prepare($query);
@@ -317,7 +338,7 @@ class Db
 	{
         try {
             self::prepareQuery($query, $params);
-            self::$lastQuery = $query;
+            self::setLastQuery($query);
 
             /** @var DbStatement $stm */
             $stm = self::$pdo->prepare($query);
@@ -686,13 +707,6 @@ class Db
         $stm->execute();
 
         return $stm->rowCount();
-    }
-
-    private static function setLastStatement(DbStatement $stm): void
-    {
-        if(self::$LOG) {
-            self::$lastStatement = $stm;
-        }
     }
 
     /**
