@@ -75,6 +75,18 @@ class System
             }
         }
 
+        // check for an .htaccess mod_rewrite 'RewriteBase' path
+        if (self::isCli() && empty($baseUrl)) {
+            $htaccessFile = System::discoverBasePath() . '/.htaccess';
+            if (is_readable($htaccessFile)) {
+                $htaccess = file_get_contents($htaccessFile);
+                if ($htaccess !== false && preg_match('/\s+RewriteBase (\/.*)\s+/i', $htaccess, $regs)) {
+                    $baseUrl = $regs[1];
+                    error_log($baseUrl);
+                }
+            }
+        }
+
         return rtrim($baseUrl, '/'.\DIRECTORY_SEPARATOR);
     }
 
