@@ -82,7 +82,6 @@ class System
                 $htaccess = file_get_contents($htaccessFile);
                 if ($htaccess !== false && preg_match('/\s+RewriteBase (\/.*)\s+/i', $htaccess, $regs)) {
                     $baseUrl = $regs[1];
-                    error_log($baseUrl);
                 }
             }
         }
