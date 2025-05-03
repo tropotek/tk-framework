@@ -14,6 +14,7 @@ class CurlyMessage extends Message
 {
     use CollectionTrait;
 
+    protected string             $content = '';
     protected ?CurlyTemplate     $template = null;
     protected CallbackCollection $onParse;
 
@@ -21,7 +22,6 @@ class CurlyMessage extends Message
     {
         parent::__construct($body, $subject, $to, $from);
         $this->onParse = new CallbackCollection();
-        $this->set('content', '');
     }
 
     public static function create(string $body = '', string $subject = '', string $to = '', string $from = ''): self
@@ -31,24 +31,12 @@ class CurlyMessage extends Message
 
     /**
      * Set the content. this should be the contents of the email
-     * not to be confused with the message template.
-     * It can contain curly template vars also.
+     * not to be confused with the message body template text.
+     * It can contain curly template vars.
      */
     public function setContent(string $tpl): static
     {
-        $this->set('content', $tpl);
-        return $this;
-    }
-
-    /**
-     * The message text body
-     */
-    public function setBody(string $body): static
-    {
-        $this->body = $body;
-        $this->template = null;
-        if ($body)
-            $this->template = CurlyTemplate::create($body);
+        $this->content = $tpl;
         return $this;
     }
 
@@ -68,21 +56,10 @@ class CurlyMessage extends Message
     }
 
     /**
-     * Gets the tCurlyTemplate object
-     * This will return null until the setBody($body) function is called with data
-     */
-    public function getTemplate(): ?CurlyTemplate
-    {
-        return $this->template;
-    }
-
-    /**
      * Returns the parsed message body ready for sending.
      */
     public function getParsed(): string
     {
-        if (!$this->template) return '';
-
         $this->set('subject', $this->getSubject());
         $this->set('fromEmail', $this->getFrom());
         $this->set('toEmail', self::listToStr($this->getTo()));
@@ -91,9 +68,19 @@ class CurlyMessage extends Message
         $this->set('bccEmailList', self::listToStr($this->getBcc()));
         $this->set('date', Date::create()->format(Date::FORMAT_LONG_DATETIME));
 
-        $this->getOnParse()->execute($this);
+        // TODO: remove this once all code uses $template->setContent('')
+        if ($this->has('content')) {
+            $this->setContent($this->get('content'));
+            $this->remove('content');
+        }
 
-        return $this->template->parse($this->getCollection()->all());
+        $tpl = $this->getBody();
+        $tpl = str_replace('{content}', $this->content, $tpl);
+        $template = CurlyTemplate::create($tpl);
+
+        $this->getOnParse()->execute($this, $template);
+
+        return $template->parse($this->getCollection()->all());
     }
 
     /**
