@@ -14,7 +14,6 @@ class CurlyMessage extends Message
 {
     use CollectionTrait;
 
-    protected string             $content = '';
     protected ?CurlyTemplate     $template = null;
     protected CallbackCollection $onParse;
 
@@ -22,22 +21,6 @@ class CurlyMessage extends Message
     {
         parent::__construct($body, $subject, $to, $from);
         $this->onParse = new CallbackCollection();
-    }
-
-    public static function create(string $body = '', string $subject = '', string $to = '', string $from = ''): self
-    {
-        return new self($body, $subject, $to, $from);
-    }
-
-    /**
-     * Set the content. this should be the contents of the email
-     * not to be confused with the message body template text.
-     * It can contain curly template vars.
-     */
-    public function setContent(string $tpl): static
-    {
-        $this->content = $tpl;
-        return $this;
     }
 
     public function getOnParse(): CallbackCollection
@@ -68,14 +51,7 @@ class CurlyMessage extends Message
         $this->set('bccEmailList', self::listToStr($this->getBcc()));
         $this->set('date', Date::create()->format(Date::FORMAT_LONG_DATETIME));
 
-        // TODO: remove this once all code uses $template->setContent('')
-        if ($this->has('content')) {
-            $this->setContent($this->get('content'));
-            $this->remove('content');
-        }
-
         $tpl = $this->getBody();
-        $tpl = str_replace('{content}', $this->content, $tpl);
         $template = CurlyTemplate::create($tpl);
 
         $this->getOnParse()->execute($this, $template);
