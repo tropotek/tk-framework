@@ -4,7 +4,7 @@ namespace Tk\Db;
 use Tk\Str;
 use Tk\Table;
 
-class Filter extends \Tk\Collection
+class Query extends \Tk\Collection
 {
 
     protected string $orderBy   = '';
@@ -14,9 +14,9 @@ class Filter extends \Tk\Collection
     protected array  $where     = [];
 
 
-    public static function create(array|Filter $params = [], string $orderBy = '', ?int $limit = null, ?int $offset = null): self
+    public static function create(array|Query $params = [], string $orderBy = '', ?int $limit = null, ?int $offset = null): self
     {
-        if ($params instanceof Filter) return $params;
+        if ($params instanceof Query) return $params;
         $obj = new self();
         $obj->orderBy = preg_replace('/[^a-z0-9, _-]/i', '', $orderBy);
         $obj->limit = $limit;
@@ -31,9 +31,9 @@ class Filter extends \Tk\Collection
     }
 
 
-    public function getFromStr(bool $trimFirst = true): string
+    public function getFromStr(): string
     {
-        if ($trimFirst && isset($this->from[0])) {
+        if (isset($this->from[0])) {
             $this->from[0] = trim($this->from[0], ',');
             $this->from[0] = str_replace('LEFT JOIN', '', $this->from[0]);
             $this->from[0] = str_replace('RIGHT JOIN', '', $this->from[0]);
@@ -126,18 +126,8 @@ class Filter extends \Tk\Collection
         return $this;
     }
 
-    public function getSql(bool $trimFirst = true): string
+    public function getSql(): string
     {
-        $from = '';
-        if (count($this->getFrom($trimFirst))) {
-            $from = $this->getFromStr();
-        }
-
-        $where = '';
-        if (count($this->getWhere())) {
-            $where = 'WHERE ' . $this->getWhereStr();
-        }
-
         $orderBy = '';
         if ($this->getOrderBy()) {
             $orderBy = 'ORDER BY ' . $this->getSqlOrderBy();
@@ -149,6 +139,16 @@ class Filter extends \Tk\Collection
             if (($this->getOffset() ?? 0) > 0) {
                 $limitStr .= ' OFFSET ' . $this->getOffset();
             }
+        }
+
+        $where = '';
+        if (count($this->getWhere())) {
+            $where = 'WHERE ' . $this->getWhereStr();
+        }
+
+        $from = '';
+        if (count($this->getFrom())) {
+            $from = $this->getFromStr();
         }
 
         $sql = <<<SQL
