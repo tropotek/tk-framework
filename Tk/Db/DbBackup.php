@@ -91,8 +91,8 @@ class DbBackup
     public static function dump(array $options = []): string
     {
         $exclude = $options['exclude'] ?? [];
-        if (!in_array(Config::instance()->get('session.db_table', ''), $exclude)) {
-            $exclude[] = Config::instance()->get('session.db_table');
+        if (!in_array(Db\Session::$DB_TABLE, $exclude)) {
+            $exclude[] = Db\Session::$DB_TABLE;
         }
         // Exclude all views
         if (is_null(Db::getPdo())) {
@@ -146,8 +146,8 @@ class DbBackup
     public static function save(string $filename = '', array $options = []): bool
     {
         $exclude = $options['exclude'] ?? [];
-        if (!in_array(Config::instance()->get('session.db_table', ''), $exclude)) {
-            $exclude[] = Config::instance()->get('session.db_table');
+        if (!in_array(Db\Session::$DB_TABLE, $exclude)) {
+            $exclude[] = Db\Session::$DB_TABLE;
         }
         // Exclude all views
         if (is_null(Db::getPdo())) {

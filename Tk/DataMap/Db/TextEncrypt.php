@@ -17,6 +17,9 @@ class TextEncrypt extends DataTypeInterface
         $value = parent::getPropertyValue($array);
         if (!is_null($value)) {
             $value = Encrypt::create(self::$encryptKey)->decrypt(strval($value));
+            //$value = Encrypt::create(self::$encryptKey)->encrypt(strval($value));
+        } elseif (!$this->isNullable()) {
+            $value = '';
         }
         return $value;
     }
@@ -26,6 +29,9 @@ class TextEncrypt extends DataTypeInterface
         $value = parent::getColumnValue($object);
         if (!is_null($value)) {
             $value = Encrypt::create(self::$encryptKey)->encrypt(strval($value));
+            //$value = Encrypt::create(self::$encryptKey)->decrypt(strval($value));
+        } elseif (!$this->isNullable()) {
+            $value = '';
         }
         return $value;
     }
