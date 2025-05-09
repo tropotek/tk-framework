@@ -1,7 +1,7 @@
 {
   "name": "ttek/tk-framework",
   "type": "library",
-  "description": "Tropotek Framework",
+  "description": "Tk8 Lib: Tropotek Framework Library",
   "keywords": [
     "Tk",
     "framework",
