@@ -21,8 +21,6 @@ namespace Tk;
  *  };
  *  ?>
  * ```
- *
- *
  */
 class ConfigLoader
 {
@@ -68,7 +66,6 @@ class ConfigLoader
         $this->load($this->basePath . '/src/config/'.$basename, $object);
         $this->load($this->basePath . '/'.$basename, $object);
     }
-
 
     /**
      * Find files that match the file basename and return them in priority from lowest to highest

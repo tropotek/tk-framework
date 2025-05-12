@@ -60,25 +60,13 @@ class Image
 
     public static function createAvatar(string $text, Color $bgColor, int $size = 128): self
     {
-        $fontSize = $size*0.5;
+        $fontSize = $size*0.3;
 
         $font = Config::makePath(Config::instance()->get('path.vendor.org') . '/tk-framework/assets/fonts/OpenSans-Semibold.ttf');
         $color = $bgColor->getTextColor();
 
-        $text = strtoupper($text);
-        $text = str_replace(['.', 'MRS', 'MISS', 'MS', 'MASTER', 'DR', 'MR'], ' ', $text);
-        $words = explode(' ', $text);
-        $initials = strtoupper($text[0] ?? '');
-        if (count($words) > 1) {
-            $initials  = reset($words)[0] ?? '';
-            $initials .= end($words)[0] ?? '';
-        }
-
-        // TODO: make this a property sent to the function
-        $initials = $initials[0] ?? ''; // only use 1 initial
-
         $img = self::createBlankPng($size, $size, $bgColor);
-        $textBoundingBox = imagettfbbox($fontSize, 0, $font, $initials);
+        $textBoundingBox = imagettfbbox($fontSize, 0, $font, $text);
         $x = $y = 0;
         if (is_array($textBoundingBox)) {
             $y = intval(abs(ceil(($size - $textBoundingBox[5]) / 2)));
@@ -86,7 +74,7 @@ class Image
         }
 
         $c = intval(imagecolorallocate($img->image, $color->getRed(), $color->getGreen(), $color->getBlue()));
-        imagettftext($img->image, $fontSize, 0, $x, $y, $c, $font, $initials);
+        imagettftext($img->image, $fontSize, 0, $x, $y, $c, $font, $text);
 
         return $img;
     }

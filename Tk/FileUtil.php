@@ -139,9 +139,9 @@ class FileUtil
      * Couldn't understand why andudi did $s["blksize"]*$s["blocks"]/8.
      * Could only be because $s["blocks"] counts the number of 512-byte disk
      * blocks not the number of $s["blksize"] blocks, so it may as well
-     * just be $s["blocks"]*512. Furthermore none of the dirspace suggestions allow
+     * just be $s["blocks"]*512. Furthermore, none of the dirspace suggestions allow
      * for the fact that directories are also files and that they also consume disk
-     * space. The following code dskspace addresses all these issues and can also
+     * space. The following code diskSpace addresses all these issues and can also
      * be used to return the disk space consumed by a single non-directory file.
      * It will return much larger numbers than you would have been seeing with
      * any of the other suggestions, but I think they are much more realistic
@@ -153,7 +153,7 @@ class FileUtil
         if (is_dir($path)) {
             $s = stat($path);
         }
-        //$space = $s["blocks"] * 512;  // Does not work value $s["blocks"] = -1 allways
+        //$space = $s["blocks"] * 512;  // Does not work value $s["blocks"] = -1 always
         if (!isset($s['size'])) {
             return 0;
         }

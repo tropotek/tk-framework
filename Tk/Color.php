@@ -208,13 +208,13 @@ class Color
      */
     public function getCymk(): array
     {
-        $cyan = 255 - $this->getRed();
+        $cyan    = 255 - $this->getRed();
         $magenta = 255 - $this->getGreen();
-        $yellow = 255 - $this->getBlue();
-        $black = min($cyan, $magenta, $yellow);
-        $cyan = @(($cyan - $black) / (255 - $black));
+        $yellow  = 255 - $this->getBlue();
+        $black   = min($cyan, $magenta, $yellow);
+        $cyan    = @(($cyan - $black) / (255 - $black));
         $magenta = @(($magenta - $black) / (255 - $black));
-        $yellow = @(($yellow - $black) / (255 - $black));
+        $yellow  = @(($yellow - $black) / (255 - $black));
         return ['cyan' => $cyan, 'yellow' => $yellow, 'magenta' => $magenta, 'key' => $black];
     }
 
@@ -298,12 +298,11 @@ class Color
         }
         $hex = $regs[2];
         $hex = strtoupper($hex);
-        $r = [
+        return [
             'red' => intval(substr($hex, 0, 2), 16),
             'green' => intval(substr($hex, 2, 2), 16),
             'blue' => intval(substr($hex, 4, 2), 16)
         ];
-        return $r;
     }
 
     /**

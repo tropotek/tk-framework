@@ -32,15 +32,15 @@ class Cookie
 
 
     public function __construct(
-        ?string $domain  = null,
-        ?string $path    = null,
-        bool $secure     = true,
-        bool $httponly   = true,
-        string $samesite = self::SAMESITE_STRICT
+        ?string $domain   = null,
+        ?string $path     = null,
+        bool    $secure   = true,
+        bool    $httponly = true,
+        string  $samesite = self::SAMESITE_STRICT
     ) {
-        $this->path = $path ?? Config::getBaseUrl();
-        $this->domain = $domain ?? Config::getHostname();
-        $this->secure = $secure;
+        $this->path     = $path ?? Config::getBaseUrl();
+        $this->domain   = $domain ?? Config::getHostname();
+        $this->secure   = $secure;
         $this->httponly = $httponly;
         $this->samesite = $samesite;
         $this->getBrowserId();
@@ -64,10 +64,10 @@ class Cookie
     protected function getCfg(?int $expires = null): array
     {
         return [
-            'expires' => $expires ?? time() + Date::daysToSeconds(self::DAYS_30),
-            'path' => $this->path,
-            'domain' => $this->domain,
-            'secure' => $this->secure,
+            'expires'  => $expires ?? time() + Date::daysToSeconds(self::DAYS_30),
+            'path'     => $this->path,
+            'domain'   => $this->domain,
+            'secure'   => $this->secure,
             'httponly' => $this->httponly,
             'samesite' => $this->samesite,
         ];

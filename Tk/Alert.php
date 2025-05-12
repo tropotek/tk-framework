@@ -4,12 +4,12 @@ namespace Tk;
 class Alert
 {
 
-    const SID = 'tk-alerts';
+    const string SID = 'tk-alerts';
 
-    const TYPE_SUCCESS = 'success';
-    const TYPE_INFO = 'info';
-    const TYPE_WARNING = 'warning';
-    const TYPE_ERROR = 'danger';
+    const string TYPE_SUCCESS = 'success';
+    const string TYPE_INFO    = 'info';
+    const string TYPE_WARNING = 'warning';
+    const string TYPE_ERROR   = 'danger';
 
     /**
      * add a flash message to the renderer queue in the session

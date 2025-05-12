@@ -18,10 +18,10 @@ class Currency
     private static array $_instance = [];
     public static string $DEFAULT = 'AUD';
 
-    const CURR_AUD = 'AUD';
-    const CURR_NZD = 'NZD';
-    const CURR_USD = 'USD';
-    const CURR_THB = 'THB';
+    const string CURR_AUD = 'AUD';
+    const string CURR_NZD = 'NZD';
+    const string CURR_USD = 'USD';
+    const string CURR_THB = 'THB';
 
     public static array $CURRENCY_LIST = [
         self::CURR_AUD => ['name' => 'Australian Dollar', 'locale' => 'Australia', 'symbol' => '$', 'altSymbol' => 'AUD$', 'digits' => 2],
