@@ -58,9 +58,9 @@ class Image
         return $obj;
     }
 
-    public static function createAvatar(string $text, Color $bgColor, int $size = 128): self
+    public static function createAvatar(string $text, Color $bgColor, int $size = 128, float $fontRatio = 0.3): self
     {
-        $fontSize = $size*0.3;
+        $fontSize = $size*$fontRatio;
 
         $font = Config::makePath(Config::instance()->get('path.vendor.org') . '/tk-framework/assets/fonts/OpenSans-Semibold.ttf');
         $color = $bgColor->getTextColor();
