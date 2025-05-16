@@ -62,7 +62,7 @@ class Image
     {
         $fontSize = $size*$fontRatio;
 
-        $font = Config::makePath(Config::instance()->get('path.vendor.org') . '/tk-framework/assets/fonts/OpenSans-Semibold.ttf');
+        $font = Path::create(Config::getValue('path.vendor.org') . '/tk-framework/assets/fonts/OpenSans-Semibold.ttf');
         $color = $bgColor->getTextColor();
 
         $img = self::createBlankPng($size, $size, $bgColor);

@@ -1,6 +1,8 @@
 <?php
 namespace Tk;
 
+use Tk\Cache\Cache;
+
 /**
  * Tools for dealing with filesystem data
  */
@@ -344,40 +346,32 @@ class FileUtil
 
     public static function getMimeArray(): array
     {
-        $mimeFile = self::$CACHE_MIME_FILE ?: Config::makePath(Config::getCachePath() . '/mime.types');
-        $mimeFileContents = null;
+        $key = 'mime.types';
+        $cache = Cache::instance();
 
-        // Update Cache
-        if (@is_file($mimeFile)) {
-            if ((@filemtime($mimeFile) < (time() - self::$CACHE_MIME_SEC))) {
-                $mimeFileContents = @file_get_contents(self::$MIME_TYPES_URL);
-                if ($mimeFileContents !== false) {
-                    @file_put_contents($mimeFile, $mimeFileContents);
+        if (!$mime = $cache->fetch($key)) {
+            $mimeContents = file_get_contents(self::$MIME_TYPES_URL);
+            if ($mimeContents === false) return [];
+            $mime = [];
+            foreach(explode("\n", $mimeContents) as $x) {
+                if (
+                    isset($x[0]) && $x[0] !== '#' &&
+                    preg_match_all('#([^\s]+)#', $x, $out) &&
+                    //isset($out[1]) &&
+                    ($c = count($out[1])) > 1
+                ) {
+                    for ($i = 1; $i < $c; $i++) {
+                        $mime[$out[1][$i]] = $out[1][0];
+                    }
                 }
             }
-            $mimeFileContents = @file_get_contents($mimeFile);
-        } else {
-            $mimeFileContents = @file_get_contents(self::$MIME_TYPES_URL);
-            if ($mimeFileContents !== false) {
-                @file_put_contents($mimeFile, $mimeFileContents);
-            }
+            ksort($mime);
+
+            // Store the data in the cache
+            $cache->store($key, $mime, self::$CACHE_MIME_SEC);
         }
 
-        $s = [];
-        foreach(@explode("\n", strval($mimeFileContents)) as $x) {
-            if (
-                isset($x[0]) && $x[0] !== '#' &&
-                preg_match_all('#([^\s]+)#', $x, $out) &&
-                //isset($out[1]) &&
-                ($c = count($out[1])) > 1
-            ) {
-                for ($i = 1; $i < $c; $i++) {
-                    $s[$out[1][$i]] = $out[1][0];
-                }
-            }
-        }
-        @ksort($s);
-        return $s;
+        return $mime;
     }
 
 }

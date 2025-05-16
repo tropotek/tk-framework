@@ -30,11 +30,15 @@ class ConfigLoader
     protected int    $ttl         = 0;
 
 
-    protected function __construct(int $cacheTtl = 0)
+    protected function __construct(string $basePath = '', int $cacheTtl = 0)
     {
         $this->ttl = $cacheTtl;
         $vendorPath = dirname(__DIR__, 2);
-        $this->basePath = Config::instance()->get('base.path', dirname($vendorPath, 2));
+        if (empty($basePath)) {
+            $basePath = dirname($vendorPath, 2);
+        }
+        $this->basePath = $basePath;
+        //$this->basePath = Config::getValue('base.path', dirname($vendorPath, 2));
 
         // Get all searchable paths
         $libPaths = scandir($vendorPath);
@@ -45,9 +49,9 @@ class ConfigLoader
         }
     }
 
-    public static function create(int $cacheTtl = 0): ConfigLoader
+    public static function create(string $basePath = '', int $cacheTtl = 0): ConfigLoader
     {
-        return new ConfigLoader($cacheTtl);
+        return new ConfigLoader($basePath, $cacheTtl);
     }
 
     /**

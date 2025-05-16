@@ -116,10 +116,44 @@ class Uri implements UriInterface
         $this->init($data['spec']);
     }
 
+    /**
+     * Create a url from a string.
+     * Relative URL's are formatted to include site $BASE_PATH (eg: '/path.html' => 'http://localhost/base/path/path.html')
+     */
     public static function create(string|Uri|null $uri = null, array $queryParams = []): self
     {
         if ($uri instanceof Uri) return clone $uri;
         return new self($uri, $queryParams);
+    }
+
+    /**
+     * Create a URL from a local data path resource (eg: '/user/image.jpg' => 'http://localhost/data/user/image.jpg')
+     */
+    public static function createDataUri(string|Uri $uri = '', array $queryParams = []): self
+    {
+        if ($uri instanceof Uri) return clone $uri;
+        if ($uri[0] != DIRECTORY_SEPARATOR) throw new Exception("URI must be a path to local data URI resource");
+        $dataPath = Config::getDataPath();
+        if (str_starts_with($uri, $dataPath)) {
+            $uri = substr($uri, strlen($dataPath));
+        }
+        $path = $dataPath . rtrim($uri, DIRECTORY_SEPARATOR);
+        return new self($path, $queryParams);
+    }
+
+    /**
+     * Create a URL from a local template path resource (eg: '/css/page.css' => 'http://localhost/html/css/ipage.css')
+     */
+    public static function createTemplateUri(string|Uri $uri = '', array $queryParams = []): self
+    {
+        if ($uri instanceof Uri) return clone $uri;
+        if ($uri[0] != DIRECTORY_SEPARATOR) throw new Exception("URI must be a path to local template URI resource");
+        $templatePath = Config::getTemplatePath();
+        if (str_starts_with($uri, $templatePath)) {
+            $uri = substr($uri, strlen($templatePath));
+        }
+        $path = $templatePath . rtrim($uri, DIRECTORY_SEPARATOR);
+        return new self($path, $queryParams);
     }
 
     protected function init(string $uri): void
@@ -266,8 +300,20 @@ class Uri implements UriInterface
     {
         $path = $this->getPath();
         $path = urldecode($path);
-        if (preg_match('/^'.  preg_quote(self::$BASE_PATH, '/') . '/', $path)) {
-            $path = preg_replace('/^'.preg_quote(self::$BASE_PATH, '/').'/', '', $path);
+        if (self::$BASE_PATH && str_starts_with($path, self::$BASE_PATH)) {
+            $path = substr($path, strlen(self::$BASE_PATH));
+        }
+        return $path;
+    }
+
+    /**
+     * Returns the path relative to the sites data path set in the Config
+     */
+    public function getDataPath(): string
+    {
+        $path = $this->getRelativePath();
+        if (str_starts_with($path, Config::getDataPath())) {
+            $path = substr($path, strlen(Config::getDataPath()));
         }
         return $path;
     }

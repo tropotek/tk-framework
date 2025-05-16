@@ -296,7 +296,7 @@ abstract class Model
         if (property_exists($this, 'dataPath')) {
             return $this->dataPath;
         }
-        return Config::instance()->get('path.data', '/data');
+        return Config::getValue('path.data', '/data');
     }
 
 }

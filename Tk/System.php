@@ -141,7 +141,7 @@ class System
      */
     public static function scriptDuration(): string
     {
-        return (string)(microtime(true) - Config::instance()->get('script.start.time'));
+        return (string)(microtime(true) - Config::getValue('script.start.time'));
     }
 
     /**
@@ -169,7 +169,7 @@ class System
         static $composer = null;
         if (!$composer) {
             $composer = [];
-            $json = file_get_contents(Config::makePath('/composer.json'));
+            $json = file_get_contents(Path::create('/composer.json'));
             if ($json !== false) {
                 $composer = json_decode($json, true);
             }
@@ -186,10 +186,10 @@ class System
         static $version = null;
         if (!$version) {
             $version = '1.0.0';
-            if (is_file(Config::makePath('/version'))) {
-                $version = file_get_contents(Config::makePath('/version'));
-            } else if (is_file(Config::makePath('/version.md'))) {
-                $version = file_get_contents(Config::makePath('/version.md'));
+            if (is_file(Path::create('/version'))) {
+                $version = file_get_contents(Path::create('/version'));
+            } else if (is_file(Path::create('/version.md'))) {
+                $version = file_get_contents(Path::create('/version.md'));
             }
         }
         return $version;
@@ -198,10 +198,10 @@ class System
     public static function getReleaseDate(): \DateTime
     {
         $released = new \DateTime();
-        if (is_file(Config::makePath('/version'))) {
-            $released = Date::create((int)filemtime(Config::makePath('/version')));
-        } else if (is_file(Config::makePath('/version.md'))) {
-            $released = Date::create((int)filemtime(Config::makePath('/version.md')));
+        if (is_file(Path::create('/version'))) {
+            $released = Date::create((int)filemtime(Path::create('/version')));
+        } else if (is_file(Path::create('/version.md'))) {
+            $released = Date::create((int)filemtime(Path::create('/version.md')));
         }
         return $released;
     }

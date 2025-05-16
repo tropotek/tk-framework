@@ -1,6 +1,8 @@
 <?php
 namespace Tk\Cache;
 
+use Tk\Cache\Adapter\Filesystem;
+use Tk\Path;
 
 /**
  * Use an instance of this object to cache any required data.
@@ -35,12 +37,28 @@ namespace Tk\Cache;
  */
 class Cache
 {
+    private static mixed $_instance = null;
+
     protected ?Adapter\Iface $adapter = null;
     protected bool           $enabled = true;
 
-    public function __construct(Adapter\Iface $adapter)
+    public function __construct(?Adapter\Iface $adapter = null)
     {
         $this->adapter = $adapter;
+    }
+
+    /**
+     * the adapter property is only valid on the initial call
+     */
+    public static function instance(?Adapter\Iface $adapter = null): self
+    {
+        if (self::$_instance == null) {
+            if (is_null($adapter)) {
+                $adapter = new Filesystem(Path::createCachePath('/'));
+            }
+            self::$_instance = new self($adapter);
+        }
+        return self::$_instance;
     }
 
     public function setEnabled(bool $b = true): void

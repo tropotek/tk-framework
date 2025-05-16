@@ -396,6 +396,7 @@ class Db
      *
      * @template T of object
      * @param class-string<T> $classname
+     * @deprecated use array_column($list, $valueProp, $keyProp);
      */
     public static function queryList(string $sql, string $key, string $value, array|object|null $params = null, string $classname = 'stdClass'): array
     {
@@ -422,6 +423,7 @@ class Db
      *
      * @template T of object
      * @param class-string<T> $classname
+     * @deprecated use array_column($list, null, $keyProp);
      */
     public static function queryAssoc(string $sql, string $key, array|object|null $params = null, string $classname = 'stdClass'): array
     {
