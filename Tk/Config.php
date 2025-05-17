@@ -40,7 +40,7 @@ final class Config extends Collection
 
         $this->set('php.date.timezone', 'Australia/Melbourne');
 
-        $this->set('env.type', self::ENV_DEVELOPMENT);
+        $this->set('env.type', self::ENV_PRODUCTION);
         $this->set('log.logLevel', \Psr\Log\LogLevel::ERROR);
         $this->set('log.enableNoLog', true);
 
