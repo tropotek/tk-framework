@@ -1,5 +1,11 @@
 #CHANGELOG#
 
+Ver 8.0.68 [2025-05-18]:
+-------------------------------
+  - Update to use static methods for Registry and Config
+  - base lib cleanup, Config/Registry/Cache
+
+
 Ver 8.0.66 [2025-05-08]:
 -------------------------------
   - added report emails
