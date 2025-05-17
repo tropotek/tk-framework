@@ -120,7 +120,7 @@ class ObjectUtil
         try {
             $rc = new \ReflectionClass($class);
             $file = strval($rc->getFileName());
-        } catch (\ReflectionException $e) {
+        } catch (\Exception $e) {
             Log::notice($e->__toString());
         }
         return $file;

@@ -13,10 +13,9 @@ class DbStatement extends \PDOStatement
         try {
             // remove any params not in query
             if (is_array($params)) {
-                $p = [];
-                foreach ($params as $k => $v) {
-                    if (str_contains($this->queryString, ":$k")) $p[$k] = $v;
-                }
+                $p = array_filter($params, function ($k) {
+                    return str_contains($this->queryString, ":$k");
+                }, ARRAY_FILTER_USE_KEY);
                 $params = $p;
             }
             $this->lastParams = $params;

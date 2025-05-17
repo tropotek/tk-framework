@@ -1,10 +1,7 @@
 <?php
 namespace Tk\Db;
 
-use Tk\Config;
-use Tk\FileUtil;
 use Tk\Db;
-use Tk\Log;
 
 /**
  * A utility to back up and restore a DB in PHP.

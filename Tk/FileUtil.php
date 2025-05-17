@@ -35,7 +35,7 @@ class FileUtil
      */
     public static function isAbsolute(string $pathname): bool
     {
-        return !empty($pathname) && ($pathname[0] === '/' || preg_match('/^[A-Z]:\\\\/i', $pathname) || substr($pathname, 0, 2) == '\\\\');
+        return !empty($pathname) && ($pathname[0] === '/' || preg_match('/^[A-Z]:\\\\/i', $pathname) || str_starts_with($pathname, '\\\\'));
     }
 
     /**
@@ -184,11 +184,10 @@ class FileUtil
      */
     public static function getExtension(string $path): string
     {
-        if (substr($path, -6) == 'tar.gz') {
+        if (str_ends_with($path, 'tar.gz')) {
             return 'tar.gz';
         }
-        $str = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-        return $str;
+        return strtolower(pathinfo($path, PATHINFO_EXTENSION));
     }
 
     /**

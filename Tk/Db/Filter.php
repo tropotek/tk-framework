@@ -25,7 +25,7 @@ class Filter extends \Tk\Collection
         return $obj;
     }
 
-    public static function createFromTable(null|array|Query $params, Table $table): self
+    public static function createFromTable(null|array|Filter $params, Table $table): self
     {
         return self::create($params, $table->getOrderBy(), $table->getLimit(), $table->getOffset());
     }

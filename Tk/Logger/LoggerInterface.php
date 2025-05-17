@@ -2,7 +2,6 @@
 namespace Tk\Logger;
 
 use Psr\Log\LogLevel;
-use Tk\DataMap\Db\DateTime;
 
 abstract class LoggerInterface extends LogLevel implements \Psr\Log\LoggerInterface
 {
