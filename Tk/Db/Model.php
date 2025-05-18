@@ -134,7 +134,7 @@ abstract class Model
     }
 
     /**
-     * return the DB table name for this object
+     * return a default DB table name for this object
      */
     public static function getDbTable(): string
     {
@@ -142,7 +142,7 @@ abstract class Model
     }
 
     /**
-     * return the DB view name it exists, empty if not
+     * return the DB view name if exists returns empty string if not
      */
     public static function getDbView(): string
     {
@@ -156,7 +156,7 @@ abstract class Model
      * Auto generate a DataMap for this object.
      *
      * Default table name is the snake case of the class name, 'MenuItem' => 'menu_item'
-     * Default view name is the same with 'v_' prepended, ''v_menu_item'
+     * Default view name is the same with 'v_' prepended, 'v_menu_item'
      * If the view table does not exist it is ignored
      *
      * Override this method if you need to create a custom DataMap with different table names
@@ -196,7 +196,7 @@ abstract class Model
             /**
              * TODO: Looks like ReflectionType::getName() is deprecated
              *       The API here is odd! Will re-visit this code when PHP gets its
-             *       reflection shit together.
+             *       property reflection shit together.
              */
             //$typeName = (string)$prop->getType();
             /** @phpstan-ignore-next-line  */
