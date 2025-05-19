@@ -215,6 +215,17 @@ class Mailer
                     list($e, $n) = Message::splitEmail($email);
                     $this->mailer->addBCC($e, $n);
                 }
+
+                if (is_array($this->params['mail.bcc'])) {
+                    foreach ($this->params['mail.bcc'] as $email) {
+                        if (!\Tk\Mail\Message::isValidEmail($email)) continue;
+                        if (in_array($email, array_column($this->mailer->getToAddresses(), 0))) continue;
+                        if (in_array($email, array_column($this->mailer->getCcAddresses(), 0))) continue;
+                        if (in_array($email, array_column($this->mailer->getBccAddresses(), 0))) continue;
+                        $message->addBcc($email);
+                    }
+                }
+
             }
 
             foreach ($message->getHeadersList() as $h => $v) {
