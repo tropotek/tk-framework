@@ -52,7 +52,7 @@ class MemCache implements Iface
         return $this->connection->delete($key);
     }
 
-    public function clear(): bool
+    public function purge(): bool
     {
         return $this->connection->flush();
     }

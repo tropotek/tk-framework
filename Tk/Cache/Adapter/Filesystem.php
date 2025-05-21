@@ -34,17 +34,23 @@ class Filesystem implements Iface
         if (!$h) {
             throw new \Tk\Exception('Could not write to cache');
         }
+
         flock($h, \LOCK_EX); // exclusive lock, will get released when the file is closed
-        fseek($h, 0); // go to the start of the file
-        // truncate the file
-        ftruncate($h, 0);
-        fwrite($h, strval(time()+$ttl));
-        fseek($h, strlen(strval(time())));
+        fseek($h, 0);           // go to the start of the file
+        ftruncate($h, 0);        // truncate the file
+
+        $ttl = ($ttl > 0) ? time()+$ttl : 0;
+
         // Serializing along with the TTL
-        $data = serialize($data);
-        if (fwrite($h, $data) === false) {
+        $store = serialize([
+            'ttl' => $ttl,
+            'data' => $data,
+        ]);
+
+        if (fwrite($h, $store) === false) {
             throw new \Tk\Exception('Could not write to cache');
         }
+
         fclose($h);
         return true;
     }
@@ -52,31 +58,31 @@ class Filesystem implements Iface
     public function fetch(string $key): mixed
     {
         $filename = $this->getFileName($key);
-        if (!file_exists($filename)) {
-            return false;
-        }
-        $h = fopen($filename, 'r');
-        if (!$h) {
-            return false;
-        }
-        // Getting a shared lock
-        flock($h, \LOCK_SH);
-        $ttl = fread($h, strlen(strval(time())));
-        if (time() > $ttl) {
-            // Unlinking when the file was expired
-            fclose($h);
-            unlink($filename);
-            return false;
-        }
-        $data = strval(file_get_contents($filename, false, null, strlen(strval(time()))));
-        fclose($h);
 
-        $data = @unserialize($data);
-        if (!$data) {     // If un serializing somehow didn't work out, we'll delete the file
+        if (!is_file($filename)) {
+            return false;
+        }
+
+        $h = fopen($filename, 'r');
+        if ($h === false) {
+            return false;
+        }
+
+        $store = strval(file_get_contents($filename));
+        $store = @unserialize($store);
+        if ($store === false) {
+            error_log("failed to unserialize cached data for key {$key}");
             unlink($filename);
             return false;
         }
-        return $data;
+
+        $ttl = $store['ttl'];
+        if ($ttl != 0 && time() > $ttl) {
+            unlink($filename);
+            return false;
+        }
+
+        return $store['data'];
     }
 
     public function delete(string $key): bool
@@ -89,7 +95,7 @@ class Filesystem implements Iface
         }
     }
 
-    public function clear(): bool
+    public function purge(): bool
     {
         return \Tk\FileUtil::rmdir($this->getCachePath());
     }

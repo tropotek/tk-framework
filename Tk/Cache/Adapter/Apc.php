@@ -22,7 +22,7 @@ class Apc implements Iface
         return apc_delete($key);
     }
 
-    public function clear(): bool
+    public function purge(): bool
     {
         return apc_clear_cache();
     }

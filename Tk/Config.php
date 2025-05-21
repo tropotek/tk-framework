@@ -21,7 +21,6 @@ final class Config extends Collection
     protected function _init(): void
     {
         $this->set('script.start.time', microtime(true));
-        $this->set('hostname', $_SERVER['HTTP_HOST'] ?? $_SERVER['HTTP_X_FORWARDED_HOST'] ?? 'localhost');
         $this->set('base.path', System::discoverBasePath());
         $this->set('base.url', System::discoverBaseUrl());
 
@@ -43,6 +42,7 @@ final class Config extends Collection
         $this->set('env.type', self::ENV_PRODUCTION);
         $this->set('log.logLevel', \Psr\Log\LogLevel::ERROR);
         $this->set('log.enableNoLog', true);
+        $this->set('hostname', System::discoverHostname());
 
         ConfigLoader::create($this->get('base.path'))->loadConfigs($this);
     }

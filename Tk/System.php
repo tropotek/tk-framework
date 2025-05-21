@@ -1,12 +1,31 @@
 <?php
 namespace Tk;
 
+use Tk\Cache\Cache;
+
 /**
  * The System object will contain all system information methods
  * and any methods to set the system state.
  */
 class System
 {
+
+    /**
+     * @return string
+     */
+    public static function discoverHostname(): string
+    {
+        $key = 'hostname';
+        if (!$hostname = Cache::instance()->fetch($key)) {
+            $hostname = $_SERVER['HTTP_HOST'] ?? $_SERVER['HTTP_X_FORWARDED_HOST'] ?? '';
+            if (!empty($hostname)) {
+                Cache::instance()->store($key, $hostname);
+            } else {
+                return 'localhost';
+            }
+        }
+        return $hostname;
+    }
 
     /**
      * Return the root path to the site.

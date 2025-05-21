@@ -138,8 +138,13 @@ class Cache
         return $this->adapter->delete($key);
     }
 
-    public function clear(): bool
+    /**
+     * Purge all cached data for this adapter
+     *
+     * @return bool
+     */
+    public function purge(): bool
     {
-        return $this->adapter->clear();
+        return $this->adapter->purge();
     }
 }

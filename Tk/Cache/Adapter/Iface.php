@@ -22,7 +22,7 @@ interface Iface
     public function delete(string $key): mixed;
 
     /**
-     * Delete all cached values
+     * Delete all cached values for this adapter
      */
-    public function clear(): bool;
+    public function purge(): bool;
 }
