@@ -70,9 +70,8 @@ class FileUtil
      */
     public static function mkdir(string $directory, bool $recursive = true): bool
     {
-        if (!is_dir($directory))
-            return mkdir($directory, self::$DIR_MASK, $recursive);
-        return true;
+        if (is_dir($directory)) return true;
+        return mkdir($directory, self::$DIR_MASK, $recursive);
     }
 
     /**
