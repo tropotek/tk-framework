@@ -31,7 +31,7 @@ class Filesystem implements Iface
 
         // Opening the file in read/write mode
         $h = fopen($this->getFileName($key), 'a+');
-        if (!$h) {
+        if ($h === false) {
             throw new \Tk\Exception('Could not write to cache');
         }
 
@@ -39,11 +39,9 @@ class Filesystem implements Iface
         fseek($h, 0);           // go to the start of the file
         ftruncate($h, 0);        // truncate the file
 
-        $ttl = ($ttl > 0) ? time()+$ttl : 0;
-
         // Serializing along with the TTL
         $store = serialize([
-            'ttl' => $ttl,
+            'ttl' => ($ttl > 0) ? time()+$ttl : 0,
             'data' => $data,
         ]);
 
@@ -64,11 +62,13 @@ class Filesystem implements Iface
         }
 
         $h = fopen($filename, 'r');
-        if ($h === false) {
-            return false;
-        }
+        if ($h === false) return false;
+        // Getting a shared lock
+        flock($h, \LOCK_SH);
 
         $store = strval(file_get_contents($filename));
+        fclose($h);
+
         $store = @unserialize($store);
         if ($store === false) {
             error_log("failed to unserialize cached data for key {$key}");

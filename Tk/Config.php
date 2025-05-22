@@ -42,6 +42,9 @@ final class Config extends Collection
         $this->set('env.type', self::ENV_PRODUCTION);
         $this->set('log.logLevel', \Psr\Log\LogLevel::ERROR);
         $this->set('log.enableNoLog', true);
+
+        error_log($this->get('base.path'));
+        error_log(Path::createCachePath('/')->toString());
         $this->set('hostname', System::discoverHostname());
 
         ConfigLoader::create($this->get('base.path'))->loadConfigs($this);
