@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 8.0.78 [2025-05-22]:
+-------------------------------
+  - disable clear cache for components
+
+
 Ver 8.0.76 [2025-05-22]:
 -------------------------------
   - Fix cache object and cache hostname on first http
