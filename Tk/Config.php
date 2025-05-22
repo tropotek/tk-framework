@@ -51,10 +51,10 @@ final class Config extends Collection
     /**
      * Gets an instance of this object, if none exists one is created
      */
-    public static function instance(): static
+    public static function instance(): self
     {
         if (self::$_instance == null) {
-            self::$_instance = new static();
+            self::$_instance = new self();
             self::$_instance->_init();
         }
         return self::$_instance;
@@ -71,7 +71,7 @@ final class Config extends Collection
     /**
      * Static alias for self::instance()->set(...)
      */
-    public static function setValue(string $key, mixed $value): static
+    public static function setValue(string $key, mixed $value): self
     {
         return self::instance()->set($key, $value);
     }
