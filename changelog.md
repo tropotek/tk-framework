@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 8.0.80 [2025-05-26]:
+-------------------------------
+  - Merge branch '8.0' of https://github.com/tropotek/tk-framework into 8.0
+
+
 Ver 8.0.78 [2025-05-22]:
 -------------------------------
   - disable clear cache for components
