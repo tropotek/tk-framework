@@ -22,24 +22,6 @@ abstract class Model
 
     const array FORCE_READ_ONLY = ['modified', 'created'];
 
-//    /**
-//     * method tries to return an object from the fkey, fid values
-//     * if no fkey is used the calling classname is used
-//     *
-//     * @deprecated use ForeignModelTrait::findDbModel()
-//     */
-//    public static function findDbModel(int $fid, ?string $fkey = null): ?static
-//    {
-//        if (is_null($fkey)) $fkey = static::class;
-//        if ($fkey != static::class || !class_exists($fkey)) {
-//            throw new \Tk\Exception("Invalid model class");
-//        }
-//        if (method_exists($fkey, 'find')) {
-//            return $fkey::find($fid);
-//        }
-//        return null;
-//    }
-
     /**
      * default find query
      */
@@ -356,14 +338,14 @@ abstract class Model
     }
 
     /**
-     * @deprecatd Do not think we need a method call for all models, just have the dataPath property created from a view
+     * return a file data path for this object
      */
-//    public function getDataPath(): string
-//    {
-//        if (property_exists($this, 'dataPath')) {
-//            return $this->dataPath;
-//        }
-//        return '';
-//    }
+    public function getDataPath(): string
+    {
+        if (property_exists($this, 'dataPath')) {
+            return $this->dataPath;
+        }
+        return '';
+    }
 
 }
