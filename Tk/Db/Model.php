@@ -23,19 +23,73 @@ abstract class Model
     const array FORCE_READ_ONLY = ['modified', 'created'];
 
     /**
-     * method trys to return an object from the fkey, fid values
+     * method tries to return an object from the fkey, fid values
      * if no fkey is used the calling classname is used
+     *
+     * @deprecated Not sure if this should be here, this may be a more custom call to foreign model classes
      */
     public static function findDbModel(int $fid, ?string $fkey = null): ?static
     {
         if (is_null($fkey)) $fkey = static::class;
-        if ($fkey == self::class || !class_exists($fkey)) {
+        if ($fkey == static::class || !class_exists($fkey)) {
             throw new \Tk\Exception("Invalid model class");
         }
         if (method_exists($fkey, 'find')) {
             return $fkey::find($fid);
         }
         return null;
+    }
+
+    /**
+     * default find query
+     */
+    public static function find(int $id): ?static
+    {
+        $table = static::getPrimaryTable();
+        $column = static::getPrimaryColumn();
+        return Db::queryOne("
+            SELECT *
+            FROM {$table}
+            WHERE {$column} = :id",
+            compact('id'),
+            static::class
+        );
+    }
+
+    /**
+     * default must find
+     * throws exception on failure to find row
+     */
+    public static function mustFind(int $id): static
+    {
+        $table = static::getPrimaryTable();
+        $column = static::getPrimaryColumn();
+        $obj = Db::queryOne("
+            SELECT *
+            FROM {$table}
+            WHERE {$column} = :id",
+            compact('id'),
+            static::class
+        );
+        if (!($obj instanceof static)) {
+            throw new \Tk\Exception(static::class . " not found with id {$id}");
+        }
+        return $obj;
+    }
+
+    /**
+     * default find all
+     * @return array<int,static>
+     */
+    public static function findAll(): array
+    {
+        $table = static::getPrimaryTable();
+        return Db::query("
+            SELECT *
+            FROM {$table}",
+            [],
+            static::class
+        );
     }
 
     /**
@@ -90,7 +144,7 @@ abstract class Model
             /** @phpstan-ignore-next-line */
             $obj = static::find($id);
         } else {
-            // TODO: this could be a potential issue if the constructor requires params
+            // TODO: this could be a potential issue if the constructor has required params on construction
             /** @phpstan-ignore-next-line */
             $obj = new static();
         }
@@ -131,6 +185,16 @@ abstract class Model
     public static function getPrimaryColumn(): string
     {
         return static::getDataMap()->getPrimaryKey()?->getColumn() ?? '';
+    }
+
+    /**
+     * return a table or view that is used as the primary lookup table
+     */
+    public static function getPrimaryTable(): string
+    {
+        $view = static::getDbView();
+        if ($view) return $view;
+        return static::getDbTable();
     }
 
     /**
@@ -291,12 +355,15 @@ abstract class Model
         return array_key_exists($name, self::$_MAPS);
     }
 
+    /**
+     * @deprecatd Do not think we need a method call for all models, just have the dataPath property created from a view
+     */
     public function getDataPath(): string
     {
         if (property_exists($this, 'dataPath')) {
             return $this->dataPath;
         }
-        return Config::getValue('path.data', '/data');
+        return '';
     }
 
 }
