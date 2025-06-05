@@ -35,10 +35,10 @@ class Filter extends \Tk\Collection
     {
         if ($trimFirst && isset($this->from[0])) {
             $this->from[0] = trim($this->from[0], ',');
-            $this->from[0] = str_replace('LEFT JOIN', '', $this->from[0]);
-            $this->from[0] = str_replace('RIGHT JOIN', '', $this->from[0]);
-            $this->from[0] = str_replace('INNER JOIN', '', $this->from[0]);
-            $this->from[0] = str_replace('JOIN', '', $this->from[0]);
+            $this->from[0] = str_starts_with($this->from[0], 'LEFT JOIN ') ? substr($this->from[0], 10): $this->from[0];
+            $this->from[0] = str_starts_with($this->from[0], 'RIGHT JOIN ') ? substr($this->from[0], 11): $this->from[0];
+            $this->from[0] = str_starts_with($this->from[0], 'INNER JOIN ') ? substr($this->from[0], 11): $this->from[0];
+            $this->from[0] = str_starts_with($this->from[0], 'JOIN ') ? substr($this->from[0], 5): $this->from[0];
             $this->from[0] = trim($this->from[0]);
         }
         return implode("\n", $this->from);
@@ -72,8 +72,8 @@ class Filter extends \Tk\Collection
     public function getWhereStr(): string
     {
         if (isset($this->where[0])) {
-            $this->where[0] = trim($this->where[0], 'AND');
-            $this->where[0] = trim($this->where[0], 'OR');
+            $this->where[0] = str_starts_with($this->where[0], 'AND ') ? substr($this->where[0], 4): $this->where[0];
+            $this->where[0] = str_starts_with($this->where[0], 'OR ') ? substr($this->where[0], 3): $this->where[0];
             $this->where[0] = trim($this->where[0]);
         }
         return implode("\n", $this->where);
