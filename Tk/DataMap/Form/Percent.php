@@ -13,7 +13,10 @@ class Percent extends DataTypeInterface
     public function getPropertyValue(array $array): ?float
     {
         $value = parent::getPropertyValue($array);
-        if ($this->isNullable() && !is_numeric($value) && empty($value)) return null;
+        if ($this->isNullable() && !is_numeric($value)) return null;
+        if (!is_numeric($value)) {
+            $value = 0.0;
+        }
         if (!empty($value) && $value >= 1) $value = (float)($value/100);
         return (float)$value;
     }
