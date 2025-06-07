@@ -182,25 +182,21 @@ class Uri implements UriInterface
 
     /**
      * Add a field to the query string
+     * append an array of query values by sending an array as the $field param
+     * If the field is a string and is null, the field name will be used as the query value
      */
-    public function set(string|array $field, null|string|int|float|bool $value = null): self
+    public function set(string|array $field, null|array|string|int|float|bool $value = null): self
     {
         if (is_array($field)) {
             foreach ($field as $k => $v) {
-                if ($v === null) {
-                    $field[$k] = $k;
-                } elseif (is_bool($v)) {
-                    $field[$k] = $v ? 'y' : 'n';
-                } else {
-                    $field[$k] = strval($v);
-                }
+                $this->set($k, $v);
             }
-            $this->query = array_merge($this->query, $field);
-            return $this;
+        } else {
+            // clean values
+            if (is_null($value)) $value = $field;
+            if (is_bool($value)) $value = $value ? 'y' : 'n';
+            $this->query[$field] = $value;
         }
-        if ($value === null) $value = $field;
-        if (is_bool($value)) $value = $value ? 'y' : 'n';
-        $this->query[$field] = strval($value);
         return $this;
     }
 
@@ -320,17 +316,8 @@ class Uri implements UriInterface
 
     public function getQuery(): string
     {
-        $query = '';
-        foreach ($this->query as $field => $value) {
-            if (is_array($value)) {
-                foreach ($value as $v) {
-                    $query .= urlencode($field) . '[]=' . urlencode($v) . '&';
-                }
-            } else {
-                $query .= urlencode($field) . '=' . urlencode($value) . '&';
-            }
-        }
-        return substr($query, 0, -1);
+        $rows = array_filter($this->query, fn($r) => !is_object($r));
+        return http_build_query($rows);
     }
 
     public function getFragment(): string

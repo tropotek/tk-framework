@@ -10,7 +10,7 @@ class Text extends DataTypeInterface
     {
         $value = parent::getPropertyValue($array);
         if ($this->isNullable() && !is_string($value) && empty($value)) return null;
-        return strval($value);
+        return trim(strval($value));
     }
 
     public function getColumnValue(object $object): string
