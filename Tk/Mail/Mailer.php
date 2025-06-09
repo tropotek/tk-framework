@@ -139,7 +139,18 @@ class Mailer
             $message->addHeader('X-Host', $this->params['hostname'] ?? '');
             $message->addHeader('X-Referer', Uri::create($this->params['referer'] ?? '')->getRelativePath());
 
+            if (is_array($this->params['mail.bcc'] ?? false)) {
+                foreach ($this->params['mail.bcc'] as $email) {
+                    if (!\Tk\Mail\Message::isValidEmail($email)) continue;
+                    if (in_array($email, array_column($this->mailer->getToAddresses(), 0))) continue;
+                    if (in_array($email, array_column($this->mailer->getCcAddresses(), 0))) continue;
+                    if (in_array($email, array_column($this->mailer->getBccAddresses(), 0))) continue;
+                    $message->addBcc($email);
+                }
+            }
+
             $this->mailer->Subject = $message->getSubject();
+            $this->mailer->ClearReplyTos();
 
             // Dev env test email redirect
             if (($this->params['env.type'] ?? '') == 'dev') {
@@ -193,15 +204,16 @@ class Mailer
 
                 $this->mailer->setFrom($testEmail, 'Debug From');
             } else {        // Send live emails
-                $email = $message->getFrom();
-                list($e, $n) = Message::splitEmail($email);
-                if (empty($e)) $e = 'noreply@' . $this->host;
-                $this->mailer->setFrom($e, $n);
 
                 if ($message->getReplyTo()) {
                     list($e, $n) = Message::splitEmail($message->getReplyTo());
                     $this->mailer->addReplyTo($e, $n);
                 }
+
+                $email = $message->getFrom();
+                list($e, $n) = Message::splitEmail($email);
+                if (empty($e)) $e = 'noreply@' . $this->host;
+                $this->mailer->setFrom($e, $n);
 
                 foreach ($message->getTo() as $email) {
                     list($e, $n) = Message::splitEmail($email);
@@ -214,16 +226,6 @@ class Mailer
                 foreach ($message->getBcc() as $email) {
                     list($e, $n) = Message::splitEmail($email);
                     $this->mailer->addBCC($e, $n);
-                }
-
-                if (is_array($this->params['mail.bcc'])) {
-                    foreach ($this->params['mail.bcc'] as $email) {
-                        if (!\Tk\Mail\Message::isValidEmail($email)) continue;
-                        if (in_array($email, array_column($this->mailer->getToAddresses(), 0))) continue;
-                        if (in_array($email, array_column($this->mailer->getCcAddresses(), 0))) continue;
-                        if (in_array($email, array_column($this->mailer->getBccAddresses(), 0))) continue;
-                        $message->addBcc($email);
-                    }
                 }
 
             }
@@ -239,7 +241,6 @@ class Mailer
 
             // Send Email
             $this->lastMessage = $message;
-
             $this->lastSent = $this->mailer->send();
             if (!$this->lastSent) {
                 throw new Exception($this->mailer->ErrorInfo);
