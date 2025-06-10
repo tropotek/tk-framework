@@ -1,5 +1,14 @@
 #CHANGELOG#
 
+Ver 8.0.82 [2025-06-10]:
+-------------------------------
+  - convert all dialog components
+  - Add table exception class
+  - Update to use new Model object
+  - Fix fin year report date select
+  - Update Model class with find functions
+
+
 Ver 8.0.80 [2025-05-26]:
 -------------------------------
   - Merge branch '8.0' of https://github.com/tropotek/tk-framework into 8.0
