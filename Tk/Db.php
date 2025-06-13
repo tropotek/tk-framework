@@ -191,6 +191,10 @@ class Db
 		return $tz;
 	}
 
+    /**
+     * @note Only InnoDB supports the SQL statements SAVEPOINT, ROLLBACK TO SAVEPOINT,
+     *       RELEASE SAVEPOINT and the optional WORK keyword for ROLLBACK.
+     */
     public static function beginTransaction(): bool
     {
         if (!self::$transactions++) {
