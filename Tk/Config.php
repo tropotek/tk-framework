@@ -49,7 +49,7 @@ final class Config extends Collection
     }
 
     /**
-     * Gets an instance of this object, if none exists one is created
+     * Gets an instance of this object, if none exists, one is created
      */
     public static function instance(): self
     {
@@ -145,65 +145,4 @@ final class Config extends Collection
         return $found;
     }
 
-
-
-
-    /**
-     * @deprecated Use isDev() instead
-     */
-    public static function isDebug(): bool
-    {
-        return self::isDev();
-    }
-
-    /**
-     * Create a full filepath to a resource using the relative path
-     * This method will strip the trailing slash.
-     * If no DIRECTORY_SEPARATOR is at the beginning of the $path one will be prepended
-     *
-     * @deprecated use Path::create($path)
-     */
-    public static function makePath(string $path = ''): string
-    {
-        $path = FileUtil::getRealPath($path);
-        $path = rtrim($path, DIRECTORY_SEPARATOR);
-        $path = str_replace(self::getBasePath(), '', $path); // Prevent recurring
-        return self::getBasePath() . $path;
-    }
-
-    /**
-     * @deprecated use Path::createDataPath($path) || Path::createPrivatePath($path)
-     */
-    public static function makeDataPath(string $path = '', bool $isPrivate = false): string
-    {
-        $sysPath = self::getDataPath();
-        if ($isPrivate) {
-            $sysPath .= '/private';
-        }
-        return self::makePath($sysPath . $path);
-    }
-
-    /**
-     * Create a full path URL from a relative path
-     * This method will strip the trailing slash.
-     * If a full URL is supplied only the path is returned
-     *
-     * @deprecated use Uri::create() and Uri::create()->getRelativePath())
-     */
-    public static function makeUrl(string $path): string
-    {
-        $path = FileUtil::getRealPath($path);
-        $path = rtrim($path, DIRECTORY_SEPARATOR);
-        $path = strval(parse_url($path, \PHP_URL_PATH));
-        $path = str_replace(self::getbaseUrl(), '', $path); // Prevent recurring
-        return self::getbaseUrl() . $path;
-    }
-
-    /**
-     * @deprecated use Uri::createDataUri() and Uri::createDataUri()->getDataPath()
-     */
-    public static function makeDataUrl(string $path): string
-    {
-        return self::makeUrl(self::getDataPath() . $path);
-    }
 }

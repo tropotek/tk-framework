@@ -18,17 +18,6 @@ class Uri implements UriInterface
 {
 
     /**
-     * The sites base path from the web root, for relative URIs
-     * Set this in your apps bootstrap file
-     */
-    public static string $BASE_PATH = '';
-
-    /**
-     * The sites hostname for relative URIs
-     */
-    public static string $SITE_HOST = 'localhost';
-
-    /**
      * Per RFC 3986(Scheme): scheme = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
      */
     const string SCHEME_REGEX_PATTERN = '/^(?:[a-z]+)(?:(?:[\+\.\-]*)(?:[a-z0-9]*))$/';
@@ -86,17 +75,19 @@ class Uri implements UriInterface
         }
 
         // Prepend site base path if this is a relative Uri path only
+        $baseUrl = Config::getBaseUrl();
+        $siteHost = Config::getHostname();
         if (
-            //!empty(trim(self::$BASE_PATH, '/')) &&
+            //!empty(trim($baseUrl, '/')) &&
             str_starts_with($uri, '/') &&       // spec starts with a path
-            !str_starts_with($uri, '//')        // ignore urls without scheme
+            !str_starts_with($uri, '//')        // ignore urls without a scheme
         ) {
-            if (str_starts_with($uri, self::$BASE_PATH)) {
-                $uri = substr($uri, strlen(self::$BASE_PATH));
+            if (str_starts_with($uri, $baseUrl)) {
+                $uri = substr($uri, strlen($baseUrl));
             }
             $uri = ($_SERVER['REQUEST_SCHEME'] ?? 'https') . '://' .
-                self::$SITE_HOST .
-                self::$BASE_PATH . '/' .
+                $siteHost .
+                $baseUrl . '/' .
                 trim($uri, '/');
         }
 
@@ -118,7 +109,7 @@ class Uri implements UriInterface
 
     /**
      * Create a url from a string.
-     * Relative URL's are formatted to include site $BASE_PATH (eg: '/path.html' => 'http://localhost/base/path/path.html')
+     * Relative URL's are formatted to include site Config::getBaseUrl() (eg: '/path.html' => 'http://localhost/base/path/path.html')
      */
     public static function create(string|Uri|null $uri = null, array $queryParams = []): self
     {
@@ -290,20 +281,22 @@ class Uri implements UriInterface
     }
 
     /**
-     * If the $BASE_PATH is set the path is returned with the $BASE_PATH removed.
+     * If the $BASE_PATH is set, the path is returned with the $BASE_PATH removed.
      */
     public function getRelativePath(): string
     {
+        $baseUrl = Config::getBaseUrl();
+
         $path = $this->getPath();
         $path = urldecode($path);
-        if (self::$BASE_PATH && str_starts_with($path, self::$BASE_PATH)) {
-            $path = substr($path, strlen(self::$BASE_PATH));
+        if ($baseUrl && str_starts_with($path, $baseUrl)) {
+            $path = substr($path, strlen($baseUrl));
         }
         return $path;
     }
 
     /**
-     * Returns the path relative to the sites data path set in the Config
+     * Returns the path relative to the site data path set in the Config
      */
     public function getDataPath(): string
     {
