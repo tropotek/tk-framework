@@ -210,12 +210,8 @@ class Message
     public static function listToStr(array|string $list, string $separator = ','): string
     {
         if (is_string($list)) $list = self::strToList($list);
-        $str = '';
-        foreach ($list as $email) {
-            if (!self::isValidEmail($email)) continue;
-            $str .= $email . $separator;
-        }
-        return rtrim($str, $separator);
+        $list = array_filter($list, fn($e) => self::isValidEmail($e));
+        return implode($separator, $list);
     }
 
     /**

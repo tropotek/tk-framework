@@ -156,20 +156,21 @@ class Mailer
             if (($this->params['env.type'] ?? '') == 'dev') {
 
                 //$this->mailer->SMTPDebug = 2;
-                $debugMsg  = 'To: ' . Message::listToStr($message->getTo()) . "\n";
-                $debugMsg .= 'From: ' . $message->getFrom() . "\n";
+                $debugMsg  = '<b>To:</b> ' . htmlentities(Message::listToStr($message->getTo())) . "<br>\n";
+                $debugMsg .= '<b>From:</b> ' . htmlentities($message->getFrom()) . "<br>\n";
                 if ($message->getReplyTo()) {
-                    $debugMsg .= 'Reply-To: ' . $message->getReplyTo() . "\n";
+                    $debugMsg .= '<b>Reply-To:</b> ' . htmlentities($message->getReplyTo()) . "<br>\n";
                 }
                 if (count($message->getCc())) {
-                    $debugMsg .= 'Cc: ' . Message::listToStr($message->getCc()) . "\n";
+                    $debugMsg .= '<b>Cc:</b> ' . htmlentities(Message::listToStr($message->getCc())) . "<br>\n";
                 }
                 if (count($message->getBcc())) {
-                    $debugMsg .= 'Bcc: ' . Message::listToStr($message->getBcc()) . "\n";
+                    $debugMsg .= '<b>Bcc:</b> ' . htmlentities(Message::listToStr($message->getBcc())) . "<br>\n";
                 }
                 $this->mailer->Body =
-                    sprintf('<pre style="background-color: #EFEFEF; border: 1px solid #CCC;padding: 0.5em;">%s</pre>', $debugMsg) .
-                    $this->mailer->Body;
+                    sprintf('<pre style="background-color: #EFEFEF; border: 1px solid #CCC;padding: 0.5em;white-space: wrap;">%s</pre>',
+                        $debugMsg
+                    ) . $this->mailer->Body;
 
                 $message->addHeader('X-Debug-To', Message::listToStr($message->getTo()));
                 $message->addHeader('X-Debug-From', $message->getFrom());
