@@ -251,6 +251,12 @@ abstract class Model
             if ($typeName == Money::class) {
                 $meta->php_type = $typeName;
             }
+            if ($typeName == 'stdClass') {
+                $meta->php_type = 'json';
+            }
+            if ($typeName == 'array') {
+                $meta->php_type = 'array';
+            }
 
             $type = DataMap::makeDbType($meta);
             $type->setNullable($prop->getType()->allowsNull());
@@ -293,6 +299,7 @@ abstract class Model
         $props = $reflect->getProperties(\ReflectionProperty::IS_PUBLIC | \ReflectionProperty::IS_PROTECTED);
         foreach ($props as $prop) {
             if (str_starts_with($prop->getName(), '_') || $prop->isStatic()) continue;
+            if (in_array($prop->getType()->getName(), ['stdClass'])) continue;
 
             /** TODO: see above comment */
             //$typeName = (string)$prop->getType();
