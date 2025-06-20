@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 8.0.84 [2025-06-21]:
+-------------------------------
+  - update notifications and recipients
+
+
 Ver 8.0.82 [2025-06-10]:
 -------------------------------
   - convert all dialog components
