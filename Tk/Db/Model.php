@@ -1,7 +1,6 @@
 <?php
 namespace Tk\Db;
 
-use Tk\Config;
 use Tk\DataMap\Db\DateTime;
 use Tk\Money;
 use Tk\ObjectUtil;
