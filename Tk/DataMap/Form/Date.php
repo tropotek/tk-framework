@@ -10,7 +10,7 @@ class Date extends DataTypeInterface
      * The date format received from the array/form
      * @default 'd/m/Y' => `31/12/2000`
      */
-    protected string $format = \Tk\Date::FORMAT_ISO_DATE;
+    protected string $format = '';
     protected ?\DateTimeZone $timezone = null;
 
 
