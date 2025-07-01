@@ -299,7 +299,7 @@ class Image
     public function rotate(int $angle, string $bg_color = '#000000'): self
     {
         $rgb = Color::hex2Rgb($bg_color);
-        $bg_color = intval(imagecolorallocate($this->image, $rgb['r'], $rgb['g'], $rgb['b']));
+        $bg_color = intval(imagecolorallocate($this->image, $rgb['red'] ?? 0, $rgb['green'] ?? 0, $rgb['blue'] ?? 0));
         $new = imagerotate($this->image, $this->keepWithin($angle, -360, 360), $bg_color);
         if ($new === false) return $this;
         $this->width = imagesx($new);
@@ -729,7 +729,7 @@ class Image
         // todo - this method could be improved to support the text angle
         $angle = 0;
         $rgb = Color::hex2Rgb($color);
-        $color = intval(imagecolorallocate($this->image, $rgb['r'], $rgb['g'], $rgb['b']));
+        $color = intval(imagecolorallocate($this->image, $rgb['red'] ?? 0, $rgb['green'] ?? 0, $rgb['blue'] ?? 0));
 
         // Determine textbox size
         $box = imagettfbbox($fontSize, $angle, $fontFile, $text);
