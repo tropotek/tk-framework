@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 8.0.86 [2025-07-02]:
+-------------------------------
+  - Added profile photo component
+
+
 Ver 8.0.84 [2025-06-21]:
 -------------------------------
   - update notifications and recipients
