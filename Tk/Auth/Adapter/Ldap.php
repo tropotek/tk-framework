@@ -28,12 +28,8 @@ class Ldap extends AdapterInterface
         $this->setTls($tls);
     }
 
-    public function authenticate(): Result
+    public function authenticate(string $username = '', string $password = ''): Result
     {
-        // get values from a post request only
-        $username = trim($_POST['username'] ?? '');
-        $password = trim($_POST['password'] ?? '');
-
         if (!$username || !$password) {
             return new Result(Result::FAILURE_CREDENTIAL_INVALID, $username, '0000 Invalid username or password.');
         }

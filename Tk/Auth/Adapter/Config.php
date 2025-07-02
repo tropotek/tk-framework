@@ -27,12 +27,8 @@ class Config extends AdapterInterface
         $this->requiredPassword = $requiredPassword;
     }
 
-    public function authenticate(): Result
+    public function authenticate(string $username = '', string $password = ''): Result
     {
-        // get values from a post or get request
-        $username = trim($_POST['username'] ?? '');
-        $password = trim($_POST['password'] ?? '');
-
         if ($this->requiredUsername && $this->requiredPassword) {
             if ($username == $this->requiredUsername && Auth::hashPassword($password) == $this->requiredPassword) {
                 return new Result(Result::SUCCESS, $username);

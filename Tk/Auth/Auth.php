@@ -48,12 +48,12 @@ class Auth
     /**
      * Authenticates against the supplied adapter
      */
-    public function authenticate(Adapter\AdapterInterface $adapter): Result
+    public function authenticate(Adapter\AdapterInterface $adapter, string $username = '', string $password = ''): Result
     {
         if ($this->hasIdentity()) {
             $this->clearIdentity();
         }
-        $loginResult = $adapter->authenticate();
+        $loginResult = $adapter->authenticate($username, $password);
         if ($loginResult->isValid()) {
             $this->getStorage()->write($loginResult->getIdentity());
         }

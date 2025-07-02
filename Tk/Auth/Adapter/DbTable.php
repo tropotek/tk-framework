@@ -34,12 +34,8 @@ class DbTable extends AdapterInterface
         return Db::queryOne($sql, compact('username'));
     }
 
-    public function authenticate(): Result
+    public function authenticate(string $username = '', string $password = ''): Result
     {
-        // get values from a post request only
-        $username = trim($_POST['username'] ?? '');
-        $password = trim($_POST['password'] ?? '');
-
         if (!$username || !$password) {
             return new Result(Result::FAILURE_CREDENTIAL_INVALID, $username, 'No username or password.');
         }

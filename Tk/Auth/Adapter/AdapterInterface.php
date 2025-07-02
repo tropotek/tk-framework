@@ -8,6 +8,6 @@ abstract class AdapterInterface
     /**
      * Perform an authentication attempt
      */
-    public abstract function authenticate(): Result;
+    public abstract function authenticate(string $username = '', string $password = ''): Result;
 
 }
