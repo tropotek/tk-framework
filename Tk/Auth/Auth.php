@@ -1,6 +1,7 @@
 <?php
 namespace Tk\Auth;
 
+use Tk\Auth\Adapter\AdapterInterface;
 use Tk\Auth\Storage\StorageInterface;
 
 /**
@@ -10,11 +11,13 @@ class Auth
 {
     public ?Result $loginResult = null;
     protected StorageInterface $storage;
+    protected AdapterInterface $adapter;
 
 
-    public function __construct(StorageInterface $storage)
+    public function __construct(StorageInterface $storage, ?AdapterInterface $adapter = null)
     {
         $this->storage = $storage;
+        $this->setAdapter($adapter);
     }
 
     /**
@@ -45,18 +48,36 @@ class Auth
         return $this->storage;
     }
 
+    public function setAdapter(?AdapterInterface $adapter): Auth
+    {
+        if (is_null($adapter)) return $this;
+        $this->adapter = $adapter;
+        return $this;
+    }
+
+    public function getAdapter(): ?AdapterInterface
+    {
+        return $this->adapter;
+    }
+
     /**
      * Authenticates against the supplied adapter
      */
-    public function authenticate(Adapter\AdapterInterface $adapter, string $username = '', string $password = ''): Result
+    public function authenticate(string $username = '', string $password = ''): Result
     {
+        if (is_null($this->getAdapter())) {
+            throw new \Tk\Exception('No authentication adapter set');
+        }
+
         if ($this->hasIdentity()) {
             $this->clearIdentity();
         }
-        $loginResult = $adapter->authenticate($username, $password);
+
+        $loginResult = $this->getAdapter()?->authenticate($username, $password);
         if ($loginResult->isValid()) {
             $this->getStorage()->write($loginResult->getIdentity());
         }
+
         return $loginResult;
     }
 
