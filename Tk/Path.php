@@ -23,24 +23,29 @@ class Path
 
     public function __construct(string $path, string $prefix = '')
     {
-        if (empty($path)) throw new Exception("path must contain a value");
-        if ($path[0] != '/') throw new Exception("path must start with a directory separator");
-        if ($prefix[0] != '/') throw new Exception("prefix must start with a directory separator");
+        //if (empty($path)) throw new Exception("path must contain a value");
+        if (!empty($path) && $path[0] != '/') throw new Exception("path must start with a directory separator");
+        //if ($prefix[0] != '/') throw new Exception("prefix must start with a directory separator");
 
-        $this->path = rtrim($path, DIRECTORY_SEPARATOR);
-        $this->prefix = rtrim($prefix, DIRECTORY_SEPARATOR);
+        // clean up path
+        $path = rtrim($path, DIRECTORY_SEPARATOR);
+        $prefix = rtrim($prefix, DIRECTORY_SEPARATOR);
+        if ($prefix && str_starts_with($path, $prefix)) {
+            $path = substr($path, strlen($prefix));
+        }
+
+        $this->path = $path;
+        $this->prefix = $prefix;
     }
 
     /**
-     * Create a path from a relative path using the system site root as the base
+     * Create a path from a relative path using the supplied prefix if given.
+     * The system site root path will be used if null, use '' for no prefix or `new Path()`
      */
-    public static function create(string|Path $path = ''): self
+    public static function create(string|Path $path = '', ?string $prefix = null): self
     {
         if ($path instanceof Path) return clone $path;
-        if (str_starts_with($path, Config::getBasePath())) {
-            $path = substr($path, strlen(Config::getBasePath()));
-        }
-        return new self($path, Config::getBasePath());
+        return new self($path, $prefix ?? Config::getBasePath());
     }
 
     /**
@@ -50,9 +55,6 @@ class Path
     {
         if ($path instanceof Path) return clone $path;
         $dataPath = Config::getBasePath() . Config::getDataPath();
-        if (str_starts_with($path, $dataPath)) {
-            $path = substr($path, strlen($dataPath));
-        }
         return new self($path, $dataPath);
     }
 
@@ -63,9 +65,6 @@ class Path
     {
         if ($path instanceof Path) return clone $path;
         $privatePath = Config::getBasePath() . Config::getDataPath() . '/private';
-        if (str_starts_with($path, $privatePath)) {
-            $path = substr($path, strlen($privatePath));
-        }
         return new self($path, $privatePath);
     }
 
@@ -76,9 +75,6 @@ class Path
     {
         if ($path instanceof Path) return clone $path;
         $cachePath = Config::getBasePath() . Config::getCachePath();
-        if (str_starts_with($path, $cachePath)) {
-            $path = substr($path, strlen($cachePath));
-        }
         return new self($path, $cachePath);
     }
 
@@ -89,9 +85,6 @@ class Path
     {
         if ($path instanceof Path) return clone $path;
         $tempPath = Config::getBasePath() . Config::getTempPath();
-        if (str_starts_with($path, $tempPath)) {
-            $path = substr($path, strlen($tempPath));
-        }
         return new self($path, $tempPath);
     }
 
@@ -102,9 +95,6 @@ class Path
     {
         if ($path instanceof Path) return clone $path;
         $templatePath = Config::getBasePath() . Config::getTemplatePath();
-        if (str_starts_with($path, $templatePath)) {
-            $path = substr($path, strlen($templatePath));
-        }
         return new self($path, $templatePath);
     }
 
@@ -118,6 +108,22 @@ class Path
     {
         return $this->prefix;
     }
+
+    public function isFile(): bool
+    {
+        return is_file($this->toString());
+    }
+
+    public function isDir(): bool
+    {
+        return is_dir($this->toString());
+    }
+
+    public function exists(): bool
+    {
+        return file_exists($this->toString());
+    }
+
 
     public function toRelativeString(): string
     {

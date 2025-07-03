@@ -345,7 +345,7 @@ class FileUtil
     public static function getMimeArray(): array
     {
         $key = 'mime.types';
-        $cache = Cache::instance();
+        $cache = new Cache();
 
         if (!$mime = $cache->fetch($key)) {
             $mimeContents = file_get_contents(self::$MIME_TYPES_URL);

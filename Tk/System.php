@@ -16,9 +16,10 @@ class System
     public static function discoverHostname(): string
     {
         $key = 'hostname';
-        if (empty($hostname = Cache::instance()->fetch($key)) || System::isRefreshCacheRequest()) {
+        $cache = new Cache();
+        if (empty($hostname = $cache->fetch($key)) || System::isRefreshCacheRequest()) {
             $hostname = $_SERVER['HTTP_HOST'] ?? $_SERVER['HTTP_X_FORWARDED_HOST'] ?? 'localhost';
-            Cache::instance()->store($key, $hostname);
+            $cache->store($key, $hostname);
         }
         return $hostname;
     }

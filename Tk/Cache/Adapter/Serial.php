@@ -2,15 +2,13 @@
 namespace Tk\Cache\Adapter;
 
 use Tk\FileUtil;
+use Tk\Log;
 
 /**
- * A filesystem cache class
- * This adapter uses a 10 byte header to test the time therefore should be faster than having
- * to read the entire cache file
- *
- * @see http://www.rooftopsolutions.nl/blog/107
+ * A serialised cache class.
+ * uses PHPs `serialize()` function to store cache data
  */
-class Filesystem implements Iface
+class Serial implements Iface
 {
     protected string $cachePath = '';
 
@@ -26,18 +24,9 @@ class Filesystem implements Iface
     public function store(string $key, mixed $data, int $ttl = 0): bool
     {
         if (!FileUtil::mkdir($this->getCachePath())) {
-            throw new \Tk\Exception('Cannot create path: ' . $this->getCachePath());
+            Log::error('Cannot create path: ' . $this->getCachePath());
+            return false;
         }
-
-        // Opening the file in read/write mode
-        $h = fopen($this->getFileName($key), 'a+');
-        if ($h === false) {
-            throw new \Tk\Exception('Could not write to cache');
-        }
-
-        flock($h, \LOCK_EX); // exclusive lock, will get released when the file is closed
-        fseek($h, 0);           // go to the start of the file
-        ftruncate($h, 0);        // truncate the file
 
         // Serializing along with the TTL
         $store = serialize([
@@ -45,11 +34,10 @@ class Filesystem implements Iface
             'data' => $data,
         ]);
 
-        if (fwrite($h, $store) === false) {
-            throw new \Tk\Exception('Could not write to cache');
+        if (false === file_put_contents($this->getFileName($key), $store, LOCK_EX)) {
+            return false;
         }
 
-        fclose($h);
         return true;
     }
 
@@ -61,13 +49,10 @@ class Filesystem implements Iface
             return false;
         }
 
-        $h = fopen($filename, 'r');
-        if ($h === false) return false;
-        // Getting a shared lock
-        flock($h, \LOCK_SH);
-
-        $store = strval(file_get_contents($filename));
-        fclose($h);
+        $store = file_get_contents($filename);
+        if ($store === false) {
+            throw new \Tk\Exception('Could not read from cache');
+        }
 
         $store = @unserialize($store);
         if ($store === false) {
@@ -100,7 +85,7 @@ class Filesystem implements Iface
         return \Tk\FileUtil::rmdir($this->getCachePath());
     }
 
-    protected function getFileName(string $key): string
+    public function getFileName(string $key): string
     {
         return $this->getCachePath() . '/' . $key;
     }

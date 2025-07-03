@@ -1,7 +1,7 @@
 <?php
 namespace Tk\Cache;
 
-use Tk\Cache\Adapter\Filesystem;
+use Tk\Cache\Adapter\Serial;
 use Tk\Path;
 
 /**
@@ -44,21 +44,10 @@ class Cache
 
     public function __construct(?Adapter\Iface $adapter = null)
     {
-        $this->adapter = $adapter;
-    }
-
-    /**
-     * the adapter property is only valid on the initial call
-     */
-    public static function instance(?Adapter\Iface $adapter = null): self
-    {
-        if (self::$_instance == null) {
-            if (is_null($adapter)) {
-                $adapter = new Filesystem(Path::createCachePath('/'));
-            }
-            self::$_instance = new self($adapter);
+        if (is_null($adapter)) {
+            $adapter = new Serial(Path::createCachePath());
         }
-        return self::$_instance;
+        $this->adapter = $adapter;
     }
 
     public function setEnabled(bool $b = true): void
