@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 8.0.88 [2025-07-04]:
+-------------------------------
+  - masive cache object cleanup
+
+
 Ver 8.0.86 [2025-07-02]:
 -------------------------------
   - Added profile photo component
