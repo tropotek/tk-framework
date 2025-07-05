@@ -13,7 +13,7 @@ use Tk\Db;
  * with the database. This class offers default behavior for common operations such as finding,
  * retrieving, and mapping database rows to objects.
  *
- * When implementing your own Models, note constructors cannot have any required params.
+ * When implementing your own Models, constructors cannot have any required params.
  * <?php
  *      // OK
  *      public function __construct(int $testId = 0)
@@ -21,7 +21,7 @@ use Tk\Db;
  *          $this->testId = $testId;
  *      }
  *
- *      // WRONG
+ *      // ERROR
  *      public function __construct(int $testId)
  *      {
  *          $this->testId = $testId;
@@ -49,6 +49,13 @@ abstract class Model
     protected static array $_MAPS = [];
 
     const array FORCE_READ_ONLY = ['modified', 'created'];
+
+    /**
+     * Leave this empty if you want to use the default table/view
+     * Default table/view name is the snake name of the class CamelCase name
+     * @see static::getPrimaryTable()
+     */
+    const string DB_TABLE  = '';
 
     /**
      * default find query
@@ -177,14 +184,6 @@ abstract class Model
         return intval($this->$priKey);
     }
 
-    /**
-     * @deprecated use getPrimaryProperty()
-     */
-    public function getPrimaryKey(): string
-    {
-        return static::getPrimaryProperty();
-    }
-
     public static function getPrimaryProperty(): string
     {
         return static::getDataMap()->getPrimaryKey()?->getProperty() ?? '';
@@ -197,16 +196,18 @@ abstract class Model
 
     /**
      * return a table or view that is used as the primary lookup table
+     * If using a non-standard table/view define DB_TABLE in your Model object
      */
     public static function getPrimaryTable(): string
     {
+        if (!empty(static::DB_TABLE)) return static::DB_TABLE;
         $view = static::getDbView();
         if ($view) return $view;
         return static::getDbTable();
     }
 
     /**
-     * return a default DB table name for this object
+     * return a snake style DB table name generated from the class name
      */
     public static function getDbTable(): string
     {
@@ -215,6 +216,7 @@ abstract class Model
 
     /**
      * return the DB view name if exists returns empty string if not
+     * All views are assumed to be the default table name with 'v_' prepended
      */
     public static function getDbView(): string
     {
