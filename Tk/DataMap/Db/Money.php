@@ -20,10 +20,8 @@ class Money extends DataTypeInterface
     public function getPropertyValue(array $array): mixed
     {
         $value = parent::getPropertyValue($array);
-        if (is_numeric($value)) {
-            $value = \Tk\Money::create((int)$value, \Tk\Currency::instance($this->currencyCode));
-        }
-        return $value;
+        if ($this->isNullable() && !is_numeric($value)) return null;
+        return \Tk\Money::create((int)$value, \Tk\Currency::instance($this->currencyCode));
     }
 
     public function getColumnValue(object $object): mixed
@@ -32,6 +30,7 @@ class Money extends DataTypeInterface
         if ($value instanceof \Tk\Money) {
             return $value->getAmount();
         }
+        if ($this->isNullable() && !is_numeric($value)) return null;
         return $value;
     }
 

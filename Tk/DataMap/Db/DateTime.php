@@ -13,6 +13,7 @@ class DateTime extends DataTypeInterface
     protected string $timezone    = '';
     protected bool   $isImmutable = false;
 
+
     public function __construct(string $property, string $key = '')
     {
         parent::__construct($property, $key);
@@ -23,22 +24,22 @@ class DateTime extends DataTypeInterface
     public function getPropertyValue(array $array): mixed
     {
         $value = parent::getPropertyValue($array);
-        if (is_string($value)) {
-            if ($this->isImmutable) {
-                $v = \DateTimeImmutable::createFromFormat($this->format, trim($value), $this->getTimeZone());
-                if ($v === false) {
-                    throw new Exception(implode(", ", (\DateTimeImmutable::getLastErrors()['errors'] ?? ['Unknown Date Error'])) .
-                        " for date: '$value'");
-                }
-            } else {
-                $v = \DateTime::createFromFormat($this->format, trim($value), $this->getTimeZone());
-                if ($v === false) {
-                    throw new Exception(implode(", ", (\DateTime::getLastErrors()['errors'] ?? ['Unknown Date Error'])) .
-                        " for date: '$value'");
-                }
+        if ($this->isNullable() && (empty($value) || !is_string($value))) return null;
+
+        if ($this->isImmutable) {
+            $value = \DateTimeImmutable::createFromFormat($this->format, trim($value), $this->getTimeZone());
+            if ($value === false) {
+                throw new Exception(implode(", ", (\DateTimeImmutable::getLastErrors()['errors'] ?? ['Unknown Date Error'])) .
+                    " for date: '$value'");
             }
-            $value = $v;
+        } else {
+            $value = \DateTime::createFromFormat($this->format, trim($value), $this->getTimeZone());
+            if ($value === false) {
+                throw new Exception(implode(", ", (\DateTime::getLastErrors()['errors'] ?? ['Unknown Date Error'])) .
+                    " for date: '$value'");
+            }
         }
+
         return $value;
     }
 
@@ -48,6 +49,7 @@ class DateTime extends DataTypeInterface
         if ($value instanceof \DateTimeInterface) {
             $value = $value->format($this->format);
         }
+        if ($this->isNullable() && (empty($value) || !is_string($value))) return null;
         return $value;
     }
 

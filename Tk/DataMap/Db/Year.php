@@ -18,7 +18,8 @@ class Year extends DateTime
         if (array_key_exists($this->getColumn(), $array)) {
             $value = $array[$this->getColumn()];
         }
-        if (is_numeric($value) && strlen(strval($value)) == 4) {
+        if ($this->isNullable() && (empty($value) || !is_numeric($value))) return null;
+        if (strlen(strval($value)) == 4) {
             $value = \Tk\Date::create("$value-01-01");
         }
         return $value;

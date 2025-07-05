@@ -27,6 +27,7 @@ class ArrayType extends DataTypeInterface
         if ($this->associative) {
             $value = array_combine($value, $value);
         }
+        if ($this->isNullable() && empty($value)) return null;
         return $value;
     }
 
@@ -34,6 +35,7 @@ class ArrayType extends DataTypeInterface
     {
         $value = parent::getColumnValue($object);
         if (is_array($value)) $value = implode(',', $value);
+        if ($this->isNullable() && empty($value)) return null;
         return $value;
     }
 

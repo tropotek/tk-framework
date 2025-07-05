@@ -160,8 +160,7 @@ abstract class Model
         if ($id) {
             $obj = static::find($id);
         } else {
-            $rc = new \ReflectionClass(static::class);
-            $obj = $rc->newInstanceWithoutConstructor();
+            $obj = new static();
         }
         if (is_null($obj)) {
             Db::$LOG = true;

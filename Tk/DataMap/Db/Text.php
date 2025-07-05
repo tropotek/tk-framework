@@ -12,15 +12,15 @@ class Text extends DataTypeInterface
     public function getPropertyValue(array $array): mixed
     {
         $value = parent::getPropertyValue($array);
-        if (!is_null($value)) $value = strval($value);
-        return $value;
+        if ($this->isNullable() && empty($value)) return null;
+        return strval($value);
     }
 
     public function getColumnValue(object $object): mixed
     {
         $value = parent::getColumnValue($object);
-        if (!is_null($value)) $value = strval($value);
-        return $value;
+        if ($this->isNullable() && empty($value)) return null;
+        return strval($value);
     }
 
 }
