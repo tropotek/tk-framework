@@ -9,7 +9,7 @@ class Date extends DateTime
     public function __construct(string $property, string $key = '')
     {
         parent::__construct($property, $key);
-        $this->format = \Tk\Date::FORMAT_ISO_DATE;
+        $this->setDateFormat(\Tk\Date::FORMAT_ISO_DATE);
     }
 
     public function getPropertyValue(array $array): mixed

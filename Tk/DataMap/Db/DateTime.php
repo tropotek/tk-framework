@@ -9,9 +9,9 @@ use Tk\DataMap\DataTypeInterface;
  */
 class DateTime extends DataTypeInterface
 {
-    protected string $format      = 'Y-m-d H:i:s';
-    protected string $timezone    = '';
-    protected bool   $isImmutable = false;
+    private string $format      = 'Y-m-d H:i:s';
+    private string $timezone    = '';
+    private bool   $isImmutable = false;
 
 
     public function __construct(string $property, string $key = '')

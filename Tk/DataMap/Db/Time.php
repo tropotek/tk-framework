@@ -9,6 +9,6 @@ class Time extends DateTime
     public function __construct(string $property, string $key = '')
     {
         parent::__construct($property, $key);
-        $this->format = \Tk\Date::FORMAT_ISO_TIME;
+        $this->setDateFormat(\Tk\Date::FORMAT_ISO_TIME);
     }
 }
