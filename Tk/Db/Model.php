@@ -74,7 +74,7 @@ abstract class Model
     }
 
     /**
-     * Magic method to map an array to an object using the dataMap
+     * Used by the \Tk\Db object to map a row to an object
      */
     public function __map(array $row, ?DataMap $map = null): void
     {
@@ -87,7 +87,7 @@ abstract class Model
     }
 
     /**
-     * map an array of values to an object using the form data map
+     * map form values array to object properties
      */
     public function mapForm(array $values): static
     {
@@ -97,7 +97,7 @@ abstract class Model
     }
 
     /**
-     * map this objects values to an array using the from data map
+     * map object properties to form values array
      */
     public function unmapForm(): array
     {
@@ -108,7 +108,7 @@ abstract class Model
     }
 
 	/**
-	 * load properties of this object from database
+	 * load properties of this object from the database
 	 */
     public function reload(): void
     {
@@ -141,13 +141,13 @@ abstract class Model
 
     /**
      * Return the primary int id of a model
-     * Does not support models with a non integer ID type
+     * Does not support models with a non-integer ID type
      */
     public function getId(): int
     {
         $priKey = static::getPrimaryProperty();
-        if (empty($priKey)) return 0;
-        return intval($this->$priKey ?? 0);
+        if (empty($priKey) || !is_numeric($this->$priKey)) return 0;
+        return intval($this->$priKey);
     }
 
     /**
@@ -207,6 +207,8 @@ abstract class Model
      * Override this method if you need to create a custom DataMap with different table names
      *
      * @note Remember to check your queries are using the view if required.
+     * @todo Refactor this, I think we can refine how we get the property map type
+     *       Looks like we are using a mix of col metadata and object prop types, can we just use obj prop type to map???
      */
     public static function getDataMap(): DataMap
     {
@@ -244,7 +246,8 @@ abstract class Model
              *       property reflection shit together.
              */
             //$typeName = (string)$prop->getType();
-            /** @phpstan-ignore-next-line  */
+
+            // vd($prop->getType().'');     // TODO: this seems to be the way, keep in mind nullables ie: `DateTime` vs `?DateTime`
             $typeName = $prop->getType()->getName();
 
             if ($typeName == Money::class) {
@@ -300,7 +303,7 @@ abstract class Model
             if (str_starts_with($prop->getName(), '_') || $prop->isStatic()) continue;
             if (in_array($prop->getType()->getName(), ['stdClass'])) continue;
 
-            /** TODO: see above comment */
+            /** TODO: see above comment about Reflection type name */
             //$typeName = (string)$prop->getType();
             /** @phpstan-ignore-next-line  */
             $typeName = $prop->getType()->getName();
