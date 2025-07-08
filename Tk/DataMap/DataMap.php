@@ -120,20 +120,20 @@ class DataMap
         return array_keys($this->propertyTypes);
     }
 
-    public static function makeDbType(\stdClass $meta): DataTypeInterface
+    public static function makeDbType(string $phpType, string $propertyName, string $columnName): DataTypeInterface
     {
-        return match ($meta->php_type) {
-            'bool'     => new Db\Boolean($meta->name_camel, $meta->name),
-            'int'      => new Db\Integer($meta->name_camel, $meta->name),
-            'float'    => new Db\Decimal($meta->name_camel, $meta->name),
-            'array'    => new Db\ArrayType($meta->name_camel, $meta->name),
-            'json'     => new Db\Json($meta->name_camel, $meta->name),
-            'timestamp', 'datetime' => new Db\DateTime($meta->name_camel, $meta->name),
-            'date'     => new Db\Date($meta->name_camel, $meta->name),
-            'time'     => new Db\Time($meta->name_camel, $meta->name),
-            'year'     => new Db\Year($meta->name_camel, $meta->name),
-            'Tk\Money' => new Db\Money($meta->name_camel, $meta->name),
-            default    => new Db\Text($meta->name_camel, $meta->name),
+        return match ($phpType) {
+            'bool'     => new Db\Boolean($propertyName, $columnName),
+            'int'      => new Db\Integer($propertyName, $columnName),
+            'float'    => new Db\Decimal($propertyName, $columnName),
+            'array'    => new Db\ArrayType($propertyName, $columnName),
+            'json'     => new Db\Json($propertyName, $columnName),
+            'timestamp', 'datetime' => new Db\DateTime($propertyName, $columnName),
+            'date'     => new Db\Date($propertyName, $columnName),
+            'time'     => new Db\Time($propertyName, $columnName),
+            'year'     => new Db\Year($propertyName, $columnName),
+            'Tk\Money' => new Db\Money($propertyName, $columnName),
+            default    => new Db\Text($propertyName, $columnName),
         };
     }
 

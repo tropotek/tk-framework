@@ -263,22 +263,23 @@ abstract class Model
             if (!property_exists($name, $meta->name_camel)) continue;
             $prop = new \ReflectionProperty(static::class, $meta->name_camel);
 
+            $phpType = $meta->php_type;
             $typeName = '';
             if ($prop->getType() instanceof \ReflectionNamedType) {
                 $typeName = $prop->getType()->getName();
             }
 
             if ($typeName == Money::class) {
-                $meta->php_type = $typeName;
+                $phpType = $typeName;
             }
             if ($typeName == 'stdClass') {
-                $meta->php_type = 'json';
+                $phpType = 'json';
             }
             if ($typeName == 'array') {
-                $meta->php_type = 'array';
+                $phpType = 'array';
             }
 
-            $type = DataMap::makeDbType($meta);
+            $type = DataMap::makeDbType($phpType, $meta->name_camel, $meta->name);
             $type->setNullable($prop->getType()->allowsNull());
 
             if ($meta->is_primary_key) {
