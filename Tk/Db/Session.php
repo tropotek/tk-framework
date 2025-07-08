@@ -58,13 +58,13 @@ class Session implements \SessionHandlerInterface
     {
         $table = self::$DB_TABLE;
         return <<<SQL
-            CREATE TABLE IF NOT EXISTS $table (
+            CREATE TABLE IF NOT EXISTS {$table} (
                 session_id VARCHAR(128) NOT NULL PRIMARY KEY,
                 data BLOB NOT NULL,
-                expiry TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP + INTERVAL 30 MINUTE,
-                modified TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-            );
+                expiry TIMESTAMP DEFAULT (CURRENT_TIMESTAMP + INTERVAL 30 MINUTE),
+                modified TIMESTAMP ON UPDATE CURRENT_TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
         SQL;
     }
 
