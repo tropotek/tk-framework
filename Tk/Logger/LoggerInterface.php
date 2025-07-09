@@ -2,6 +2,7 @@
 namespace Tk\Logger;
 
 use Psr\Log\LogLevel;
+use Tk\Date;
 
 abstract class LoggerInterface extends LogLevel implements \Psr\Log\LoggerInterface
 {
@@ -49,11 +50,11 @@ abstract class LoggerInterface extends LogLevel implements \Psr\Log\LoggerInterf
     protected function format(string $level, string $message, array $context = []): ?string
     {
         // FORMAT = "[%datetime%]%post% %level_name%: %message% %context% %extra%\n";
-        $mem = sprintf('[%9s]', \Tk\FileUtil::bytes2String(memory_get_usage(false)));
-        $now = \DateTime::createFromFormat('U.u', strval(microtime(true)));
+        $mem = sprintf('[%10s]', \Tk\FileUtil::bytes2String(memory_get_usage(false)));
+        $now = \DateTime::createFromFormat('U.u', strval($_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true)));
         $ts = '';
         if ($now instanceof \DateTime) {
-            $ts = $now->format("H:i:s.u");
+            $ts = $now->format("Y-m-d H:i:s.u");
         }
 
         return sprintf('[%s]%s %s %s',
