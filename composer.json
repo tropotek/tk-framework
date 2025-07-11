@@ -36,6 +36,8 @@
         "ext-pdo": "*",
         "ext-fileinfo": "*",
         "ext-curl": "*",
+        "ext-mbstring": "*",
+        "ext-gd": "*",
         "psr/log": "^3.0.2-@stable",
         "psr/http-message": "^1.0-@stable",
         "phpmailer/phpmailer": "~6.0-@stable"
