@@ -157,7 +157,8 @@ class System
      */
     public static function scriptDuration(): string
     {
-        return (string)(microtime(true) - Config::getValue('script.start.time'));
+        $start = $_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true);
+        return (string)(microtime(true) - $start);
     }
 
     /**

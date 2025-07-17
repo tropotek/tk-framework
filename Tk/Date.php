@@ -26,7 +26,7 @@ class Date
     /**
      * EG: 01 Jan 2009 12:59 PM
      */
-    const string FORMAT_LONG_DATETIME = 'j M Y h:i A';
+    const string FORMAT_LONG_DATETIME = 'j M Y g:i A';
 
     /**
      * EG: 23/09/2009 24:59:59

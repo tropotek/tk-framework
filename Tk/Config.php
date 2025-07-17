@@ -20,7 +20,6 @@ final class Config extends Collection
 
     protected function _init(): void
     {
-        $this->set('script.start.time', microtime(true));
         $this->set('base.path', System::discoverBasePath());
         $this->set('base.url', System::discoverBaseUrl());
 
