@@ -3,6 +3,7 @@
 namespace Tk\Cache;
 
 use Tk\FileUtil;
+use Tk\Log;
 
 /**
  * Cache text in a file using its file modified time to trigger the cache refresh.
@@ -50,6 +51,7 @@ class FileCache
     {
         if (!is_dir($this->cachePath)) {
             FileUtil::mkdir($this->cachePath);
+            Log::notice("created cache folder: " . $this->cachePath);
         }
 
         $path = $this->getFileName($filename);
