@@ -33,6 +33,11 @@ class Uri implements UriInterface
     const string IPV4_REGEX_PATTERN = '(?:\d{1,3})\.(?:\d{1,3})\.(?:\d{1,3})\.(?:\d{1,3})';
 
     /**
+     * user agent string for CURL requests
+     */
+    const string USERAGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:141.0) Gecko/20100101 Firefox/141.0';
+
+    /**
      * Per RFC 3986(Port): port = *DIGIT
      */
     const string PORT_REGEX_PATTERN = '/^(?:\d+)$/';
