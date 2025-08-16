@@ -4,10 +4,14 @@ namespace Tk;
 use Tk\Db\Exception;
 
 /**
- * @phpver 8.2
+ *
+ *
+ * @phpver 8.3
  */
 class Db
 {
+    const string DEFAULT_TIMEZONE = 'Australia/Melbourne';
+
     const string TABLES = 'BASE TABLE';
     const string VIEWS  = 'VIEW';
 
@@ -22,17 +26,23 @@ class Db
 	private static array  $dsn_stack     = [];    // stack of DSNs and timezones for push/pop
 	private static string $dbName        = '';
 
-	private static string $dsn           = '';    // dsn to use when opening connection
+	private static string $dsn           = '';    // dsn to use when opening a connection
 	private static string $timezone      = '';    // last timezone explicitly set on the db connection
     private static array  $options       = [];    // DB connection options
+
 
     /**
      * Create a Mysql SQL driver object from a dsn:
      *   - 'hostname[:port]/username/password/dbname'
+     * When $options is null the default options are used from the config.php (db.mysql.options)
      */
-	public static function connect(string $dsn, array $options = []): \PDO
+	public static function connect(string $dsn, ?array $options = null): \PDO
     {
 		assert(!empty($dsn), "no DSN for database connection");
+
+        if (is_null($options)) {
+            $options = self::getDefaultOpts();
+        }
 
         [$host, $port, $user, $pass, self::$dbName] = array_values(self::parseDsn($dsn));
         $dbName = '';
@@ -53,13 +63,41 @@ class Db
 
         //self::$pdo->exec('SET CHARACTER SET utf8mb4;');
         //self::$pdo->exec('ALTER DATABASE CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;');
-		if (self::$timezone) {
-			$st = self::$pdo->prepare("SET time_zone = :timezone");
-            $st->execute(['timezone' => self::$timezone]);
+		if (isset(self::$options['timezone'])) {
+            self::setTimezone(self::$options['timezone']);
 		}
 
 		return self::$pdo;
     }
+
+	/**
+	 * set the session timezone, which persists for the MySQL session
+	 * returns the previous timezone value
+	 */
+	public static function setTimezone(string $timezone = 'SYSTEM'): string
+	{
+		$tz = self::$timezone;
+		if ($timezone && $timezone != self::$timezone) {
+            self::execute("SET time_zone = :timezone", compact('timezone'));
+            self::$timezone = $timezone;
+		}
+		return $tz;
+	}
+
+    /**
+     * Get the default db options from the config file
+     *
+     * @return array<string, mixed>
+     */
+    public static function getDefaultOpts(): array
+    {
+        $opts = Config::getValue('db.mysql.options', []);
+        if (!isset($opts['timezone'])) {
+            $opts['timezone'] = Config::getValue('php.date.timezone', self::DEFAULT_TIMEZONE);
+        }
+        return $opts;
+    }
+
 
 	/**
 	 * remembers current DSN and timezone, connects to database with passed DSN
@@ -71,7 +109,7 @@ class Db
 	}
 
 	/**
-	 * pops DSN and timezone from stack and connects to database
+	 * pops DSN and timezone from the stack and connects to a database
 	 */
 	public static function popDsn(): void
 	{
@@ -177,20 +215,6 @@ class Db
         return self::$dbName;
     }
 
-	/**
-	 * set the session timezone, which persists for the MySQL session
-	 * returns the previous timezone value
-	 */
-	public static function setTimezone(string $timezone = 'SYSTEM'): string
-	{
-		$tz = self::$timezone;
-		if ($timezone && $timezone != self::$timezone) {
-            self::execute("SET time_zone = :timezone", compact('timezone'));
-            self::$timezone = $timezone;
-		}
-		return $tz;
-	}
-
     /**
      * @note Only InnoDB supports the SQL statements SAVEPOINT, ROLLBACK TO SAVEPOINT,
      *       RELEASE SAVEPOINT and the optional WORK keyword for ROLLBACK.
@@ -254,7 +278,7 @@ class Db
     /**
      * Execute an SQL statement that doesn't get a result set
 	 * e.g. update, insert, delete
-	 * returns number of affected rows or true if succeeded, false if failed
+	 * Returns the number of affected rows or true if succeeded, false if failed
      */
     public static function execute(string $query, array|object|null $params = null): int|bool
     {
@@ -335,7 +359,7 @@ class Db
 
 	/**
 	 * execute sql SELECT statement
-	 * returns string representation of first value of the first row of the result
+	 * returns string representation of the first value of the first row of the result
 	 * or null if nothing selected
 	 */
 	public static function queryVal(string $query, array|object|null $params = null): mixed
@@ -393,10 +417,10 @@ class Db
     }
 
     /**
-     * execute sql SELECT statement
+     * execute SQL SELECT statement
      * returns lookup table as [row[key] => row[value], ...] for each fetched row
      * where $key and $value are column names retrieved by the query
-     * if $key is empty the returned list is a plain array of [value, value, ...]
+     * if $key is empty, the returned list is a plain array of [value, value, ...]
      *
      * @template T of object
      * @param class-string<T> $classname
@@ -422,8 +446,8 @@ class Db
 
     /**
      * execute SQL SELECT statement
-     * returns array of [key => row, ...]
-     * where key is a column returned in the query results
+     * returns an array of [key => row, ...]
+     * where the key is a column returned in the query results
      *
      * @template T of object
      * @param class-string<T> $classname
@@ -664,7 +688,7 @@ class Db
     }
 
     /**
-     * set the $type to restrict list (self::TABLES or self::VIEWS)
+     * set the $type to restrict a list (self::TABLES or self::VIEWS)
      * (default) returns both
      */
     public static function getTableList(?string $type = null): array

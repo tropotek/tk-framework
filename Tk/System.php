@@ -196,17 +196,18 @@ class System
 
     /**
      * Get the version found in the version file (if any)
-     * Returns "1.0" if no version file found
+     * Returns default if no version file found
      */
-    public static function getVersion(): string
+    public static function getVersion(string $default = '1.0.0'): string
     {
         static $version = null;
         if (!$version) {
-            $version = '1.0.0';
             if (is_file(Path::create('/version'))) {
                 $version = file_get_contents(Path::create('/version'));
             } else if (is_file(Path::create('/version.md'))) {
                 $version = file_get_contents(Path::create('/version.md'));
+            } else {
+                return $default;
             }
         }
         return $version;
