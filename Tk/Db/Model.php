@@ -160,6 +160,9 @@ abstract class Model
         if ($id) {
             $obj = static::find($id);
         } else {
+            // Warning, if a model class has constructor params, this will fail
+            // models should use a factory method instead.
+            // @phpstan-ignore-next-line
             $obj = new static();
         }
         if (is_null($obj)) {

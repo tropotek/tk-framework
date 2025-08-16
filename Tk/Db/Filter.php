@@ -126,10 +126,10 @@ class Filter extends \Tk\Collection
         return $this;
     }
 
-    public function getSql(bool $trimFirst = true): string
+    public function getSql(): string
     {
         $from = '';
-        if (count($this->getFrom($trimFirst))) {
+        if (count($this->getFrom())) {
             $from = $this->getFromStr();
         }
 

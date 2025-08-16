@@ -73,7 +73,7 @@ class Auth
             $this->clearIdentity();
         }
 
-        $loginResult = $this->getAdapter()?->authenticate($username, $password);
+        $loginResult = $this->getAdapter()->authenticate($username, $password);
         if ($loginResult->isValid()) {
             $this->getStorage()->write($loginResult->getIdentity());
         }

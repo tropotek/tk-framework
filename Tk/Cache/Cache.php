@@ -37,8 +37,6 @@ use Tk\Path;
  */
 class Cache
 {
-    private static mixed $_instance = null;
-
     protected ?Adapter\Iface $adapter = null;
     protected bool           $enabled = true;
 
