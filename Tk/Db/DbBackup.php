@@ -88,8 +88,8 @@ class DbBackup
     public static function dump(array $options = []): string
     {
         $exclude = $options['exclude'] ?? [];
-        if (!in_array(Db\Session::$DB_TABLE, $exclude)) {
-            $exclude[] = Db\Session::$DB_TABLE;
+        if (!in_array(MySqlSession::$DB_TABLE, $exclude)) {
+            $exclude[] = MySqlSession::$DB_TABLE;
         }
         // Exclude all views
         if (is_null(Db::getPdo())) {
@@ -143,8 +143,8 @@ class DbBackup
     public static function save(string $filename = '', array $options = []): bool
     {
         $exclude = $options['exclude'] ?? [];
-        if (!in_array(Db\Session::$DB_TABLE, $exclude)) {
-            $exclude[] = Db\Session::$DB_TABLE;
+        if (!in_array(MySqlSession::$DB_TABLE, $exclude)) {
+            $exclude[] = MySqlSession::$DB_TABLE;
         }
         // Exclude all views
         if (is_null(Db::getPdo())) {
