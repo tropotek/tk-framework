@@ -124,8 +124,10 @@ class Session implements \SessionHandlerInterface
     }
 
 
+    // session cache methods with timeout
+
     /**
-     * save a named value to session cache with optional timeout (seconds)
+     * save a named value to the session cache with optional timeout (seconds)
      * timeout = 0 means never expires
      */
     public static function set(string $name, mixed $data, int $timeout_seconds = 60): void
@@ -137,8 +139,6 @@ class Session implements \SessionHandlerInterface
             'data'         => $data,
         ];
     }
-
-    // session cache methods with timeout
 
     /**
      * expires cache and returns a value from session cache
@@ -156,7 +156,7 @@ class Session implements \SessionHandlerInterface
     }
 
     /**
-     * get the value from the session then remove it
+     * get the value from the session, then remove it
      */
     public static function once(string $name): mixed
     {
@@ -175,7 +175,7 @@ class Session implements \SessionHandlerInterface
     }
 
     /**
-     * removes expired values from session cache
+     * removes expired values from the session cache
      */
     public static function expire(): void
     {

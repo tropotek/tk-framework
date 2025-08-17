@@ -24,6 +24,7 @@ trait SingletonTrait
     /**
      * For singletons the constructor must be set to final
      * Use the _init() method to init your singleton object
+     * for overridden objects.
      */
     protected function _init(): void
     {

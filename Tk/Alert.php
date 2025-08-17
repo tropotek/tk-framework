@@ -52,7 +52,11 @@ class Alert
     public static function getAlerts(bool $clear = true): array
     {
         $list = $_SESSION[self::SID] ?? [];
-        if ($clear) unset($_SESSION[self::SID]);
+        if ($clear && isset($_SESSION[self::SID])) {
+            vd('alert', session_id(), session_name());
+            $_SESSION[self::SID] = [];
+            //unset($_SESSION[self::SID]);
+        }
         foreach ($list as $type => $arr) {
             foreach ($arr as $i => $data) {
                 $list[$type][$i] = unserialize($data);
