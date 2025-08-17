@@ -5,8 +5,9 @@ namespace Tk;
 
 class Session
 {
-    const string SID_IP    = '_user.ip';
-    const string SID_AGENT = '_user.agent';
+    const string SID_IP           = '_user.ip';
+    const string SID_AGENT        = '_user.agent';
+    const string SID_PAGE_REFERER = '_user.pagereferer';
 
     protected static mixed $_instance = null;
 
@@ -18,8 +19,11 @@ class Session
         }
         session_start();
 
-        $_SESSION[self::SID_IP]    = System::getClientIp();
-        $_SESSION[self::SID_AGENT] = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        $_SESSION[self::SID_IP]      = System::getClientIp();
+        $_SESSION[self::SID_AGENT]   = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        if (!isset($_SESSION[self::SID_PAGE_REFERER]) && isset($_SERVER['HTTP_REFERER'])) {
+            $_SESSION[self::SID_PAGE_REFERER] = $_SERVER['HTTP_REFERER'] ?? '';
+        }
     }
 
     public static function instance(?\SessionHandlerInterface $handler = null): self
