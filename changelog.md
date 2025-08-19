@@ -1,5 +1,13 @@
 #CHANGELOG#
 
+Ver 8.0.108 [2025-08-19]:
+-------------------------------
+  - implement new safe enc for all
+  - update enc class
+  - Renamed Dispatch class to Listeners
+  - Merge branch '8.0' of https://github.com/tropotek/tk-framework into 8.0
+
+
 Ver 8.0.106 [2025-08-16]:
 -------------------------------
 
