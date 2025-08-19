@@ -54,20 +54,16 @@ class Encrypt
         return new self($key);
     }
 
-    /**
-     * @todo will call safeEncrypt() in the future
-     */
     public function encrypt(string $string, bool $encode = true): string
     {
-        return $this->basicEncrypt($string);
+        //return $this->basicEncrypt($string);
+        return $this->safeEncrypt($string);
     }
 
-    /**
-     * @todo will call safeDecrypt() in the future
-     */
     public function decrypt(string $string, bool $encode = true): string
     {
-        return $this->basicDecrypt($string);
+        //return $this->basicDecrypt($string);
+        return $this->safeDecrypt($string);
     }
 
     /**
