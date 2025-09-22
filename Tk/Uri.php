@@ -83,7 +83,6 @@ class Uri implements UriInterface
         $baseUrl = Config::getBaseUrl();
         $siteHost = Config::getHostname();
         if (
-            //!empty(trim($baseUrl, '/')) &&
             str_starts_with($uri, '/') &&       // spec starts with a path
             !str_starts_with($uri, '//')        // ignore urls without a scheme
         ) {
@@ -97,8 +96,8 @@ class Uri implements UriInterface
         }
 
         // finalize the Uri
-        $this->spec = $uri;
-        $this->init($uri);
+        $this->spec = rtrim($uri, '/');
+        $this->init($this->spec);
         $this->set($queryParams);
     }
 
