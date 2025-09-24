@@ -333,7 +333,7 @@ class Uri implements UriInterface
         $authority = $this->getAuthority();
         $fullUri .= empty($authority) ? '' : '//' . $authority;
         $path = $this->getPath();
-        $fullUri .= empty($path) ? '' : '/' . ltrim($path, '/');
+        $fullUri .= rtrim(empty($path) ? '' : '/' . ltrim($path, '/'), '/');
         $query = $this->getQuery();
         $fullUri .= empty($query) ? '' : '?' . $query;
         $fragment = $this->getFragment();
@@ -348,7 +348,7 @@ class Uri implements UriInterface
 
         $fullUri = '';
         $path = $this->getRelativePath();
-        $fullUri .= empty($path) ? '' : '/' . ltrim($path, '/');
+        $fullUri .= rtrim(empty($path) ? '' : '/' . ltrim($path, '/'), '/');
         $query = $this->getQuery();
         $fullUri .= empty($query) ? '' : '?' . $query;
         $fragment = $this->getFragment();
