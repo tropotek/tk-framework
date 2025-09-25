@@ -17,7 +17,9 @@ class Session
         if (!is_null($handler)) {
             session_set_save_handler($handler, true);
         }
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
 
         $_SESSION[self::SID_IP]      = System::getClientIp();
         $_SESSION[self::SID_AGENT]   = $_SERVER['HTTP_USER_AGENT'] ?? '';
