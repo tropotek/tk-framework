@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 8.0.110 [2025-09-30]:
+-------------------------------
+  - Major refactor of DomTemplate lib
+
+
 Ver 8.0.108 [2025-08-19]:
 -------------------------------
   - implement new safe enc for all
