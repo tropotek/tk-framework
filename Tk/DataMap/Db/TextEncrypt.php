@@ -15,7 +15,8 @@ class TextEncrypt extends DataTypeInterface
     public function getPropertyValue(array $array): mixed
     {
         $value = parent::getPropertyValue($array);
-        if ($this->isNullable() && empty($value)) return null;
+        if ($this->isNullable() && is_null($value)) return null;
+        if (empty($value)) return '';
         return Encrypt::create(self::$encryptKey)->decrypt(strval($value));
     }
 
@@ -23,6 +24,7 @@ class TextEncrypt extends DataTypeInterface
     {
         $value = parent::getColumnValue($object);
         if ($this->isNullable() && is_null($value)) return null;
+        if (empty($value)) return '';
         return Encrypt::create(self::$encryptKey)->encrypt(strval($value));
     }
 
