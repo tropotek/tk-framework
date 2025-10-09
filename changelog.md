@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 8.0.112 [2025-10-09]:
+-------------------------------
+  - clean empty encrypted fields
+
+
 Ver 8.0.110 [2025-09-30]:
 -------------------------------
   - Major refactor of DomTemplate lib
