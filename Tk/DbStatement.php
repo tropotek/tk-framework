@@ -49,25 +49,25 @@ class DbStatement extends \PDOStatement
         }
 
         // disable DB query log for Db::countTotalRows() to work correctly
-        $olog = Db::$LOG;
-        Db::$LOG = false;
+        $cache = Db::$CACHE_LAST;
+        Db::$CACHE_LAST = false;
         $obj = new $classname;
 
         // use PDO mapping if class is not a DbModel object
         if (!($obj instanceof Model)) {
             $obj = $this->fetchObject($classname);
-            Db::$LOG = $olog;
+            Db::$CACHE_LAST = $cache;
             return $obj;
         }
 
         $row = $this->fetch(\PDO::FETCH_ASSOC);
         if ($row === false) {
-            Db::$LOG = $olog;
+            Db::$CACHE_LAST = $cache;
             return false;
         }
 
         $obj->__map($row);
-        Db::$LOG = $olog;
+        Db::$CACHE_LAST = $cache;
 
         return $obj;
     }

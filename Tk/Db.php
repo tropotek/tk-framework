@@ -15,7 +15,8 @@ class Db
     const string TABLES = 'BASE TABLE';
     const string VIEWS  = 'VIEW';
 
-    public static bool $LOG = true;
+    /** enables caching of lastQuery, lastStatement and lastId */
+    public static bool $CACHE_LAST = true;
 
     private static ?\PDO          $pdo           = null;
     private static ?DbStatement   $lastStatement = null;
@@ -171,7 +172,7 @@ class Db
 
     private static function setLastInsertId(int $id): void
     {
-        if(self::$LOG) {
+        if(self::$CACHE_LAST) {
             self::$lastId = $id;
         }
     }
@@ -183,7 +184,7 @@ class Db
 
     private static function setLastQuery(string $query): void
     {
-        if(self::$LOG) {
+        if(self::$CACHE_LAST) {
             self::$lastQuery = $query;
         }
     }
@@ -195,7 +196,7 @@ class Db
 
     private static function setLastStatement(DbStatement $stm): void
     {
-        if(self::$LOG) {
+        if(self::$CACHE_LAST) {
             self::$lastStatement = $stm;
         }
     }
@@ -605,7 +606,10 @@ class Db
         return [$limit, $offset, $total];
     }
 
-    public static function getTableInfo(string $table): array
+    /**
+     * return
+     */
+    public static function getTableInfo(string $table, bool $camelKeys = false): array
     {
         $types = [
             'varchar'    => 'string',
@@ -651,11 +655,13 @@ class Db
                 $col->name_camel = lcfirst(str_replace(' ', '', ucwords(str_replace(['_', '-'], ' ', $col->name))));
                 preg_match('/^([a-z0-9_]+)(\(([0-9]+)\))?(.+)?/i', $col->Type, $r);
 
-                $col->mysql_type = $r[1] ?? 'unknown';
+                $col->mysql_type = $r[1] ?? 'varchar';
                 $col->len = intval($r[3] ?? 0);
                 $col->ext = trim($r[4] ?? '');
-                $col->php_type = $types[$col->mysql_type] ?? 'unknown';
+                $col->php_type = $types[$col->mysql_type] ?? 'string';
                 if ($col->php_type == 'int' && $col->len == 1) $col->php_type = 'bool';
+
+                // TODO - this should be moved to the DataMapper
                 if (str_starts_with($col->name, 'json_')) $col->php_type = 'json';
 
                 $col->is_primary_key = $col->Key == 'PRI';
@@ -666,7 +672,8 @@ class Db
                 $col->is_enum        = ($col->mysql_type == 'enum');
                 $col->is_set         = ($col->mysql_type == 'set');
 
-                $list[$col->name] = $col;
+                $key = $camelKeys ? $col->name_camel : $col->name;
+                $list[$key] = $col;
             }
             return $list;
         } catch (\Exception $e) {

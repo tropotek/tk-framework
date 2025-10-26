@@ -1,6 +1,10 @@
 <?php
 namespace Tk\Traits;
 
+/**
+ * Implements an interface for the PHP magic methods __get and __set
+ * enable the ability to set a non-existing object property for PHP5.3+
+ */
 trait DataTrait
 {
     protected array $_data = [];

@@ -4,8 +4,8 @@ namespace Tk\DataMap;
 use Tk\Db\Model;
 
 /**
- * This DataMap object is used to load objects and arrays
- * from a collection of DataTypes.
+ * A DataMap is a collection of DataTypeInterface objects used to map/unmap
+ * an object to/from an array.
  *
  * Load it with the data types you want to map from an object to
  * an array and vica-versa and use loadObject() and loadArray()
