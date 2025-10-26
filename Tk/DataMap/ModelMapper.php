@@ -198,6 +198,8 @@ class ModelMapper
 
         $metaData = $wMetaData + $rMetaData;
 
+        \TK\Db::$CACHE_LAST = true;
+
         $rClass = new \ReflectionClass($class);
         $map = new DataMap();
 
