@@ -10,8 +10,7 @@ use Tk\DataMap\DataMap;
 use Tk\Db;
 
 /**
- * This class contains the default behavior for common operations such as
- * retrieving, saving, and mapping/unmapping objects for databases and forms.
+ * A Base DB/Form Model class, it contains the default data map behavior for common DB and Form operations.
  *
  * When implementing your own Models, constructors cannot have any required params.
  * <?php
