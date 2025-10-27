@@ -26,7 +26,7 @@ class ModelMapper
 
     /**
      * A cache to hold created class datamaps using the namespaced model class name as the key
-     * @var array<string,DataMap>
+     * @var array<string, DataMap>
      */
     protected array $classMaps = [];
 
@@ -101,7 +101,6 @@ class ModelMapper
         return array_key_exists($dataType, $this->dataTypes[$mapName]);
     }
 
-
     protected function getMap(string $name): ?DataMap
     {
         return $this->classMaps[$name] ?? null;
@@ -172,7 +171,7 @@ class ModelMapper
     /**
      * Create a new DataTypeInterface object
      */
-    public function makeType(string $mapName, string $dataType, string $propertyName, string $columnName): DataTypeInterface
+    public function makeType(string $mapName, string $dataType, string $propertyName, string $columnName = ''): DataTypeInterface
     {
         $typeClass = $this->getMapType($mapName, $dataType) ?? $this->getMapType($mapName, '_default');
         return new $typeClass($propertyName, $columnName);
@@ -190,18 +189,14 @@ class ModelMapper
             return $this->getMap($key);
         }
 
-        if (!is_subclass_of($class, Model::class)) {
-            //throw new \Exception("Class {$class} is not a subclass of Tk\Db\Model");
-            return null;
-        }
+        if (!is_subclass_of($class, Model::class)) return null;
 
         \TK\Db::$CACHE_LAST = false;
 
-        // get read DB table/view meta data
+        // read only table metadata
         $rMetaData = \TK\Db::getTableInfo($this->getPrimaryTable($class), true);
-        // get write DB table meta data
+        // writable table meta data
         $wMetaData = \TK\Db::getTableInfo($this->getDbTable($class), true);
-
         $metaData = $wMetaData + $rMetaData;
 
         \TK\Db::$CACHE_LAST = true;
@@ -230,7 +225,7 @@ class ModelMapper
                 $dataType = 'array';
             }
 
-            $type = DataMap::makeDbType($dataType, $prop->getName(), $meta->name);
+            $type = $this->makeType(self::MAP_DB, $dataType, $prop->getName(), $meta->name);
             $type->setNullable($prop->getType()->allowsNull());
             if ($meta->is_primary_key) {
                 $type->setFlag(DataMap::PRI);
@@ -268,10 +263,7 @@ class ModelMapper
         $key = self::MAP_FORM . '_' . $class;
         if ($this->hasMap($key)) return $this->getMap($key);
 
-        if (!is_subclass_of($class, Model::class)) {
-            //throw new \Exception("Class {$class} is not a subclass of Tk\Db\Model");
-            return null;
-        }
+        if (!is_subclass_of($class, Model::class)) return null;
 
         \TK\Db::$CACHE_LAST = false;
 
@@ -289,7 +281,7 @@ class ModelMapper
             // ignored types
             if (in_array($dataType, ['stdClass'])) continue;
 
-            $type = DataMap::makeFormType($dataType, $prop->getName());
+            $type = $this->makeType(self::MAP_FORM, $dataType, $prop->getName());
             $type->setNullable($prop->getType()->allowsNull());
 
             if ($primaryId == $prop->getName()) {

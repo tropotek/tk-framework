@@ -169,6 +169,8 @@ class ObjectUtil
 
     /**
      * Convert a map array to a stdClass object
+     *
+     * @param array<string, mixed> $array
      */
     public static function arrayToObject(array $array): ?\stdClass
     {

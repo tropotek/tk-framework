@@ -24,13 +24,13 @@ class DataMap
 
     /**
      * A list of types indexed by property name
-     * @var DataTypeInterface[]|array
+     * @var array<string, DataTypeInterface>
      */
     private array $propertyTypes = [];
 
     /**
      * A list of types indexed by column name
-     * @var DataTypeInterface[]|array
+     * @var array<string, DataTypeInterface>
      */
     private array $columnTypes = [];
 
@@ -41,10 +41,12 @@ class DataMap
 
 
     /**
-     * Map all types from an array to an object.
+     * Use the DataMap to load an object with the values from an array
      *
      * If the property does not exist in the object the type`s value is added to
      * the object as a dynamic property. If DataMap::dynamicProperties is set to true.
+     *
+     * @param array<string, mixed> $srcArray
      */
     public function loadObject(object $object, array $srcArray, int $access = self::READ): self
     {
@@ -65,7 +67,9 @@ class DataMap
     }
 
     /**
-     * Using the DataMap load an array with the values from an object
+     * Use the DataMap to load an array with the values from an object
+     *
+     * @param array<string, mixed> $array
      */
     public function loadArray(array &$array, object $srcObject, int $access = self::WRITE): self
     {
@@ -76,6 +80,9 @@ class DataMap
         return $this;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getArray(object $srcObject, int $access = self::WRITE): array
     {
         $array = [];
@@ -115,11 +122,17 @@ class DataMap
         return null;
     }
 
+    /**
+     * @return list<string>
+     */
     public function getColumnNames(): array
     {
         return array_keys($this->columnTypes);
     }
 
+    /**
+     * @return list<string>
+     */
     public function getPropertyNames(): array
     {
         return array_keys($this->propertyTypes);
@@ -136,34 +149,4 @@ class DataMap
         return $this;
     }
 
-    public static function makeDbType(string $phpType, string $propertyName, string $columnName): DataTypeInterface
-    {
-        return match ($phpType) {
-            'bool'     => new Db\Boolean($propertyName, $columnName),
-            'int'      => new Db\Integer($propertyName, $columnName),
-            'float'    => new Db\Decimal($propertyName, $columnName),
-            'array'    => new Db\ArrayType($propertyName, $columnName),
-            'json'     => new Db\Json($propertyName, $columnName),
-            'timestamp', 'datetime' => new Db\DateTime($propertyName, $columnName),
-            'date'     => new Db\Date($propertyName, $columnName),
-            'time'     => new Db\Time($propertyName, $columnName),
-            'year'     => new Db\Year($propertyName, $columnName),
-            'Tk\Money' => new Db\Money($propertyName, $columnName),
-            default    => new Db\Text($propertyName, $columnName),
-        };
-    }
-
-    public static function makeFormType(string $type, string $property): DataTypeInterface
-    {
-        return match ($type) {
-            'bool'     => new Form\Boolean($property),
-            'int'      => new Form\Integer($property),
-            'float'    => new Form\Decimal($property),
-            'array'    => new Form\ArrayType($property),
-            'percent'  => new Form\Percent($property),
-            'Tk\Money' => new Form\Money($property),
-            'DateTime' => new Form\Date($property),
-            default    => new Form\Text($property),
-        };
-    }
 }
