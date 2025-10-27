@@ -1,9 +1,7 @@
 <?php
 namespace Tk\Db;
 
-use Tk\DataMap\Db\DateTime;
 use Tk\DataMap\ModelMapper;
-use Tk\Money;
 use Tk\ObjectUtil;
 use Tk\Traits\DataTrait;
 use Tk\DataMap\DataMap;

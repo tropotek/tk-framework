@@ -10,17 +10,16 @@ use Tk\Traits\DataTrait;
  *
  * Use this object to manage the creation of DB and Form Model data maps.
  *
- * New Data types can be added using the ModelMapper::addMapType() method.
+ * New Data types can be added using `ModelMapper::instance()->addMapType(...)` in your app bootstrap code.
  *
  */
 class ModelMapper
 {
     use DataTrait;
 
-    // TODO - not sure if we really need this, see if it can be removed???
-    const array FORCE_READ_ONLY = ['modified', 'created'];
-
     private static mixed $_instance = null;
+
+    const array FORCE_READ_ONLY = ['modified', 'created'];
 
     const string MAP_DB   = 'db';
     const string MAP_FORM = 'form';
