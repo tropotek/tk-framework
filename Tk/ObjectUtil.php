@@ -185,4 +185,35 @@ class ObjectUtil
         return null;
     }
 
+    /**
+     * returns true if the constructor of the class has required parameters
+     */
+    public static function constructorRequiresParams($class): bool
+    {
+        $reflectionClass = new \ReflectionClass($class);
+        $constructor = $reflectionClass->getConstructor();
+        if (!$constructor) return false;
+        $parameters = $constructor->getParameters();
+        foreach ($parameters as $parameter) {
+            if (!$parameter->isOptional()) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Warning, if a model class has constructor params, this will fail.
+     * models should use a factory method instead, eg: Object::create(...$params).
+     */
+    public static function createObjectInstance(string $class, bool $useReflection = false): object
+    {
+        if ($useReflection) {
+            $reflection = new \ReflectionClass($class);
+            $obj = $reflection->newInstanceWithoutConstructor();
+        } else {
+            // @phpstan-ignore-next-line
+            $obj = new $class();
+        }
+        return $obj;
+    }
+
 }

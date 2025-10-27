@@ -12,29 +12,10 @@ use Tk\Db;
 /**
  * A Base DB/Form Model class, it contains the default data map behavior for common DB and Form operations.
  *
- * When implementing your own Models, constructors cannot have any required params.
- * <?php
- *      // OK
- *      public function __construct(int $testId = 0)
- *      {
- *          $this->testId = $testId;
- *      }
- *
- *      // ERROR
- *      public function __construct(int $testId)
- *      {
- *          $this->testId = $testId;
- *      }
- *
- *      // As an alternative use a factory method, to use any params on construction
- *      public static function create(int $testId): self
- *      {
- *          $obj = new self();
- *          $obj->testId = $testId;
- *          return $obj;
- *      }
- * ?>
- *
+ * Note: If your object constructor has required params, the object will be created using reflection, and
+ *       your object may not be initialized correctly if you have set default values within the constructor.
+ *       It is recommended to use a factory method such as `MyObject::create($params)` keeping the default
+ *       initialization code within the constructor when object instantiation requires params.
  */
 abstract class Model
 {
@@ -103,10 +84,8 @@ abstract class Model
         if ($id) {
             $obj = static::find($id);
         } else {
-            // Warning, if a model class has constructor params, this will fail.
-            // models should use a factory method instead, eg: Object::create(...$params).
-            // @phpstan-ignore-next-line
-            $obj = new static();
+            // if a constructor requires params, if use reflection to create the object
+            $obj = ObjectUtil::createObjectInstance(static::class, $map->getConstructorRequiresParams());
         }
         if (is_null($obj)) {
             Db::$CACHE_LAST = true;

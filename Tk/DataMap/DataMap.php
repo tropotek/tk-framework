@@ -34,6 +34,11 @@ class DataMap
      */
     private array $columnTypes = [];
 
+    /**
+     * true if the object constructor has required parameters
+     */
+    private bool $constructorRequiresParams = false;
+
 
     /**
      * Map all types from an array to an object.
@@ -118,6 +123,17 @@ class DataMap
     public function getPropertyNames(): array
     {
         return array_keys($this->propertyTypes);
+    }
+
+    public function getConstructorRequiresParams(): bool
+    {
+        return $this->constructorRequiresParams;
+    }
+
+    public function setConstructorRequiresParams(bool $requiresParams): self
+    {
+        $this->constructorRequiresParams = $requiresParams;
+        return $this;
     }
 
     public static function makeDbType(string $phpType, string $propertyName, string $columnName): DataTypeInterface

@@ -1,6 +1,7 @@
 <?php
 namespace Tk;
 
+use Tk\DataMap\ModelMapper;
 use Tk\Db\Model;
 
 class DbStatement extends \PDOStatement
@@ -51,7 +52,15 @@ class DbStatement extends \PDOStatement
         // disable DB query log for Db::countTotalRows() to work correctly
         $cache = Db::$CACHE_LAST;
         Db::$CACHE_LAST = false;
-        $obj = new $classname;
+
+        // check if constructor requires params, if so use reflection to create object
+        $map = ModelMapper::instance()->getDataMap($classname);
+        $useReflection = false;
+        if ($map) {
+            $useReflection = $map->getConstructorRequiresParams();
+        }
+        $obj = ObjectUtil::createObjectInstance($classname, $useReflection);
+
 
         // use PDO mapping if class is not a DbModel object
         if (!($obj instanceof Model)) {

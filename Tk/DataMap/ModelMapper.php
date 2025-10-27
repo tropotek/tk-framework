@@ -1,6 +1,7 @@
 <?php
 namespace Tk\DataMap;
 
+use Tk\Db\Model;
 use Tk\ObjectUtil;
 use Tk\Traits\DataTrait;
 
@@ -102,19 +103,19 @@ class ModelMapper
     }
 
 
-    public function getMap(string $name): ?DataMap
+    protected function getMap(string $name): ?DataMap
     {
         return $this->classMaps[$name] ?? null;
     }
 
-    public function setMap(string $name, DataMap $map): self
+    protected function setMap(string $name, DataMap $map): self
     {
         if (empty($name)) throw new \Exception('Map name cannot be empty');
         $this->classMaps[$name] = $map;
         return $this;
     }
 
-    public function hasMap(string $name): bool
+    protected function hasMap(string $name): bool
     {
         return array_key_exists($name, $this->classMaps);
     }
@@ -183,12 +184,18 @@ class ModelMapper
      * Creates and caches a new DataMap if it does not exist
      * Override this method if you need to create a custom DataMap with different table names
      */
-    public function getDataMap(string $class): DataMap
+    public function getDataMap(string $class): ?DataMap
     {
         $key = self::MAP_DB . '_' . $class;
         if ($this->hasMap($key)) {
             return $this->getMap($key);
         }
+
+        if (!is_subclass_of($class, Model::class)) {
+            //throw new \Exception("Class {$class} is not a subclass of Tk\Db\Model");
+            return null;
+        }
+
         \TK\Db::$CACHE_LAST = false;
 
         // get read DB table/view meta data
@@ -202,6 +209,7 @@ class ModelMapper
 
         $rClass = new \ReflectionClass($class);
         $map = new DataMap();
+        $map->setConstructorRequiresParams(ObjectUtil::constructorRequiresParams($class));
 
         $properties = $rClass->getProperties();
         foreach ($properties as $prop) {
@@ -256,10 +264,15 @@ class ModelMapper
      * Creates and caches a new DataMap if it does not exist
      * Override this method if you need to create a custom DataMap with different table names
      */
-    public function getFormMap(string $class): DataMap
+    public function getFormMap(string $class): ?DataMap
     {
         $key = self::MAP_FORM . '_' . $class;
         if ($this->hasMap($key)) return $this->getMap($key);
+
+        if (!is_subclass_of($class, Model::class)) {
+            //throw new \Exception("Class {$class} is not a subclass of Tk\Db\Model");
+            return null;
+        }
 
         \TK\Db::$CACHE_LAST = false;
 
