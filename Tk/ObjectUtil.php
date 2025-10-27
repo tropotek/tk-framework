@@ -189,8 +189,11 @@ class ObjectUtil
 
     /**
      * returns true if the constructor of the class has required parameters
+     *
+     * @template T of object
+     * @param class-string<T> $class
      */
-    public static function constructorRequiresParams($class): bool
+    public static function constructorRequiresParams(string $class): bool
     {
         $reflectionClass = new \ReflectionClass($class);
         $constructor = $reflectionClass->getConstructor();
@@ -205,6 +208,10 @@ class ObjectUtil
     /**
      * Warning, if a model class has constructor params, this will fail.
      * models should use a factory method instead, eg: Object::create(...$params).
+     *
+     * @template T of object
+     * @param class-string<T> $class
+     * @return T
      */
     public static function createObjectInstance(string $class, bool $useReflection = false): object
     {
@@ -212,7 +219,6 @@ class ObjectUtil
             $reflection = new \ReflectionClass($class);
             $obj = $reflection->newInstanceWithoutConstructor();
         } else {
-            // @phpstan-ignore-next-line
             $obj = new $class();
         }
         return $obj;

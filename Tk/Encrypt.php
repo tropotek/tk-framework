@@ -105,7 +105,7 @@ class Encrypt
     public function unsafeEncrypt(string $message, bool $encode = true): string
     {
         $nonceSize = openssl_cipher_iv_length(self::METHOD);
-        $nonce = openssl_random_pseudo_bytes($nonceSize);
+        $nonce = openssl_random_pseudo_bytes($nonceSize ?: 255);
 
         $ciphertext = openssl_encrypt(
             $message,
@@ -137,8 +137,8 @@ class Encrypt
         }
 
         $nonceSize = openssl_cipher_iv_length(self::METHOD);
-        $nonce = mb_substr($message, 0, $nonceSize, '8bit');
-        $ciphertext = mb_substr($message, $nonceSize, null, '8bit');
+        $nonce = mb_substr($message, 0, $nonceSize ?: 255, '8bit');
+        $ciphertext = mb_substr($message, $nonceSize ?: 255, null, '8bit');
 
         $plaintext = openssl_decrypt(
             $ciphertext,
@@ -148,7 +148,7 @@ class Encrypt
             $nonce
         );
 
-        return $plaintext;
+        return $plaintext ?: '';
     }
 
 
@@ -160,7 +160,7 @@ class Encrypt
         list($encKey, $authKey) = $this->splitKeys($this->getBinKey());
 
         // Pass to UnsafeCrypto::encrypt
-        $ciphertext = $this->unsafeEncrypt($message, $encKey, false);
+        $ciphertext = $this->unsafeEncrypt($message, $encKey);
 
         // Calculate a MAC of the IV and ciphertext
         $mac = hash_hmac(self::HASH_ALGO, $ciphertext, $authKey, true);
@@ -203,7 +203,7 @@ class Encrypt
         }
 
         // Pass to UnsafeCrypto::decrypt
-        $plaintext = $this->unsafeDecrypt($ciphertext, $encKey, false);
+        $plaintext = $this->unsafeDecrypt($ciphertext, $encKey);
 
         return $plaintext;
     }
@@ -240,7 +240,11 @@ class Encrypt
 
     protected function getBinKey(): string
     {
-        return hex2bin($this->key);
+        $bin = hex2bin($this->key);
+        if (false === $bin) {
+            throw new Exception('Invalid key');
+        }
+        return $bin;
     }
 
 }

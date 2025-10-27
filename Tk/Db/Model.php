@@ -172,6 +172,11 @@ abstract class Model
         return ModelMapper::instance()->getPrimaryTable(static::class);
     }
 
+    public static function getDbTable(): string
+    {
+        return ModelMapper::instance()->getDbTable(static::class);
+    }
+
     /**
      * return a file data path for this object
      */

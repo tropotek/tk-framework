@@ -102,6 +102,8 @@ abstract class DataTypeInterface
 
     /**
      * Set the array key/value from the object`s properties
+     *
+     * @param array<string, mixed> $array
      */
     public function loadArray(array &$array, object $srcObject): static
     {

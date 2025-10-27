@@ -101,6 +101,7 @@ class ModelMapper
         return array_key_exists($dataType, $this->dataTypes[$mapName]);
     }
 
+
     protected function getMap(string $name): ?DataMap
     {
         return $this->classMaps[$name] ?? null;
@@ -113,9 +114,33 @@ class ModelMapper
         return $this;
     }
 
+    public function setDataMap(string $class, DataMap $map): self
+    {
+        $key = self::MAP_DB . '_' . $class;
+        return $this->setMap($key, $map);
+    }
+
+    public function setFormMap(string $class, DataMap $map): self
+    {
+        $key = self::MAP_FORM . '_' . $class;
+        return $this->setMap($key, $map);
+    }
+
     protected function hasMap(string $name): bool
     {
         return array_key_exists($name, $this->classMaps);
+    }
+
+    public function hasDataMap(string $name): bool
+    {
+        $key = self::MAP_DB . '_' . $name;
+        return array_key_exists($key, $this->classMaps);
+    }
+
+    public function hasFormMap(string $name): bool
+    {
+        $key = self::MAP_FORM . '_' . $name;
+        return array_key_exists($key, $this->classMaps);
     }
 
     /**
@@ -164,7 +189,7 @@ class ModelMapper
     {
         $table = $this->getDbTable($class);
         $view = "v_{$table}";
-        if (\TK\Db::tableExists($view)) return $view;
+        if (\Tk\Db::tableExists($view)) return $view;
         return '';
     }
 
@@ -191,15 +216,15 @@ class ModelMapper
 
         if (!is_subclass_of($class, Model::class)) return null;
 
-        \TK\Db::$CACHE_LAST = false;
+        \Tk\Db::$CACHE_LAST = false;
 
         // read only table metadata
-        $rMetaData = \TK\Db::getTableInfo($this->getPrimaryTable($class), true);
+        $rMetaData = \Tk\Db::getTableInfo($this->getPrimaryTable($class), true);
         // writable table meta data
-        $wMetaData = \TK\Db::getTableInfo($this->getDbTable($class), true);
+        $wMetaData = \Tk\Db::getTableInfo($this->getDbTable($class), true);
         $metaData = $wMetaData + $rMetaData;
 
-        \TK\Db::$CACHE_LAST = true;
+        \Tk\Db::$CACHE_LAST = true;
 
         $rClass = new \ReflectionClass($class);
         $map = new DataMap();
@@ -265,7 +290,7 @@ class ModelMapper
 
         if (!is_subclass_of($class, Model::class)) return null;
 
-        \TK\Db::$CACHE_LAST = false;
+        \Tk\Db::$CACHE_LAST = false;
 
         $map = new DataMap();
         $primaryId = $this->getDataMap($class)->getPrimaryKey()->getProperty();
@@ -300,7 +325,7 @@ class ModelMapper
         }
         static::setMap($key, $map);
 
-        \TK\Db::$CACHE_LAST = true;
+        \Tk\Db::$CACHE_LAST = true;
 
         return $map;
     }
