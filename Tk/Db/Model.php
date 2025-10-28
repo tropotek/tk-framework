@@ -11,9 +11,9 @@ use Tk\Db;
  * A Base DB/Form Model class, it contains the default data map behavior for common DB and Form operations.
  *
  * Note: If your object constructor has required params, the object will be created using reflection, and
- *       your object may not be initialized correctly if you have set default values within the constructor.
- *       It is recommended to use a factory method such as `MyObject::create($params)` keeping the default
- *       initialization code within the constructor when object instantiation requires params.
+ *       your object may not be initialized correctly when you set default values within the constructor.
+ *       It is recommended to use a factory method such as `MyObject::create($params)` for required constructor params,
+ *       keeping the default initialization code within the constructor when object instantiation requires params.
  */
 abstract class Model
 {
@@ -25,6 +25,17 @@ abstract class Model
      * @see static::getPrimaryTable()
      */
     const string DB_TABLE = '';
+
+    /**
+     * Return the primary int id of a model
+     * Does not support models with a non-integer ID type
+     */
+    public function getId(): int
+    {
+        $priKey = static::getPrimaryProperty();
+        if (empty($priKey) || !is_numeric($this->$priKey)) return 0;
+        return intval($this->$priKey);
+    }
 
 
     public static function find(int $id): ?static
@@ -82,7 +93,7 @@ abstract class Model
         if ($id) {
             $obj = static::find($id);
         } else {
-            // if a constructor requires params, if use reflection to create the object
+            // if a constructor requires params, the object will be created without executing the constructor
             $obj = ObjectUtil::createObjectInstance(static::class, $map->getConstructorRequiresParams());
         }
         if (is_null($obj)) {
@@ -93,17 +104,6 @@ abstract class Model
             $this->$prop = $val;
         }
         Db::$CACHE_LAST = true;
-    }
-
-    /**
-     * Return the primary int id of a model
-     * Does not support models with a non-integer ID type
-     */
-    public function getId(): int
-    {
-        $priKey = static::getPrimaryProperty();
-        if (empty($priKey) || !is_numeric($this->$priKey)) return 0;
-        return intval($this->$priKey);
     }
 
 
@@ -152,16 +152,24 @@ abstract class Model
     }
 
     /**
-     * Get the primary key object property name
+     * return a file data path for this object
      */
+    public function getDataPath(): string
+    {
+        if (property_exists($this, 'dataPath')) {
+            return $this->dataPath;
+        }
+        return '';
+    }
+
+
+    // ModelMapper helper methods
+
     public static function getPrimaryProperty(): string
     {
         return self::getDataMap()->getPrimaryKey()?->getProperty() ?? '';
     }
 
-    /**
-     * Get the primary key DB column name
-     */
     public static function getPrimaryColumn(): string
     {
         return self::getDataMap()->getPrimaryKey()?->getColumn() ?? '';
@@ -175,16 +183,5 @@ abstract class Model
     public static function getDbTable(): string
     {
         return ModelMapper::instance()->getDbTable(static::class);
-    }
-
-    /**
-     * return a file data path for this object
-     */
-    public function getDataPath(): string
-    {
-        if (property_exists($this, 'dataPath')) {
-            return $this->dataPath;
-        }
-        return '';
     }
 }

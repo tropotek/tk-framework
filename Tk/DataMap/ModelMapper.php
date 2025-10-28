@@ -6,12 +6,11 @@ use Tk\ObjectUtil;
 use Tk\Traits\DataTrait;
 
 /**
- * The ModelMapper is a singleton class that contains the Data type maps to map an object to an array.
- *
- * Use this object to manage the creation of DB and Form Model data maps.
+ * The ModelMapper is a Factory object to get/create Model class data maps.
  *
  * New Data types can be added using `ModelMapper::instance()->addMapType(...)` in your app bootstrap code.
  *
+ * This object can be extended if you want to add more data maps types for other storage options other than DB and forms.
  */
 class ModelMapper
 {
