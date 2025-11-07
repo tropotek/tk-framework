@@ -10,14 +10,17 @@ namespace Tk;
  * EG:
  *  o 10-config.php (run first)
  *  o 50-config.php
- *  o 100-config.php (ran last, before /src/config/config.php, /config.php files)
+ *  o 100-config.php
+ *  o /src/config/config.php    (always 2nd last)
+ *  o /config.php               (always last)
  *
  * Config files are expected to be '.php' file in the following format, using `\Tk\Config` as an example:
  * ```php
  *  <?php
  *  use Tk\Config;
  *  return function (Config $config) {
- *    // setup the config object as needed
+ *      // setup the config object as needed
+ *      $config->set('key', 'value');
  *  };
  *  ?>
  * ```
@@ -38,7 +41,6 @@ class ConfigLoader
             $basePath = dirname($vendorPath, 2);
         }
         $this->basePath = $basePath;
-        //$this->basePath = Config::getValue('base.path', dirname($vendorPath, 2));
 
         // Get all searchable paths
         $libPaths = scandir($vendorPath);
