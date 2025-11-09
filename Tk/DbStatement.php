@@ -49,10 +49,6 @@ class DbStatement extends \PDOStatement
             throw new Db\Exception("class name '{$classname}' does not exist");
         }
 
-        // disable DB query log for Db::countTotalRows() to work correctly
-        $cache = Db::$CACHE_LAST;
-        Db::$CACHE_LAST = false;
-
         // check if constructor requires params, if so use reflection to create object
         $map = ModelMapper::instance()->getDataMap($classname);
         $useReflection = false;
@@ -65,18 +61,15 @@ class DbStatement extends \PDOStatement
         // use PDO mapping if class is not a DbModel object
         if (!($obj instanceof Model)) {
             $obj = $this->fetchObject($classname);
-            Db::$CACHE_LAST = $cache;
             return $obj;
         }
 
         $row = $this->fetch(\PDO::FETCH_ASSOC);
         if ($row === false) {
-            Db::$CACHE_LAST = $cache;
             return false;
         }
 
         $obj->__map($row);
-        Db::$CACHE_LAST = $cache;
 
         return $obj;
     }

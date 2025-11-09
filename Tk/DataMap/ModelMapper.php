@@ -215,6 +215,7 @@ class ModelMapper
 
         if (!is_subclass_of($class, Model::class)) return null;
 
+        $cache = \Tk\Db::$CACHE_LAST;
         \Tk\Db::$CACHE_LAST = false;
 
         // read only table metadata
@@ -223,7 +224,7 @@ class ModelMapper
         $wMetaData = \Tk\Db::getTableInfo($this->getDbTable($class), true);
         $metaData = $wMetaData + $rMetaData;
 
-        \Tk\Db::$CACHE_LAST = true;
+        \Tk\Db::$CACHE_LAST = $cache;
 
         $rClass = new \ReflectionClass($class);
         $map = new DataMap();
@@ -289,7 +290,7 @@ class ModelMapper
 
         if (!is_subclass_of($class, Model::class)) return null;
 
-        \Tk\Db::$CACHE_LAST = false;
+        //\Tk\Db::$CACHE_LAST = false;
 
         $map = new DataMap();
         $primaryId = $this->getDataMap($class)->getPrimaryKey()->getProperty();
@@ -322,9 +323,10 @@ class ModelMapper
 
             $map->addType($type);
         }
+
         static::setMap($key, $map);
 
-        \Tk\Db::$CACHE_LAST = true;
+        //\Tk\Db::$CACHE_LAST = true;
 
         return $map;
     }

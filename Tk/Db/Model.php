@@ -81,11 +81,9 @@ abstract class Model
      */
     public function reload(): void
     {
-        Db::$CACHE_LAST = false;
         $map = self::getDataMap();
         $priKey = $map->getPrimaryKey()?->getProperty();
         if (is_null($priKey)) {
-            Db::$CACHE_LAST = true;
             return;
         }
         $id = $this->$priKey;
@@ -97,15 +95,12 @@ abstract class Model
             $obj = ObjectUtil::createObjectInstance(static::class, $map->getConstructorRequiresParams());
         }
         if (is_null($obj)) {
-            Db::$CACHE_LAST = true;
             return;
         }
         foreach (get_object_vars($obj) as $prop => $val) {
             $this->$prop = $val;
         }
-        Db::$CACHE_LAST = true;
     }
-
 
     public static function getDataMap(): DataMap
     {
@@ -117,12 +112,10 @@ abstract class Model
      */
     public function __map(array $row, ?DataMap $map = null): void
     {
-        Db::$CACHE_LAST = false;
         if (is_null($map)) {
             $map = self::getDataMap();
         }
         $map->loadObject($this, $row);
-        Db::$CACHE_LAST = true;
     }
 
     public static function getFormMap(): DataMap
@@ -161,7 +154,6 @@ abstract class Model
         }
         return '';
     }
-
 
     // ModelMapper helper methods
 

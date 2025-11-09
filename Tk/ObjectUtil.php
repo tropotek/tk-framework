@@ -215,12 +215,17 @@ class ObjectUtil
      */
     public static function createObjectInstance(string $class, bool $useReflection = false): object
     {
+        $cache = Db::$CACHE_LAST;
+        Db::$CACHE_LAST = false;
+
         if ($useReflection) {
             $reflection = new \ReflectionClass($class);
             $obj = $reflection->newInstanceWithoutConstructor();
         } else {
             $obj = new $class();
         }
+
+        Db::$CACHE_LAST = $cache;
         return $obj;
     }
 
