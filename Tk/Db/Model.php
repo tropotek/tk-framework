@@ -53,12 +53,7 @@ abstract class Model
      */
     public static function mustFind(int $id): static
     {
-        $table = ModelMapper::instance()->getPrimaryTable(static::class);
-        $column = self::getPrimaryColumn();
-        $obj = Db::queryOne("
-            SELECT *
-            FROM {$table}
-            WHERE {$column} = :id", compact('id'), static::class);
+        $obj = self::find($id);
         if (!($obj instanceof static)) {
             throw new \Tk\Exception(static::class . " not found with id {$id}");
         }

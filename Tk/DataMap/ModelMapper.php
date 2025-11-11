@@ -24,7 +24,7 @@ class ModelMapper
     const string MAP_FORM = 'form';
 
     /**
-     * A cache to hold created class datamaps using the namespaced model class name as the key
+     * A cache to hold created class datamaps using the model class name as the key
      * @var array<string, DataMap>
      */
     protected array $classMaps = [];
@@ -54,6 +54,9 @@ class ModelMapper
         return self::$_instance;
     }
 
+    /**
+     * init default DB data types
+     */
     public function initDefaultDbTypes(): void
     {
         $this->addMapType(self::MAP_DB, '_default', Db\Text::class);
@@ -71,6 +74,9 @@ class ModelMapper
         $this->addMapType(self::MAP_DB, 'Tk\Money', Db\Money::class);
     }
 
+    /**
+     * init default Form data types
+     */
     public function initDefaultFormTypes(): void
     {
         $this->addMapType(self::MAP_FORM, '_default', Form\Text::class);
@@ -290,8 +296,6 @@ class ModelMapper
 
         if (!is_subclass_of($class, Model::class)) return null;
 
-        //\Tk\Db::$CACHE_LAST = false;
-
         $map = new DataMap();
         $primaryId = $this->getDataMap($class)->getPrimaryKey()->getProperty();
 
@@ -325,8 +329,6 @@ class ModelMapper
         }
 
         static::setMap($key, $map);
-
-        //\Tk\Db::$CACHE_LAST = true;
 
         return $map;
     }
