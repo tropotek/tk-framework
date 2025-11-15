@@ -1,5 +1,12 @@
 #CHANGELOG#
 
+Ver 8.0.114 [2025-11-15]:
+-------------------------------
+  - fix model mapper
+  - phpstan fixes
+  - Update DB Mapper
+
+
 Ver 8.0.112 [2025-10-09]:
 -------------------------------
   - clean empty encrypted fields
