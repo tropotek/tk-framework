@@ -149,29 +149,15 @@ class FileUtil
      *
      * Get the total disk space usage of a directory
      */
-    public static function diskSpace(string $path): int
+    public static function diskSpace(string $directory): int
     {
-        if (is_dir($path)) {
-            $s = stat($path);
+        $size = 0;
+        $files = glob($directory.'/*', GLOB_NOSORT);
+        foreach($files as $path) {
+            is_file($path) && $size += intval(filesize($path));
+            is_dir($path)  && $size += self::diskSpace($path);
         }
-        //$space = $s["blocks"] * 512;  // Does not work value $s["blocks"] = -1 always
-        if (!isset($s['size'])) {
-            return 0;
-        }
-        $space = $s["size"];
-        if (is_dir($path) && is_readable($path)) {
-            $dh = opendir($path);
-            if ($dh === false) {
-                return 0;
-            }
-            while (($file = readdir($dh)) !== false) {
-                if ($file != "." and $file != "..") {
-                    $space += self::diskSpace($path . "/" . $file);
-                }
-            }
-            closedir($dh);
-        }
-        return $space;
+        return $size;
     }
 
     /**
