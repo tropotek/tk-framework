@@ -121,31 +121,27 @@ class ModelMapper
 
     public function setDataMap(string $class, DataMap $map): self
     {
-        $key = self::MAP_DB . '_' . $class;
-        return $this->setMap($key, $map);
+        return $this->setMap($this->getDataKey($class), $map);
     }
 
     public function setFormMap(string $class, DataMap $map): self
     {
-        $key = self::MAP_FORM . '_' . $class;
-        return $this->setMap($key, $map);
+        return $this->setMap($this->getFormKey($class), $map);
     }
 
-    protected function hasMap(string $name): bool
+    protected function hasMap(string $key): bool
     {
-        return array_key_exists($name, $this->classMaps);
-    }
-
-    public function hasDataMap(string $name): bool
-    {
-        $key = self::MAP_DB . '_' . $name;
         return array_key_exists($key, $this->classMaps);
     }
 
-    public function hasFormMap(string $name): bool
+    public function hasDataMap(string $class): bool
     {
-        $key = self::MAP_FORM . '_' . $name;
-        return array_key_exists($key, $this->classMaps);
+        return array_key_exists($this->getDataKey($class), $this->classMaps);
+    }
+
+    public function hasFormMap(string $class): bool
+    {
+        return array_key_exists($this->getFormKey($class), $this->classMaps);
     }
 
     /**
@@ -207,6 +203,16 @@ class ModelMapper
         return new $typeClass($propertyName, $columnName);
     }
 
+    public function getDataKey(string $class): string
+    {
+        return self::MAP_DB . '_' . $class;
+    }
+
+    public function getFormKey(string $class): string
+    {
+        return self::MAP_FORM . '_' . $class;
+    }
+
     /**
      * Get a DB DataMap for a class
      * Creates and caches a new DataMap if it does not exist
@@ -214,9 +220,8 @@ class ModelMapper
      */
     public function getDataMap(string $class): ?DataMap
     {
-        $key = self::MAP_DB . '_' . $class;
-        if ($this->hasMap($key)) {
-            return $this->getMap($key);
+        if ($this->hasDataMap($class)) {
+            return $this->getMap($this->getDataKey($class));
         }
 
         if (!is_subclass_of($class, Model::class)) return null;
@@ -280,7 +285,7 @@ class ModelMapper
             $map->addType($type);
         }
 
-        $this->setMap($key, $map);
+        $this->setDataMap($class, $map);
         return $map;
     }
 
@@ -291,8 +296,9 @@ class ModelMapper
      */
     public function getFormMap(string $class): ?DataMap
     {
-        $key = self::MAP_FORM . '_' . $class;
-        if ($this->hasMap($key)) return $this->getMap($key);
+        if ($this->hasFormMap($class)) {
+            return $this->getMap($this->getFormKey($class));
+        }
 
         if (!is_subclass_of($class, Model::class)) return null;
 
@@ -328,7 +334,7 @@ class ModelMapper
             $map->addType($type);
         }
 
-        static::setMap($key, $map);
+        static::setMap($this->getFormKey($class), $map);
 
         return $map;
     }

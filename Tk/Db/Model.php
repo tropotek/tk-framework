@@ -41,7 +41,7 @@ abstract class Model
     public static function find(int $id): ?static
     {
         $table = ModelMapper::instance()->getPrimaryTable(static::class);
-        $column = self::getPrimaryColumn();
+        $column = static::getPrimaryColumn();
         return Db::queryOne("
             SELECT *
             FROM {$table}
@@ -53,7 +53,7 @@ abstract class Model
      */
     public static function mustFind(int $id): static
     {
-        $obj = self::find($id);
+        $obj = static::find($id);
         if (!($obj instanceof static)) {
             throw new \Tk\Exception(static::class . " not found with id {$id}");
         }
@@ -108,7 +108,7 @@ abstract class Model
     public function __map(array $row, ?DataMap $map = null): void
     {
         if (is_null($map)) {
-            $map = self::getDataMap();
+            $map = static::getDataMap();
         }
         $map->loadObject($this, $row);
     }
@@ -123,7 +123,7 @@ abstract class Model
      */
     public function mapForm(array $values): static
     {
-        $map = self::getFormMap();
+        $map = static::getFormMap();
         $map->loadObject($this, $values);
         return $this;
     }
@@ -133,7 +133,7 @@ abstract class Model
      */
     public function unmapForm(): array
     {
-        $map = self::getFormMap();
+        $map = static::getFormMap();
         $values = [];
         $map->loadArray($values, $this);
         return $values;

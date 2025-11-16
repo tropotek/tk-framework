@@ -49,8 +49,13 @@ class DbStatement extends \PDOStatement
             throw new Db\Exception("class name '{$classname}' does not exist");
         }
 
-        // check if constructor requires params, if so use reflection to create object
-        $map = ModelMapper::instance()->getDataMap($classname);
+        // check if the constructor requires params, if so, use reflection to create object
+        if (is_subclass_of($classname, Model::class)) {
+            $map = $classname::getDataMap();
+        } else {
+            $map = ModelMapper::instance()->getDataMap($classname);
+        }
+
         $useReflection = false;
         if ($map) {
             $useReflection = $map->getConstructorRequiresParams();
