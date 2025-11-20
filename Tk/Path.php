@@ -24,12 +24,18 @@ class Path
     public function __construct(string $path, string $prefix = '')
     {
         // clean up path
-        if ($path[0] != DIRECTORY_SEPARATOR) $path = DIRECTORY_SEPARATOR . $path;
-        $path = rtrim($path, DIRECTORY_SEPARATOR);
-        if ($prefix[0] != DIRECTORY_SEPARATOR) $prefix = DIRECTORY_SEPARATOR . $prefix;
-        $prefix = rtrim($prefix, DIRECTORY_SEPARATOR);
-        if ($prefix && str_starts_with($path, $prefix)) {
-            $path = substr($path, strlen($prefix));
+        if (!empty($path)) {
+            if ($path[0] != DIRECTORY_SEPARATOR) $path = DIRECTORY_SEPARATOR . $path;
+            $path = rtrim($path, DIRECTORY_SEPARATOR);
+        }
+
+        if (!empty($prefix)) {
+            if ($prefix[0] != DIRECTORY_SEPARATOR) $prefix = DIRECTORY_SEPARATOR . $prefix;
+            $prefix = rtrim($prefix, DIRECTORY_SEPARATOR);
+
+            if (str_starts_with($path, $prefix)) {
+                $path = substr($path, strlen($prefix));
+            }
         }
 
         $this->path = $path;
