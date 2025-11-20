@@ -15,13 +15,6 @@ namespace Tk;
  *
  * var_dump($encrypted, $decrypted);
  * ```
- *
- * @todo Find all usages of encrypt/decrypt and update to use safeEncrypt/safeDecrypt
- *       Rename current encrypt/decrypt methods to basicEncrypt/basicDecrypt
- *       Rename safeEncrypt/safeDecrypt to encrypt/decrypt
- *       Find all usages of encrypt/decrypt and update to use safeEncrypt/safeDecrypt
- *       Also locate any uses of Config::get('system.encrypt') and update anything that uses it
- *       we may need to add a new specific config key for encryption Config::get('system.string.encrypt')???
  */
 class Encrypt
 {

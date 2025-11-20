@@ -564,17 +564,17 @@ class Uri implements UriInterface
         }
 
         // Node: Kept here for debugging
-//        if(Config::isDebug()) {
-//            $arr = debug_backtrace();
-//            $arr = $arr[0];
-//            $msg = sprintf('%s REDIRECT `%s` called from %s:%s',
-//                $code,
-//                $this->__toString(),
-//                str_replace(Config::getBasePath(), '', $arr['file'] ?? ''),
-//                $arr['line'] ?? 0
-//            );
-//            \Tk\Log::debug($msg);
-//        }
+        if(Config::isDev()) {
+            $arr = debug_backtrace();
+            $arr = $arr[0];
+            $msg = sprintf('%s REDIRECT `%s` called from %s:%s',
+                $code,
+                $this->__toString(),
+                str_replace(Config::getBasePath(), '', $arr['file'] ?? ''),
+                $arr['line'] ?? 0
+            );
+            \Tk\Log::debug($msg);
+        }
 
         header("Location: {$this->__toString()}", true, $code);
         exit();

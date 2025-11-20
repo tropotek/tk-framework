@@ -23,12 +23,10 @@ class Path
 
     public function __construct(string $path, string $prefix = '')
     {
-        //if (empty($path)) throw new Exception("path must contain a value");
-        if (!empty($path) && $path[0] != '/') throw new Exception("path must start with a directory separator");
-        //if ($prefix[0] != '/') throw new Exception("prefix must start with a directory separator");
-
         // clean up path
+        if ($path[0] != DIRECTORY_SEPARATOR) $path = DIRECTORY_SEPARATOR . $path;
         $path = rtrim($path, DIRECTORY_SEPARATOR);
+        if ($prefix[0] != DIRECTORY_SEPARATOR) $prefix = DIRECTORY_SEPARATOR . $prefix;
         $prefix = rtrim($prefix, DIRECTORY_SEPARATOR);
         if ($prefix && str_starts_with($path, $prefix)) {
             $path = substr($path, strlen($prefix));
@@ -64,7 +62,7 @@ class Path
     public static function createPrivatePath(string|Path $path = ''): self
     {
         if ($path instanceof Path) return clone $path;
-        $privatePath = Config::getBasePath() . Config::getDataPath() . '/private';
+        $privatePath = Config::getBasePath() . Config::getDataPath() . DIRECTORY_SEPARATOR . 'private';
         return new self($path, $privatePath);
     }
 

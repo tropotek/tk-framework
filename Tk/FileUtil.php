@@ -35,7 +35,11 @@ class FileUtil
      */
     public static function isAbsolute(string $pathname): bool
     {
-        return !empty($pathname) && ($pathname[0] === '/' || preg_match('/^[A-Z]:\\\\/i', $pathname) || str_starts_with($pathname, '\\\\'));
+        return !empty($pathname) && (
+            $pathname[0] === DIRECTORY_SEPARATOR ||
+            preg_match('/^[A-Z]:\\\\/i', $pathname) ||
+            str_starts_with($pathname, '\\\\')
+        );
     }
 
     /**
@@ -45,8 +49,8 @@ class FileUtil
      */
     public static function getRealPath(string $path): string
     {
-        $start = str_starts_with($path, '/') ? '/' : '';
-        $end = str_ends_with($path, '/') ? '/' : '';
+        $start = str_starts_with($path, DIRECTORY_SEPARATOR) ? DIRECTORY_SEPARATOR : '';
+        $end = str_ends_with($path, DIRECTORY_SEPARATOR) ? DIRECTORY_SEPARATOR : '';
 
         $path = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $path);
         $parts = array_filter(explode(DIRECTORY_SEPARATOR, $path), fn($f) => strlen($f) > 0);
@@ -152,7 +156,7 @@ class FileUtil
     public static function diskSpace(string $directory): int
     {
         $size = 0;
-        $files = glob($directory.'/*', GLOB_NOSORT);
+        $files = glob($directory.DIRECTORY_SEPARATOR.'*', GLOB_NOSORT);
         foreach($files as $path) {
             is_file($path) && $size += intval(filesize($path));
             is_dir($path)  && $size += self::diskSpace($path);
@@ -218,20 +222,20 @@ class FileUtil
         }
         while(false !== ($file = readdir($dir))) {
             if (($file != '.') && ($file != '..')) {
-                if (is_dir($src . '/' . $file)) {
+                if (is_dir($src . DIRECTORY_SEPARATOR . $file)) {
                     if ($deep) {
-                        self::copyDir($src . '/' . $file,$dest . '/' . $file, $deep);
+                        self::copyDir($src . DIRECTORY_SEPARATOR . $file,$dest . DIRECTORY_SEPARATOR . $file, $deep);
                     }
                 } else {
                     $copy = true;
                     if (is_callable($onCopy)) {
-                        $b = call_user_func_array($onCopy, [$src . '/' . $file, $dest . '/' . $file]);
+                        $b = call_user_func_array($onCopy, [$src . DIRECTORY_SEPARATOR . $file, $dest . DIRECTORY_SEPARATOR . $file]);
                         if (is_bool($b)) {
                             $copy = $b;
                         }
                     }
 
-                    if ($copy) copy($src . '/' . $file,$dest . '/' . $file);
+                    if ($copy) copy($src . DIRECTORY_SEPARATOR . $file,$dest . DIRECTORY_SEPARATOR . $file);
                 }
             }
         }
