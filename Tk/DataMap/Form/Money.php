@@ -18,10 +18,7 @@ class Money extends DataTypeInterface
     public function getPropertyValue(array $array): ?\Tk\Money
     {
         $value = parent::getPropertyValue($array);
-        if ($this->isNullable() && is_null($value)) return null;
-        if (!is_numeric($value)) {
-            $value = 0.0;
-        }
+        if ($this->isNullable() && !is_numeric($value)) return null;
         $value = \Tk\Money::parseFromString(strval($value), \Tk\Currency::instance($this->currencyCode));
         return $value;
     }
