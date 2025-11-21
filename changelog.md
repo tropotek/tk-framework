@@ -1,5 +1,11 @@
 #CHANGELOG#
 
+Ver 8.0.118 [2025-11-21]:
+-------------------------------
+  - Added product price bulk update
+  - Merge branch '8.0' of https://github.com/tropotek/tk-framework into 8.0
+
+
 Ver 8.0.116 [2025-11-16]:
 -------------------------------
 
