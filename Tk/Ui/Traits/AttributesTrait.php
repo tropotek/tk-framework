@@ -26,7 +26,6 @@ trait AttributesTrait
             $this->_attrList = $this->_attrList + $name;
         } else {
             $name = strip_tags(trim($name));
-            //$this->_attrList[$name] = $this->escapeAttr($value ?? $name); // interferes with htmx urls
             $this->_attrList[$name] = is_null($value) ? $name : (string)$value;
         }
         return $this;
@@ -72,7 +71,7 @@ trait AttributesTrait
     public function addCss(string $css): static
     {
         foreach (explode(' ', $css) as $c) {
-            if (!$c) continue;
+            if (empty(trim($c))) continue;
             $c = self::cleanCss($c);
             $this->_cssList[$c] = $c;
         }
