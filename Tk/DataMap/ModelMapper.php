@@ -254,7 +254,7 @@ class ModelMapper
                 $dataType = $phpType;
             }
             // store default stdClass objects as a JSON string in the DB
-            if ($phpType == 'stdClass') {
+            if ($phpType == 'stdClass' || str_starts_with($meta->name, 'json_')) {
                 $dataType = 'json';
             }
             if ($phpType == 'array') {

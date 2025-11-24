@@ -36,6 +36,7 @@ class DataMap
 
     /**
      * true if the object constructor has required parameters
+     * @todo: consider adding a params array to DataMap to store metadata
      */
     private bool $constructorRequiresParams = false;
 

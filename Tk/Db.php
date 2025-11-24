@@ -651,6 +651,7 @@ class Db
 
             foreach ($stm as $row) {
                 $col = (object)$row;
+                vd($col);
                 $col->name = $col->Field;
                 $col->name_camel = lcfirst(str_replace(' ', '', ucwords(str_replace(['_', '-'], ' ', $col->name))));
                 preg_match('/^([a-z0-9_]+)(\(([0-9]+)\))?(.+)?/i', $col->Type, $r);
@@ -660,9 +661,6 @@ class Db
                 $col->ext = trim($r[4] ?? '');
                 $col->php_type = $types[$col->mysql_type] ?? 'string';
                 if ($col->php_type == 'int' && $col->len == 1) $col->php_type = 'bool';
-
-                // TODO - this should be moved to the DataMapper
-                if (str_starts_with($col->name, 'json_')) $col->php_type = 'json';
 
                 $col->is_primary_key = $col->Key == 'PRI';
                 $col->is_unique      = in_array($col->Key, ['PRI', 'UNI']);
