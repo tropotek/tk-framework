@@ -651,7 +651,6 @@ class Db
 
             foreach ($stm as $row) {
                 $col = (object)$row;
-                vd($col);
                 $col->name = $col->Field;
                 $col->name_camel = lcfirst(str_replace(' ', '', ucwords(str_replace(['_', '-'], ' ', $col->name))));
                 preg_match('/^([a-z0-9_]+)(\(([0-9]+)\))?(.+)?/i', $col->Type, $r);
@@ -727,7 +726,7 @@ class Db
 
     /**
      * Remove all tables from a DB
-     * You must send true as a parameter to ensure it executes
+     * You must send $confirm = true to ensure correct execution
      */
     public static function dropAllTables(bool $confirm = false, array $exclude = []): int
     {

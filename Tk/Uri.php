@@ -563,10 +563,9 @@ class Uri implements UriInterface
                 break;
         }
 
-        // Node: Kept here for debugging
+        // handy for debugging redirection issues
         if(Config::isDev()) {
-            $arr = debug_backtrace();
-            $arr = $arr[0];
+            $arr = debug_backtrace()[0] ?? [];
             $msg = sprintf('%s REDIRECT `%s` called from %s:%s',
                 $code,
                 $this->__toString(),
