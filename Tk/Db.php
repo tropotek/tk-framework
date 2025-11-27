@@ -298,6 +298,7 @@ class Db
 
             return $stm->rowCount();
         } catch (\Exception $e) {
+            Log::error($e->__toString());
             throw new Exception($e->getMessage(), $e->getCode(), $query, $params);
         }
     }
