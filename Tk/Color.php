@@ -135,9 +135,6 @@ class Color
         return $this;
     }
 
-    /**
-     *
-     */
     public function getHex(): string
     {
         return sprintf('%02s%02s%02s', dechex($this->getRed()), dechex($this->getGreen()), dechex($this->getBlue()));
@@ -421,7 +418,7 @@ class Color
         'Brown' => '0;33',
         'Yellow' => '1;33',
         'LightGray' => '0;37',
-        'White' => '1;37'
+        'White' => '1;37',
     ];
 
     public static array $cliBgColorChart = [
@@ -432,7 +429,7 @@ class Color
         'Blue' => '44',
         'Magenta' => '45',
         'Cyan' => '46',
-        'LightGray' => '47'
+        'LightGray' => '47',
     ];
 
     /**
@@ -508,6 +505,7 @@ class Color
         'Turquoise' => '40E0D0', 'Violet' => 'EE82EE',
         'Wheat' => 'F5DEB3', 'White' => 'FFFFFF',
         'WhiteSmoke' => 'F5F5F5', 'Yellow' => 'FFFF00',
-        'YellowGreen' => '9ACD32'];
+        'YellowGreen' => '9ACD32',
+    ];
 
 }

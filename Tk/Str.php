@@ -113,7 +113,7 @@ class Str
     /**
      * Substring without cutting a word boundary
      * tiny words (length 3 by default) are included on the result.
-     * "..." is added if result do not reach original string length
+     * "..." is added if the result does not reach the original string length
      *
      * @todo Lookup a more refined way of doing this
      */

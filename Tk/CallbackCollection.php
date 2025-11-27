@@ -2,7 +2,7 @@
 namespace Tk;
 
 /**
- * Use this to store and execute an array of callback events for objects
+ * Use this to store and execute arrays of callback events
  */
 class CallbackCollection
 {
