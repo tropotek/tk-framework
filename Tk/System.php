@@ -19,7 +19,9 @@ class System
         $cache = new Cache();
         if (empty($hostname = $cache->fetch($key)) || System::isRefreshCacheRequest()) {
             $hostname = $_SERVER['HTTP_HOST'] ?? $_SERVER['HTTP_X_FORWARDED_HOST'] ?? 'localhost';
-            $cache->store($key, $hostname);
+            if (!self::isCli()) {
+                $cache->store($key, $hostname);
+            }
         }
         return $hostname;
     }
