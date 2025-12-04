@@ -38,6 +38,14 @@ class Path
             }
         }
 
+        // No accessible files/directories should start with a dot, except on rare occasions
+        if (preg_match('/' . preg_quote(DIRECTORY_SEPARATOR, '/') . '\./', $path)) {
+            throw new Exception("Invalid path value", 0, null, "path: " . $path);
+        }
+        if (preg_match('/' . preg_quote(DIRECTORY_SEPARATOR, '/') . '\./', $prefix)) {
+            throw new Exception("Invalid prefix value", 0, null, "prefix: " . $prefix);
+        }
+
         $this->path = $path;
         $this->prefix = $prefix;
     }

@@ -157,6 +157,7 @@ class FileUtil
     {
         $size = 0;
         $files = glob($directory.DIRECTORY_SEPARATOR.'*', GLOB_NOSORT);
+        if ($files === false) return 0;
         foreach($files as $path) {
             is_file($path) && $size += intval(filesize($path));
             is_dir($path)  && $size += self::diskSpace($path);

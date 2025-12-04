@@ -15,8 +15,8 @@ class Exception extends \Exception
     public function __toString(): string
     {
         $str = parent::__toString();
-        if ($this->dump != null) {
-            $str .= $this->dump . "\n\n";
+        if (!empty($this->dump)) {
+            $str .= "\nDump:\n" . $this->dump . "\n\n";
         }
         return $str;
     }
