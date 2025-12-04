@@ -38,7 +38,7 @@ class Path
             }
         }
 
-        // No accessible files/directories should start with a dot, except on rare occasions
+        // Files/directories starting with a dot should not be accessible generally.
         if (preg_match('/' . preg_quote(DIRECTORY_SEPARATOR, '/') . '\./', $path)) {
             throw new Exception("Invalid path value", 0, null, "path: " . $path);
         }
