@@ -726,7 +726,6 @@ class Image
      */
     public function text(string $text, string $fontFile, float $fontSize = 12, string $color = '#000000', string $position = 'center', int $xOffset = 0, int $yOffset = 0): self
     {
-        // todo - this method could be improved to support the text angle
         $angle = 0;
         $rgb = Color::hex2Rgb($color);
         $color = intval(imagecolorallocate($this->image, $rgb['red'] ?? 0, $rgb['green'] ?? 0, $rgb['blue'] ?? 0));
