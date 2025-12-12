@@ -285,6 +285,12 @@ class ModelMapper
             $map->addType($type);
         }
 
+        // call a magic function to modify the datamap
+        if (method_exists($class, '__dataMap')) {
+            $r = call_user_func_array([$class, '__dataMap'], [$map]);
+            if ($r instanceof DataMap) $map = $r;
+        }
+
         $this->setDataMap($class, $map);
         return $map;
     }
@@ -334,7 +340,13 @@ class ModelMapper
             $map->addType($type);
         }
 
-        static::setMap($this->getFormKey($class), $map);
+        // call a magic function to modify the datamap
+        if (method_exists($class, '__formMap')) {
+            $r = call_user_func_array([$class, '__formMap'], [$map]);
+            if ($r instanceof DataMap) $map = $r;
+        }
+
+        $this->setFormMap($class, $map);
 
         return $map;
     }
