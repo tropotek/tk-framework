@@ -1,5 +1,11 @@
 #CHANGELOG#
 
+Ver 8.0.126 [2025-12-13]:
+-------------------------------
+  - fix data map
+  - Merge branch '8.0' of https://github.com/tropotek/tk-framework into 8.0
+
+
 Ver 8.0.124 [2025-12-08]:
 -------------------------------
 
