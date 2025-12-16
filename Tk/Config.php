@@ -57,6 +57,14 @@ final class Config extends Collection
     }
 
     /**
+     * This will destry the current config instance forcing _init() to be called on the next instance() call (if any)
+     */
+    public static function destroy(): void
+    {
+        self::$_instance = null;
+    }
+
+    /**
      * Static alias for self::instance()->get(...)
      */
     public static function getValue(string $key, mixed $default = null): mixed

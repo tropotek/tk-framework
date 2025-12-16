@@ -50,6 +50,7 @@ class Db
         if (!empty(self::$dbName)) {
             $dbName = sprintf(';dbname=%s', self::$dbName);
         }
+
         $pdoDsn = sprintf('mysql:host=%s;port=%s;charset=utf8mb4%s', $host, $port, $dbName);
         self::$pdo = new \PDO($pdoDsn, $user, $pass, $options);
         self::$pdo->setAttribute(\PDO::ATTR_STATEMENT_CLASS, [DbStatement::class]);
