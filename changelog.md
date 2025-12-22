@@ -1,5 +1,11 @@
 #CHANGELOG#
 
+Ver 8.0.128 [2025-12-22]:
+-------------------------------
+  - Added all requests from client, ready for UA testing
+  - Added docker container and install scripts
+
+
 Ver 8.0.126 [2025-12-13]:
 -------------------------------
   - fix data map
