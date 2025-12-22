@@ -557,7 +557,7 @@ class Db
 		$set = implode(', ', $set);
 
 		if ($set) {
-			$sql = "INSERT INTO $table ($cols) VALUES ($vals) ON DUPLICATE KEY UPDATE $set";
+			$sql = "INSERT INTO {$table} ({$cols}) VALUES ({$vals}) ON DUPLICATE KEY UPDATE {$set}";
 		} else {
 			// only got primary key column, insert ignore new row
 			$sql = "INSERT IGNORE INTO $table ($cols) VALUES ($vals)";

@@ -12,6 +12,8 @@ use Tk\Db;
  *
  * After you have made your modifications you must call the Collection->save();
  * method so the data is saved from memory to the DB table.
+ *
+ * TODO: Rename column key to `keyId` to save a lot of confusion
  */
 class Collection extends \Tk\Collection
 {
@@ -84,7 +86,7 @@ class Collection extends \Tk\Collection
     /**
      * Remove all items from collection
      */
-    public function clear(): Collection
+    public function clear(): static
     {
         foreach ($this as $k => $v) {
             $this->remove($k);

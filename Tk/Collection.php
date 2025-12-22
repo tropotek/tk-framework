@@ -10,7 +10,7 @@ namespace Tk;
 class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
 {
 
-    private array $_data = [];
+    protected array $_data = [];
 
 
     public function __construct(array $items = [])
@@ -248,6 +248,14 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
         return $this;
     }
 
+    /**
+     * Remove all items from collection
+     */
+    public function clear(): static
+    {
+        $this->_data = [];
+        return $this;
+    }
 
     /**
      * @interface \ArrayAccess
