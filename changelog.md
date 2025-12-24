@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 8.0.130 [2025-12-24]:
+-------------------------------
+  - Added content snippet templates to reporting fields
+
+
 Ver 8.0.128 [2025-12-22]:
 -------------------------------
   - Added all requests from client, ready for UA testing
