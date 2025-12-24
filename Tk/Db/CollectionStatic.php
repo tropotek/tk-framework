@@ -26,6 +26,11 @@ class CollectionStatic extends \Tk\Collection
         $this->dbLoad();
     }
 
+    static function create(string $table, string $keyId): static
+    {
+        return new static($table, $keyId);
+    }
+
     public function __sleep()
     {
         return ['table', 'keyId', '_data'];
