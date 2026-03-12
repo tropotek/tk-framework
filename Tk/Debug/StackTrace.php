@@ -70,7 +70,7 @@ class StackTrace {
         return trim($str);
     }
 
-    public static function dumpLine(int $dumpLine = 1, bool $showClass = false, bool $showFunction = false): string
+    public static function dumpTraceLine(int $dumpLine = 1, bool $showClass = false, bool $showFunction = false): string
     {
         $line = debug_backtrace();
         $line = $line[$dumpLine];
