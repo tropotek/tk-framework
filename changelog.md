@@ -1,5 +1,11 @@
 #CHANGELOG#
 
+Ver 8.0.132 [2026-03-17]:
+-------------------------------
+  - update docker
+  - Fix page title and icons
+
+
 Ver 8.0.130 [2025-12-24]:
 -------------------------------
   - Added content snippet templates to reporting fields
