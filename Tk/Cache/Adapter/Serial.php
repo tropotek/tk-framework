@@ -57,13 +57,13 @@ class Serial implements Iface
         $store = @unserialize($store);
         if ($store === false) {
             error_log("failed to unserialize cached data for key {$key}");
-            unlink($filename);
+            if (file_exists($filename)) @unlink($filename);
             return false;
         }
 
         $ttl = $store['ttl'];
         if ($ttl != 0 && time() > $ttl) {
-            unlink($filename);
+            if (file_exists($filename)) @unlink($filename);
             return false;
         }
 
@@ -74,7 +74,7 @@ class Serial implements Iface
     {
         $filename = $this->getFileName($key);
         if (file_exists($filename)) {
-            return unlink($filename);
+            return @unlink($filename);
         } else {
             return false;
         }
