@@ -21,14 +21,14 @@ class Db
     private static ?\PDO          $pdo           = null;
     private static ?DbStatement   $lastStatement = null;
 
-	private static string $lastQuery     = '';
-	private static int    $lastId        = 0;
+    private static string $lastQuery     = '';
+    private static int    $lastId        = 0;
     private static int    $transactions  = 0;     // count of transactions started to detect nested transactions
-	private static array  $dsn_stack     = [];    // stack of DSNs and timezones for push/pop
-	private static string $dbName        = '';
+    private static array  $dsn_stack     = [];    // stack of DSNs and timezones for push/pop
+    private static string $dbName        = '';
 
-	private static string $dsn           = '';    // dsn to use when opening a connection
-	private static string $timezone      = '';    // last timezone explicitly set on the db connection
+    private static string $dsn           = '';    // dsn to use when opening a connection
+    private static string $timezone      = '';    // last timezone explicitly set on the db connection
     private static array  $options       = [];    // DB connection options
 
 
@@ -37,13 +37,11 @@ class Db
      *   - 'hostname[:port]/username/password/dbname'
      * When $options is null the default options are used from the config.php (db.mysql.options)
      */
-	public static function connect(string $dsn, ?array $options = null): \PDO
+    public static function connect(string $dsn, array $options = []): \PDO
     {
-		assert(!empty($dsn), "no DSN for database connection");
+        assert(!empty($dsn), "no DSN for database connection");
 
-        if (is_null($options)) {
-            $options = self::getDefaultOpts();
-        }
+        $options = self::getDefaultOpts($options);
 
         [$host, $port, $user, $pass, self::$dbName] = array_values(self::parseDsn($dsn));
         $dbName = '';
@@ -59,67 +57,73 @@ class Db
 
         self::$dsn          = $dsn;
         self::$options      = $options;
-		self::$lastQuery    = '';
-		self::$lastId       = 0;
-		self::$transactions = 0;
+        self::$lastQuery    = '';
+        self::$lastId       = 0;
+        self::$transactions = 0;
 
         //self::$pdo->exec('SET CHARACTER SET utf8mb4;');
         //self::$pdo->exec('ALTER DATABASE CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;');
-		if (isset(self::$options['timezone'])) {
+        if (isset(self::$options['timezone'])) {
             self::setTimezone(self::$options['timezone']);
-		}
+        }
 
-		return self::$pdo;
+        return self::$pdo;
     }
 
-	/**
-	 * set the session timezone, which persists for the MySQL session
-	 * returns the previous timezone value
-	 */
-	public static function setTimezone(string $timezone = 'SYSTEM'): string
-	{
-		$tz = self::$timezone;
-		if ($timezone && $timezone != self::$timezone) {
+    /**
+     * set the session timezone, which persists for the MySQL session
+     * returns the previous timezone value
+     */
+    public static function setTimezone(string $timezone = 'SYSTEM'): string
+    {
+        $tz = self::$timezone;
+        if ($timezone && $timezone != self::$timezone) {
             self::execute("SET time_zone = :timezone", compact('timezone'));
             self::$timezone = $timezone;
-		}
-		return $tz;
-	}
+        }
+        return $tz;
+    }
 
     /**
      * Get the default db options from the config file
      *
      * @return array<string, mixed>
      */
-    public static function getDefaultOpts(): array
+    public static function getDefaultOpts(array $opts): array
     {
-        $opts = Config::getValue('db.mysql.options', []);
         if (!isset($opts['timezone'])) {
             $opts['timezone'] = Config::getValue('php.date.timezone', self::DEFAULT_TIMEZONE);
         }
+
+        // set buffering on by default
+        // disable in config with `$config['db.mysql.options'] = [Pdo\Mysql::ATTR_USE_BUFFERED_QUERY => false];`
+        if (!isset($opts[\Pdo\Mysql::ATTR_USE_BUFFERED_QUERY])) {
+            $opts[\Pdo\Mysql::ATTR_USE_BUFFERED_QUERY] = true;
+        }
+
         return $opts;
     }
 
 
-	/**
-	 * remembers current DSN and timezone, connects to database with passed DSN
-	 */
-	public static function pushDsn(string $dsn, array $options = []): void
-	{
-		self::$dsn_stack[] = [self::$dsn, self::$options, self::$timezone];
-		self::connect($dsn, $options);
-	}
+    /**
+     * remembers current DSN and timezone, connects to database with passed DSN
+     */
+    public static function pushDsn(string $dsn, array $options = []): void
+    {
+        self::$dsn_stack[] = [self::$dsn, self::$options, self::$timezone];
+        self::connect($dsn, $options);
+    }
 
-	/**
-	 * pops DSN and timezone from the stack and connects to a database
-	 */
-	public static function popDsn(): void
-	{
-		assert(count(self::$dsn_stack) > 0, "no pushed DSN to pop");
-		[$dsn, $options, $timezone] = array_pop(self::$dsn_stack);
-		self::$timezone = $timezone;
-		self::connect($dsn, $options);
-	}
+    /**
+     * pops DSN and timezone from the stack and connects to a database
+     */
+    public static function popDsn(): void
+    {
+        assert(count(self::$dsn_stack) > 0, "no pushed DSN to pop");
+        [$dsn, $options, $timezone] = array_pop(self::$dsn_stack);
+        self::$timezone = $timezone;
+        self::connect($dsn, $options);
+    }
 
     public static function getDsn(): string
     {
@@ -253,7 +257,7 @@ class Db
      */
     public static function prepareQuery(string &$query, array|object|null &$params = null): void
     {
-		if (is_object($params)) $params = get_object_vars($params);
+        if (is_object($params)) $params = get_object_vars($params);
         if (!is_array($params)) return;
         // is array sequential (not assoc)
         if (array_keys($params) === range(0, count($params) - 1)) return;
@@ -279,8 +283,8 @@ class Db
 
     /**
      * Execute an SQL statement that doesn't get a result set
-	 * e.g. update, insert, delete
-	 * Returns the number of affected rows or true if succeeded, false if failed
+     * e.g. update, insert, delete
+     * Returns the number of affected rows or true if succeeded, false if failed
      */
     public static function execute(string $query, array|object|null $params = null): int|bool
     {
@@ -307,9 +311,9 @@ class Db
     /**
      * Executes an SQL statement, returning a result set as a PDOStatement object
      *
-	 * @template T of object
-	 * @param class-string<T> $classname
-	 * @return array<int,T>
+     * @template T of object
+     * @param class-string<T> $classname
+     * @return array<int,T>
      */
     public static function query(string $query, array|object|null $params = null, string $classname = 'stdClass'): array
     {
@@ -333,16 +337,16 @@ class Db
         }
     }
 
-	/**
-	 * execute sql SELECT statement
-	 * returns first row as an object of type $classname, or null if no rows found
-	 *
-	 * @template T of object
-	 * @param class-string<T> $classname
-	 * @return T|null
-	 */
-	public static function queryOne(string $query, array|object|null $params = null, string $classname = 'stdClass'): ?object
-	{
+    /**
+     * execute sql SELECT statement
+     * returns first row as an object of type $classname, or null if no rows found
+     *
+     * @template T of object
+     * @param class-string<T> $classname
+     * @return T|null
+     */
+    public static function queryOne(string $query, array|object|null $params = null, string $classname = 'stdClass'): ?object
+    {
         try {
             self::prepareQuery($query, $params);
             self::setLastQuery($query);
@@ -358,15 +362,15 @@ class Db
         } catch (\Exception $e) {
             throw new Exception($e->getMessage(), $e->getCode(), $query, $params);
         }
-	}
+    }
 
-	/**
-	 * execute sql SELECT statement
-	 * returns string representation of the first value of the first row of the result
-	 * or null if nothing selected
-	 */
-	public static function queryVal(string $query, array|object|null $params = null): mixed
-	{
+    /**
+     * execute sql SELECT statement
+     * returns string representation of the first value of the first row of the result
+     * or null if nothing selected
+     */
+    public static function queryVal(string $query, array|object|null $params = null): mixed
+    {
         try {
             self::prepareQuery($query, $params);
             self::setLastQuery($query);
@@ -380,7 +384,7 @@ class Db
         } catch (\Exception $e) {
             throw new Exception($e->getMessage(), $e->getCode(), $query, $params);
         }
-	}
+    }
 
     /**
      * query a single value, always convert to int
@@ -467,104 +471,104 @@ class Db
         return $list;
     }
 
-	/**
-	 * convenience function: insert a row
-	 * $values is [column => value, ...] or an object
-	 */
-	public static function insert(string $table, array|object $values): int|bool
-	{
-		if (is_object($values)) $values = get_object_vars($values);
-		$cols = implode(', ', array_keys($values));
-		$vals = preg_replace('/([^, ]+)/', ':$1', $cols);
-		$cols = implode(', ', array_map(fn($r) => '`'.$r.'`', array_keys($values)));
-		return self::execute("INSERT INTO $table ($cols) VALUES ($vals)", $values);
-	}
-
-	/**
-	 * convenience function: insert a row ignoring errors
-	 * $values is [column => value, ...] or an object
-	 */
-	public static function insertIgnore(string $table, array|object $values): int|bool
-	{
-		if (is_object($values)) $values = get_object_vars($values);
-		$cols = implode(', ', array_keys($values));
-		$vals = preg_replace('/([^, ]+)/', ':$1', $cols);
-        $cols = implode(', ', array_map(fn($r) => '`'.$r.'`', array_keys($values)));
-		return self::execute("INSERT IGNORE INTO $table ($cols) VALUES ($vals)", $values);
-	}
-
-	/**
-	 * convenience function: delete a row matching all conditions
-	 * $values is [column => value, ...] or an object
-	 * $values must contain at least one condition
-	 */
-	public static function delete(string $table, array|object $values): int|bool
+    /**
+     * convenience function: insert a row
+     * $values is [column => value, ...] or an object
+     */
+    public static function insert(string $table, array|object $values): int|bool
     {
-		if (is_object($values)) $values = get_object_vars($values);
+        if (is_object($values)) $values = get_object_vars($values);
+        $cols = implode(', ', array_keys($values));
+        $vals = preg_replace('/([^, ]+)/', ':$1', $cols);
+        $cols = implode(', ', array_map(fn($r) => '`'.$r.'`', array_keys($values)));
+        return self::execute("INSERT INTO $table ($cols) VALUES ($vals)", $values);
+    }
+
+    /**
+     * convenience function: insert a row ignoring errors
+     * $values is [column => value, ...] or an object
+     */
+    public static function insertIgnore(string $table, array|object $values): int|bool
+    {
+        if (is_object($values)) $values = get_object_vars($values);
+        $cols = implode(', ', array_keys($values));
+        $vals = preg_replace('/([^, ]+)/', ':$1', $cols);
+        $cols = implode(', ', array_map(fn($r) => '`'.$r.'`', array_keys($values)));
+        return self::execute("INSERT IGNORE INTO $table ($cols) VALUES ($vals)", $values);
+    }
+
+    /**
+     * convenience function: delete a row matching all conditions
+     * $values is [column => value, ...] or an object
+     * $values must contain at least one condition
+     */
+    public static function delete(string $table, array|object $values): int|bool
+    {
+        if (is_object($values)) $values = get_object_vars($values);
         $where = [];
-		foreach (array_keys($values) as $col) {
-			$where[] = "`$col` = :$col";
+        foreach (array_keys($values) as $col) {
+            $where[] = "`$col` = :$col";
         }
-		$where = implode(' AND ', $where);
+        $where = implode(' AND ', $where);
 
         return self::execute("DELETE FROM $table WHERE $where", $values);
     }
 
-	/**
-	 * convenience function: update a row
-	 * $primaryKey is the name of the primary key column, must be in $values.
-	 * $values is [column => value, ...] or an object
-	 *
-	 * note: cannot change primary key with this function
-	 */
-	public static function update(string $table, string $primaryKey, array|object $values): int|bool
-	{
-		if (is_object($values)) $values = get_object_vars($values);
+    /**
+     * convenience function: update a row
+     * $primaryKey is the name of the primary key column, must be in $values.
+     * $values is [column => value, ...] or an object
+     *
+     * note: cannot change primary key with this function
+     */
+    public static function update(string $table, string $primaryKey, array|object $values): int|bool
+    {
+        if (is_object($values)) $values = get_object_vars($values);
 
-		$set = [];
-		$vals = [];
-		foreach ($values as $column => $value) {
-			if ($column != $primaryKey) {
-				$set[] = "`$column` = :$column";
-			}
-			$vals[$column] = $value;
-		}
+        $set = [];
+        $vals = [];
+        foreach ($values as $column => $value) {
+            if ($column != $primaryKey) {
+                $set[] = "`$column` = :$column";
+            }
+            $vals[$column] = $value;
+        }
 
-		$set = implode(', ', $set);
-		$sql = "UPDATE $table SET $set WHERE `$primaryKey` = :$primaryKey";
-		return self::execute($sql, $vals);
-	}
+        $set = implode(', ', $set);
+        $sql = "UPDATE $table SET $set WHERE `$primaryKey` = :$primaryKey";
+        return self::execute($sql, $vals);
+    }
 
-	/**
-	 * insert (cols) values (vals) on duplicate key update col=val, ...
-	 * $primaryKey is not updated
-	 * values is [column => value, ...] or an object
-	 */
-	public static function insertUpdate(string $table, string $primaryKey, array|object $values): int|bool
-	{
-		if (is_object($values)) $values = get_object_vars($values);
-		if (empty($values[$primaryKey])) $values[$primaryKey] = null;
-		$cols = implode(', ', array_keys($values));
-		$vals = preg_replace('/([^, ]+)/', ':$1', $cols);
+    /**
+     * insert (cols) values (vals) on duplicate key update col=val, ...
+     * $primaryKey is not updated
+     * values is [column => value, ...] or an object
+     */
+    public static function insertUpdate(string $table, string $primaryKey, array|object $values): int|bool
+    {
+        if (is_object($values)) $values = get_object_vars($values);
+        if (empty($values[$primaryKey])) $values[$primaryKey] = null;
+        $cols = implode(', ', array_keys($values));
+        $vals = preg_replace('/([^, ]+)/', ':$1', $cols);
 
-		$set = [];
-		foreach (array_keys($values) as $column) {
-			if ($column != $primaryKey) {
-				$set[] = "`$column` = :$column";
-			}
-		}
+        $set = [];
+        foreach (array_keys($values) as $column) {
+            if ($column != $primaryKey) {
+                $set[] = "`$column` = :$column";
+            }
+        }
 
-		$set = implode(', ', $set);
+        $set = implode(', ', $set);
 
-		if ($set) {
-			$sql = "INSERT INTO {$table} ({$cols}) VALUES ({$vals}) ON DUPLICATE KEY UPDATE {$set}";
-		} else {
-			// only got primary key column, insert ignore new row
-			$sql = "INSERT IGNORE INTO $table ($cols) VALUES ($vals)";
-		}
+        if ($set) {
+            $sql = "INSERT INTO {$table} ({$cols}) VALUES ({$vals}) ON DUPLICATE KEY UPDATE {$set}";
+        } else {
+            // only got primary key column, insert ignore new row
+            $sql = "INSERT IGNORE INTO $table ($cols) VALUES ($vals)";
+        }
 
-		return self::execute($sql, $values);
-	}
+        return self::execute($sql, $values);
+    }
 
     /**
      * Predict the next insert ID of the table
