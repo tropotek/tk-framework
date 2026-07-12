@@ -95,7 +95,7 @@ class Cookie
         return false;
     }
 
-    public function getBrowserId(): string
+    public function getBrowserId(?int $expires = null): string
     {
         $id = trim($this->get(self::BROWSER_ID, ''));
         if (!preg_match('/[0-9A-F]{32}/i', $id)) {
@@ -106,7 +106,7 @@ class Cookie
             );
             //$id = md5(time().$this->getRequest()->getClientIp().$this->getRequest()->server->get('HTTP_USER_AGENT'));
         }
-        $this->set(self::BROWSER_ID, $id);
+        $this->set(self::BROWSER_ID, $id, $expires);
         return $id;
     }
 
