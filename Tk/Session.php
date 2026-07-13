@@ -47,6 +47,17 @@ class Session
         return self::$_instance;
     }
 
+    /**
+     * Regenerate the session id, preserving session data.
+     * Call on every privilege elevation (login) to prevent session fixation.
+     */
+    public function regenerateId(): void
+    {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_regenerate_id(true);
+        }
+    }
+
     // session cache methods with timeout
 
     /**

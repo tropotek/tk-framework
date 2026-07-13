@@ -75,6 +75,7 @@ class Auth
 
         $loginResult = $this->getAdapter()->authenticate($username, $password);
         if ($loginResult->isValid()) {
+            \Tk\Session::instance()->regenerateId();
             $this->getStorage()->write($loginResult->getIdentity());
         }
 
