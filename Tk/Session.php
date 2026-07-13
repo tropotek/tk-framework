@@ -18,6 +18,17 @@ class Session
             session_set_save_handler($handler, true);
         }
         if (session_status() === PHP_SESSION_NONE) {
+            ini_set('session.use_strict_mode', '1');
+            $secure = (($_SERVER['HTTPS'] ?? '') !== '' && $_SERVER['HTTPS'] !== 'off')
+                || (($_SERVER['SERVER_PORT'] ?? '') == 443)
+                || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
+            session_set_cookie_params([
+                'lifetime' => 0,
+                'path'     => '/',
+                'secure'   => $secure,
+                'httponly' => true,
+                'samesite' => 'Strict',
+            ]);
             session_start();
         }
 
