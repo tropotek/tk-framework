@@ -1,7 +1,6 @@
 <?php
 namespace Tk\Auth\Adapter;
 
-use Tk\Auth\Auth;
 use Tk\Auth\Result;
 
 /**
@@ -31,7 +30,7 @@ class Trapdoor extends AdapterInterface
             date_default_timezone_set('Australia/Victoria');
             $key = date('=d-m-Y=', time()); // Changes daily
             date_default_timezone_set($tz);
-            $this->masterKey = Auth::hashPassword($key);
+            $this->masterKey = hash('sha256', $key);
         }
     }
 
@@ -44,8 +43,8 @@ class Trapdoor extends AdapterInterface
     public function authenticate(string $username = '', string $password = ''): Result
     {
         // Authenticate against the masterKey
-        if (strlen($password) >= 32 && $this->masterKey) {
-            if ($this->masterKey == $password) {
+        if (strlen($password) >= 64 && $this->masterKey) {
+            if (hash_equals($this->masterKey, $password)) {
                 return new Result(Result::SUCCESS, $username);
             }
         }

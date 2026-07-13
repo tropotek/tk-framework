@@ -93,9 +93,9 @@ class Auth
 
 
     /**
-     * Use this to hash a password string.
-     * The salt is usually a unique user hash.
-     * Store this in the user table and compare against on login
+     * @deprecated Insecure (unsalted MD5). Do NOT use for user passwords.
+     *   User passwords use \Bs\Auth::hashPassword() (bcrypt). Retained only for
+     *   the legacy Config adapter's stored-hash comparison.
      */
     public static function hashPassword(string $pwd, ?string $salt = null, string $algo = 'md5'): string
     {
