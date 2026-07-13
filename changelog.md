@@ -1,5 +1,12 @@
 #CHANGELOG#
 
+Ver 8.0.138 [2026-07-13]:
+-------------------------------
+  - security: deprecate MD5 hashPassword; move Trapdoor to sha256+hash_equals
+  - security: regenerate session id on login (fixation)
+  - security: harden session cookie (httponly, samesite, strict-mode, TLS-aware secure)
+
+
 Ver 8.0.136 [2026-06-12]:
 -------------------------------
   - fixed invoice search added students and total row to invoice export
