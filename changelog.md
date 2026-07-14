@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 8.0.140 [2026-07-14]:
+-------------------------------
+  - fix getClientIp() method
+
+
 Ver 8.0.138 [2026-07-13]:
 -------------------------------
   - security: deprecate MD5 hashPassword; move Trapdoor to sha256+hash_equals
