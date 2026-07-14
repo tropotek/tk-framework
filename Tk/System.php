@@ -125,22 +125,101 @@ class System
     /**
      * Returns the client IP address.
      *
-     * This method can read the client IP address from the "X-Forwarded-For" header
-     * when trusted proxies were set via "setTrustedProxies()". The "X-Forwarded-For"
-     * header value is a comma+space separated list of IP addresses, the left-most
-     * being the original client, and each successive proxy that passed the request
-     * adding the IP address where it received the request from.
+     * By default this returns the direct TCP peer address ($_SERVER['REMOTE_ADDR'])
+     * and ignores any "X-Forwarded-For"/"X-Client-IP" headers, since those are
+     * trivially spoofable by any client when nothing sits in front of the app.
+     *
+     * If the immediate peer's address matches an entry in the
+     * "system.trustedProxies" config value (an array of exact IPs and/or CIDR
+     * blocks, e.g. ['10.0.0.0/8', '192.168.1.5'], default empty), the
+     * "X-Forwarded-For" header (falling back to "X-Client-IP") is honoured
+     * instead. That header is a comma-separated hop list, left-most being the
+     * original client; this walks it from the right and returns the first hop
+     * that is not itself a trusted proxy, so a chain of trusted proxies is
+     * transparently skipped through to the real client.
      */
     public static function getClientIp(): string
     {
-        $ip = $_SERVER['HTTP_CLIENT_IP'] ?? ($_SERVER['HTTP_X_FORWARDED_FOR'] ?? ($_SERVER['REMOTE_ADDR'] ?? ''));
+        $remoteAddr = self::validateIp($_SERVER['REMOTE_ADDR'] ?? '');
 
-        if (substr_count($ip, ':') > 1) {   // is ip 6
-            if (!filter_var($ip, \FILTER_VALIDATE_IP, \FILTER_FLAG_IPV6)) $ip = '';
-        } else {
-            if (!filter_var($ip, \FILTER_VALIDATE_IP, \FILTER_FLAG_IPV4)) $ip = '';
+        $trustedProxies = Config::getValue('system.trustedProxies', []);
+        if (empty($trustedProxies) || $remoteAddr === '' || !self::ipIsTrustedProxy($remoteAddr, $trustedProxies)) {
+            return $remoteAddr;
         }
-        return $ip;
+
+        $forwardedFor = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? ($_SERVER['HTTP_CLIENT_IP'] ?? '');
+        $hops = array_values(array_filter(array_map(
+            fn(string $hop) => self::validateIp($hop),
+            explode(',', $forwardedFor)
+        ), fn(string $ip) => $ip !== ''));
+
+        for ($i = count($hops) - 1; $i >= 0; $i--) {
+            if (!self::ipIsTrustedProxy($hops[$i], $trustedProxies)) {
+                return $hops[$i];
+            }
+        }
+
+        // Every forwarded hop was itself a trusted proxy (or the header was
+        // missing/unparseable) - fall back to the immediate peer address.
+        return $remoteAddr;
+    }
+
+    /**
+     * Returns $ip if it is a well-formed IPv4/IPv6 address, empty string otherwise.
+     */
+    private static function validateIp(string $ip): string
+    {
+        $ip = trim($ip);
+        if ($ip === '') return '';
+        $flag = substr_count($ip, ':') > 1 ? \FILTER_FLAG_IPV6 : \FILTER_FLAG_IPV4;
+        return filter_var($ip, \FILTER_VALIDATE_IP, $flag) ? $ip : '';
+    }
+
+    /**
+     * @param string[] $trustedProxies Exact IPs and/or CIDR blocks (e.g. '10.0.0.0/8').
+     */
+    private static function ipIsTrustedProxy(string $ip, array $trustedProxies): bool
+    {
+        foreach ($trustedProxies as $proxy) {
+            if (self::ipMatchesCidr($ip, (string)$proxy)) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Matches $ip against $cidr, which may be a bare IP (exact match) or an
+     * IP/prefix-length CIDR block. Supports IPv4 and IPv6; a mismatched
+     * address family never matches.
+     */
+    private static function ipMatchesCidr(string $ip, string $cidr): bool
+    {
+        if (!str_contains($cidr, '/')) {
+            return $ip !== '' && $ip === $cidr;
+        }
+
+        [$subnet, $maskBits] = explode('/', $cidr, 2);
+        if (!ctype_digit($maskBits)) return false;
+        $maskBits = (int)$maskBits;
+
+        $ipBin = @inet_pton($ip);
+        $subnetBin = @inet_pton($subnet);
+        if ($ipBin === false || $subnetBin === false || strlen($ipBin) !== strlen($subnetBin)) {
+            return false;
+        }
+
+        $maxBits = strlen($ipBin) * 8;
+        if ($maskBits < 0 || $maskBits > $maxBits) return false;
+
+        $bytes = intdiv($maskBits, 8);
+        $remainderBits = $maskBits % 8;
+
+        if ($bytes > 0 && substr($ipBin, 0, $bytes) !== substr($subnetBin, 0, $bytes)) {
+            return false;
+        }
+        if ($remainderBits === 0) return true;
+
+        $mask = chr((0xFF << (8 - $remainderBits)) & 0xFF);
+        return (substr($ipBin, $bytes, 1) & $mask) === (substr($subnetBin, $bytes, 1) & $mask);
     }
 
     /**
