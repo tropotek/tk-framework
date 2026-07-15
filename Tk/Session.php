@@ -27,7 +27,7 @@ class Session
                 'path'     => '/',
                 'secure'   => $secure,
                 'httponly' => true,
-                'samesite' => 'Strict',
+                'samesite' => self::getCookieSameSite(),
             ]);
             session_start();
         }
@@ -37,6 +37,26 @@ class Session
         if (!isset($_SESSION[self::SID_PAGE_REFERER]) && isset($_SERVER['HTTP_REFERER'])) {
             $_SESSION[self::SID_PAGE_REFERER] = $_SERVER['HTTP_REFERER'] ?? '';
         }
+    }
+
+    /**
+     * Resolve the session cookie SameSite policy.
+     *
+     * Defaults to Lax: 'Strict' withholds the cookie on cross-site top-level
+     * navigations, which breaks any external auth callback redirecting back
+     * into the site (oAuth/SSI). Only set 'Strict' on sites with no such flow.
+     */
+    protected static function getCookieSameSite(): string
+    {
+        $samesite = ucfirst(strtolower(trim(strval(
+            Config::getValue('session.cookie.samesite', Cookie::SAMESITE_LAX)
+        ))));
+
+        $valid = [Cookie::SAMESITE_NONE, Cookie::SAMESITE_LAX, Cookie::SAMESITE_STRICT];
+        if (!in_array($samesite, $valid, true)) {
+            return Cookie::SAMESITE_LAX;
+        }
+        return $samesite;
     }
 
     public static function instance(?\SessionHandlerInterface $handler = null): self

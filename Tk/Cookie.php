@@ -28,7 +28,7 @@ class Cookie
     protected string $domain   = '';
     protected bool   $secure   = true;
     protected bool   $httponly = true;
-    protected string $samesite = self::SAMESITE_STRICT;
+    protected string $samesite = self::SAMESITE_LAX;
 
 
     public function __construct(
@@ -36,7 +36,7 @@ class Cookie
         ?string $path     = null,
         bool    $secure   = true,
         bool    $httponly = true,
-        string  $samesite = self::SAMESITE_STRICT
+        string  $samesite = self::SAMESITE_LAX
     ) {
         $this->path     = $path ?? Config::getBaseUrl();
         $this->domain   = $domain ?? Config::getHostname();
