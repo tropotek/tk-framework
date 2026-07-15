@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 8.0.142 [2026-07-15]:
+-------------------------------
+  - fox SameSite issue, default to Lax
+
+
 Ver 8.0.140 [2026-07-14]:
 -------------------------------
   - fix getClientIp() method
