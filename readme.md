@@ -27,7 +27,7 @@ Or add the following to your composer.json file:
 ```json
 {
   "require": {
-    "ttek/tk-framework": "~8.0.0"
+    "ttek/tk-framework": "~8.1.0"
   }
 }
 ```
