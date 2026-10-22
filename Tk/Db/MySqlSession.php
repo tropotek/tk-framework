@@ -85,6 +85,10 @@ class MySqlSession implements \SessionHandlerInterface
      */
     public function write(string $id, string $data): bool
     {
+        // Client disconnected mid-request: the script may have been stopped mid-query,
+        // leaving the connection unusable (MySQL error 2014). Skip the write.
+        if (connection_aborted()) return true;
+
         // Create time stamp
         $table = self::$DB_TABLE;
         $time = new \DateTimeImmutable();
