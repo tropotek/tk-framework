@@ -2,6 +2,12 @@
 
 Ver 8.1.6 [2026-10-22]:
 -------------------------------
+  - Tagging and releasing branch `main` with version `8.1.6`.
+  - fix session
+
+
+Ver 8.1.6 [2026-10-22]:
+-------------------------------
   - fix session
 
 
